@@ -1290,26 +1290,98 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ SCREEN: ADMIN NUEVO COMERCIO ============ -->
   <div class="screen hidden" id="screen-admin-nuevo-comercio">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="kicker">Admin</div>
     <div class="page-title">Nuevo comercio</div>
-    <div class="field"><label>Nombre del comercio</label><input type="text" id="adNombre" placeholder="Ej: Farmacia Central"></div>
-    <div class="field"><label>Rubro</label>
-      <select id="adRubro" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;">
-        ${Object.keys({
-          'Indumentaria y calzado':1,'Hogar y decoración':1,'Ferretería y construcción':1,
-          'Repuestos y automotor':1,'Agencias de autos':1,'Agencias de motos':1,
-          'Agro e insumos rurales':1,'Veterinaria y ganadería':1,'Transporte y viajes':1,
-          'Peluquerías':1,'Inmobiliarias':1,'Deportes y aire libre':1,'Alimentos y bebidas':1,
-          'Alojamiento y turismo':1,'Tecnología':1,'Belleza y cuidado personal':1,
-          'Salud y farmacia':1,'Librería y papelería':1,'Mascotas':1,'Servicios varios':1,'Otros / varios':1
-        }).map(r=>`<option>${r}</option>`).join('')}
-      </select>
+    <div class="card">
+      <!-- FOTO LOGO -->
+      <div class="field">
+        <label>Logo o foto del comercio</label>
+        <div class="logo-upload-row">
+          <div class="logo-upload" id="adLogoFotoBox">
+            <div id="adLogoFotoPreview" class="logo-upload-empty"><div class="ic">📷</div></div>
+          </div>
+          <div class="logo-upload-info">
+            <div class="t">Logo principal del comercio</div>
+            <div class="btn-block-row" style="margin:4px 0;">
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('adLogoInputCam').click()">📷 Foto</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('adLogoInputGal').click()">🖼️ Galería</button>
+            </div>
+            <input type="file" id="adLogoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this,'adLogo')">
+            <input type="file" id="adLogoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this,'adLogo')">
+            <div class="foto-upload-estado" id="adLogoFotoEstado">Se muestra en la ficha del comercio.</div>
+          </div>
+        </div>
+      </div>
+      <!-- FOTO 2 -->
+      <div class="field">
+        <label>Foto secundaria <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+        <div class="logo-upload-row">
+          <div class="logo-upload" id="adFoto2FotoBox">
+            <div id="adFoto2FotoPreview" class="logo-upload-empty"><div class="ic">🖼️</div></div>
+          </div>
+          <div class="logo-upload-info">
+            <div class="t">Interior, fachada, producto estrella…</div>
+            <div class="btn-block-row" style="margin:4px 0;">
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('adFoto2InputCam').click()">📷 Foto</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('adFoto2InputGal').click()">🖼️ Galería</button>
+            </div>
+            <input type="file" id="adFoto2InputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this,'adFoto2')">
+            <input type="file" id="adFoto2InputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this,'adFoto2')">
+            <div class="foto-upload-estado" id="adFoto2FotoEstado">Segunda imagen del comercio.</div>
+          </div>
+        </div>
+      </div>
+      <!-- DATOS BÁSICOS -->
+      <div class="field"><label>Nombre del comercio</label><input type="text" id="adNombre" placeholder="Ej: Farmacia Central"></div>
+      <div class="two-col">
+        <div class="field"><label>Ciudad</label><input type="text" id="adCiudad" value="La Paz" placeholder="La Paz"></div>
+        <div class="field"><label>Rubro</label>
+          <select id="adRubro">
+            <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
+            <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
+            <option>Agencias de autos</option><option>Agencias de motos</option>
+            <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
+            <option>Transporte y viajes</option><option>Peluquerías</option>
+            <option>Inmobiliarias</option><option>Deportes y aire libre</option>
+            <option>Alimentos y bebidas</option><option>Alojamiento y turismo</option>
+            <option>Tecnología</option><option>Belleza y cuidado personal</option>
+            <option>Salud y farmacia</option><option>Librería y papelería</option>
+            <option>Mascotas</option><option>Servicios varios</option><option>Otros / varios</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
+      <div class="two-col">
+        <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
+        <div class="field"><label>Teléfono alternativo</label><input type="tel" id="adTelefonoAlt" placeholder="Opcional"></div>
+      </div>
+      <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
+      <div class="field"><label>Instagram</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
+      <div class="field"><label>Facebook</label><input type="text" id="adFacebook" placeholder="facebook.com/comercio"></div>
+      <div class="field"><label>Sitio web</label><input type="text" id="adWeb" placeholder="www.comercio.com.ar"></div>
+      <div class="field"><label>Descripción breve</label><textarea id="adDescripcion" rows="2" placeholder="Qué ofrece el comercio, especialidad…" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;"></textarea></div>
+      <!-- HORARIOS -->
+      <div class="field">
+        <label>Turno mañana</label>
+        <div class="two-col">
+          <input type="time" id="adTurnoManDesde">
+          <input type="time" id="adTurnoManHasta">
+        </div>
+      </div>
+      <div class="field">
+        <label>Turno tarde <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+        <div class="two-col">
+          <input type="time" id="adTurnoTarDesde">
+          <input type="time" id="adTurnoTarHasta">
+        </div>
+      </div>
+      <div class="field">
+        <label>Días que abre</label>
+        <input type="text" id="adDias" placeholder="Ej: Lun a Vie, o Lun-Sáb">
+      </div>
     </div>
-    <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
-    <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
-    <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
-    <div class="field"><label>Instagram (opcional)</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
-    <div class="field"><label>Horario (opcional)</label><input type="text" id="adHorario" placeholder="Lun-Vie 9-13 y 17-21"></div>
     <button class="btn btn-primary" onclick="adminGuardarNuevoComercio()">Guardar comercio</button>
+    <div style="height:20px;"></div>
   </div>
 
   <!-- ============ CLIENTE: DETALLE PRODUCTO ============ -->
@@ -4196,22 +4268,45 @@ async function adminCargarMensajesEnviados(){
 // ---- NUEVO COMERCIO DESDE ADMIN ----
 async function adminGuardarNuevoComercio(){
   const nombre = document.getElementById('adNombre').value.trim();
-  const rubro  = document.getElementById('adRubro').value;
-  const dir    = document.getElementById('adDireccion').value.trim();
-  const tel    = document.getElementById('adTelefono').value.trim();
-  const email  = document.getElementById('adEmail').value.trim();
-  const ig     = document.getElementById('adInstagram').value.trim();
-  const horario= document.getElementById('adHorario').value.trim();
   if(!nombre){ toast('El nombre es obligatorio.'); return; }
   const id = 'c-' + Date.now();
-  const data = { id, nombre, rubro, direccion:dir, telefono:tel, email, instagram:ig, horario,
-    ciudad:'La Paz', aprobado:true, publicidadActiva:true, publicidadVence: new Date(Date.now()+30*864e5).toISOString(),
-    adheridos:[], creadoPorAdmin:true, fechaAlta: new Date().toISOString() };
+  const qr = 'CQR-' + String(Date.now()).slice(-4);
+  const data = {
+    id, nombre,
+    rubro:       document.getElementById('adRubro').value,
+    ciudad:      document.getElementById('adCiudad').value.trim() || 'La Paz',
+    direccion:   document.getElementById('adDireccion').value.trim(),
+    telefono:    document.getElementById('adTelefono').value.trim(),
+    telefonoAlt: document.getElementById('adTelefonoAlt').value.trim(),
+    email:       document.getElementById('adEmail').value.trim(),
+    instagram:   document.getElementById('adInstagram').value.trim(),
+    facebook:    document.getElementById('adFacebook').value.trim(),
+    web:         document.getElementById('adWeb').value.trim(),
+    descripcion: document.getElementById('adDescripcion').value.trim(),
+    turnoManDesde: document.getElementById('adTurnoManDesde').value,
+    turnoManHasta: document.getElementById('adTurnoManHasta').value,
+    turnoTarDesde: document.getElementById('adTurnoTarDesde').value,
+    turnoTarHasta: document.getElementById('adTurnoTarHasta').value,
+    dias:        document.getElementById('adDias').value.trim(),
+    img:         fotosCargadas['adLogo'] || null,
+    img2:        fotosCargadas['adFoto2'] || null,
+    qrPersonal: qr, aprobado:true, publicidadActiva:true,
+    publicidadVence: new Date(Date.now()+30*864e5).toISOString(),
+    adheridos:[], creadoPorAdmin:true, fechaAlta: new Date().toISOString()
+  };
   try{
     await db.collection('comercios').doc(id).set(data);
     state.comercios.push(data);
     toast('Comercio creado ✅');
-    ['adNombre','adDireccion','adTelefono','adEmail','adInstagram','adHorario'].forEach(i=>{ document.getElementById(i).value=''; });
+    // Limpiar formulario
+    ['adNombre','adCiudad','adDireccion','adTelefono','adTelefonoAlt','adEmail',
+     'adInstagram','adFacebook','adWeb','adDescripcion','adDias',
+     'adTurnoManDesde','adTurnoManHasta','adTurnoTarDesde','adTurnoTarHasta'].forEach(i=>{
+      const el = document.getElementById(i); if(el) el.value = '';
+    });
+    delete fotosCargadas['adLogo']; delete fotosCargadas['adFoto2'];
+    document.getElementById('adLogoFotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">📷</div></div>';
+    document.getElementById('adFoto2FotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">🖼️</div></div>';
     showScreen('admin-comercios'); adminCargarComercios();
   }catch(e){ toast('Error al guardar: ' + e.message); }
 }
