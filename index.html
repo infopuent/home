@@ -10,14 +10,14 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="PuenT — Todo tu pueblo, en un solo lugar">
 <meta property="og:description" content="Descubrí las ofertas del día, los comercios y los vendedores de tu ciudad, todo en un solo lugar.">
-<meta property="og:image" content="https://raw.githubusercontent.com/bioscanrural/puente/refs/heads/main/imagenes/logo%20puente%203.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="PuenT — Todo tu pueblo, en un solo lugar">
 <meta name="twitter:description" content="Descubrí las ofertas del día, los comercios y los vendedores de tu ciudad, todo en un solo lugar.">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/bioscanrural/puente/refs/heads/main/imagenes/logo%20puente%203.png">
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/bioscanrural/puente/refs/heads/main/imagenes/logo%20puente%203.png">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bai+Jamjuree:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -384,18 +384,18 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .explora-ciudad{margin-bottom:20px;}
 .explora-row{display:flex; gap:14px; overflow-x:auto; padding-bottom:4px;}
 .explora-row::-webkit-scrollbar{display:none;}
-.explora-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px 10px;}
-.explora-item{display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; width:64px; cursor:pointer;}
-.explora-grid .explora-item{width:auto;}
-.explora-ic{
-  width:52px; height:52px; border-radius:50%; background:white; border:1px solid var(--line);
-  display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 2px 6px rgba(0,0,0,0.05);
-  transition:transform .1s ease;
+.explora-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
+.explora-item{
+  display:flex; flex-direction:column; align-items:flex-start; gap:10px;
+  padding:14px 12px; border-radius:16px; background:#EAF0E6; border:0.5px solid #c8dac0;
+  cursor:pointer; transition:transform .1s ease, background .15s ease;
 }
-.explora-grid .explora-ic{width:64px; height:64px; font-size:27px;}
-.explora-item:active .explora-ic{transform:scale(0.92);}
-.explora-label{font-size:10.5px; font-weight:700; color:var(--ink); text-align:center; line-height:1.2;}
-.explora-grid .explora-label{font-size:11.5px;}
+.explora-item:active{transform:scale(0.95); background:#daebd2;}
+.explora-ic{
+  width:100%; display:flex; align-items:center; font-size:26px; color:var(--navy-2);
+}
+.explora-ic i{font-size:26px; color:var(--navy-2);}
+.explora-label{font-size:11px; font-weight:700; color:var(--navy); line-height:1.25;}
 
 .destacados-row{display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:22px;}
 .destacados-row::-webkit-scrollbar{display:none;}
@@ -445,14 +445,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 <div id="splash" onclick="hideSplash()">
   <div class="splash-logo-wrap">
-    <img src="https://raw.githubusercontent.com/bioscanrural/puente/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente">
+    <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente">
   </div>
 </div>
 
 <div id="app">
 
   <div class="topbar" id="topbar">
-    <img class="brand-logo" src="https://raw.githubusercontent.com/bioscanrural/puente/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente" onclick="irInicio()">
+    <img class="brand-logo" src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente" onclick="irInicio()">
     <div class="filter-dd ciudad-dd topbar-ciudad" id="ciudadDd">
       <button type="button" class="topbar-city-btn" onclick="toggleFilterDd(event, 'ciudadDdPanel')">📍 <span id="ciudadDdLabel">La Paz, Entre Ríos</span> <span class="filter-dd-chev">▾</span></button>
       <div class="filter-dd-panel hidden" id="ciudadDdPanel"></div>
@@ -464,8 +464,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen" id="screen-feed">
     <div class="feed-hero">
       <div class="feed-banner-slider" id="feedBannerSlider">
-        <img src="https://raw.githubusercontent.com/bioscanrural/puente/refs/heads/main/imagenes/banner1.png" class="active" alt="">
-        <img src="https://raw.githubusercontent.com/bioscanrural/puente/refs/heads/main/imagenes/banner2.png" alt="">
+        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner1.png" class="active" alt="">
+        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner2.png" alt="">
       </div>
       <div class="feed-title hidden" id="feedHeroTitle">Todo tu pueblo, en un solo lugar</div>
       <div class="feed-sub hidden" id="feedHeroSub">PuenT reúne a todos los comercios y locales de la ciudad — y las mejores ofertas del día.</div>
@@ -3249,25 +3249,27 @@ function setCiudad(c){
 
 /* ================= EXPLORÁ TU CIUDAD / DESTACADOS / CERCA TUYO ================= */
 const ICONOS_RUBRO = {
-  'Indumentaria y calzado':'👕', 'Hogar y decoración':'🏠', 'Ferretería y construcción':'🔧',
-  'Repuestos y automotor':'🚗', 'Agencias de autos':'🚙', 'Agencias de motos':'🏍️',
-  'Agro e insumos rurales':'🚜', 'Veterinaria y ganadería':'🐄',
-  'Transporte y viajes':'🚌', 'Peluquerías':'💈', 'Inmobiliarias':'🏘️',
-  'Deportes y aire libre':'⚽', 'Alimentos y bebidas':'🍞',
-  'Alojamiento y turismo':'🏨', 'Tecnología':'📱', 'Belleza y cuidado personal':'💇',
-  'Salud y farmacia':'💊', 'Librería y papelería':'📚',
-  'Mascotas':'🐾', 'Servicios varios':'🧰', 'Otros / varios':'✨'
+  'Indumentaria y calzado':'ti-shirt', 'Hogar y decoración':'ti-home',
+  'Ferretería y construcción':'ti-tool', 'Repuestos y automotor':'ti-car',
+  'Agencias de autos':'ti-car-garage', 'Agencias de motos':'ti-motorbike',
+  'Agro e insumos rurales':'ti-plant', 'Veterinaria y ganadería':'ti-paw',
+  'Transporte y viajes':'ti-bus', 'Peluquerías':'ti-scissors',
+  'Inmobiliarias':'ti-building', 'Deportes y aire libre':'ti-ball-football',
+  'Alimentos y bebidas':'ti-meat', 'Alojamiento y turismo':'ti-bed',
+  'Tecnología':'ti-device-mobile', 'Belleza y cuidado personal':'ti-sparkles',
+  'Salud y farmacia':'ti-heart-rate-monitor', 'Librería y papelería':'ti-book',
+  'Mascotas':'ti-dog', 'Servicios varios':'ti-settings', 'Otros / varios':'ti-grid-dots'
 };
 function renderExploraCiudad(){
   const rubros = Object.keys(ICONOS_RUBRO);
   document.getElementById('exploraRow').innerHTML = rubros.map(r=>`
     <div class="explora-item" onclick="irALocalesPorRubro('${r}')">
-      <div class="explora-ic">${ICONOS_RUBRO[r]}</div>
-      <div class="explora-label">${r.split(' ')[0]}</div>
+      <div class="explora-ic"><i class="ti ${ICONOS_RUBRO[r]}" aria-hidden="true"></i></div>
+      <div class="explora-label">${r}</div>
     </div>`).join('') + `
     <div class="explora-item" onclick="irALocalesPorRubro('Todos')">
-      <div class="explora-ic">➕</div>
-      <div class="explora-label">Más</div>
+      <div class="explora-ic"><i class="ti ti-layout-grid" aria-hidden="true"></i></div>
+      <div class="explora-label">Ver todos</div>
     </div>`;
 }
 function irALocalesPorRubro(rubro){
