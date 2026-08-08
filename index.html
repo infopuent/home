@@ -1189,6 +1189,129 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="prod-grid" id="clProdGrid"></div>
   </div>
 
+  <!-- ============ SCREEN: ADMIN PANEL ============ -->
+  <div class="screen hidden" id="screen-admin-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div>
+        <div class="kicker">Panel</div>
+        <div class="page-title" style="margin-bottom:0;">Admin PuenT 🛡️</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="confirmarCierreSesion()">Salir</button>
+    </div>
+    <!-- Stats rápidas -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;" id="adminStats">
+      <div class="card" style="margin:0;text-align:center;padding:12px 8px;">
+        <div style="font-size:22px;font-weight:800;color:var(--navy);" id="statComercios">—</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Comercios</div>
+      </div>
+      <div class="card" style="margin:0;text-align:center;padding:12px 8px;">
+        <div style="font-size:22px;font-weight:800;color:var(--navy);" id="statVendedores">—</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Vendedores</div>
+      </div>
+      <div class="card" style="margin:0;text-align:center;padding:12px 8px;">
+        <div style="font-size:22px;font-weight:800;color:var(--navy);" id="statVentas">—</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Ventas</div>
+      </div>
+    </div>
+    <!-- Tiles de navegación -->
+    <div class="btn-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <button class="btn-tile btn-tile-sage" onclick="showScreen('admin-comercios');adminCargarComercios()"><i class="ti ti-building-store ic"></i>Comercios</button>
+      <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-vendedores');adminCargarVendedores()"><i class="ti ti-users ic"></i>Vendedores</button>
+      <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
+      <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-usuarios');adminCargarUsuarios()"><i class="ti ti-user-circle ic"></i>Usuarios</button>
+      <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
+      <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN COMERCIOS ============ -->
+  <div class="screen hidden" id="screen-admin-comercios">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Comercios</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn btn-ghost btn-sm" id="adminFiltroTodos" onclick="adminFiltrarComercios('todos')" style="flex:1;">Todos</button>
+      <button class="btn btn-ghost btn-sm" id="adminFiltroPendientes" onclick="adminFiltrarComercios('pendientes')" style="flex:1;">Pendientes</button>
+      <button class="btn btn-ghost btn-sm" id="adminFiltroActivos" onclick="adminFiltrarComercios('activos')" style="flex:1;">Activos</button>
+    </div>
+    <div id="adminComerciosList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN VENDEDORES ============ -->
+  <div class="screen hidden" id="screen-admin-vendedores">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Vendedores</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('todos')" style="flex:1;">Todos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('pendientes')" style="flex:1;">Pendientes</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('aprobados')" style="flex:1;">Aprobados</button>
+    </div>
+    <div id="adminVendedoresList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN VENTAS ============ -->
+  <div class="screen hidden" id="screen-admin-ventas">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Ventas realizadas</div>
+    <div id="adminVentasList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN USUARIOS ============ -->
+  <div class="screen hidden" id="screen-admin-usuarios">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Usuarios</div>
+    <input class="feed-search-inline" type="text" placeholder="🔍 Buscar por nombre o email…" oninput="adminBuscarUsuario(this.value)" style="width:100%;margin-bottom:14px;">
+    <div id="adminUsuariosList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN MENSAJES ============ -->
+  <div class="screen hidden" id="screen-admin-mensajes">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Enviar mensaje</div>
+    <div class="field">
+      <label>Destinatarios</label>
+      <select id="adminMsgDest" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;">
+        <option value="todos">Todos los usuarios</option>
+        <option value="vendedores">Solo vendedores</option>
+        <option value="comercios">Solo comercios</option>
+        <option value="clientes">Solo clientes</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Mensaje</label>
+      <textarea id="adminMsgTexto" rows="4" placeholder="Escribí el mensaje acá…" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="adminEnviarMensaje()">Enviar mensaje</button>
+    <div style="margin-top:20px;">
+      <div class="kicker" style="margin-bottom:10px;">Mensajes enviados</div>
+      <div id="adminMensajesEnviados"><p style="color:var(--muted);font-size:13px;">Sin mensajes enviados.</p></div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN NUEVO COMERCIO ============ -->
+  <div class="screen hidden" id="screen-admin-nuevo-comercio">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Nuevo comercio</div>
+    <div class="field"><label>Nombre del comercio</label><input type="text" id="adNombre" placeholder="Ej: Farmacia Central"></div>
+    <div class="field"><label>Rubro</label>
+      <select id="adRubro" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;">
+        ${Object.keys({
+          'Indumentaria y calzado':1,'Hogar y decoración':1,'Ferretería y construcción':1,
+          'Repuestos y automotor':1,'Agencias de autos':1,'Agencias de motos':1,
+          'Agro e insumos rurales':1,'Veterinaria y ganadería':1,'Transporte y viajes':1,
+          'Peluquerías':1,'Inmobiliarias':1,'Deportes y aire libre':1,'Alimentos y bebidas':1,
+          'Alojamiento y turismo':1,'Tecnología':1,'Belleza y cuidado personal':1,
+          'Salud y farmacia':1,'Librería y papelería':1,'Mascotas':1,'Servicios varios':1,'Otros / varios':1
+        }).map(r=>`<option>${r}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
+    <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
+    <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
+    <div class="field"><label>Instagram (opcional)</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
+    <div class="field"><label>Horario (opcional)</label><input type="text" id="adHorario" placeholder="Lun-Vie 9-13 y 17-21"></div>
+    <button class="btn btn-primary" onclick="adminGuardarNuevoComercio()">Guardar comercio</button>
+  </div>
+
   <!-- ============ CLIENTE: DETALLE PRODUCTO ============ -->
   <div class="screen hidden" id="screen-cl-producto">
     <div class="link-back" onclick="showScreen('cl-catalogo')">← Volver</div>
@@ -1398,6 +1521,7 @@ function onRoleChipClick(){
   if(state.role==='vendedor') showScreen('v-catalogo');
   else if(state.role==='comercio') showScreen('c-panel');
   else if(state.role==='cliente') showScreen('cl-buscador');
+  else if(state.role==='admin'){ adminCargarStats(); showScreen('admin-panel'); }
 }
 
 function confirmarCierreSesion(){
@@ -1720,6 +1844,7 @@ function loginConGoogle(){
 // Si es cuenta nueva: si ya había elegido un rol en la pantalla de inicio, la crea directo con ese rol;
 // si no (ej: alguien entra por "Iniciar sesión" genérico), le pedimos que elija.
 async function manejarUsuarioGoogle(user){
+  if(esAdmin(user)){ entrarComoAdmin(user); return; }
   try{
     for(const rol of Object.keys(COL_POR_ROL)){
       const doc = await db.collection(COL_POR_ROL[rol]).doc(user.uid).get();
@@ -3815,6 +3940,285 @@ function procesarCodigoPendienteDesdeURL(){
   document.getElementById('scanCodigo').value = codigo;
   escanearCodigo();
 }
+
+// =============================================
+// PANEL ADMIN
+// =============================================
+const ADMIN_EMAILS = ['infopuent@gmail.com'];
+
+function esAdmin(user){
+  return user && ADMIN_EMAILS.includes(user.email);
+}
+
+function entrarComoAdmin(user){
+  state.currentUser = { uid: user.uid, nombre: user.displayName || 'Admin', email: user.email };
+  state.role = 'admin';
+  setRoleChip('🛡️ Admin', false);
+  document.getElementById('bottomnav').classList.remove('hidden');
+  adminCargarStats();
+  showScreen('admin-panel');
+  updateBottomNav('admin-panel');
+  toast('¡Bienvenido, Admin!');
+}
+
+async function adminCargarStats(){
+  if(!firebaseListo) return;
+  try{
+    const [cs, vs, vts] = await Promise.all([
+      db.collection('comercios').get(),
+      db.collection('vendedores').get(),
+      db.collection('ventas').get()
+    ]);
+    document.getElementById('statComercios').textContent = cs.size;
+    document.getElementById('statVendedores').textContent = vs.size;
+    document.getElementById('statVentas').textContent = vts.size;
+  }catch(e){ console.error('adminCargarStats:', e); }
+}
+
+// ---- COMERCIOS ----
+let _adminComercios = [];
+async function adminCargarComercios(){
+  const el = document.getElementById('adminComerciosList');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const snap = await db.collection('comercios').get();
+    _adminComercios = snap.docs.map(d=>({...d.data(), _docId: d.id}));
+    adminRenderComercios(_adminComercios);
+  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
+}
+
+function adminFiltrarComercios(filtro){
+  let lista = _adminComercios;
+  if(filtro==='pendientes') lista = lista.filter(c=>!c.aprobado);
+  if(filtro==='activos') lista = lista.filter(c=>c.aprobado);
+  adminRenderComercios(lista);
+}
+
+function adminRenderComercios(lista){
+  const el = document.getElementById('adminComerciosList');
+  if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
+  el.innerHTML = lista.map(c=>`
+    <div class="list-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;width:100%;">
+        <div class="av" style="background:var(--green);">🏬</div>
+        <div class="main">
+          <div class="t">${c.nombre||'Sin nombre'}</div>
+          <div class="s">${c.rubro||'—'} · ${c.email||'—'}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${c.aprobado?'#E3F3EA':'#FBF1DC'};color:${c.aprobado?'#2F7A55':'#93732A'};">${c.aprobado?'Activo':'Pendiente'}</span>
+      </div>
+      <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
+        ${!c.aprobado?`<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarComercio('${c._docId}')">✅ Aprobar</button>`:''}
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminEliminarComercio('${c._docId}','${c.nombre||''}')">🗑️ Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+async function adminAprobarComercio(docId){
+  try{
+    await db.collection('comercios').doc(docId).update({aprobado: true});
+    toast('Comercio aprobado ✅');
+    adminCargarComercios();
+  }catch(e){ toast('Error al aprobar.'); }
+}
+
+async function adminEliminarComercio(docId, nombre){
+  if(!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  try{
+    await db.collection('comercios').doc(docId).delete();
+    toast('Comercio eliminado.');
+    adminCargarComercios();
+  }catch(e){ toast('Error al eliminar.'); }
+}
+
+// ---- VENDEDORES ----
+let _adminVendedores = [];
+async function adminCargarVendedores(){
+  const el = document.getElementById('adminVendedoresList');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const snap = await db.collection('vendedores').get();
+    _adminVendedores = snap.docs.map(d=>({...d.data(), _docId: d.id}));
+    adminRenderVendedores(_adminVendedores);
+  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
+}
+
+function adminFiltrarVendedores(filtro){
+  let lista = _adminVendedores;
+  if(filtro==='pendientes') lista = lista.filter(v=>!v.aprobado);
+  if(filtro==='aprobados') lista = lista.filter(v=>v.aprobado);
+  adminRenderVendedores(lista);
+}
+
+function adminRenderVendedores(lista){
+  const el = document.getElementById('adminVendedoresList');
+  if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
+  el.innerHTML = lista.map(v=>`
+    <div class="list-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;width:100%;">
+        <div class="av" style="background:var(--blue);">🛍️</div>
+        <div class="main">
+          <div class="t">${v.nombre||'Sin nombre'}</div>
+          <div class="s">${v.email||'—'} · ${v.zona||'—'}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${v.aprobado?'#E3F3EA':'#FBF1DC'};color:${v.aprobado?'#2F7A55':'#93732A'};">${v.aprobado?'Aprobado':'Pendiente'}</span>
+      </div>
+      <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
+        ${!v.aprobado?`<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarVendedor('${v._docId}')">✅ Aprobar</button>`:''}
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminEliminarVendedor('${v._docId}','${v.nombre||''}')">🗑️ Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+async function adminAprobarVendedor(docId){
+  try{
+    await db.collection('vendedores').doc(docId).update({aprobado: true});
+    toast('Vendedor aprobado ✅');
+    adminCargarVendedores();
+  }catch(e){ toast('Error al aprobar.'); }
+}
+
+async function adminEliminarVendedor(docId, nombre){
+  if(!confirm(`¿Eliminar a "${nombre}"?`)) return;
+  try{
+    await db.collection('vendedores').doc(docId).delete();
+    toast('Vendedor eliminado.');
+    adminCargarVendedores();
+  }catch(e){ toast('Error al eliminar.'); }
+}
+
+// ---- VENTAS ----
+async function adminCargarVentas(){
+  const el = document.getElementById('adminVentasList');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const snap = await db.collection('ventas').orderBy('fecha','desc').limit(100).get();
+    if(snap.empty){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin ventas registradas.</p>'; return; }
+    el.innerHTML = snap.docs.map(d=>{
+      const v = d.data();
+      const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-AR') : '—';
+      return `<div class="list-row">
+        <div class="av" style="background:#C99A3E;">💰</div>
+        <div class="main">
+          <div class="t">${v.productoNombre||'Producto'}</div>
+          <div class="s">Vendedor: ${v.vendedorNombre||'—'} · ${fecha}</div>
+        </div>
+        <div style="font-size:14px;font-weight:800;color:var(--navy);">$${v.precio||0}</div>
+      </div>`;
+    }).join('');
+  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar ventas.</p>'; }
+}
+
+// ---- USUARIOS ----
+let _adminUsuarios = [];
+async function adminCargarUsuarios(){
+  const el = document.getElementById('adminUsuariosList');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const [cs, vs, cls] = await Promise.all([
+      db.collection('comercios').get(),
+      db.collection('vendedores').get(),
+      db.collection('clientes').get()
+    ]);
+    _adminUsuarios = [
+      ...cs.docs.map(d=>({...d.data(), _rol:'comercio', _docId:d.id})),
+      ...vs.docs.map(d=>({...d.data(), _rol:'vendedor', _docId:d.id})),
+      ...cls.docs.map(d=>({...d.data(), _rol:'cliente', _docId:d.id}))
+    ];
+    adminRenderUsuarios(_adminUsuarios);
+  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
+}
+
+function adminBuscarUsuario(q){
+  const filtrados = _adminUsuarios.filter(u=>(u.nombre+' '+u.email).toLowerCase().includes(q.toLowerCase()));
+  adminRenderUsuarios(filtrados);
+}
+
+function adminRenderUsuarios(lista){
+  const el = document.getElementById('adminUsuariosList');
+  if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
+  const ic = {comercio:'🏬', vendedor:'🛍️', cliente:'🙋'};
+  const bg = {comercio:'var(--green)', vendedor:'var(--blue)', cliente:'var(--muted)'};
+  el.innerHTML = lista.map(u=>`
+    <div class="list-row">
+      <div class="av" style="background:${bg[u._rol]||'#ccc'};">${ic[u._rol]||'👤'}</div>
+      <div class="main">
+        <div class="t">${u.nombre||'Sin nombre'}</div>
+        <div class="s">${u.email||'—'} · ${u._rol}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="adminEliminarUsuario('${u._docId}','${u._rol}','${(u.nombre||'').replace(/'/g,'')}')" style="padding:6px 10px;">🗑️</button>
+    </div>`).join('');
+}
+
+async function adminEliminarUsuario(docId, rol, nombre){
+  const col = {comercio:'comercios', vendedor:'vendedores', cliente:'clientes'}[rol];
+  if(!col) return;
+  if(!confirm(`¿Eliminar a "${nombre}" (${rol})?`)) return;
+  try{
+    await db.collection(col).doc(docId).delete();
+    toast('Usuario eliminado.');
+    adminCargarUsuarios();
+  }catch(e){ toast('Error al eliminar.'); }
+}
+
+// ---- MENSAJES ----
+async function adminEnviarMensaje(){
+  const dest = document.getElementById('adminMsgDest').value;
+  const texto = document.getElementById('adminMsgTexto').value.trim();
+  if(!texto){ toast('Escribí un mensaje primero.'); return; }
+  try{
+    await db.collection('mensajes_admin').add({
+      dest, texto, fecha: new Date().toISOString(),
+      de: state.currentUser?.email || 'admin'
+    });
+    document.getElementById('adminMsgTexto').value = '';
+    toast('Mensaje enviado ✅');
+    adminCargarMensajesEnviados();
+  }catch(e){ toast('Error al enviar.'); }
+}
+
+async function adminCargarMensajesEnviados(){
+  const el = document.getElementById('adminMensajesEnviados');
+  try{
+    const snap = await db.collection('mensajes_admin').orderBy('fecha','desc').limit(20).get();
+    if(snap.empty){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin mensajes enviados.</p>'; return; }
+    el.innerHTML = snap.docs.map(d=>{
+      const m = d.data();
+      const fecha = new Date(m.fecha).toLocaleDateString('es-AR');
+      return `<div class="card" style="margin-bottom:10px;padding:12px 14px;">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;">Para: ${m.dest} · ${fecha}</div>
+        <div style="font-size:13px;color:var(--ink);">${m.texto}</div>
+      </div>`;
+    }).join('');
+  }catch(e){}
+}
+
+// ---- NUEVO COMERCIO DESDE ADMIN ----
+async function adminGuardarNuevoComercio(){
+  const nombre = document.getElementById('adNombre').value.trim();
+  const rubro  = document.getElementById('adRubro').value;
+  const dir    = document.getElementById('adDireccion').value.trim();
+  const tel    = document.getElementById('adTelefono').value.trim();
+  const email  = document.getElementById('adEmail').value.trim();
+  const ig     = document.getElementById('adInstagram').value.trim();
+  const horario= document.getElementById('adHorario').value.trim();
+  if(!nombre){ toast('El nombre es obligatorio.'); return; }
+  const id = 'c-' + Date.now();
+  const data = { id, nombre, rubro, direccion:dir, telefono:tel, email, instagram:ig, horario,
+    ciudad:'La Paz', aprobado:true, publicidadActiva:true, publicidadVence: new Date(Date.now()+30*864e5).toISOString(),
+    adheridos:[], creadoPorAdmin:true, fechaAlta: new Date().toISOString() };
+  try{
+    await db.collection('comercios').doc(id).set(data);
+    state.comercios.push(data);
+    toast('Comercio creado ✅');
+    ['adNombre','adDireccion','adTelefono','adEmail','adInstagram','adHorario'].forEach(i=>{ document.getElementById(i).value=''; });
+    showScreen('admin-comercios'); adminCargarComercios();
+  }catch(e){ toast('Error al guardar: ' + e.message); }
+}
+
+// =============================================
+// FIN PANEL ADMIN
+// =============================================
 </script>
 </body>
 </html>
