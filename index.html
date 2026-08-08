@@ -3248,31 +3248,31 @@ function setCiudad(c){
 }
 
 /* ================= EXPLORÁ TU CIUDAD / DESTACADOS / CERCA TUYO ================= */
-const FLUENT_BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/';
+const FLUENT_BASE = 'https://cdn.jsdelivr.net/gh/shuding/fluentui-emoji-unicode/assets/';
 const ICONOS_RUBRO = {
-  'Indumentaria y calzado':  'T-shirt/3D/t-shirt_3d.png',
-  'Hogar y decoración':      'House/3D/house_3d.png',
-  'Ferretería y construcción':'Wrench/3D/wrench_3d.png',
-  'Repuestos y automotor':   'Automobile/3D/automobile_3d.png',
-  'Agencias de autos':       'Sport utility vehicle/3D/sport_utility_vehicle_3d.png',
-  'Agencias de motos':       'Motorcycle/3D/motorcycle_3d.png',
-  'Agro e insumos rurales':  'Tractor/3D/tractor_3d.png',
-  'Veterinaria y ganadería': 'Cow/3D/cow_3d.png',
-  'Transporte y viajes':     'Bus/3D/bus_3d.png',
-  'Peluquerías':             'Scissors/3D/scissors_3d.png',
-  'Inmobiliarias':           'House with garden/3D/house_with_garden_3d.png',
-  'Deportes y aire libre':   'Soccer ball/3D/soccer_ball_3d.png',
-  'Alimentos y bebidas':     'Bread/3D/bread_3d.png',
-  'Alojamiento y turismo':   'Hotel/3D/hotel_3d.png',
-  'Tecnología':              'Mobile phone/3D/mobile_phone_3d.png',
-  'Belleza y cuidado personal':'Nail polish/3D/nail_polish_3d.png',
-  'Salud y farmacia':        'Pill/3D/pill_3d.png',
-  'Librería y papelería':    'Books/3D/books_3d.png',
-  'Mascotas':                'Paw prints/3D/paw_prints_3d.png',
-  'Servicios varios':        'Toolbox/3D/toolbox_3d.png',
-  'Otros / varios':          'Sparkles/3D/sparkles_3d.png'
+  'Indumentaria y calzado':   '1f455_3d.png',
+  'Hogar y decoración':       '1f3e0_3d.png',
+  'Ferretería y construcción':'1f527_3d.png',
+  'Repuestos y automotor':    '1f697_3d.png',
+  'Agencias de autos':        '1f699_3d.png',
+  'Agencias de motos':        '1f3cd_3d.png',
+  'Agro e insumos rurales':   '1f69c_3d.png',
+  'Veterinaria y ganadería':  '1f404_3d.png',
+  'Transporte y viajes':      '1f68c_3d.png',
+  'Peluquerías':              '2702_3d.png',
+  'Inmobiliarias':            '1f3e1_3d.png',
+  'Deportes y aire libre':    '26bd_3d.png',
+  'Alimentos y bebidas':      '1f35e_3d.png',
+  'Alojamiento y turismo':    '1f3e8_3d.png',
+  'Tecnología':               '1f4f1_3d.png',
+  'Belleza y cuidado personal':'1f485_3d.png',
+  'Salud y farmacia':         '1f48a_3d.png',
+  'Librería y papelería':     '1f4da_3d.png',
+  'Mascotas':                 '1f43e_3d.png',
+  'Servicios varios':         '1f9f0_3d.png',
+  'Otros / varios':           '2728_3d.png'
 };
-function fluentImg(path){ return `<img src="${FLUENT_BASE}${path}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
+function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
 function renderExploraCiudad(){
   const rubros = Object.keys(ICONOS_RUBRO);
   document.getElementById('exploraRow').innerHTML = rubros.map(r=>`
@@ -3281,7 +3281,7 @@ function renderExploraCiudad(){
       <div class="explora-label">${r}</div>
     </div>`).join('') + `
     <div class="explora-item" onclick="irALocalesPorRubro('Todos')">
-      <div class="explora-ic">${fluentImg('Round pushpin/3D/round_pushpin_3d.png')}</div>
+      <div class="explora-ic">${fluentImg('1f4cd_3d.png')}</div>
       <div class="explora-label">Ver todos</div>
     </div>`;
 }
