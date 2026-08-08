@@ -392,9 +392,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 }
 .explora-item:active{transform:scale(0.95); background:#daebd2;}
 .explora-ic{
-  width:100%; display:flex; align-items:center; font-size:26px; color:var(--navy-2);
+  width:100%; display:flex; align-items:center; font-size:30px; line-height:1;
 }
-.explora-ic i{font-size:26px; color:var(--navy-2);}
 .explora-label{font-size:11px; font-weight:700; color:var(--navy); line-height:1.25;}
 
 .destacados-row{display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:22px;}
@@ -3249,26 +3248,24 @@ function setCiudad(c){
 
 /* ================= EXPLORÁ TU CIUDAD / DESTACADOS / CERCA TUYO ================= */
 const ICONOS_RUBRO = {
-  'Indumentaria y calzado':'ti-shirt', 'Hogar y decoración':'ti-home',
-  'Ferretería y construcción':'ti-tool', 'Repuestos y automotor':'ti-car',
-  'Agencias de autos':'ti-car-garage', 'Agencias de motos':'ti-motorbike',
-  'Agro e insumos rurales':'ti-plant', 'Veterinaria y ganadería':'ti-paw',
-  'Transporte y viajes':'ti-bus', 'Peluquerías':'ti-scissors',
-  'Inmobiliarias':'ti-building', 'Deportes y aire libre':'ti-ball-football',
-  'Alimentos y bebidas':'ti-meat', 'Alojamiento y turismo':'ti-bed',
-  'Tecnología':'ti-device-mobile', 'Belleza y cuidado personal':'ti-sparkles',
-  'Salud y farmacia':'ti-heart-rate-monitor', 'Librería y papelería':'ti-book',
-  'Mascotas':'ti-dog', 'Servicios varios':'ti-settings', 'Otros / varios':'ti-grid-dots'
+  'Indumentaria y calzado':'👕', 'Hogar y decoración':'🏠', 'Ferretería y construcción':'🔧',
+  'Repuestos y automotor':'🚗', 'Agencias de autos':'🚙', 'Agencias de motos':'🏍️',
+  'Agro e insumos rurales':'🚜', 'Veterinaria y ganadería':'🐄',
+  'Transporte y viajes':'🚌', 'Peluquerías':'💈', 'Inmobiliarias':'🏘️',
+  'Deportes y aire libre':'⚽', 'Alimentos y bebidas':'🍞',
+  'Alojamiento y turismo':'🏨', 'Tecnología':'📱', 'Belleza y cuidado personal':'💇',
+  'Salud y farmacia':'💊', 'Librería y papelería':'📚',
+  'Mascotas':'🐾', 'Servicios varios':'🧰', 'Otros / varios':'✨'
 };
 function renderExploraCiudad(){
   const rubros = Object.keys(ICONOS_RUBRO);
   document.getElementById('exploraRow').innerHTML = rubros.map(r=>`
     <div class="explora-item" onclick="irALocalesPorRubro('${r}')">
-      <div class="explora-ic"><i class="ti ${ICONOS_RUBRO[r]}" aria-hidden="true"></i></div>
+      <div class="explora-ic">${ICONOS_RUBRO[r]}</div>
       <div class="explora-label">${r}</div>
     </div>`).join('') + `
     <div class="explora-item" onclick="irALocalesPorRubro('Todos')">
-      <div class="explora-ic"><i class="ti ti-layout-grid" aria-hidden="true"></i></div>
+      <div class="explora-ic">➕</div>
       <div class="explora-label">Ver todos</div>
     </div>`;
 }
