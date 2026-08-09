@@ -112,12 +112,33 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 /* ---- Bottom nav ---- */
 .bottomnav{
   position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px;
-  background:white; border-top:1px solid var(--line); display:flex; z-index:30;
-  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  background:white; border-top:0.5px solid var(--line); display:flex; align-items:center; z-index:30;
+  padding:6px 6px calc(6px + env(safe-area-inset-bottom));
 }
-.navbtn{flex:1; display:flex; align-items:center; justify-content:center; padding:10px 2px; border-radius:10px; background:transparent; color:var(--muted);}
+.navbtn{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:4px 2px; border-radius:10px; background:transparent; color:var(--muted);}
 .navbtn .ic{font-size:22px;}
-.navbtn.active{color:var(--navy);}
+.navbtn .nav-label{font-size:9px; font-weight:500;}
+.navbtn.active{color:var(--navy-2);}
+.navbtn-cart{
+  flex:none; width:54px; height:54px; border-radius:50%;
+  background:var(--green); color:white;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:-28px; margin-bottom:2px;
+  border:3px solid white;
+  box-shadow:0 4px 14px rgba(92,115,85,.30);
+  position:relative; cursor:pointer;
+  flex-shrink:0;
+}
+.navbtn-cart .ic{font-size:26px; color:white;}
+.navbtn-cart .cart-badge{
+  position:absolute; top:-2px; right:-2px;
+  background:#D98080; color:white;
+  font-size:8px; font-weight:800;
+  border-radius:100px; padding:1px 4px; min-width:14px;
+  text-align:center; border:1.5px solid white;
+  display:none;
+}
+.navbtn-cart .cart-badge.visible{display:block;}
 
 /* ---- Product grid ---- */
 .prod-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
@@ -601,10 +622,23 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="prod-price" style="font-size:20px; margin-bottom:6px;" id="ofPrecio">$0</div>
       <div id="ofStockInfo" style="margin-bottom:12px;"></div>
 
-      <div class="card" style="background:var(--cream); text-align:left; margin-bottom:16px;">
+      <!-- Bloque local: visible solo para registrados -->
+      <div id="ofLocalBloque" class="card" style="background:var(--cream); text-align:left; margin-bottom:16px;">
         <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:4px;">📍 Retirás en</div>
         <div class="page-sub" id="ofComercio" style="font-weight:700; color:var(--navy); margin-bottom:2px; font-size:15px;">Comercio</div>
         <div class="page-sub" id="ofDireccion" style="margin-bottom:0;">Dirección</div>
+      </div>
+      <!-- Bloque para NO registrados -->
+      <div id="ofBloqueNoRegistrado" class="hidden" style="margin-bottom:16px;">
+        <div style="background:#F3F0E8;border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">🔒</div>
+          <div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:6px;">Registrate para ver el local y reservar</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">El nombre y la dirección del comercio son exclusivos para usuarios registrados de PuenT.</div>
+          <button class="btn btn-primary" style="width:100%;" onclick="invitarRegistroDesdeProducto()">
+            <svg width="16" height="16" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.6 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.6 3.5 24 3.5 12.7 3.5 3.5 12.7 3.5 24S12.7 44.5 24 44.5 44.5 35.3 44.5 24c0-1.2-.1-2.4-.3-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.6 19 12.5 24 12.5c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.6 3.5 24 3.5c-7.9 0-14.6 4.5-17.7 11.2z"/><path fill="#4CAF50" d="M24 44.5c5.4 0 10.2-1.8 13.9-4.9l-6.4-5.4c-2 1.4-4.6 2.3-7.5 2.3-5.4 0-9.9-3.4-11.5-8.2l-6.5 5C9.3 40 16.1 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.7 2-2 3.7-3.7 5l6.4 5.4C41.4 35.4 44.5 30.2 44.5 24c0-1.2-.1-2.4-.9-3.5z"/></svg>
+            Registrarme con Google
+          </button>
+        </div>
       </div>
 
       <div id="ofVendedorBanner" class="hidden card" style="background:#fff4d6; text-align:left; margin-bottom:16px;">
@@ -613,8 +647,18 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
 
       <div id="ofAntes">
-        <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Si te sirve la ubicación, generá tu código y presentalo cuando llegues al local para retirarlo.</p>
-        <button class="btn btn-primary" onclick="quieroEstaOferta()">Quiero esta oferta — generar mi código</button>
+        <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.</p>
+        <button class="btn btn-primary" id="ofBtnReservar" onclick="reservarProducto()">🛒 Reservar</button>
+        <div id="ofYaReservado" class="hidden" style="margin-top:10px;">
+          <div style="background:#E3F3EA;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">✅</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#2F7A55;">¡Reservado! Está en tu carrito.</div>
+              <div style="font-size:12px;color:#2F7A55;">Generá el QR cuando llegues al local.</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost" style="width:100%;margin-top:10px;" onclick="abrirCarrito()">Ver carrito 🛒</button>
+        </div>
       </div>
 
       <div id="ofDespues" class="hidden">
@@ -1180,7 +1224,31 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ CLIENTE: CATALOGO DE VENDEDOR ============ -->
-  <div class="screen hidden" id="screen-cl-catalogo">
+  <!-- ============ SCREEN: CARRITO DEL CLIENTE ============ -->
+  <div class="screen hidden" id="screen-cl-carrito">
+    <div class="link-back" onclick="showScreen('feed')">← Seguir comprando</div>
+    <div class="kicker">Mi carrito</div>
+    <div class="page-title" style="margin-bottom:4px;">Mis reservas</div>
+    <p class="page-sub" style="margin-bottom:16px;">Llegá al local y generá el QR para retirar tus productos.</p>
+    <div id="carritoContenido"></div>
+  </div>
+
+  <!-- ============ SCREEN: QR DEL CARRITO ============ -->
+  <div class="screen hidden" id="screen-cl-qr-carrito">
+    <div class="link-back" onclick="showScreen('cl-carrito')">← Mi carrito</div>
+    <div class="kicker" id="qrCarritoKicker">Código de retiro</div>
+    <div class="page-title" id="qrCarritoComercio" style="margin-bottom:4px;"></div>
+    <div class="card" style="text-align:center;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Mostrá este código en el local para retirar todos tus productos.</p>
+      <div class="qr-fake" id="qrCarritoFake"></div>
+      <div class="code-text" id="qrCarritoCodigo">CQR-0000</div>
+      <div class="code-label">Código de retiro del carrito</div>
+      <div id="qrCarritoItems" style="margin-top:16px;text-align:left;"></div>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:12px;" onclick="showScreen('feed')">Seguir comprando</button>
+  </div>
+
+  <!-- ============ CLIENTE: CATALOGO ============ -->
     <div class="link-back" onclick="showScreen('cl-buscador')">← Volver al buscador</div>
     <div class="list-row" style="margin-bottom:16px;">
       <div class="av" style="background:var(--green)" id="clVendAvatar">🛍️</div>
@@ -1761,32 +1829,54 @@ function escanearCodigoConCamara(){
 /* ================= BOTTOM NAV ================= */
 const navByRole = {
   vendedor:[
-    {key:'feed', ic:'ti-home', action:"irInicio()"},
-    {key:'v-catalogo', ic:'ti-building-store', action:"showScreen('v-catalogo')"},
-    {key:'v-solicitudes', ic:'ti-bell', action:"showScreen('v-solicitudes')"},
-    {key:'v-perfil', ic:'ti-user', action:"abrirEditarVendedor()"},
+    {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
+    {key:'v-catalogo',  ic:'ti-building-store',  label:'Catálogo',action:"showScreen('v-catalogo')"},
+    {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
+    {key:'v-solicitudes',ic:'ti-bell',           label:'Pedidos', action:"showScreen('v-solicitudes')"},
+    {key:'v-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirEditarVendedor()"},
   ],
   comercio:[
-    {key:'feed', ic:'ti-home', action:"irInicio()"},
-    {key:'c-panel', ic:'ti-building-store', action:"showScreen('c-panel')"},
-    {key:'c-panel-actividad', ic:'ti-bell', action:"showScreen('c-panel')"},
-    {key:'c-perfil', ic:'ti-user', action:"abrirEditarComercio()"},
+    {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
+    {key:'c-panel',     ic:'ti-building-store',  label:'Panel',   action:"showScreen('c-panel')"},
+    {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
+    {key:'c-panel-actividad',ic:'ti-bell',       label:'Actividad',action:"showScreen('c-panel')"},
+    {key:'c-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirEditarComercio()"},
   ],
   cliente:[
-    {key:'feed', ic:'ti-home', action:"irInicio()"},
-    {key:'cl-buscador', ic:'ti-search', action:"showScreen('cl-buscador')"},
-    {key:'cl-actividad', ic:'ti-bell', action:"toast('Todavía no tenés pedidos')"},
-    {key:'cl-perfil', ic:'ti-user', action:"toast('Próximamente')"},
+    {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
+    {key:'rayo-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderRayoOfertas();showScreen('rayo-ofertas')"},
+    {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:"abrirCarrito()"},
+    {key:'cl-buscador', ic:'ti-search',          label:'Buscar',  action:"showScreen('cl-buscador')"},
+    {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"toast('Próximamente')"},
+  ],
+  admin:[
+    {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
+    {key:'admin-panel', ic:'ti-shield',          label:'Admin',   action:"showScreen('admin-panel')"},
+    {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
+    {key:'admin-panel', ic:'ti-bell',            label:'Alertas', action:"toast('Sin alertas')"},
+    {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"toast('Próximamente')"},
   ]
 };
+
 function updateBottomNav(current){
   const nav = document.getElementById('bottomnav');
   if(!state.role || !navByRole[state.role]){ nav.classList.add('hidden'); return; }
   nav.classList.remove('hidden');
-  nav.innerHTML = navByRole[state.role].map(item=>`
-    <button class="navbtn ${current===item.key?'active':''}" onclick="${item.action}">
+  const totalCarrito = Object.values(carrito).reduce((s,c)=>s+c.items.length, 0);
+  nav.innerHTML = navByRole[state.role].map(item=>{
+    if(item.key === '__cart__'){
+      const badgeVisible = totalCarrito > 0 ? 'visible' : '';
+      const onclick = item.action ? `onclick="${item.action}"` : 'onclick="abrirCarrito()"';
+      return `<button class="navbtn-cart" ${onclick} aria-label="Carrito">
+        <i class="ti ti-shopping-cart ic" aria-hidden="true"></i>
+        <div class="cart-badge ${badgeVisible}">${totalCarrito}</div>
+      </button>`;
+    }
+    return `<button class="navbtn ${current===item.key?'active':''}" onclick="${item.action}">
       <i class="ti ${item.ic} ic" aria-hidden="true"></i>
-    </button>`).join('');
+      <span class="nav-label">${item.label}</span>
+    </button>`;
+  }).join('');
 }
 
 /* ================= VERIFICACION SMS ================= */
@@ -3732,12 +3822,27 @@ function abrirOferta(prodId){
   const c = state.comercios.find(x=>x.id===p.comercioId);
   document.getElementById('ofFoto').innerHTML = p.img ? `<img src="${p.img}" alt="${p.nombre}" style="width:100%; height:100%; object-fit:cover;">` : p.foto;
   document.getElementById('ofNombre').textContent = p.nombre;
-  document.getElementById('ofPrecio').textContent = '$'+p.precio.toLocaleString('es-AR');
   const badge = etiquetaOferta(p);
   document.getElementById('ofPrecio').innerHTML = '$'+p.precio.toLocaleString('es-AR') + (badge ? ` <span class="oferta-badge" style="position:static; display:inline-block; margin-left:8px; vertical-align:middle;">${badge}</span>` : '');
-  document.getElementById('ofComercio').textContent = c ? c.nombre : 'Comercio';
-  document.getElementById('ofDireccion').textContent = c ? (c.direccion || 'La Paz, Entre Ríos') : '';
   document.getElementById('ofStockInfo').innerHTML = stockBadge(p);
+
+  // --- Mostrar u ocultar info del local según si está registrado ---
+  const estaRegistrado = !!state.role && state.role !== null;
+  const localBloque = document.getElementById('ofLocalBloque');
+  const noRegistradoBloque = document.getElementById('ofBloqueNoRegistrado');
+  const ofAntes = document.getElementById('ofAntes');
+
+  if(estaRegistrado){
+    document.getElementById('ofComercio').textContent = c ? c.nombre : 'Comercio';
+    document.getElementById('ofDireccion').textContent = c ? (c.direccion || 'La Paz, Entre Ríos') : '';
+    localBloque.classList.remove('hidden');
+    noRegistradoBloque.classList.add('hidden');
+    ofAntes.classList.remove('hidden');
+  } else {
+    localBloque.classList.add('hidden');
+    noRegistradoBloque.classList.remove('hidden');
+    ofAntes.classList.add('hidden'); // Ocultar botón reservar también
+  }
 
   const banner = document.getElementById('ofVendedorBanner');
   if(state.role==='vendedor' && p.comision>0){
@@ -3758,37 +3863,38 @@ function abrirOferta(prodId){
     banner.classList.add('hidden');
   }
 
-  // ¿Ya habíamos generado un código para este producto antes? Si el pedido sigue pendiente, lo mostramos
-  // de nuevo en vez de resetear la pantalla — así el cliente no lo "pierde" al salir y volver a entrar.
+  // ¿Ya habíamos generado un código para este producto antes?
   const ventaPrevia = buscarVentaPropiaGuardada(prodId);
-  if(ventaPrevia){
+  if(ventaPrevia && estaRegistrado){
     mostrarCodigoDeOferta(ventaPrevia);
-  } else if(p.tipoOferta==='h24'){
-    const estado = estadoRayo(p);
-    let html;
-    if(estado==='antes'){
-      html = `<div style="text-align:center; padding:16px 0; color:var(--navy); font-weight:700; font-size:14px;">🕐 Todavía no arrancó<br><span style="font-weight:500; font-size:12.5px; color:var(--muted);">Se larga a las ${p.horaInicio}hs</span></div>`;
-    } else if(estado==='cerrada'){
-      html = `<div style="text-align:center; padding:16px 0; color:var(--muted); font-weight:700; font-size:14px;">Esta oferta ya cerró</div>`;
-    } else if(estado==='agotada'){
-      html = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">🚫 Agotado — ya se reservó todo</div>`;
+  } else if(estaRegistrado){
+    if(p.tipoOferta==='h24'){
+      const estado = estadoRayo(p);
+      let html;
+      if(estado==='antes'){
+        html = `<div style="text-align:center; padding:16px 0; color:var(--navy); font-weight:700; font-size:14px;">🕐 Todavía no arrancó<br><span style="font-weight:500; font-size:12.5px; color:var(--muted);">Se larga a las ${p.horaInicio}hs</span></div>`;
+      } else if(estado==='cerrada'){
+        html = `<div style="text-align:center; padding:16px 0; color:var(--muted); font-weight:700; font-size:14px;">Esta oferta ya cerró</div>`;
+      } else if(estado==='agotada'){
+        html = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">🚫 Agotado — ya se reservó todo</div>`;
+      } else {
+        html = `<p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">⚡ Quedan ${stockDisponible(p)} disponibles hasta las ${p.horaHasta}hs.</p>
+          <button class="btn btn-primary" onclick="reservarProducto()">🛒 Reservar</button>`;
+      }
+      ofAntes.innerHTML = html;
+      ofAntes.classList.remove('hidden');
+      document.getElementById('ofDespues').classList.add('hidden');
+    } else if(p.stock !== null && p.stock !== undefined && p.stock <= 0){
+      ofAntes.innerHTML = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">😔 Este producto ya no tiene stock disponible</div>`;
+      ofAntes.classList.remove('hidden');
+      document.getElementById('ofDespues').classList.add('hidden');
     } else {
-      html = `<p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">⚡ Quedan ${stockDisponible(p)} disponibles hasta las ${p.horaHasta}hs. Reservá ahora y generás tu código al toque.</p>
-        <button class="btn btn-primary" onclick="quieroEstaOferta()">Reservar — generar mi código</button>`;
+      ofAntes.innerHTML = `
+        <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Reservá el producto. Generás el QR cuando llegues al local.</p>
+        <button class="btn btn-primary" onclick="reservarProducto()">🛒 Reservar</button>`;
+      ofAntes.classList.remove('hidden');
+      document.getElementById('ofDespues').classList.add('hidden');
     }
-    document.getElementById('ofAntes').innerHTML = html;
-    document.getElementById('ofAntes').classList.remove('hidden');
-    document.getElementById('ofDespues').classList.add('hidden');
-  } else if(p.stock !== null && p.stock !== undefined && p.stock <= 0){
-    document.getElementById('ofAntes').innerHTML = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">😔 Este producto ya no tiene stock disponible</div>`;
-    document.getElementById('ofAntes').classList.remove('hidden');
-    document.getElementById('ofDespues').classList.add('hidden');
-  } else {
-    document.getElementById('ofAntes').innerHTML = `
-      <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Si te sirve la ubicación, generá tu código y presentalo cuando llegues al local para retirarlo.</p>
-      <button class="btn btn-primary" onclick="quieroEstaOferta()">Quiero esta oferta — generar mi código</button>`;
-    document.getElementById('ofAntes').classList.remove('hidden');
-    document.getElementById('ofDespues').classList.add('hidden');
   }
   showScreen('oferta');
 }
@@ -4312,7 +4418,187 @@ async function adminGuardarNuevoComercio(){
 }
 
 // =============================================
-// FIN PANEL ADMIN
+// CARRITO DE COMPRAS
+// =============================================
+// Estructura: carrito[comercioId] = { comercioNombre, items: [{prodId, nombre, precio, qty}] }
+const carrito = {};
+
+function reservarProducto(){
+  const p = state.productos.find(x=>x.id===ofertaAbierta);
+  if(!p){ toast('Producto no encontrado'); return; }
+
+  // Verificar stock
+  if(p.tipoOferta==='h24'){
+    const est = estadoRayo(p);
+    if(est!=='abierta'){ toast(est==='agotada'?'Se agotó 😔':'No disponible ahora'); abrirOferta(p.id); return; }
+  } else if(p.stock !== null && p.stock !== undefined && p.stock <= 0){
+    toast('Sin stock disponible 😔'); return;
+  }
+
+  // Verificar si ya está en el carrito
+  if(carrito[p.comercioId]?.items.some(i=>i.prodId===p.id)){
+    toast('Ya lo tenés reservado en tu carrito 🛒');
+    document.getElementById('ofBtnReservar')?.classList.add('hidden');
+    document.getElementById('ofYaReservado')?.classList.remove('hidden');
+    return;
+  }
+
+  const c = state.comercios.find(x=>x.id===p.comercioId);
+  if(!carrito[p.comercioId]){
+    carrito[p.comercioId] = { comercioNombre: c?.nombre||'Local', comercioId: p.comercioId, items:[] };
+  }
+  carrito[p.comercioId].items.push({
+    prodId: p.id, nombre: p.nombre, precio: p.precio, img: p.img||null
+  });
+
+  // Descontar stock
+  if(p.stock !== null && p.stock !== undefined){ p.stock = Math.max(0, p.stock - 1); }
+
+  // UI: mostrar confirmación
+  const btnReservar = document.getElementById('ofBtnReservar');
+  const yaReservado = document.getElementById('ofYaReservado');
+  if(btnReservar) btnReservar.classList.add('hidden');
+  if(yaReservado) yaReservado.classList.remove('hidden');
+
+  updateBottomNav('oferta');
+  toast('¡Reservado! Lo encontrás en tu carrito 🛒');
+}
+
+function abrirCarrito(){
+  renderCarrito();
+  showScreen('cl-carrito');
+  updateBottomNav('cl-carrito');
+}
+
+function renderCarrito(){
+  const el = document.getElementById('carritoContenido');
+  const comercios = Object.values(carrito).filter(c=>c.items.length>0);
+
+  if(!comercios.length){
+    el.innerHTML = `<div class="empty">
+      <div class="ic">🛒</div>
+      <div class="t">Tu carrito está vacío</div>
+      <div class="s">Buscá productos y reservalos para retirarlos en el local.</div>
+      <button class="btn btn-primary" style="margin-top:14px;" onclick="irInicio()">Explorar productos</button>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = comercios.map(grupo=>{
+    const total = grupo.items.reduce((s,i)=>s+i.precio,0);
+    const itemsHtml = grupo.items.map(item=>`
+      <div class="list-row" style="align-items:center;">
+        <div class="av" style="background:var(--cream);border-radius:10px;overflow:hidden;flex-shrink:0;">
+          ${item.img ? `<img src="${item.img}" style="width:100%;height:100%;object-fit:cover;">` : '📦'}
+        </div>
+        <div class="main">
+          <div class="t">${item.nombre}</div>
+          <div class="s" style="color:var(--navy);font-weight:700;">$${item.precio.toLocaleString('es-AR')}</div>
+        </div>
+        <button onclick="quitarDelCarrito('${grupo.comercioId}','${item.prodId}')" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px;">✕</button>
+      </div>`).join('');
+
+    return `<div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Local</div>
+          <div style="font-size:16px;font-weight:800;color:var(--navy);">${grupo.comercioNombre}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);">Total</div>
+          <div style="font-size:16px;font-weight:800;color:var(--navy);">$${total.toLocaleString('es-AR')}</div>
+        </div>
+      </div>
+      ${itemsHtml}
+      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="generarQRCarrito('${grupo.comercioId}')">
+        📲 Generar QR para retirar en ${grupo.comercioNombre}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function quitarDelCarrito(comercioId, prodId){
+  if(!carrito[comercioId]) return;
+  const idx = carrito[comercioId].items.findIndex(i=>i.prodId===prodId);
+  if(idx>-1){
+    // Devolver stock
+    const p = state.productos.find(x=>x.id===prodId);
+    if(p && p.stock !== null && p.stock !== undefined) p.stock++;
+    carrito[comercioId].items.splice(idx,1);
+  }
+  if(carrito[comercioId].items.length===0) delete carrito[comercioId];
+  updateBottomNav('cl-carrito');
+  renderCarrito();
+}
+
+function generarQRCarrito(comercioId){
+  const grupo = carrito[comercioId];
+  if(!grupo || !grupo.items.length){ toast('No hay productos en este carrito'); return; }
+
+  const c = state.comercios.find(x=>x.id===comercioId);
+  const codigo = genCodigo();
+  const clienteNombre = state.currentUser?.nombre || 'Cliente';
+
+  // Crear una venta por ítem
+  grupo.items.forEach(item=>{
+    const p = state.productos.find(x=>x.id===item.prodId);
+    if(!p) return;
+    const venta = {
+      id: nextId('t'), codigo, vendedorId:null, productoId:p.id, comercioId,
+      clienteNombre, estado:'pendiente', comisionMonto:0, origen:'carrito',
+      precioUnidad: p.precio, fechaReserva: new Date().toISOString()
+    };
+    state.ventas.push(venta);
+    guardarVentaEnFirestore && guardarVentaEnFirestore(venta);
+  });
+
+  // Mostrar pantalla QR
+  document.getElementById('qrCarritoKicker').textContent = 'Código de retiro';
+  document.getElementById('qrCarritoComercio').textContent = grupo.comercioNombre;
+  document.getElementById('qrCarritoCodigo').textContent = codigo;
+  const total = grupo.items.reduce((s,i)=>s+i.precio,0);
+  document.getElementById('qrCarritoItems').innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Productos incluidos</div>
+    ${grupo.items.map(i=>`
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--line);">
+        <span style="color:var(--ink);">${i.nombre}</span>
+        <span style="font-weight:700;color:var(--navy);">$${i.precio.toLocaleString('es-AR')}</span>
+      </div>`).join('')}
+    <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding:10px 0 0;color:var(--navy);">
+      <span>Total</span><span>$${total.toLocaleString('es-AR')}</span>
+    </div>`;
+
+  // QR visual
+  const qrEl = document.getElementById('qrCarritoFake');
+  if(typeof QRCode !== 'undefined'){
+    qrEl.innerHTML = '';
+    new QRCode(qrEl, { text: codigo, width:160, height:160, correctLevel: QRCode.CorrectLevel.M });
+  } else { qrEl.textContent = codigo; }
+
+  // Limpiar carrito de este comercio
+  delete carrito[comercioId];
+  updateBottomNav('cl-qr-carrito');
+  showScreen('cl-qr-carrito');
+  toast('¡Código generado! Mostralo en ' + (c?.nombre||'el local') + ' 🎉');
+}
+
+// Invitar a registrarse desde la pantalla de producto
+let _productoPendienteRegistro = null;
+function invitarRegistroDesdeProducto(){
+  _productoPendienteRegistro = ofertaAbierta;
+  // Preseleccionar rol cliente y disparar login con Google
+  rolPreElegido = 'cliente';
+  loginIniciadoPorUsuario = true;
+  if(typeof auth !== 'undefined'){
+    auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  } else {
+    toast('Iniciando sesión con Google…');
+    showScreen('home');
+  }
+}
+
+// =============================================
+// FIN CARRITO
 // =============================================
 </script>
 </body>
