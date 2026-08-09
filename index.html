@@ -478,7 +478,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button type="button" class="topbar-city-btn" onclick="toggleFilterDd(event, 'ciudadDdPanel')">📍 <span id="ciudadDdLabel">La Paz, Entre Ríos</span> <span class="filter-dd-chev">▾</span></button>
       <div class="filter-dd-panel hidden" id="ciudadDdPanel"></div>
     </div>
-    <span class="role-chip is-cta" id="roleChip" onclick="onRoleChipClick()">Ingresar / Registrarme</span>
+
   </div>
 
   <!-- ============ SCREEN: FEED PUBLICO (INICIAL) ============ -->
@@ -1249,6 +1249,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ CLIENTE: CATALOGO ============ -->
+  <div class="screen hidden" id="screen-cl-catalogo">
     <div class="link-back" onclick="showScreen('cl-buscador')">← Volver al buscador</div>
     <div class="list-row" style="margin-bottom:16px;">
       <div class="av" style="background:var(--green)" id="clVendAvatar">🛍️</div>
@@ -1648,6 +1649,7 @@ function goHome(){
 }
 function setRoleChip(texto, esCta){
   const chip = document.getElementById('roleChip');
+  if(!chip) return;
   chip.textContent = texto;
   chip.classList.toggle('is-cta', !!esCta);
 }
