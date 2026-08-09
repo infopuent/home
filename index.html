@@ -4552,7 +4552,7 @@ function generarQRCarrito(comercioId){
       precioUnidad: p.precio, fechaReserva: new Date().toISOString()
     };
     state.ventas.push(venta);
-    guardarVentaEnFirestore && guardarVentaEnFirestore(venta);
+    if(typeof guardarVentaEnFirestore === 'function') guardarVentaEnFirestore(venta);
   });
 
   // Mostrar pantalla QR
