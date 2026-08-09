@@ -473,6 +473,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 <div id="app">
 
   <div class="topbar" id="topbar">
+    <div id="topbarUserStrip" class="hidden" style="width:100%;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:4px;">
+      <span id="topbarRoleBadge" style="font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:100px;background:var(--navy);color:white;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0;"></span>
+      <span id="topbarUserName" style="font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button onclick="abrirPerfil()" style="margin-left:auto;background:none;border:none;font-size:11.5px;font-weight:700;color:var(--navy-2);flex-shrink:0;padding:0;cursor:pointer;">Ver perfil →</button>
+    </div>
     <img class="brand-logo" src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente" onclick="irInicio()">
     <div class="filter-dd ciudad-dd topbar-ciudad" id="ciudadDd">
       <button type="button" class="topbar-city-btn" onclick="toggleFilterDd(event, 'ciudadDdPanel')">📍 <span id="ciudadDdLabel">La Paz, Entre Ríos</span> <span class="filter-dd-chev">▾</span></button>
@@ -1466,6 +1471,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <button class="btn btn-primary" onclick="pedirProducto()">Quiero este producto</button>
   </div>
 
+  <!-- ============ PERFIL UNIFICADO ============ -->
+  <div class="screen hidden" id="screen-perfil">
+    <div id="perfilContenido"></div>
+  </div>
+
 </div>
 
 <!-- ============ OVERLAY: ESCÁNER DE CÁMARA (reutilizable) ============ -->
@@ -1645,6 +1655,7 @@ function goHome(){
   state.currentUser = null;
   if(firebaseListo) firebaseAuth.signOut().catch(()=>{});
   setRoleChip('Ingresar / Registrarme', true);
+  updateTopbarUser();
   showScreen('home');
 }
 function setRoleChip(texto, esCta){
@@ -1844,28 +1855,28 @@ const navByRole = {
     {key:'v-catalogo',  ic:'ti-building-store',  label:'Catálogo',action:"showScreen('v-catalogo')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
     {key:'v-solicitudes',ic:'ti-bell',           label:'Pedidos', action:"showScreen('v-solicitudes')"},
-    {key:'v-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirEditarVendedor()"},
+    {key:'v-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
   ],
   comercio:[
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
     {key:'c-panel',     ic:'ti-building-store',  label:'Panel',   action:"showScreen('c-panel')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
     {key:'c-panel-actividad',ic:'ti-bell',       label:'Actividad',action:"showScreen('c-panel')"},
-    {key:'c-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirEditarComercio()"},
+    {key:'c-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
   ],
   cliente:[
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
     {key:'rayo-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderRayoOfertas();showScreen('rayo-ofertas')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:"abrirCarrito()"},
     {key:'cl-buscador', ic:'ti-search',          label:'Buscar',  action:"showScreen('cl-buscador')"},
-    {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"toast('Próximamente')"},
+    {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
   ],
   admin:[
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
     {key:'admin-panel', ic:'ti-shield',          label:'Admin',   action:"showScreen('admin-panel')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
     {key:'admin-panel', ic:'ti-bell',            label:'Alertas', action:"toast('Sin alertas')"},
-    {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"toast('Próximamente')"},
+    {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
   ]
 };
 
@@ -1958,7 +1969,7 @@ function verificarCodigo(){
   renderVendedorStats();
   showScreen('v-catalogo');
   updateBottomNav('v-catalogo');
-  pendingVendedorData = null;
+  updateTopbarUser();
 }
 
 let pendingGoogleUser = null;
@@ -2107,7 +2118,7 @@ function entrarConDatosGuardados(rol, data){
     cargarCatalogoVendedorGuardado(data.id);
     renderVendedorCatalogo(); renderVendedorSolicitudes(); renderVendedorStats();
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
-    showScreen('v-catalogo'); updateBottomNav('v-catalogo');
+    showScreen('v-catalogo'); updateBottomNav('v-catalogo'); updateTopbarUser();
   } else if(rol==='comercio'){
     if(!publicidadActiva(data)){
       data.publicidadActiva = true;
@@ -2123,7 +2134,7 @@ function entrarConDatosGuardados(rol, data){
     cargarProductosGuardados(data.uid);
     if(window._codigoPendienteDesdeURL) procesarCodigoPendienteDesdeURL();
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
-    showScreen('c-panel'); updateBottomNav('c-panel');
+    showScreen('c-panel'); updateBottomNav('c-panel'); updateTopbarUser();
   } else {
     const idx = state.clientes.findIndex(x=>x.uid===data.uid);
     if(idx>=0) state.clientes[idx] = data; else state.clientes.push(data);
@@ -2131,7 +2142,7 @@ function entrarConDatosGuardados(rol, data){
     setRoleChip('🙋 Cliente', false);
     renderClienteBuscador();
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
-    showScreen('cl-buscador'); updateBottomNav('cl-buscador');
+    showScreen('cl-buscador'); updateBottomNav('cl-buscador'); updateTopbarUser();
   }
 }
 
@@ -4142,6 +4153,7 @@ function entrarComoAdmin(user){
   adminCargarStats();
   showScreen('admin-panel');
   updateBottomNav('admin-panel');
+  updateTopbarUser();
   toast('¡Bienvenido, Admin!');
 }
 
@@ -4597,6 +4609,77 @@ function invitarRegistroDesdeProducto(){
     toast('Iniciando sesión con Google…');
     showScreen('home');
   }
+}
+
+// =============================================
+// TOPBAR USUARIO + PERFIL UNIFICADO
+// =============================================
+
+const ROLE_LABEL = { vendedor:'Vendedor', comercio:'Comercio', cliente:'Cliente', admin:'Admin', guest:'' };
+const ROLE_COLOR = { vendedor:'#5C7355', comercio:'#C99A3E', cliente:'#5C7355', admin:'#3A3F35', guest:'#7A8271' };
+
+function updateTopbarUser(){
+  const strip = document.getElementById('topbarUserStrip');
+  const badge = document.getElementById('topbarRoleBadge');
+  const nameEl = document.getElementById('topbarUserName');
+  if(!strip) return;
+  const u = state.currentUser;
+  if(!u || state.role === 'guest'){
+    strip.classList.add('hidden');
+    return;
+  }
+  strip.classList.remove('hidden');
+  strip.style.display = 'flex';
+  badge.textContent = ROLE_LABEL[state.role] || state.role;
+  badge.style.background = ROLE_COLOR[state.role] || 'var(--navy)';
+  nameEl.textContent = u.nombre || u.email || '—';
+}
+
+function abrirPerfil(){
+  const u = state.currentUser;
+  const el = document.getElementById('perfilContenido');
+  if(!u || state.role === 'guest'){
+    showScreen('home');
+    return;
+  }
+
+  const fila = (label, valor) => valor ? `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:0.5px solid var(--line);">
+      <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">${label}</span>
+      <span style="font-size:14px;font-weight:600;color:var(--ink);text-align:right;max-width:60%;word-break:break-word;">${valor}</span>
+    </div>` : '';
+
+  let campos = '';
+  let editBtn = '';
+
+  if(state.role === 'vendedor'){
+    campos = fila('Nombre', u.nombre) + fila('Usuario', u.usuario ? '@'+u.usuario : null) + fila('Teléfono', u.telefono) + fila('Ciudad', u.ciudad) + fila('Zona', u.zona) + fila('Alta', u.fechaAlta ? new Date(u.fechaAlta).toLocaleDateString('es-AR') : null);
+    editBtn = `<button class="btn btn-ghost" style="margin-top:10px;" onclick="abrirEditarVendedor()">✏️ Editar información</button>`;
+  } else if(state.role === 'comercio'){
+    campos = fila('Nombre', u.nombre) + fila('Dirección', u.direccion) + fila('Ciudad', u.ciudad) + fila('Rubro', u.rubro) + fila('Teléfono', u.telefono) + fila('Horario', u.horario) + fila('Rating', u.rating ? '⭐ '+u.rating : null);
+    editBtn = `<button class="btn btn-ghost" style="margin-top:10px;" onclick="abrirEditarComercio()">✏️ Editar información</button>`;
+  } else if(state.role === 'cliente'){
+    campos = fila('Nombre', u.nombre) + fila('Teléfono', u.telefono) + fila('Ciudad', u.ciudad);
+  } else if(state.role === 'admin'){
+    campos = fila('Nombre', u.nombre) + fila('Email', u.email);
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:22px;color:white;flex-shrink:0;">
+        ${ state.role==='vendedor'?'🛍️': state.role==='comercio'?'🏬': state.role==='cliente'?'🙋':'🛡️' }
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:2px;">${ROLE_LABEL[state.role]||''}</div>
+        <div style="font-size:20px;font-weight:700;color:var(--navy);">${u.nombre || u.email || '—'}</div>
+      </div>
+    </div>
+    <div class="card" style="padding:4px 16px;">${campos}</div>
+    ${editBtn}
+    <button class="btn btn-ghost" style="margin-top:10px;color:#c23b3b;border-color:#f0d0d0;" onclick="confirmarCierreSesion()">🚪 Cerrar sesión</button>`;
+
+  showScreen('perfil');
+  updateBottomNav('cl-perfil');
 }
 
 // =============================================
