@@ -4573,10 +4573,7 @@ function generarQRCarrito(comercioId){
 
   // QR visual
   const qrEl = document.getElementById('qrCarritoFake');
-  if(typeof QRCode !== 'undefined'){
-    qrEl.innerHTML = '';
-    new QRCode(qrEl, { text: codigo, width:160, height:160, correctLevel: QRCode.CorrectLevel.M });
-  } else { qrEl.textContent = codigo; }
+  renderQR(qrEl, codigo);
 
   // Limpiar carrito de este comercio
   delete carrito[comercioId];
