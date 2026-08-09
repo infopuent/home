@@ -1477,7 +1477,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 </div>
 
-<div class="bottomnav hidden" id="bottomnav"></div>
+<div class="bottomnav" id="bottomnav"></div>
 <div id="toast"></div>
 
 <!-- ============ MODAL: VALORAR ============ -->
@@ -1561,7 +1561,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 <script>
 /* ================= ESTADO EN MEMORIA ================= */
 let state = {
-  role: null,
+  role: 'guest',
   currentUser: null,
   vendedores: [],
   comercios: [],
@@ -1640,11 +1640,10 @@ function showScreen(name){
   updateBottomNav(name);
 }
 function goHome(){
-  state.role = null;
+  state.role = 'guest';
   state.currentUser = null;
   if(firebaseListo) firebaseAuth.signOut().catch(()=>{});
   setRoleChip('Ingresar / Registrarme', true);
-  document.getElementById('bottomnav').classList.add('hidden');
   showScreen('home');
 }
 function setRoleChip(texto, esCta){
@@ -1827,7 +1826,17 @@ function escanearCodigoConCamara(){
 }
 
 /* ================= BOTTOM NAV ================= */
+// carrito debe definirse acá para que updateBottomNav lo encuentre
+const carrito = {};
+
 const navByRole = {
+  guest:[
+    {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
+    {key:'rayo-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderRayoOfertas();showScreen('rayo-ofertas')"},
+    {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:"abrirCarrito()"},
+    {key:'cl-buscador', ic:'ti-search',          label:'Buscar',  action:"showScreen('cl-buscador')"},
+    {key:'home',        ic:'ti-user',            label:'Ingresar',action:"showScreen('home')"},
+  ],
   vendedor:[
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
     {key:'v-catalogo',  ic:'ti-building-store',  label:'Catálogo',action:"showScreen('v-catalogo')"},
@@ -2068,8 +2077,6 @@ function crearCuentaDesdeGoogle(rol, user){
 function entrarConDatosGuardados(rol, data){
   state.currentUser = data; state.role = rol;
 
-  // Si veníamos de "Guardar este código con Google" desde la pantalla de una oferta,
-  // no lo mandamos a ningún panel — solo vinculamos el código y lo dejamos donde estaba.
   if(window._ventaPendienteDeGuardar){
     if(rol==='cliente'){
       const idx = state.clientes.findIndex(x=>x.uid===data.uid);
@@ -2077,14 +2084,17 @@ function entrarConDatosGuardados(rol, data){
     }
     setRoleChip('🙋 Cliente', false);
     vincularVentaConCliente(data);
+    document.getElementById('bottomnav').classList.remove('hidden');
+    updateBottomNav('oferta');
     return;
   }
 
-  // Si venía de escanear un código de retiro con la cámara del celular, pero esta cuenta no es de comercio.
   if(window._codigoPendienteDesdeURL && rol!=='comercio'){
     toast('Ese código se valida desde una cuenta de comercio, no desde esta cuenta.');
     window._codigoPendienteDesdeURL = null;
   }
+
+  document.getElementById('bottomnav').classList.remove('hidden');
 
   if(rol==='vendedor'){
     const idx = state.vendedores.findIndex(x=>x.uid===data.uid);
@@ -2094,13 +2104,9 @@ function entrarConDatosGuardados(rol, data){
     document.getElementById('vNombre').textContent = data.nombre;
     cargarCatalogoVendedorGuardado(data.id);
     renderVendedorCatalogo(); renderVendedorSolicitudes(); renderVendedorStats();
-    if(loginIniciadoPorUsuario){
-      toast('¡Bienvenido de nuevo!');
-      showScreen('v-catalogo'); updateBottomNav('v-catalogo');
-    }
+    if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
+    showScreen('v-catalogo'); updateBottomNav('v-catalogo');
   } else if(rol==='comercio'){
-    // Cuentas de comercio creadas antes de este arreglo no tenían publicidad de prueba activa
-    // (por eso no podían publicar productos) — se la damos ahora, una sola vez.
     if(!publicidadActiva(data)){
       data.publicidadActiva = true;
       data.publicidadVence = diasAtras(-30);
@@ -2114,20 +2120,16 @@ function entrarConDatosGuardados(rol, data){
     renderComercioPanel();
     cargarProductosGuardados(data.uid);
     if(window._codigoPendienteDesdeURL) procesarCodigoPendienteDesdeURL();
-    if(loginIniciadoPorUsuario){
-      toast('¡Bienvenido de nuevo!');
-      showScreen('c-panel'); updateBottomNav('c-panel');
-    }
+    if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
+    showScreen('c-panel'); updateBottomNav('c-panel');
   } else {
     const idx = state.clientes.findIndex(x=>x.uid===data.uid);
     if(idx>=0) state.clientes[idx] = data; else state.clientes.push(data);
     state.currentUser = data; state.role='cliente';
     setRoleChip('🙋 Cliente', false);
     renderClienteBuscador();
-    if(loginIniciadoPorUsuario){
-      toast('¡Bienvenido de nuevo!');
-      showScreen('cl-buscador'); updateBottomNav('cl-buscador');
-    }
+    if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
+    showScreen('cl-buscador'); updateBottomNav('cl-buscador');
   }
 }
 
@@ -3479,6 +3481,8 @@ function hideSplash(){
   s.classList.add('hide');
 }
 setTimeout(hideSplash, 3400);
+// Mostrar el menú inferior desde el inicio (modo invitado)
+updateBottomNav('feed');
 
 /* ================= FEED PUBLICO ================= */
 let feedRubroFiltro = 'Todos';
@@ -4420,8 +4424,7 @@ async function adminGuardarNuevoComercio(){
 // =============================================
 // CARRITO DE COMPRAS
 // =============================================
-// Estructura: carrito[comercioId] = { comercioNombre, items: [{prodId, nombre, precio, qty}] }
-const carrito = {};
+// Estructura: carrito[comercioId] = { comercioNombre, items: [{prodId, nombre, precio}] }
 
 function reservarProducto(){
   const p = state.productos.find(x=>x.id===ofertaAbierta);
