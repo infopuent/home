@@ -1250,7 +1250,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="code-label">Código de retiro del carrito</div>
       <div id="qrCarritoItems" style="margin-top:16px;text-align:left;"></div>
     </div>
-    <button class="btn btn-ghost" style="margin-top:12px;" onclick="showScreen('feed')">Seguir comprando</button>
+    <button class="btn btn-ghost" style="margin-top:12px;" onclick="showScreen('feed')">🏠 Seguir comprando</button>
+    <button class="btn btn-ghost" style="margin-top:8px;" onclick="abrirPerfil()">📋 Ver mis QR anteriores</button>
   </div>
 
   <!-- ============ CLIENTE: CATALOGO ============ -->
@@ -4548,54 +4549,6 @@ function quitarDelCarrito(comercioId, prodId){
   renderCarrito();
 }
 
-function generarQRCarrito(comercioId){
-  const grupo = carrito[comercioId];
-  if(!grupo || !grupo.items.length){ toast('No hay productos en este carrito'); return; }
-
-  const c = state.comercios.find(x=>x.id===comercioId);
-  const codigo = genCodigo();
-  const clienteNombre = state.currentUser?.nombre || 'Cliente';
-
-  // Crear una venta por ítem
-  grupo.items.forEach(item=>{
-    const p = state.productos.find(x=>x.id===item.prodId);
-    if(!p) return;
-    const venta = {
-      id: nextId('t'), codigo, vendedorId:null, productoId:p.id, comercioId,
-      clienteNombre, estado:'pendiente', comisionMonto:0, origen:'carrito',
-      precioUnidad: p.precio, fechaReserva: new Date().toISOString()
-    };
-    state.ventas.push(venta);
-    if(typeof guardarVentaEnFirestore === 'function') guardarVentaEnFirestore(venta);
-  });
-
-  // Mostrar pantalla QR
-  document.getElementById('qrCarritoKicker').textContent = 'Código de retiro';
-  document.getElementById('qrCarritoComercio').textContent = grupo.comercioNombre;
-  document.getElementById('qrCarritoCodigo').textContent = codigo;
-  const total = grupo.items.reduce((s,i)=>s+i.precio,0);
-  document.getElementById('qrCarritoItems').innerHTML = `
-    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Productos incluidos</div>
-    ${grupo.items.map(i=>`
-      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--line);">
-        <span style="color:var(--ink);">${i.nombre}</span>
-        <span style="font-weight:700;color:var(--navy);">$${i.precio.toLocaleString('es-AR')}</span>
-      </div>`).join('')}
-    <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding:10px 0 0;color:var(--navy);">
-      <span>Total</span><span>$${total.toLocaleString('es-AR')}</span>
-    </div>`;
-
-  // QR visual
-  const qrEl = document.getElementById('qrCarritoFake');
-  renderQR(qrEl, codigo);
-
-  // Limpiar carrito de este comercio
-  delete carrito[comercioId];
-  updateBottomNav('cl-qr-carrito');
-  showScreen('cl-qr-carrito');
-  toast('¡Código generado! Mostralo en ' + (c?.nombre||'el local') + ' 🎉');
-}
-
 // Invitar a registrarse desde la pantalla de producto
 let _productoPendienteRegistro = null;
 function invitarRegistroDesdeProducto(){
@@ -4609,6 +4562,91 @@ function invitarRegistroDesdeProducto(){
     toast('Iniciando sesión con Google…');
     showScreen('home');
   }
+}
+
+// =============================================
+// HISTORIAL DE QR — persiste en localStorage
+// =============================================
+
+function cargarHistorialQR(){
+  try{ return JSON.parse(localStorage.getItem('puente_historial_qr') || '[]'); }
+  catch(e){ return []; }
+}
+function guardarHistorialQR(arr){
+  try{ localStorage.setItem('puente_historial_qr', JSON.stringify(arr.slice(0,30))); }catch(e){}
+}
+function agregarAlHistorialQR(entrada){
+  const arr = cargarHistorialQR();
+  arr.unshift(entrada); // más reciente primero
+  guardarHistorialQR(arr);
+}
+
+function generarQRCarrito(comercioId){
+  const grupo = carrito[comercioId];
+  if(!grupo || !grupo.items.length){ toast('No hay productos en este carrito'); return; }
+
+  const c = state.comercios.find(x=>x.id===comercioId);
+  const codigo = genCodigo();
+  const clienteNombre = state.currentUser?.nombre || 'Cliente';
+  const total = grupo.items.reduce((s,i)=>s+i.precio,0);
+
+  // Crear una venta por ítem en state
+  grupo.items.forEach(item=>{
+    const p = state.productos.find(x=>x.id===item.prodId);
+    if(!p) return;
+    const venta = {
+      id: nextId('t'), codigo, vendedorId:null, productoId:p.id, comercioId,
+      clienteNombre, estado:'pendiente', comisionMonto:0, origen:'carrito',
+      precioUnidad: p.precio, fechaReserva: new Date().toISOString()
+    };
+    state.ventas.push(venta);
+    if(typeof guardarVentaEnFirestore === 'function') guardarVentaEnFirestore(venta);
+  });
+
+  // Guardar en historial persistente
+  agregarAlHistorialQR({
+    codigo,
+    comercioId,
+    comercioNombre: grupo.comercioNombre,
+    items: grupo.items.map(i=>({nombre:i.nombre, precio:i.precio, img:i.img||null})),
+    total,
+    fecha: new Date().toISOString()
+  });
+
+  // Mostrar pantalla QR
+  mostrarPantallaQRCarrito({ codigo, comercioNombre: grupo.comercioNombre, items: grupo.items, total });
+
+  // Limpiar carrito de este comercio
+  delete carrito[comercioId];
+  updateBottomNav('cl-qr-carrito');
+  toast('¡Código generado! Mostralo en ' + (c?.nombre||'el local') + ' 🎉');
+}
+
+function mostrarPantallaQRCarrito({ codigo, comercioNombre, items, total, fecha }){
+  document.getElementById('qrCarritoKicker').textContent = fecha
+    ? '📋 QR del ' + new Date(fecha).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit'})
+    : 'Código de retiro';
+  document.getElementById('qrCarritoComercio').textContent = comercioNombre;
+  document.getElementById('qrCarritoCodigo').textContent = codigo;
+  document.getElementById('qrCarritoItems').innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Productos incluidos</div>
+    ${items.map(i=>`
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--line);">
+        <span style="color:var(--ink);">${i.nombre}</span>
+        <span style="font-weight:700;color:var(--navy);">$${i.precio.toLocaleString('es-AR')}</span>
+      </div>`).join('')}
+    <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding:10px 0 0;color:var(--navy);">
+      <span>Total</span><span>$${total.toLocaleString('es-AR')}</span>
+    </div>`;
+  renderQR(document.getElementById('qrCarritoFake'), codigo);
+  showScreen('cl-qr-carrito');
+}
+
+function reabrirQRHistorial(idx){
+  const historial = cargarHistorialQR();
+  const h = historial[idx];
+  if(!h) return;
+  mostrarPantallaQRCarrito(h);
 }
 
 // =============================================
@@ -4651,7 +4689,6 @@ function abrirPerfil(){
 
   let campos = '';
   let editBtn = '';
-
   if(state.role === 'vendedor'){
     campos = fila('Nombre', u.nombre) + fila('Usuario', u.usuario ? '@'+u.usuario : null) + fila('Teléfono', u.telefono) + fila('Ciudad', u.ciudad) + fila('Zona', u.zona) + fila('Alta', u.fechaAlta ? new Date(u.fechaAlta).toLocaleDateString('es-AR') : null);
     editBtn = `<button class="btn btn-ghost" style="margin-top:10px;" onclick="abrirEditarVendedor()">✏️ Editar información</button>`;
@@ -4663,6 +4700,28 @@ function abrirPerfil(){
   } else if(state.role === 'admin'){
     campos = fila('Nombre', u.nombre) + fila('Email', u.email);
   }
+
+  // Historial de QR
+  const historial = cargarHistorialQR();
+  const historialHtml = historial.length === 0
+    ? `<div class="empty" style="padding:22px 0;">
+        <div class="ic">📋</div>
+        <div class="t">Sin compras todavía</div>
+        <div class="s">Tus códigos QR generados van a aparecer acá.</div>
+       </div>`
+    : historial.map((h, idx) => {
+        const fecha = new Date(h.fecha).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit'});
+        const hora  = new Date(h.fecha).toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+        return `
+        <div class="list-row" style="align-items:flex-start;gap:12px;cursor:pointer;" onclick="reabrirQRHistorial(${idx})">
+          <div class="av" style="background:var(--navy);flex-shrink:0;">🛒</div>
+          <div class="main" style="flex:1;min-width:0;">
+            <div class="t">${h.comercioNombre}</div>
+            <div class="s">${h.items.map(i=>i.nombre).join(', ')}</div>
+            <div style="font-size:10.5px;color:var(--blue);font-weight:700;margin-top:3px;">${fecha} ${hora} · $${h.total.toLocaleString('es-AR')} · <span style="font-family:monospace;">${h.codigo}</span></div>
+          </div>
+          <span style="font-size:11px;font-weight:700;background:#EAF0E6;color:var(--navy-2);padding:4px 9px;border-radius:100px;flex-shrink:0;margin-top:2px;">Ver QR</span>
+        </div>`}).join('');
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
@@ -4676,7 +4735,14 @@ function abrirPerfil(){
     </div>
     <div class="card" style="padding:4px 16px;">${campos}</div>
     ${editBtn}
-    <button class="btn btn-ghost" style="margin-top:10px;color:#c23b3b;border-color:#f0d0d0;" onclick="confirmarCierreSesion()">🚪 Cerrar sesión</button>`;
+
+    <div style="margin-top:22px;margin-bottom:10px;">
+      <div class="section-title">📋 Mis compras y QR generados</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tocá cualquier fila para volver a ver el QR.</div>
+    </div>
+    ${historialHtml}
+
+    <button class="btn btn-ghost" style="margin-top:18px;color:#c23b3b;border-color:#f0d0d0;" onclick="confirmarCierreSesion()">🚪 Cerrar sesión</button>`;
 
   showScreen('perfil');
   updateBottomNav('cl-perfil');
