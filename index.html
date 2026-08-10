@@ -705,30 +705,67 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   <!-- ============ SCREEN: HOME (entrar o registrarme) ============ -->
   <div class="screen hidden" id="screen-home">
-    <div class="link-back" onclick="showScreen('feed')">← Ver productos sin ingresar</div>
-    <div class="kicker">Bienvenido</div>
-    <h1 class="page-title">¿Ya tenés cuenta en PuenT?</h1>
-    <p class="page-sub">Elegí una opción para continuar.</p>
+    <div class="link-back" onclick="showScreen('feed')">← Explorar sin ingresar</div>
 
-    <button class="btn btn-primary" style="margin-bottom:10px;" onclick="loginConGoogle()">Ya tengo cuenta — Iniciar sesión</button>
-    <button class="btn btn-ghost" style="margin-bottom:18px;" onclick="mostrarSeleccionDeRol()">Soy nuevo — Quiero registrarme</button>
+    <div style="text-align:center;margin-bottom:24px;">
+      <div class="kicker">Bienvenido a PuenT</div>
+      <h1 class="page-title" style="font-size:22px;margin-bottom:8px;">El mercado de tu ciudad</h1>
+      <p class="page-sub" style="margin:0;">Conectamos clientes, comercios y ConectoresT en un solo lugar.</p>
+    </div>
 
-    <div class="link-back" style="text-align:center; margin:0 0 14px;" onclick="document.getElementById('registroManualBox').classList.toggle('hidden')">¿No tenés Gmail? Registrate sin Google</div>
+    <!-- Cards explicativas de roles -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div style="background:var(--cream);border-radius:16px;padding:14px 12px;border:1.5px solid var(--line);">
+        <div style="font-size:26px;margin-bottom:6px;">🏬</div>
+        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px;">Comercio</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.45;">Validá QR, gestioná pedidos y administrá tu stock desde la app.</div>
+      </div>
+      <div style="background:var(--cream);border-radius:16px;padding:14px 12px;border:1.5px solid var(--line);">
+        <div style="font-size:26px;margin-bottom:6px;">🔗</div>
+        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px;">ConectorT</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.45;">Trabajá independiente. Conectá compradores con comercios y cobrá comisión.</div>
+      </div>
+      <div style="background:var(--cream);border-radius:16px;padding:14px 12px;border:1.5px solid var(--line);grid-column:1/-1;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:26px;">🙋</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:3px;">Cliente</div>
+            <div style="font-size:11.5px;color:var(--muted);line-height:1.45;">Descubrí productos de tu ciudad, reservá y retirá en el local. Sin complicaciones.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones principales -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <button class="btn btn-primary" style="padding:14px 8px;font-size:13.5px;border-radius:14px;flex-direction:column;display:flex;align-items:center;gap:4px;height:auto;" onclick="loginConGoogle()">
+        <span style="font-size:22px;">🔑</span>
+        <span style="font-weight:800;">Iniciar sesión</span>
+        <span style="font-size:10.5px;font-weight:500;opacity:.85;">Ya tengo cuenta</span>
+      </button>
+      <button class="btn" style="padding:14px 8px;font-size:13.5px;border-radius:14px;flex-direction:column;display:flex;align-items:center;gap:4px;height:auto;background:var(--cream);color:var(--navy);border:2px solid var(--navy);" onclick="mostrarSeleccionDeRol()">
+        <span style="font-size:22px;">✨</span>
+        <span style="font-weight:800;">Registrarme</span>
+        <span style="font-size:10.5px;font-weight:500;opacity:.75;">Soy nuevo en PuenT</span>
+      </button>
+    </div>
+
+    <div class="link-back" style="text-align:center;margin:0 0 14px;" onclick="document.getElementById('registroManualBox').classList.toggle('hidden')">¿No tenés Gmail? Registrate sin Google</div>
 
     <div class="hidden" id="registroManualBox">
-      <div style="text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px;">Este registro es manual (con verificación de teléfono) y es una cuenta aparte de la de Google.</div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:14px;">Este registro es manual (con verificación de teléfono) y es una cuenta aparte de la de Google.</div>
       <div class="role-select-grid" style="margin-top:0;">
         <button class="role-btn" onclick="goRegister('vendedor')">
-          <div class="ic" style="background:var(--green)">🛍️</div>
-          <div><div class="tt">Registrarme como Vendedor</div><div class="ss">Armo mi catálogo y vendo</div></div>
+          <div class="ic" style="background:var(--green)">🔗</div>
+          <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
         </button>
         <button class="role-btn" onclick="goRegister('comercio')">
           <div class="ic" style="background:var(--blue)">🏬</div>
-          <div><div class="tt">Registrarme como Comercio</div><div class="ss">Escaneo códigos y facturo</div></div>
+          <div><div class="tt">Comercio</div><div class="ss">Escaneo códigos y gestiono pedidos</div></div>
         </button>
         <button class="role-btn" onclick="goRegister('cliente')">
           <div class="ic" style="background:var(--navy)">🙋</div>
-          <div><div class="tt">Registrarme como Cliente</div><div class="ss">Busco productos de mi ciudad</div></div>
+          <div><div class="tt">Cliente</div><div class="ss">Busco productos de mi ciudad</div></div>
         </button>
       </div>
     </div>
@@ -743,12 +780,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <div class="role-select-grid" style="margin-top:0;">
       <button class="role-btn" onclick="elegirRolParaRegistro('vendedor')">
-        <div class="ic" style="background:var(--green)">🛍️</div>
-        <div><div class="tt">Vendedor</div><div class="ss">Armo mi catálogo y vendo</div></div>
+        <div class="ic" style="background:var(--green)">🔗</div>
+        <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
       </button>
       <button class="role-btn" onclick="elegirRolParaRegistro('comercio')">
         <div class="ic" style="background:var(--blue)">🏬</div>
-        <div><div class="tt">Comercio</div><div class="ss">Escaneo códigos y facturo</div></div>
+        <div><div class="tt">Comercio</div><div class="ss">Escaneo códigos y gestiono pedidos</div></div>
       </button>
       <button class="role-btn" onclick="elegirRolParaRegistro('cliente')">
         <div class="ic" style="background:var(--navy)">🙋</div>
@@ -766,7 +803,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="role-select-grid" style="margin-top:0;">
       <button class="role-btn" onclick="elegirRolGoogle('vendedor')">
         <div class="ic" style="background:var(--green)">🛍️</div>
-        <div><div class="tt">Vendedor</div><div class="ss">Armo mi catálogo y vendo</div></div>
+        <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
       </button>
       <button class="role-btn" onclick="elegirRolGoogle('comercio')">
         <div class="ic" style="background:var(--blue)">🏬</div>
@@ -808,7 +845,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-v-catalogo">
     <button class="cerrar-sesion-btn" onclick="confirmarCierreSesion()">👤 Cerrar sesión</button>
     <div class="kicker">Tu catálogo</div>
-    <h1 class="page-title">Hola, <span id="vNombre">Vendedor</span></h1>
+    <h1 class="page-title">Hola, <span id="vNombre">ConectorT</span></h1>
     <div id="vMiValoracion" style="margin:-8px 0 14px;"></div>
     <p class="page-sub">Estos son los productos que armaste. Compartilos por WhatsApp o generá un código cuando alguien quiera comprar.</p>
     <div id="actividadBox"></div>
@@ -1259,7 +1296,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen('cl-buscador')">← Volver al buscador</div>
     <div class="list-row" style="margin-bottom:16px;">
       <div class="av" style="background:var(--green)" id="clVendAvatar">🛍️</div>
-      <div class="main"><div class="t" id="clVendNombre">Vendedor</div><div class="s" id="clVendZona">Zona</div></div>
+      <div class="main"><div class="t" id="clVendNombre">ConectorT</div><div class="s" id="clVendZona">Zona</div></div>
     </div>
     <div class="prod-grid" id="clProdGrid"></div>
   </div>
@@ -1962,7 +1999,7 @@ function verificarCodigo(){
   v.qrPersonal = 'VQR-' + v.id.split('-')[1].padStart(4,'0');
   state.vendedores.push(v);
   state.currentUser = v; state.role='vendedor';
-  setRoleChip('🛍️ Vendedor', false);
+  setRoleChip('🔗 ConectorT', false);
   document.getElementById('vNombre').textContent = v.nombre;
   toast('¡Teléfono verificado! Cuenta creada ✅');
   renderVendedorCatalogo();
@@ -2114,7 +2151,7 @@ function entrarConDatosGuardados(rol, data){
     const idx = state.vendedores.findIndex(x=>x.uid===data.uid);
     if(idx>=0) state.vendedores[idx] = data; else state.vendedores.push(data);
     state.currentUser = data; state.role='vendedor';
-    setRoleChip('🛍️ Vendedor', false);
+    setRoleChip('🔗 ConectorT', false);
     document.getElementById('vNombre').textContent = data.nombre;
     cargarCatalogoVendedorGuardado(data.id);
     renderVendedorCatalogo(); renderVendedorSolicitudes(); renderVendedorStats();
@@ -3319,7 +3356,7 @@ function escanearCodigo(){
     <div class="field"><label>Cliente</label>${venta.clienteNombre}</div>
     <div class="field"><label>Producto</label>${prod.nombre} — $${prod.precio.toLocaleString('es-AR')}</div>
     ${vend
-      ? `<div class="field"><label>Vendedor a acreditar</label><span class="pill pill-green">${vend.nombre}</span></div>
+      ? `<div class="field"><label>ConectorT a acreditar</label><span class="pill pill-green">${vend.nombre}</span></div>
          <div class="field"><label>Comisión a acreditar</label>$${venta.comisionMonto.toLocaleString('es-AR')} (${prod.comision}%)</div>`
       : `<div class="field"><label>Origen</label><span class="pill pill-blue">Oferta directa del feed — sin vendedor</span></div>`
     }
@@ -3695,7 +3732,7 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
       etiqueta = '📣 ' + (c ? c.nombre : 'Local');
     } else {
       const v = state.vendedores.find(x=>x.id===p._vendedorId);
-      etiqueta = v ? v.nombre : 'Vendedor';
+      etiqueta = v ? v.nombre : 'ConectorT';
     }
     const click = origenTipo==='comercio' ? `abrirOferta('${p.id}')` : `abrirCatalogoVendedor('${p._vendedorId}')`;
     const badge = etiquetaOferta(p);
@@ -4270,7 +4307,7 @@ function adminRenderVendedores(lista){
 async function adminAprobarVendedor(docId){
   try{
     await db.collection('vendedores').doc(docId).update({aprobado: true});
-    toast('Vendedor aprobado ✅');
+    toast('ConectorT aprobado ✅');
     adminCargarVendedores();
   }catch(e){ toast('Error al aprobar.'); }
 }
@@ -4279,7 +4316,7 @@ async function adminEliminarVendedor(docId, nombre){
   if(!confirm(`¿Eliminar a "${nombre}"?`)) return;
   try{
     await db.collection('vendedores').doc(docId).delete();
-    toast('Vendedor eliminado.');
+    toast('ConectorT eliminado.');
     adminCargarVendedores();
   }catch(e){ toast('Error al eliminar.'); }
 }
@@ -4653,7 +4690,7 @@ function reabrirQRHistorial(idx){
 // TOPBAR USUARIO + PERFIL UNIFICADO
 // =============================================
 
-const ROLE_LABEL = { vendedor:'Vendedor', comercio:'Comercio', cliente:'Cliente', admin:'Admin', guest:'' };
+const ROLE_LABEL = { vendedor:'ConectorT', comercio:'Comercio', cliente:'Cliente', admin:'Admin', guest:'' };
 const ROLE_COLOR = { vendedor:'#5C7355', comercio:'#C99A3E', cliente:'#5C7355', admin:'#3A3F35', guest:'#7A8271' };
 
 function updateTopbarUser(){
