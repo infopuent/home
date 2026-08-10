@@ -841,63 +841,48 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <button class="btn btn-ghost" style="margin-top:10px" onclick="reenviarCodigo()">Reenviar código</button>
   </div>
 
-  <!-- ============ VENDEDOR: CATALOGO ============ -->
+  <!-- ============ CONECTORT: PANEL PRINCIPAL ============ -->
   <div class="screen hidden" id="screen-v-catalogo">
     <button class="cerrar-sesion-btn" onclick="confirmarCierreSesion()">👤 Cerrar sesión</button>
-    <div class="kicker">Tu catálogo</div>
+    <div class="kicker">Panel ConectorT</div>
     <h1 class="page-title">Hola, <span id="vNombre">ConectorT</span></h1>
     <div id="vMiValoracion" style="margin:-8px 0 14px;"></div>
-    <p class="page-sub">Estos son los productos que armaste. Compartilos por WhatsApp o generá un código cuando alguien quiera comprar.</p>
+    <p class="page-sub">Elegí productos de la plataforma, arma tu catálogo y cuando un cliente quiera comprar, reservá por él y mandále el QR.</p>
     <div id="actividadBox"></div>
     <div class="btn-grid" style="margin-bottom:16px">
-      <button class="btn-tile btn-tile-coral" onclick="showScreen('v-elegir-comercio'); renderVElegirComercio();"><i class="ti ti-shopping-bag ic" aria-hidden="true"></i>Elegir productos</button>
-      <button class="btn-tile btn-tile-sage" onclick="showScreen('v-nuevo-comercio')"><i class="ti ti-building-store ic" aria-hidden="true"></i>Sumar comercio</button>
+      <button class="btn-tile btn-tile-coral" onclick="showScreen('v-elegir-comercio'); renderVElegirComercio();"><i class="ti ti-plus ic" aria-hidden="true"></i>Agregar productos</button>
+      <button class="btn-tile btn-tile-rose" onclick="renderVReservas();showScreen('v-reservas')"><i class="ti ti-qrcode ic" aria-hidden="true"></i>Mis reservas</button>
+      <button class="btn-tile btn-tile-mint" onclick="showScreen('v-stats')"><i class="ti ti-chart-bar ic" aria-hidden="true"></i>Comisiones</button>
       <button class="btn-tile btn-tile-neutral" onclick="abrirEditarVendedor()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
-      <button class="btn-tile btn-tile-rose" onclick="showScreen('v-solicitudes')"><i class="ti ti-message-2 ic" aria-hidden="true"></i>Pedidos</button>
-      <button class="btn-tile btn-tile-mint" onclick="showScreen('v-stats')"><i class="ti ti-chart-bar ic" aria-hidden="true"></i>Stats</button>
+      <button class="btn-tile btn-tile-sage" onclick="contactarAdminSumarComercio()"><i class="ti ti-building-store ic" aria-hidden="true"></i>Sumar comercio</button>
     </div>
+    <div class="section-title" style="margin-bottom:10px;">Mi catálogo</div>
     <div id="vProdList"></div>
   </div>
 
-  <!-- ============ VENDEDOR: SUMAR COMERCIO NUEVO ============ -->
+  <!-- ============ CONECTORT: SUMAR COMERCIO → WhatsApp admin ============ -->
   <div class="screen hidden" id="screen-v-nuevo-comercio">
-    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al catálogo</div>
+    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver</div>
     <div class="kicker">Sumar un comercio</div>
-    <h1 class="page-title">Traé un local a ElPuente</h1>
-    <p class="page-sub">Cargá los datos reales del comercio. Le vamos a mandar un código por SMS a su teléfono para validar que existe de verdad — pedíselo para confirmar el alta.</p>
+    <h1 class="page-title">¿Conocés un local que quiera sumarse?</h1>
+    <p class="page-sub">El alta de comercios la coordina el equipo de PuenT directamente con el dueño del local. Mandanos el dato y nosotros lo contactamos.</p>
     <div class="card">
-      <div class="field"><label>Nombre del comercio</label><input id="ncNombre" placeholder="Ej: Almacén Don José"></div>
-      <div class="field"><label>Dirección</label><input id="ncDireccion" placeholder="Calle y número"></div>
-      <div class="field"><label>Teléfono del comercio (a verificar)</label><input id="ncTelefono" type="tel" placeholder="Ej: 344 5 123456"></div>
-      <div class="field">
-        <label>Rubro</label>
-        <select id="ncRubro">
-          <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
-          <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
-          <option>Agencias de autos</option><option>Agencias de motos</option>
-          <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
-          <option>Transporte y viajes</option><option>Peluquerías</option>
-          <option>Inmobiliarias</option>
-          <option>Deportes y aire libre</option><option>Alimentos y bebidas</option>
-          <option>Alojamiento y turismo</option><option>Tecnología</option>
-          <option>Belleza y cuidado personal</option><option>Salud y farmacia</option>
-          <option>Librería y papelería</option><option>Mascotas</option>
-          <option>Servicios varios</option><option>Otros / varios</option>
-        </select>
-      </div>
+      <div class="field"><label>Nombre del comercio</label><input id="ncNombreRef" placeholder="Ej: Almacén Don José"></div>
+      <div class="field"><label>Ciudad / barrio</label><input id="ncCiudadRef" placeholder="Ej: La Paz, Entre Ríos"></div>
+      <div class="field"><label>Teléfono o contacto del local (opcional)</label><input id="ncTelefonoRef" type="tel" placeholder="Para que podamos llamarlos"></div>
     </div>
-    <button class="btn btn-primary" onclick="registrarComercioDirecto()">Enviar código de verificación</button>
+    <button class="btn btn-primary" onclick="enviarReferidoComercioAdmin()">📲 Enviar al equipo PuenT por WhatsApp</button>
   </div>
 
-  <!-- ============ VENDEDOR: EDITAR MI INFORMACIÓN ============ -->
+  <!-- ============ CONECTORT: EDITAR INFO ============ -->
   <div class="screen hidden" id="screen-editar-vendedor">
     <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al catálogo</div>
     <div class="kicker">Mi cuenta</div>
     <h1 class="page-title">Editar mi información</h1>
-    <p class="page-sub">Estos datos son los que ven los comercios y clientes cuando interactúan con vos.</p>
+    <p class="page-sub">Estos datos aparecen en tu catálogo y son los que ven tus clientes.</p>
     <div class="card">
       <div class="field"><label>Nombre completo</label><input id="editVNombre" placeholder="Tu nombre"></div>
-      <div class="field"><label>Teléfono</label><input id="editVTelefono" type="tel" placeholder="Tu WhatsApp"></div>
+      <div class="field"><label>Teléfono / WhatsApp</label><input id="editVTelefono" type="tel" placeholder="Tu WhatsApp"></div>
       <div class="two-col">
         <div class="field"><label>Ciudad</label><input id="editVCiudad" placeholder="Ej: La Paz"></div>
         <div class="field"><label>Zona</label><input id="editVZona" placeholder="Ej: Zona Centro"></div>
@@ -906,70 +891,79 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <button class="btn btn-primary" onclick="guardarEdicionVendedor()">Guardar cambios</button>
   </div>
 
-  <!-- ============ VENDEDOR: NUEVO PRODUCTO ============ -->
+  <!-- ============ CONECTORT: AGREGAR PRODUCTOS (elegir comercio) ============ -->
   <div class="screen hidden" id="screen-v-elegir-comercio">
     <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al catálogo</div>
-    <div class="kicker">Elegir productos</div>
+    <div class="kicker">Agregar productos</div>
     <h1 class="page-title">¿De qué comercio?</h1>
-    <p class="page-sub">Elegí un comercio de tu ciudad para ver su catálogo real (precio y comisión ya definidos por ellos).</p>
+    <p class="page-sub">Elegí un comercio para ver sus productos disponibles con comisión.</p>
     <div id="vComerciosList"></div>
     <div class="empty hidden" id="vSinComercios">
       <div class="ic">🏬</div>
-      <div class="t">Todavía no hay comercios con productos disponibles</div>
-      <div class="s">En cuanto un comercio de tu ciudad cargue un producto con comisión, va a aparecer acá.</div>
+      <div class="t">Todavía no hay comercios con productos</div>
+      <div class="s">Cuando un comercio de tu ciudad cargue productos con comisión, van a aparecer acá.</div>
     </div>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="showScreen('v-nuevo-comercio')">🏬 Sumar comercio nuevo</button>
   </div>
 
-  <!-- ============ VENDEDOR: PRODUCTOS DE UN COMERCIO (elegir cuáles vender) ============ -->
+  <!-- ============ CONECTORT: PRODUCTOS DE UN COMERCIO ============ -->
   <div class="screen hidden" id="screen-v-elegir-producto">
-    <div class="link-back" onclick="showScreen('v-elegir-comercio')">← Volver a mis comercios</div>
+    <div class="link-back" onclick="showScreen('v-elegir-comercio')">← Volver</div>
     <div class="kicker" id="vepComercioNombre">Comercio</div>
-    <h1 class="page-title">Elegí qué vender</h1>
-    <p class="page-sub">Precio y comisión los define el comercio — no se pueden modificar desde acá.</p>
+    <h1 class="page-title">Elegí qué ofrecer</h1>
+    <p class="page-sub">Precio y comisión los define el comercio.</p>
     <div id="vepProdList"></div>
-    <div class="card" style="text-align:left; margin-top:8px;">
-      <div style="font-size:13px; font-weight:700; color:var(--navy); margin-bottom:4px;">¿No está lo que buscás?</div>
-      <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">Pedile a este comercio que suba un producto nuevo a su catálogo.</div>
-      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="irPedirProducto()">📬 Pedir que sumen un producto</button>
-    </div>
   </div>
 
-  <!-- ============ VENDEDOR: PEDIR QUE SUMEN UN PRODUCTO ============ -->
+  <!-- ============ CONECTORT: PEDIR QUE SUMEN UN PRODUCTO ============ -->
   <div class="screen hidden" id="screen-v-pedir-producto">
     <div class="link-back" onclick="showScreen('v-elegir-producto')">← Volver</div>
     <div class="kicker">Pedido a <span id="vppComercioNombre">comercio</span></div>
-    <h1 class="page-title">¿Qué te gustaría vender?</h1>
-    <p class="page-sub">Le va a llegar como un pedido pendiente en su panel. El comercio decide si lo carga, con su propio precio y comisión.</p>
+    <h1 class="page-title">¿Qué te gustaría ofrecer?</h1>
+    <p class="page-sub">Le va a llegar como pedido pendiente en su panel. El comercio decide si lo carga con su precio y comisión.</p>
     <div class="card">
-      <div class="field"><label>Producto que te gustaría vender</label><input id="vppNombre" placeholder="Ej: Mochilas impermeables"></div>
-      <div class="field"><label>Comentario (opcional)</label><textarea id="vppNota" rows="2" placeholder="Alguna referencia de precio, marca, etc."></textarea></div>
+      <div class="field"><label>Producto que te gustaría ofrecer</label><input id="vppNombre" placeholder="Ej: Mochilas impermeables"></div>
+      <div class="field"><label>Comentario (opcional)</label><textarea id="vppNota" rows="2" placeholder="Referencia de precio, marca, etc."></textarea></div>
     </div>
     <button class="btn btn-primary" onclick="enviarPedidoProducto()">Enviar pedido</button>
   </div>
 
-  <!-- ============ VENDEDOR: SOLICITUDES ============ -->
-  <div class="screen hidden" id="screen-v-solicitudes">
-    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver</div>
-    <div class="kicker">Solicitudes</div>
-    <h1 class="page-title">Clientes interesados</h1>
-    <p class="page-sub">Cuando un cliente pide un producto tuyo, aparece acá. Generale su código para que vaya al comercio.</p>
-    <div id="vSolicitudesList"></div>
+  <!-- ============ CONECTORT: RESERVAR PARA UN CLIENTE ============ -->
+  <div class="screen hidden" id="screen-v-reservar-cliente">
+    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al catálogo</div>
+    <div class="kicker">Reserva para cliente</div>
+    <h1 class="page-title">¿Para quién es?</h1>
+    <p class="page-sub">Ingresá los datos del cliente. Se genera el QR para que lo pase a buscar al local.</p>
+    <div class="card" id="vReservarProductoInfo" style="margin-bottom:14px;"></div>
+    <div class="card">
+      <div class="field"><label>Nombre del cliente *</label><input id="vReservarClienteNombre" placeholder="Ej: María González"></div>
+      <div class="field"><label>Teléfono / WhatsApp (opcional)</label><input id="vReservarClienteTel" type="tel" placeholder="Para avisarle cuando esté listo"></div>
+    </div>
+    <button class="btn btn-primary" onclick="confirmarReservaParaCliente()">Confirmar y generar QR</button>
   </div>
 
-  <!-- ============ VENDEDOR: GENERAR CODIGO (resultado) ============ -->
+  <!-- ============ CONECTORT: QR GENERADO (resultado) ============ -->
   <div class="screen hidden" id="screen-v-codigo">
-    <div class="link-back" onclick="showScreen('v-solicitudes')">← Volver</div>
+    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al catálogo</div>
     <div class="kicker">Listo para compartir</div>
-    <h1 class="page-title">Código generado</h1>
-    <p class="page-sub">Pasale esto al cliente por WhatsApp. Con eso va directo al comercio a buscar su producto.</p>
+    <h1 class="page-title">QR generado</h1>
+    <p class="page-sub" id="vCodigoSub">Mandále este QR al cliente por WhatsApp. Con esto va directo al comercio a retirar.</p>
     <div class="code-block">
       <div class="qr-fake" id="qrFake"></div>
       <div class="code-text" id="codigoTexto">EP-0000</div>
-      <div class="code-label">Válido por 48hs</div>
+      <div class="code-label" id="vCodigoLabel">Válido para retiro en el local</div>
     </div>
     <div class="card" id="codigoDetalle"></div>
-    <button class="btn btn-primary" onclick="showScreen('v-catalogo')">Listo</button>
+    <button class="btn btn-primary" id="vCodigoBtnWsp" onclick="">📲 Compartir por WhatsApp</button>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="renderVReservas();showScreen('v-reservas')">Ver mis reservas activas</button>
+  </div>
+
+  <!-- ============ CONECTORT: MIS RESERVAS ACTIVAS ============ -->
+  <div class="screen hidden" id="screen-v-reservas">
+    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver</div>
+    <div class="kicker">Mis reservas</div>
+    <h1 class="page-title">QR generados</h1>
+    <p class="page-sub">Reservas que hiciste para tus clientes. Tocá una para volver a ver el QR.</p>
+    <div id="vReservasList"></div>
   </div>
 
   <!-- ============ VENDEDOR: ESTADISTICAS ============ -->
@@ -2499,21 +2493,25 @@ function renderVendedorCatalogo(){
   const list = document.getElementById('vProdList');
   const productos = misProductos();
   if(productos.length===0){
-    list.innerHTML = `<div class="empty"><div class="ic">🗂️</div><div class="t">Todavía no elegiste productos</div><div class="s">Entrá a "Elegir productos para vender" y sumá el primero.</div></div>`;
+    list.innerHTML = `<div class="empty"><div class="ic">🗂️</div><div class="t">Todavía no elegiste productos</div><div class="s">Tocá "Agregar productos" y sumá el primero de tu catálogo.</div></div>`;
     return;
   }
   list.innerHTML = `<div class="prod-grid">` + productos.map(p=>{
     const com = state.comercios.find(c=>c.id===p.comercioId);
     const foto = p.img ? `<img src="${p.img}" alt="${p.nombre}">` : p.foto;
+    const comMonto = Math.round(p.precio * p.comision / 100);
     return `
       <div class="prod-card">
         <div class="prod-photo">${foto}</div>
         <div class="prod-body">
           <div class="prod-name">${p.nombre}</div>
           <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-          <div class="prod-tag">${com ? com.nombre : 'Comercio no encontrado'}</div>
-          <div class="prod-comm">Comisión ${p.comision}%</div>
-          <button class="share-btn" onclick="compartirProducto('${p.id}')">📤 Compartir</button>
+          <div class="prod-tag">${com ? com.nombre : '—'}</div>
+          <div class="prod-comm">Comisión: $${comMonto.toLocaleString('es-AR')} (${p.comision}%)</div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button class="share-btn" style="flex:1;" onclick="compartirProducto('${p.id}')">📤 Compartir</button>
+            <button class="share-btn" style="flex:1;background:var(--navy);color:white;" onclick="abrirReservaParaCliente('${p.id}')">🔖 Reservar</button>
+          </div>
         </div>
       </div>`;
   }).join('') + `</div>`;
@@ -3077,18 +3075,140 @@ function enviarPedidoProducto(){
   showScreen('v-elegir-producto');
 }
 
-function registrarComercioDirecto(){
-  const nombre = document.getElementById('ncNombre').value.trim();
-  const direccion = document.getElementById('ncDireccion').value.trim();
-  const telefono = document.getElementById('ncTelefono').value.trim();
-  const rubro = document.getElementById('ncRubro').value;
-  if(!nombre || !direccion || !telefono){ toast('Completá nombre, dirección y teléfono del comercio'); return; }
-  const nombreOcupado = state.comercios.some(c => (c.nombre||'').toLowerCase() === nombre.toLowerCase());
-  if(nombreOcupado){ toast('Ya existe un comercio con ese nombre'); return; }
+/* ================= CONECTORT: SUMAR COMERCIO VIA ADMIN ================= */
+const ADMIN_WSP = '5493434000000'; // ← reemplazar con el número real del admin
 
-  pendingComercioData = {nombre, direccion, telefono, rubro};
-  pendingComercioReturn = 'v-catalogo';
-  enviarCodigoVerificacion(telefono, 'comercio-amigo');
+function contactarAdminSumarComercio(){
+  showScreen('v-nuevo-comercio');
+}
+
+function enviarReferidoComercioAdmin(){
+  const nombre  = document.getElementById('ncNombreRef').value.trim();
+  const ciudad  = document.getElementById('ncCiudadRef').value.trim();
+  const tel     = document.getElementById('ncTelefonoRef').value.trim();
+  if(!nombre){ toast('Poné al menos el nombre del comercio'); return; }
+  const conector = state.currentUser?.nombre || 'Un ConectorT';
+  const msg = `Hola equipo PuenT! Te paso un comercio para sumar:\n📍 ${nombre}${ciudad ? ' — '+ciudad : ''}${tel ? '\n📞 '+tel : ''}\nMe lo pasó: ${conector}`;
+  window.open('https://wa.me/' + ADMIN_WSP + '?text=' + encodeURIComponent(msg), '_blank');
+  toast('¡Gracias! El equipo va a coordinar con el comercio 👍');
+  showScreen('v-catalogo');
+}
+
+/* ================= CONECTORT: RESERVAR PARA UN CLIENTE ================= */
+let _prodReservando = null;
+
+function abrirReservaParaCliente(prodId){
+  const p = state.productos.find(x=>x.id===prodId);
+  if(!p){ toast('Producto no encontrado'); return; }
+  _prodReservando = p;
+  const com = state.comercios.find(c=>c.id===p.comercioId);
+  const comMonto = Math.round(p.precio * p.comision / 100);
+  document.getElementById('vReservarProductoInfo').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span style="font-size:15px;font-weight:700;color:var(--navy);">${p.nombre}</span>
+      <span style="font-size:16px;font-weight:800;color:var(--navy);">$${p.precio.toLocaleString('es-AR')}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);">📍 ${com ? com.nombre : '—'} &nbsp;·&nbsp; Tu comisión: <strong style="color:var(--green)">$${comMonto.toLocaleString('es-AR')}</strong></div>`;
+  document.getElementById('vReservarClienteNombre').value = '';
+  document.getElementById('vReservarClienteTel').value = '';
+  showScreen('v-reservar-cliente');
+}
+
+function confirmarReservaParaCliente(){
+  const clienteNombre = document.getElementById('vReservarClienteNombre').value.trim();
+  if(!clienteNombre){ toast('Ingresá el nombre del cliente'); return; }
+  const clienteTel = document.getElementById('vReservarClienteTel').value.trim();
+  const p = _prodReservando;
+  if(!p){ toast('Error: producto no encontrado'); return; }
+  const com = state.comercios.find(c=>c.id===p.comercioId);
+  const codigo = genCodigo();
+  const comMonto = Math.round(p.precio * p.comision / 100);
+
+  const venta = {
+    id: nextId('t'), codigo,
+    vendedorId: state.currentUser?.id || state.currentUser?.uid,
+    productoId: p.id, comercioId: p.comercioId,
+    clienteNombre, clienteTel, estado:'pendiente',
+    comisionMonto: comMonto, fechaReserva: new Date().toISOString()
+  };
+  state.ventas.push(venta);
+
+  // Guardar en localStorage para Mis reservas
+  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  reservas.unshift({ ...venta, productoNombre: p.nombre, comercioNombre: com?.nombre || '—' });
+  localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas.slice(0, 50)));
+
+  // Armar pantalla de resultado
+  const linkCodigo = construirLinkCodigo(codigo);
+  document.getElementById('codigoTexto').textContent = codigo;
+  document.getElementById('vCodigoLabel').textContent = `Para: ${clienteNombre} · Retira en ${com?.nombre || '—'}`;
+  document.getElementById('vCodigoSub').textContent = `Mandále este QR a ${clienteNombre} por WhatsApp. Con esto va directo a ${com?.nombre||'el local'} a retirar.`;
+  renderQR(document.getElementById('qrFake'), linkCodigo);
+  document.getElementById('codigoDetalle').innerHTML = `
+    <div class="field"><label>Cliente</label>${clienteNombre}${clienteTel ? ' · '+clienteTel : ''}</div>
+    <div class="field"><label>Producto</label>${p.nombre} — $${p.precio.toLocaleString('es-AR')}</div>
+    <div class="field"><label>Comercio donde retira</label>${com?.nombre || '—'}</div>
+    <div class="field"><label>Tu comisión</label><span class="pill pill-green">$${comMonto.toLocaleString('es-AR')} (${p.comision}%)</span></div>`;
+
+  // Botón compartir por WhatsApp
+  const msgWsp = `Hola ${clienteNombre}! Tu reserva está lista 🎉\nProducto: ${p.nombre}\nRetirás en: ${com?.nombre||'el local'}\nMostrá este código: *${codigo}*`;
+  const btnWsp = document.getElementById('vCodigoBtnWsp');
+  btnWsp.onclick = () => window.open('https://wa.me/' + (clienteTel.replace(/\D/g,'') || '') + '?text=' + encodeURIComponent(msgWsp), '_blank');
+
+  _prodReservando = null;
+  showScreen('v-codigo');
+  toast('¡Reserva generada para ' + clienteNombre + '! 🎉');
+}
+
+/* ================= CONECTORT: MIS RESERVAS ================= */
+function renderVReservas(){
+  const list = document.getElementById('vReservasList');
+  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  if(reservas.length === 0){
+    list.innerHTML = `<div class="empty"><div class="ic">📋</div><div class="t">Sin reservas todavía</div><div class="s">Cuando reserves un producto para un cliente, aparece acá con su QR.</div></div>`;
+    return;
+  }
+  list.innerHTML = reservas.map((r, idx) => {
+    const fecha = new Date(r.fechaReserva).toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'2-digit'});
+    const estadoPill = r.estado === 'confirmada'
+      ? `<span class="pill pill-green">Confirmada</span>`
+      : `<span class="pill pill-navy">Pendiente</span>`;
+    return `
+      <div class="list-row" style="align-items:flex-start;gap:12px;cursor:pointer;" onclick="reabrirReserva(${idx})">
+        <div class="av" style="background:var(--navy);flex-shrink:0;">🔖</div>
+        <div class="main" style="flex:1;min-width:0;">
+          <div class="t">${r.clienteNombre}</div>
+          <div class="s">${r.productoNombre} · ${r.comercioNombre}</div>
+          <div style="font-size:10.5px;font-weight:700;color:var(--blue);margin-top:3px;">${fecha} · $${r.precio||r.comisionMonto} · <span style="font-family:monospace">${r.codigo}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+          ${estadoPill}
+          <span style="font-size:11px;font-weight:700;background:#EAF0E6;color:var(--navy-2);padding:3px 8px;border-radius:100px;">Ver QR</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function reabrirReserva(idx){
+  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  const r = reservas[idx];
+  if(!r) return;
+  const p = state.productos.find(x=>x.id===r.productoId) || { nombre: r.productoNombre, precio: 0, comision: 0 };
+  const com = state.comercios.find(x=>x.id===r.comercioId) || { nombre: r.comercioNombre };
+  const linkCodigo = construirLinkCodigo(r.codigo);
+  document.getElementById('codigoTexto').textContent = r.codigo;
+  document.getElementById('vCodigoLabel').textContent = `Para: ${r.clienteNombre} · Retira en ${com.nombre}`;
+  document.getElementById('vCodigoSub').textContent = `Reserva para ${r.clienteNombre}. Retira en ${com.nombre}.`;
+  renderQR(document.getElementById('qrFake'), linkCodigo);
+  document.getElementById('codigoDetalle').innerHTML = `
+    <div class="field"><label>Cliente</label>${r.clienteNombre}${r.clienteTel ? ' · '+r.clienteTel : ''}</div>
+    <div class="field"><label>Producto</label>${r.productoNombre}</div>
+    <div class="field"><label>Comercio</label>${r.comercioNombre}</div>
+    <div class="field"><label>Comisión</label><span class="pill pill-green">$${r.comisionMonto?.toLocaleString('es-AR') || '—'}</span></div>`;
+  const msgWsp = `Hola ${r.clienteNombre}! Acá te mando tu QR de reserva 🎉\nProducto: ${r.productoNombre}\nRetirás en: ${r.comercioNombre}\nCódigo: *${r.codigo}*`;
+  const btnWsp = document.getElementById('vCodigoBtnWsp');
+  btnWsp.onclick = () => window.open('https://wa.me/' + (r.clienteTel||'').replace(/\D/g,'') + '?text=' + encodeURIComponent(msgWsp), '_blank');
+  showScreen('v-codigo');
 }
 
 /* ================= NOTIFICACION POR MAIL (simulada) ================= */
@@ -3101,61 +3221,18 @@ function compartirProducto(prodId){
   const p = state.productos.find(x=>x.id===prodId);
   if(!p) return;
   const v = state.currentUser;
-  const texto = `${p.nombre} — $${p.precio.toLocaleString('es-AR')}\nLo tengo disponible a través de ElPuente. Te paso los detalles y coordinamos la entrega.\nVendedor: ${v ? v.nombre : ''}`;
-
+  const texto = `*${p.nombre}* — $${p.precio.toLocaleString('es-AR')}\nLo tengo disponible a través de PuenT. Consultame por este producto 👇\nConectorT: ${v ? v.nombre : ''}`;
   if(navigator.share){
     navigator.share({ title: p.nombre, text: texto }).catch(()=>{});
   } else {
-    const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
-    window.open(url, '_blank');
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
   }
 }
 
-/* ================= VENDEDOR: SOLICITUDES ================= */
+/* ================= CONECTORT: SOLICITUDES (compatibilidad legacy) ================= */
 function renderVendedorSolicitudes(){
-  const list = document.getElementById('vSolicitudesList');
-  const mias = state.solicitudes.filter(s=>s.vendedorId===state.currentUser.id && s.estado==='pendiente');
-  if(mias.length===0){
-    list.innerHTML = `<div class="empty"><div class="ic">💬</div><div class="t">No tenés solicitudes por ahora</div><div class="s">Compartí tu catálogo para que te lleguen pedidos.</div></div>`;
-    return;
-  }
-  list.innerHTML = mias.map(s=>{
-    const prod = state.productos.find(p=>p.id===s.productoId);
-    return `
-      <div class="list-row">
-        <div class="av" style="background:var(--navy)">🙋</div>
-        <div class="main">
-          <div class="t">${s.clienteNombre}</div>
-          <div class="s">Quiere: ${prod ? prod.nombre : '—'}</div>
-        </div>
-        <button class="btn btn-sm btn-green" onclick="generarCodigo('${s.id}')">Generar código</button>
-      </div>`;
-  }).join('');
-}
-
-function generarCodigo(solicitudId){
-  const s = state.solicitudes.find(x=>x.id===solicitudId);
-  const prod = state.productos.find(p=>p.id===s.productoId);
-  const com = state.comercios.find(c=>c.id===prod.comercioId);
-  const codigo = genCodigo();
-
-  const venta = {
-    id: nextId('t'), codigo, vendedorId: state.currentUser.id, productoId: prod.id,
-    comercioId: com.id, clienteNombre: s.clienteNombre, estado:'pendiente', comisionMonto: Math.round(prod.precio * prod.comision/100)
-  };
-  state.ventas.push(venta);
-  s.estado = 'con_codigo';
-
-  document.getElementById('codigoTexto').textContent = codigo;
-  renderQR(document.getElementById('qrFake'), construirLinkCodigo(codigo));
-  document.getElementById('codigoDetalle').innerHTML = `
-    <div class="field"><label>Cliente</label>${s.clienteNombre}</div>
-    <div class="field"><label>Producto</label>${prod.nombre} — $${prod.precio.toLocaleString('es-AR')}</div>
-    <div class="field"><label>Comercio (recién visible ahora)</label>${com.nombre}</div>
-    <div class="field"><label>Tu comisión</label><span class="pill pill-green">$${venta.comisionMonto.toLocaleString('es-AR')} (${prod.comision}%)</span></div>
-  `;
-  renderVendedorSolicitudes();
-  showScreen('v-codigo');
+  // Redirige al nuevo panel de reservas
+  renderVReservas();
 }
 
 /* ================= VENDEDOR: STATS ================= */
