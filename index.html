@@ -139,6 +139,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   display:none;
 }
 .navbtn-cart .cart-badge.visible{display:block;}
+.nav-badge{
+  position:absolute; top:-3px; right:-3px;
+  background:#D98080; color:white;
+  font-size:8px; font-weight:800;
+  border-radius:100px; padding:1px 4px; min-width:14px;
+  text-align:center; border:1.5px solid white; pointer-events:none;
+}
+.navbtn{ position:relative; }
 
 /* ---- Product grid ---- */
 .prod-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
@@ -2148,6 +2156,7 @@ function entrarConDatosGuardados(rol, data){
     document.getElementById('vNombre').textContent = data.nombre;
     cargarCatalogoVendedorGuardado(data.id);
     renderVendedorCatalogo(); renderVendedorSolicitudes(); renderVendedorStats();
+    cargarReservasDeConector(data.id || data.uid);
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
     showScreen('v-catalogo'); updateBottomNav('v-catalogo'); updateTopbarUser();
   } else if(rol==='comercio'){
@@ -2163,6 +2172,8 @@ function entrarConDatosGuardados(rol, data){
     document.getElementById('cNombre').textContent = data.nombre;
     renderComercioPanel();
     cargarProductosGuardados(data.uid);
+    cargarVentasDeComercio(data.id || data.uid);
+    iniciarListenerVentasComercio(data.id || data.uid);
     if(window._codigoPendienteDesdeURL) procesarCodigoPendienteDesdeURL();
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
     showScreen('c-panel'); updateBottomNav('c-panel'); updateTopbarUser();
@@ -3129,9 +3140,11 @@ function confirmarReservaParaCliente(){
     vendedorId: state.currentUser?.id || state.currentUser?.uid,
     productoId: p.id, comercioId: p.comercioId,
     clienteNombre, clienteTel, estado:'pendiente',
-    comisionMonto: comMonto, fechaReserva: new Date().toISOString()
+    comisionMonto: comMonto, fechaReserva: new Date().toISOString(),
+    origen: 'conector'
   };
   state.ventas.push(venta);
+  guardarVentaEnFirestore(venta);
 
   // Guardar en localStorage para Mis reservas
   const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
@@ -3229,9 +3242,152 @@ function compartirProducto(prodId){
   }
 }
 
+/* =====================================================
+   VENTAS EN FIRESTORE — persistencia real + notificaciones
+   ===================================================== */
+
+// Guarda o actualiza una venta en Firestore
+function guardarVentaEnFirestore(venta){
+  if(!firebaseListo || !venta?.id) return;
+  db.collection('ventas').doc(venta.id).set(venta, {merge:true})
+    .catch(e => console.error('Error guardando venta en Firestore:', e));
+}
+
+// Actualiza solo el estado de una venta en Firestore
+function actualizarEstadoVentaFirestore(ventaId, campos){
+  if(!firebaseListo || !ventaId) return;
+  db.collection('ventas').doc(ventaId).set(campos, {merge:true})
+    .catch(e => console.error('Error actualizando venta en Firestore:', e));
+}
+
+// Carga todas las ventas de un comercio al iniciar sesión
+async function cargarVentasDeComercio(comercioId){
+  if(!firebaseListo) return;
+  try{
+    const snap = await db.collection('ventas')
+      .where('comercioId','==', comercioId)
+      .get();
+    snap.forEach(doc=>{
+      const v = doc.data();
+      if(!state.ventas.find(x=>x.id===v.id)) state.ventas.push(v);
+    });
+    renderComercioPanel();
+    actualizarBadgeReservas();
+  } catch(e){ console.error('Error cargando ventas del comercio:', e); }
+}
+
+// Carga las reservas propias del ConectorT al iniciar sesión
+async function cargarReservasDeConector(vendedorId){
+  if(!firebaseListo) return;
+  try{
+    const snap = await db.collection('ventas')
+      .where('vendedorId','==', vendedorId)
+      .get();
+    snap.forEach(doc=>{
+      const v = doc.data();
+      if(!state.ventas.find(x=>x.id===v.id)) state.ventas.push(v);
+      // Sincronizar también en localStorage para que renderVReservas las vea
+      _sincronizarReservaEnLocalStorage(v);
+    });
+  } catch(e){ console.error('Error cargando reservas del ConectorT:', e); }
+}
+
+function _sincronizarReservaEnLocalStorage(v){
+  if(!v.origen || v.origen !== 'conector') return; // solo las del ConectorT
+  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  if(!reservas.find(r=>r.id===v.id)){
+    const prod = state.productos.find(p=>p.id===v.productoId);
+    const com  = state.comercios.find(c=>c.id===v.comercioId);
+    reservas.unshift({
+      ...v,
+      productoNombre: prod?.nombre || '—',
+      comercioNombre: com?.nombre || '—'
+    });
+    localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas.slice(0,50)));
+  }
+}
+
+/* ---- Listener en tiempo real para el comercio ---- */
+let _ventasListener = null;
+let _listenerReady  = false; // true después de la carga inicial
+
+function iniciarListenerVentasComercio(comercioId){
+  if(_ventasListener) _ventasListener(); // desuscribir anterior
+  _listenerReady = false;
+
+  _ventasListener = db.collection('ventas')
+    .where('comercioId','==', comercioId)
+    .onSnapshot(snapshot=>{
+      snapshot.docChanges().forEach(change=>{
+        const v = change.doc.data();
+        if(change.type === 'added'){
+          const existe = state.ventas.find(x=>x.id===v.id);
+          if(!existe){
+            state.ventas.push(v);
+            if(_listenerReady) notificarNuevaReservaAComercio(v);
+          }
+        } else if(change.type === 'modified'){
+          const idx = state.ventas.findIndex(x=>x.id===v.id);
+          if(idx>=0) state.ventas[idx] = v; else state.ventas.push(v);
+          // Refrescar panel si está visible
+          if(!document.getElementById('screen-c-panel')?.classList.contains('hidden')){
+            renderComercioPanel();
+          }
+        } else if(change.type === 'removed'){
+          state.ventas = state.ventas.filter(x=>x.id!==v.id);
+        }
+      });
+      // Primera entrega del snapshot ya procesada — las siguientes son cambios reales
+      if(!_listenerReady){
+        _listenerReady = true;
+        actualizarBadgeReservas();
+        renderComercioPanel();
+      }
+    }, e=> console.error('Error en listener de ventas:', e));
+}
+
+/* ---- Notificación al comercio ---- */
+function notificarNuevaReservaAComercio(venta){
+  if(state.role !== 'comercio') return;
+  const prod = state.productos.find(p=>p.id===venta.productoId);
+  const nombre = prod?.nombre || 'un producto';
+  const origen = venta.origen === 'carrito' ? 'carrito' : venta.origen === 'conector' ? 'ConectorT' : 'oferta';
+  toast(`🔔 Nueva reserva (${origen}): ${venta.clienteNombre} · ${nombre} · ${venta.codigo}`);
+  actualizarBadgeReservas();
+  // Refrescar historial si el panel está visible
+  if(!document.getElementById('screen-c-panel')?.classList.contains('hidden')){
+    renderComercioPanel();
+  }
+}
+
+/* ---- Badge de reservas pendientes en el nav ---- */
+function actualizarBadgeReservas(){
+  if(state.role !== 'comercio' || !state.currentUser) return;
+  const pendientes = state.ventas.filter(v=>
+    (v.comercioId===state.currentUser.id || v.comercioId===state.currentUser.uid)
+    && v.estado==='pendiente'
+  ).length;
+  const nav = document.getElementById('bottomnav');
+  if(!nav) return;
+  nav.querySelectorAll('.nav-item').forEach(btn=>{
+    if(btn.dataset.key === 'c-escanear'){
+      let badge = btn.querySelector('.nav-badge');
+      if(pendientes > 0){
+        if(!badge){ badge = document.createElement('span'); badge.className='nav-badge'; btn.appendChild(badge); }
+        badge.textContent = pendientes > 9 ? '9+' : pendientes;
+      } else {
+        badge?.remove();
+      }
+    }
+  });
+}
+
+/* =====================================================
+   FIN VENTAS FIRESTORE
+   ===================================================== */
+
 /* ================= CONECTORT: SOLICITUDES (compatibilidad legacy) ================= */
 function renderVendedorSolicitudes(){
-  // Redirige al nuevo panel de reservas
   renderVReservas();
 }
 
@@ -3454,16 +3610,18 @@ function confirmarVenta(){
   const venta = state.ventas.find(v=>v.id===window._ventaEscaneada);
   venta.estado = 'confirmada';
   venta.sustituto = document.getElementById('cSustituto').value === 'no';
+  venta.fechaConfirmacion = new Date().toISOString();
+  actualizarEstadoVentaFirestore(venta.id, { estado:'confirmada', sustituto: venta.sustituto, fechaConfirmacion: venta.fechaConfirmacion });
   document.getElementById('scanCodigo').value='';
   const vend = state.vendedores.find(v=>v.id===venta.vendedorId);
   if(vend) vend.ultimaVenta = new Date().toISOString();
-  // Descontar del stock si el producto tiene límite
   const prod = state.productos.find(p=>p.id===venta.productoId);
   if(prod && prod.stock !== null && prod.stock !== undefined){
     prod.stock = Math.max(0, prod.stock - 1);
     guardarProductoEnFirestore(prod, state.currentUser.uid);
   }
   toast(venta.sustituto ? 'Venta confirmada con reemplazo — comisión original acreditada ✅' : 'Venta confirmada — comisión acreditada ✅');
+  actualizarBadgeReservas();
   renderComercioPanel();
   renderFeed();
   showScreen('c-panel');
@@ -3490,10 +3648,15 @@ function rechazarVenta(){
   venta.estado = 'no_realizada';
   venta.motivoNoVenta = motivo;
   venta.motivoNoVentaTexto = motivo==='otro' ? otroTexto : MOTIVOS_NO_VENTA[motivo];
-  venta.comisionMonto = 0; // no se acredita comisión si la venta no se concretó
-
+  venta.comisionMonto = 0;
+  actualizarEstadoVentaFirestore(venta.id, {
+    estado:'no_realizada', motivoNoVenta: motivo,
+    motivoNoVentaTexto: motivo==='otro' ? otroTexto : MOTIVOS_NO_VENTA[motivo],
+    comisionMonto: 0
+  });
   document.getElementById('scanCodigo').value='';
   toast('Quedó registrado que la venta no se concretó. No se acreditó comisión.');
+  actualizarBadgeReservas();
   renderComercioPanel();
   showScreen('c-panel');
 }
@@ -4114,6 +4277,7 @@ function quieroEstaOferta(){
     vencePickup: vencePickup ? vencePickup.toISOString() : null
   };
   state.ventas.push(venta);
+  guardarVentaEnFirestore(venta);
   guardarVentaPropiaLocal(p.id, venta.id);
   mostrarCodigoDeOferta(venta);
   const avisoRetiro = vencePickup ? ` Tenés hasta las ${vencePickup.toLocaleString('es-AR',{hour:'2-digit',minute:'2-digit'})} del ${vencePickup.toLocaleDateString('es-AR')} para retirarlo.` : '';
