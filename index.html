@@ -1622,7 +1622,7 @@ let state = {
   solicitudes: [],
   ventas: [],
   valoraciones: [], // {id, deUid, deRol, deNombre, paraUid, paraRol, estrellas, comentario, fecha, ventaId}
-  seq: 1,
+  seq: 1, // legacy — ya no se usa (nextId usa timestamp)
 };
 
 const emojiByRubro = {
@@ -1630,49 +1630,9 @@ const emojiByRubro = {
   "Hogar y decoración":"🏠","Tecnología":"📱","Alimentos y bebidas":"🍞"
 };
 
-/* --------- helper de fechas para datos demo --------- */
+/* --------- helper de fechas --------- */
 function diasAtras(n){ const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString(); }
 
-/* --------- seed de datos de ejemplo para que no arranque vacío --------- */
-function seed(){
-  state.vendedores.push({id:'v-demo', nombre:'Marcos Gómez', usuario:'marcos_pesca', ciudad:'La Paz', zona:'Zona Centro', qrPersonal:'VQR-DEMO', fechaAlta:diasAtras(20), ultimaVenta:diasAtras(3), diasExtra:0});
-  state.vendedores.push({id:'v-demo2', nombre:'Rocío Benítez', usuario:'rociobe', ciudad:'La Paz', zona:'Costanera', qrPersonal:'VQR-DEM2', fechaAlta:diasAtras(100), ultimaVenta:diasAtras(68), diasExtra:0});
-  state.vendedores.push({id:'v-demo3', nombre:'Ezequiel Duarte', usuario:'eze_duarte', ciudad:'La Paz', zona:'Barrio Norte', qrPersonal:'VQR-DEM3', fechaAlta:diasAtras(130), ultimaVenta:diasAtras(95), diasExtra:0});
-
-  state.comercios.push({id:'c-demo1', nombre:'Ferretería Don Aldo', ciudad:'La Paz', rubro:'Ferretería y construcción', qrPersonal:'CQR-DEM1', rating:4.6, lat:-30.7511, lng:-59.6392, adheridos:['v-demo'], direccion:'Av. 9 de Julio 850', horario:'Lun a Sáb 8 a 13 y 17 a 20:30hs', img:'https://picsum.photos/seed/ferreteria/500/320', verificado:true, publicidadActiva:true, publicidadVence:diasAtras(-12)});
-  state.comercios.push({id:'c-demo2', nombre:'Pesca Total', ciudad:'La Paz', rubro:'Deportes y aire libre', qrPersonal:'CQR-DEM2', rating:4.8, lat:-30.7458, lng:-59.6355, adheridos:['v-demo'], direccion:'Costanera Sur 120', horario:'Todos los días 8 a 20hs', img:'https://picsum.photos/seed/pescatotal/500/320', verificado:true, publicidadActiva:true, publicidadVence:diasAtras(-18)});
-  state.comercios.push({id:'c-demo3', nombre:'Indumentaria Sur', ciudad:'La Paz', rubro:'Indumentaria y calzado', qrPersonal:'CQR-DEM3', rating:4.3, lat:-30.7502, lng:-59.641, adheridos:['v-demo2'], direccion:'San Martín 430', horario:'Lun a Vie 9 a 13 y 16 a 20hs', img:'https://picsum.photos/seed/indusur/500/320', verificado:true, publicidadActiva:true, publicidadVence:diasAtras(-20)});
-  state.comercios.push({id:'c-demo4', nombre:'Almacén La Costanera', ciudad:'La Paz', rubro:'Alimentos y bebidas', qrPersonal:'CQR-DEM4', rating:4.7, lat:-30.744, lng:-59.637, adheridos:['v-demo2'], direccion:'Costanera Norte 45', horario:'Todos los días 8 a 21hs', img:'https://picsum.photos/seed/almacencostanera/500/320', verificado:true, publicidadActiva:true, publicidadVence:diasAtras(-9)});
-  state.comercios.push({id:'c-demo5', nombre:'TecnoHogar', ciudad:'La Paz', rubro:'Tecnología', qrPersonal:'CQR-DEM5', rating:4.5, lat:-30.7525, lng:-59.6401, adheridos:['v-demo3'], direccion:'Belgrano 210', horario:'Lun a Sáb 9 a 13 y 16 a 20hs', img:'https://picsum.photos/seed/tecnohogar/500/320', verificado:true, publicidadActiva:true, publicidadVence:diasAtras(-25)});
-  state.comercios.push({id:'c-demo6', nombre:'Deco Hogar Norte', ciudad:'La Paz', rubro:'Hogar y decoración', qrPersonal:'CQR-DEM6', rating:4.9, lat:-30.748, lng:-59.644, adheridos:['v-demo3'], direccion:'Barrio Norte, Ruta 11 km 3', horario:'Lun a Sáb 9 a 20hs', img:'https://picsum.photos/seed/decohogar/500/320', verificado:true, publicidadActiva:true, publicidadVence:diasAtras(-15)});
-  state.comercios.push({id:'c-demo7', nombre:'Consultorio Dr. Ibáñez (Clínica Médica)', ciudad:'La Paz', rubro:'Salud y farmacia', qrPersonal:'CQR-DEM7', rating:4.8, lat:-30.7495, lng:-59.6388, adheridos:[], direccion:'San Martín 610', horario:'Lun a Vie 8 a 12 y 16 a 19hs', telefono:'343 415-0011', img:'https://picsum.photos/seed/consultorio/500/320', verificado:true});
-  state.comercios.push({id:'c-demo8', nombre:'Centro Odontológico La Paz', ciudad:'La Paz', rubro:'Salud y farmacia', qrPersonal:'CQR-DEM8', rating:4.7, lat:-30.7518, lng:-59.6379, adheridos:[], direccion:'Alberdi 220', horario:'Lun a Vie 8 a 13 y 17 a 20hs', telefono:'343 415-0022', img:'https://picsum.photos/seed/odontologia/500/320', verificado:true});
-  state.comercios.push({id:'c-demo9', nombre:'Taller Mecánico Hnos. Roldán', ciudad:'La Paz', rubro:'Repuestos y automotor', qrPersonal:'CQR-DEM9', rating:4.6, lat:-30.7469, lng:-59.6421, adheridos:[], direccion:'Ruta 11 km 2', horario:'Lun a Sáb 8 a 12 y 15 a 19hs', telefono:'343 415-0033', img:'https://picsum.photos/seed/tallerroldan/500/320', verificado:true});
-  state.comercios.push({id:'c-demo10', nombre:'Gomería y Mecánica El Pibe', ciudad:'La Paz', rubro:'Repuestos y automotor', qrPersonal:'CQR-DEM10', rating:4.5, lat:-30.7533, lng:-59.6405, adheridos:[], direccion:'Av. 9 de Julio 1420', horario:'Todos los días 8 a 20hs', telefono:'343 415-0044', img:'https://picsum.photos/seed/gomeriapibe/500/320', verificado:true});
-
-  state.productos.push({id:'p1', comercioId:'c-demo2', nombre:'Caña de pescar 2.10m', precio:24000, comision:4, rubro:'Deportes y aire libre', foto:'🎣', img:'https://picsum.photos/seed/canapesca/400/400'});
-  state.productos.push({id:'p2', comercioId:'c-demo1', nombre:'Taladro percutor 1/2"', precio:38500, comision:3, rubro:'Ferretería y construcción', foto:'🔧', img:'https://picsum.photos/seed/taladro/400/400'});
-  state.productos.push({id:'p3', comercioId:'c-demo3', nombre:'Zapatillas urbanas', precio:31000, comision:5, rubro:'Indumentaria y calzado', foto:'👟', img:'https://picsum.photos/seed/zapatillas/400/400'});
-  state.productos.push({id:'p4', comercioId:'c-demo4', nombre:'Canasta de picada regional', precio:12500, comision:4, rubro:'Alimentos y bebidas', foto:'🧺', img:'https://picsum.photos/seed/picada/400/400'});
-  state.productos.push({id:'p5', comercioId:'c-demo5', nombre:'Auriculares bluetooth', precio:27500, comision:3, rubro:'Tecnología', foto:'🎧', img:'https://picsum.photos/seed/auriculares/400/400'});
-  state.productos.push({id:'p6', comercioId:'c-demo6', nombre:'Set de mates artesanales', precio:15900, comision:5, rubro:'Hogar y decoración', foto:'🧉', img:'https://picsum.photos/seed/mates/400/400'});
-  // El vendedor demo "elige" estos productos del catálogo real del comercio (no los inventa él).
-  state.catalogoVendedor.push({id:nextId('sel'), vendedorId:'v-demo', productoId:'p1'});
-  state.catalogoVendedor.push({id:nextId('sel'), vendedorId:'v-demo', productoId:'p2'});
-  state.catalogoVendedor.push({id:nextId('sel'), vendedorId:'v-demo2', productoId:'p3'});
-  state.catalogoVendedor.push({id:nextId('sel'), vendedorId:'v-demo2', productoId:'p4'});
-  state.catalogoVendedor.push({id:nextId('sel'), vendedorId:'v-demo3', productoId:'p5'});
-  state.catalogoVendedor.push({id:nextId('sel'), vendedorId:'v-demo3', productoId:'p6'});
-  state.productos.push({id:'p7', comercioId:'c-demo2', nombre:'Kit de carnada + anzuelos', precio:9800, comision:0, rubro:'Deportes y aire libre', foto:'🪱', img:'https://picsum.photos/seed/carnada/400/400', origen:'comercio', tipoOferta:'ddp', descuento:20});
-  state.productos.push({id:'p8', comercioId:'c-demo4', nombre:'Canasta de fiambres regional', precio:14200, comision:0, rubro:'Alimentos y bebidas', foto:'🧀', img:'https://picsum.photos/seed/fiambres/400/400', origen:'comercio'});
-  state.productos.push({id:'p9', comercioId:'c-demo5', nombre:'Cargador rápido 30W', precio:11500, comision:0, rubro:'Tecnología', foto:'🔌', img:'https://picsum.photos/seed/cargador/400/400', origen:'comercio', tipoOferta:'tiempo'});
-  state.productos.push({id:'p10', comercioId:'c-demo5', nombre:'Parlante bluetooth portátil', precio:22900, comision:0, rubro:'Tecnología', foto:'🔊', img:'https://picsum.photos/seed/parlante/400/400', origen:'comercio'});
-  state.productos.push({id:'p11', comercioId:'c-demo1', nombre:'Set de destornilladores x12', precio:13800, comision:0, rubro:'Ferretería y construcción', foto:'🪛', img:'https://picsum.photos/seed/destornilladores/400/400', origen:'comercio'});
-  state.productos.push({id:'p12', comercioId:'c-demo3', nombre:'Campera de abrigo unisex', precio:29500, comision:0, rubro:'Indumentaria y calzado', foto:'🧥', img:'https://picsum.photos/seed/campera/400/400', origen:'comercio', tipoOferta:'ddn', descuento:15});
-  state.productos.push({id:'p13', comercioId:'c-demo6', nombre:'Juego de velas aromáticas', precio:8900, comision:0, rubro:'Hogar y decoración', foto:'🕯️', img:'https://picsum.photos/seed/velas/400/400', origen:'comercio'});
-  state.productos.push({id:'p14', comercioId:'c-demo2', nombre:'Reposera plegable de pesca', precio:18700, comision:0, rubro:'Deportes y aire libre', foto:'🪑', img:'https://picsum.photos/seed/reposera/400/400', origen:'comercio'});
-}
-seed();
 
 /* ================= HELPERS ================= */
 function toast(msg){
@@ -1721,7 +1681,9 @@ function confirmarCierreSesion(){
   }
 }
 
-function nextId(prefix){ return prefix + '-' + (state.seq++); }
+function nextId(prefix){
+  return prefix + '-' + Date.now() + '-' + Math.floor(Math.random()*9999);
+}
 
 /* ================= TURNOS DE ATENCIÓN DEL COMERCIO ================= */
 function leerTurnosForm(prefix){
