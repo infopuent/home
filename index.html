@@ -2154,8 +2154,8 @@ function entrarConDatosGuardados(rol, data){
     state.currentUser = data; state.role='vendedor';
     setRoleChip('🔗 ConectorT', false);
     document.getElementById('vNombre').textContent = data.nombre;
-    cargarCatalogoVendedorGuardado(data.id);
-    renderVendedorCatalogo(); renderVendedorSolicitudes(); renderVendedorStats();
+    cargarCatalogoVendedorGuardado(data.id); // llama renderVendedorCatalogo() al terminar
+    renderVendedorStats();
     cargarReservasDeConector(data.id || data.uid);
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
     showScreen('v-catalogo'); updateBottomNav('v-catalogo'); updateTopbarUser();
@@ -2490,8 +2490,9 @@ function submitRegister(){
 
 /* ================= VENDEDOR: CATALOGO ================= */
 function misProductos(){
+  const vId = state.currentUser?.uid || state.currentUser?.id;
   return state.catalogoVendedor
-    .filter(sel=>sel.vendedorId===state.currentUser.id)
+    .filter(sel=>sel.vendedorId===vId)
     .map(sel=>state.productos.find(p=>p.id===sel.productoId))
     .filter(Boolean);
 }
@@ -2966,27 +2967,43 @@ async function cargarProductosGuardados(ownerUid){
 }
 
 async function cargarCatalogoVendedorGuardado(vendedorId){
-  if(!firebaseListo || !vendedorId) return;
+  if(!firebaseListo) return;
+  // Usar uid como clave primaria; vendedorId puede ser uid o id interno
+  const vId = state.currentUser?.uid || vendedorId;
   try{
-    const snap = await db.collection('catalogoVendedor').where('vendedorId','==',vendedorId).get();
-    snap.forEach(doc=>{
-      const sel = doc.data();
-      if(!state.catalogoVendedor.some(existing=>existing.id===sel.id)){
-        state.catalogoVendedor.push(sel);
+    // Buscar por uid (nuevo sistema) Y por id interno (compatibilidad con entradas viejas)
+    const [snapUid, snapId] = await Promise.all([
+      db.collection('catalogoVendedor').where('vendedorId','==', vId).get(),
+      vId !== vendedorId
+        ? db.collection('catalogoVendedor').where('vendedorId','==', vendedorId).get()
+        : Promise.resolve({ forEach: ()=>{} })
+    ]);
+
+    const agregar = (sel) => {
+      if(!state.catalogoVendedor.some(x=>x.id===sel.id)){
+        // Normalizar a uid para consistencia futura
+        state.catalogoVendedor.push({...sel, vendedorId: vId});
       }
-    });
-    // Los productos elegidos son de otros comercios — hay que traerlos también si todavía no los tenemos.
-    const idsFaltantes = [...new Set(state.catalogoVendedor.filter(s=>s.vendedorId===vendedorId).map(s=>s.productoId))]
-      .filter(pid => !state.productos.some(p=>p.id===pid));
+    };
+    snapUid.forEach(doc => agregar(doc.data()));
+    snapId.forEach  && snapId.forEach(doc => agregar(doc.data()));
+
+    // Traer productos que aún no estén en state
+    const idsFaltantes = [...new Set(
+      state.catalogoVendedor
+        .filter(s=>s.vendedorId===vId)
+        .map(s=>s.productoId)
+    )].filter(pid => !state.productos.some(p=>p.id===pid));
+
     if(idsFaltantes.length){
-      const snapsProd = await Promise.all(idsFaltantes.map(pid => db.collection('productos').doc(pid).get()));
-      snapsProd.forEach(docSnap=>{
-        if(docSnap.exists && !state.productos.some(p=>p.id===docSnap.id)) state.productos.push(docSnap.data());
-      });
+      const snaps = await Promise.all(idsFaltantes.map(pid=>db.collection('productos').doc(pid).get()));
+      snaps.forEach(d=>{ if(d.exists && !state.productos.some(p=>p.id===d.id)) state.productos.push(d.data()); });
     }
-    renderVendedorCatalogo(); renderVendedorStats();
+
+    renderVendedorCatalogo();
+    renderVendedorStats();
   }catch(e){
-    console.error('No se pudo cargar el catálogo elegido del vendedor:', e);
+    console.error('No se pudo cargar el catálogo del ConectorT:', e);
   }
 }
 
@@ -3022,7 +3039,7 @@ function abrirComercioParaElegir(comercioId){
   const c = state.comercios.find(x=>x.id===comercioId);
   document.getElementById('vepComercioNombre').textContent = c ? c.nombre : 'Comercio';
   const prods = state.productos.filter(p=>p.comercioId===comercioId);
-  const yaElegidos = new Set(state.catalogoVendedor.filter(s=>s.vendedorId===state.currentUser.id).map(s=>s.productoId));
+  const yaElegidos = new Set(state.catalogoVendedor.filter(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id)).map(s=>s.productoId));
   const list = document.getElementById('vepProdList');
   if(prods.length===0){
     list.innerHTML = `<div class="empty" style="padding:30px 10px;"><div class="ic">📦</div><div class="t">Este comercio todavía no cargó productos</div></div>`;
@@ -3049,16 +3066,16 @@ function abrirComercioParaElegir(comercioId){
 }
 
 function agregarProductoAMiCatalogo(productoId){
-  const yaExiste = state.catalogoVendedor.some(s=>s.vendedorId===state.currentUser.id && s.productoId===productoId);
+  const vId = state.currentUser.uid || state.currentUser.id;
+  const yaExiste = state.catalogoVendedor.some(s=>s.vendedorId===vId && s.productoId===productoId);
   if(yaExiste){ toast('Ya tenías este producto en tu catálogo'); return; }
-  const sel = {id: nextId('sel'), vendedorId: state.currentUser.id, productoId};
+  const sel = {id: 'sel-'+vId+'-'+productoId, vendedorId: vId, productoId};
   state.catalogoVendedor.push(sel);
-  if(firebaseListo) db.collection('catalogoVendedor').doc(sel.id).set(sel).catch(e=>console.error('No se pudo guardar la selección del vendedor:', e));
+  if(firebaseListo) db.collection('catalogoVendedor').doc(sel.id).set(sel)
+    .catch(e=>console.error('No se pudo guardar la selección:', e));
   toast('¡Sumado a tu catálogo! ✅');
   renderVendedorStats();
-  renderVendedorCatalogo(); // así "Tu catálogo" ya queda al día apenas volvés a esa pantalla, vengas de donde vengas
-  // Si estamos parados en la pantalla de "elegir productos de un comercio", la refrescamos ahí mismo.
-  // Si el agregado vino desde el feed principal, simplemente volvemos a dibujar la grilla del feed.
+  renderVendedorCatalogo();
   if(comercioElegido && document.getElementById('screen-v-elegir-producto') && !document.getElementById('screen-v-elegir-producto').classList.contains('hidden')){
     abrirComercioParaElegir(comercioElegido);
   } else {
@@ -3978,7 +3995,7 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
     const comisionBadge = (state.role==='vendedor' && p.comision>0) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
     let botonVendedor = '';
     if(state.role==='vendedor' && p.comision>0){
-      const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===state.currentUser.id && s.productoId===p.id);
+      const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
       botonVendedor = yaEnCatalogo
         ? `<button class="share-btn" disabled style="opacity:.55; cursor:default;" onclick="event.stopPropagation()">✅ En tu catálogo</button>`
         : `<button class="share-btn" onclick="event.stopPropagation(); agregarProductoAMiCatalogo('${p.id}')">➕ Sumar a mi catálogo</button>`;
@@ -4140,7 +4157,7 @@ function abrirOferta(prodId){
 
   const banner = document.getElementById('ofVendedorBanner');
   if(state.role==='vendedor' && p.comision>0){
-    const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===state.currentUser.id && s.productoId===p.id);
+    const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
     document.getElementById('ofVendedorComision').textContent = `💰 Este comercio ofrece ${p.comision}% de comisión`;
     const btn = document.getElementById('ofVendedorBtn');
     if(yaEnCatalogo){
@@ -4321,7 +4338,7 @@ function verProductosDeLocal(comercioId){
       const comisionBadge = (state.role==='vendedor' && p.comision>0) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
       let botonVendedor = '';
       if(state.role==='vendedor' && p.comision>0){
-        const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===state.currentUser.id && s.productoId===p.id);
+        const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
         botonVendedor = yaEnCatalogo
           ? `<button class="share-btn" disabled style="opacity:.55; cursor:default;" onclick="event.stopPropagation()">✅ En tu catálogo</button>`
           : `<button class="share-btn" onclick="event.stopPropagation(); agregarProductoAMiCatalogo('${p.id}')">➕ Sumar a mi catálogo</button>`;
