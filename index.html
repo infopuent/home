@@ -2929,11 +2929,14 @@ async function cargarProductosGuardados(ownerUid){
 }
 
 async function cargarCatalogoVendedorGuardado(vendedorId){
-  if(!firebaseListo) return;
-  // Usar uid como clave primaria; vendedorId puede ser uid o id interno
+  if(!firebaseListo || !db){
+    toast('⚠️ Firebase no disponible — catálogo solo en memoria');
+    renderVendedorCatalogo();
+    return;
+  }
   const vId = state.currentUser?.uid || vendedorId;
+  toast('🔄 Cargando catálogo...');
   try{
-    // Buscar por uid (nuevo sistema) Y por id interno (compatibilidad con entradas viejas)
     const [snapUid, snapId] = await Promise.all([
       db.collection('catalogoVendedor').where('vendedorId','==', vId).get(),
       vId !== vendedorId
@@ -2941,16 +2944,18 @@ async function cargarCatalogoVendedorGuardado(vendedorId){
         : Promise.resolve({ forEach: ()=>{} })
     ]);
 
+    let encontrados = 0;
     const agregar = (sel) => {
       if(!state.catalogoVendedor.some(x=>x.id===sel.id)){
-        // Normalizar a uid para consistencia futura
         state.catalogoVendedor.push({...sel, vendedorId: vId});
+        encontrados++;
       }
     };
     snapUid.forEach(doc => agregar(doc.data()));
-    snapId.forEach  && snapId.forEach(doc => agregar(doc.data()));
+    snapId.forEach && snapId.forEach(doc => agregar(doc.data()));
 
-    // Traer productos que aún no estén en state
+    toast(`📦 Catálogo: ${encontrados} producto${encontrados!==1?'s':''} encontrado${encontrados!==1?'s':''} (uid: ${vId.slice(0,8)}...)`);
+
     const idsFaltantes = [...new Set(
       state.catalogoVendedor
         .filter(s=>s.vendedorId===vId)
@@ -2965,7 +2970,8 @@ async function cargarCatalogoVendedorGuardado(vendedorId){
     renderVendedorCatalogo();
     renderVendedorStats();
   }catch(e){
-    console.error('No se pudo cargar el catálogo del ConectorT:', e);
+    toast('❌ Error cargando catálogo: ' + e.message);
+    console.error('Error en cargarCatalogoVendedorGuardado:', e);
   }
 }
 
@@ -3028,14 +3034,26 @@ function abrirComercioParaElegir(comercioId){
 }
 
 function agregarProductoAMiCatalogo(productoId){
-  const vId = state.currentUser.uid || state.currentUser.id;
+  const vId = state.currentUser?.uid || state.currentUser?.id;
+  if(!vId){ toast('❌ Error: no hay usuario logueado'); return; }
+
   const yaExiste = state.catalogoVendedor.some(s=>s.vendedorId===vId && s.productoId===productoId);
   if(yaExiste){ toast('Ya tenías este producto en tu catálogo'); return; }
+
   const sel = {id: 'sel-'+vId+'-'+productoId, vendedorId: vId, productoId};
   state.catalogoVendedor.push(sel);
-  if(firebaseListo) db.collection('catalogoVendedor').doc(sel.id).set(sel)
-    .catch(e=>console.error('No se pudo guardar la selección:', e));
-  toast('¡Sumado a tu catálogo! ✅');
+
+  if(!firebaseListo || !db){
+    toast('⚠️ Sin conexión a Firestore — el producto no se va a guardar');
+  } else {
+    db.collection('catalogoVendedor').doc(sel.id).set(sel)
+      .then(()=> toast('✅ Guardado en tu catálogo'))
+      .catch(e=>{
+        toast('❌ No se pudo guardar: ' + e.message);
+        console.error('Error guardando en catalogoVendedor:', e);
+      });
+  }
+
   renderVendedorStats();
   renderVendedorCatalogo();
   if(comercioElegido && document.getElementById('screen-v-elegir-producto') && !document.getElementById('screen-v-elegir-producto').classList.contains('hidden')){
