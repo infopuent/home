@@ -2221,6 +2221,7 @@ async function cargarDatosPublicosDeFirestore(){
   renderFeed();
   renderFeedVendedores();
   renderExploraCiudad();
+  renderLocales();
 }
 // Por si Firebase ya había terminado de cargar antes de que este script se ejecutara.
 if(firebaseListo) onFirebaseReady();
