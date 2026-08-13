@@ -1401,6 +1401,57 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ SCREEN: ADMIN NUEVO COMERCIO ============ -->
+  <!-- ============ ADMIN: DETALLE COMERCIO ============ -->
+  <div class="screen hidden" id="screen-admin-comercio-detalle">
+    <div class="link-back" onclick="showScreen('admin-comercios'); adminCargarComercios()">← Comercios</div>
+    <div class="kicker">Admin · Comercio</div>
+    <div id="adminComercioDetalleContenido"></div>
+  </div>
+
+  <!-- ============ ADMIN: EDITAR COMERCIO ============ -->
+  <div class="screen hidden" id="screen-admin-editar-comercio">
+    <div class="link-back" onclick="showScreen('admin-comercio-detalle')">← Volver al detalle</div>
+    <div class="kicker">Editar comercio</div>
+    <input type="hidden" id="editAdComercioId">
+    <div class="card">
+      <div class="field"><label>Nombre</label><input id="editAdNombre" type="text"></div>
+      <div class="field"><label>Ciudad</label>
+        <select id="editAdCiudad">
+          <option value="La Paz">La Paz</option><option value="Bovril">Bovril</option>
+          <option value="Alcaraz">Alcaraz</option><option value="Hernandarias">Hernandarias</option>
+          <option value="Colón">Colón</option><option value="Concordia">Concordia</option>
+          <option value="Paraná">Paraná</option><option value="Gualeguaychú">Gualeguaychú</option>
+          <option value="Otra">Otra</option>
+        </select>
+      </div>
+      <div class="field"><label>Rubro</label>
+        <select id="editAdRubro">
+          <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
+          <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
+          <option>Agencias de autos</option><option>Agencias de motos</option>
+          <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
+          <option>Transporte y viajes</option><option>Peluquerías</option>
+          <option>Inmobiliarias</option><option>Deportes y aire libre</option>
+          <option>Alimentos y bebidas</option><option>Alojamiento y turismo</option>
+          <option>Tecnología</option><option>Belleza y cuidado personal</option>
+          <option>Salud y farmacia</option><option>Librería y papelería</option>
+          <option>Mascotas</option><option>Servicios varios</option><option>Otros / varios</option>
+        </select>
+      </div>
+      <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text"></div>
+      <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel"></div>
+      <div class="field"><label>Email</label><input id="editAdEmail" type="email"></div>
+      <div class="field"><label>Instagram</label><input id="editAdInstagram" type="text"></div>
+      <div class="field"><label>Sitio web</label><input id="editAdWeb" type="text"></div>
+      <div class="field"><label>Descripción</label><textarea id="editAdDescripcion" rows="2" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;"></textarea></div>
+      <div class="field"><label>Horario</label><input id="editAdHorario" type="text" placeholder="Ej: Lun a Vie 9 a 13 y 16 a 20hs"></div>
+      <div class="field"><label>Publicidad activa hasta</label><input id="editAdPublicidadVence" type="date"></div>
+    </div>
+    <button class="btn btn-primary" onclick="adminGuardarEdicionComercio()">Guardar cambios</button>
+    <div style="height:20px;"></div>
+  </div>
+
+  <!-- ============ ADMIN: NUEVO COMERCIO ============ -->
   <div class="screen hidden" id="screen-admin-nuevo-comercio">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
     <div class="kicker">Admin</div>
@@ -1447,7 +1498,19 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <!-- DATOS BÁSICOS -->
       <div class="field"><label>Nombre del comercio</label><input type="text" id="adNombre" placeholder="Ej: Farmacia Central"></div>
       <div class="two-col">
-        <div class="field"><label>Ciudad</label><input type="text" id="adCiudad" value="La Paz" placeholder="La Paz"></div>
+        <div class="field"><label>Ciudad</label>
+          <select id="adCiudad">
+            <option value="La Paz">La Paz</option>
+            <option value="Bovril">Bovril</option>
+            <option value="Alcaraz">Alcaraz</option>
+            <option value="Hernandarias">Hernandarias</option>
+            <option value="Colón">Colón</option>
+            <option value="Concordia">Concordia</option>
+            <option value="Paraná">Paraná</option>
+            <option value="Gualeguaychú">Gualeguaychú</option>
+            <option value="Otra">Otra</option>
+          </select>
+        </div>
         <div class="field"><label>Rubro</label>
           <select id="adRubro">
             <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
@@ -4475,15 +4538,172 @@ function adminRenderComercios(lista){
         <div class="av" style="background:var(--green);">🏬</div>
         <div class="main">
           <div class="t">${c.nombre||'Sin nombre'}</div>
-          <div class="s">${c.rubro||'—'} · ${c.email||'—'}</div>
+          <div class="s">${c.ciudad||'—'} · ${c.rubro||'—'}</div>
+          <div class="s" style="margin-top:1px;">${c.telefono||''} ${c.email ? '· '+c.email : ''}</div>
         </div>
         <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${c.aprobado?'#E3F3EA':'#FBF1DC'};color:${c.aprobado?'#2F7A55':'#93732A'};">${c.aprobado?'Activo':'Pendiente'}</span>
       </div>
       <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
-        ${!c.aprobado?`<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarComercio('${c._docId}')">✅ Aprobar</button>`:''}
-        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminEliminarComercio('${c._docId}','${c.nombre||''}')">🗑️ Eliminar</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerComercio('${c._docId||c.id}')">👁️ Ver</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${c._docId||c.id}')">✏️ Editar</button>
+        ${!c.aprobado?`<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarComercio('${c._docId||c.id}')">✅ Aprobar</button>`:''}
+        <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarComercio('${c._docId||c.id}','${(c.nombre||'').replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
       </div>
     </div>`).join('');
+}
+
+/* ---- Ver detalle de un comercio (movimientos, valoraciones) ---- */
+let _adminComercioActual = null;
+async function adminVerComercio(docId){
+  const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+  if(!c){ toast('Comercio no encontrado'); return; }
+  _adminComercioActual = c;
+  const el = document.getElementById('adminComercioDetalleContenido');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando datos…</p>';
+  showScreen('admin-comercio-detalle');
+
+  // Datos básicos
+  const pubVence = c.publicidadVence ? new Date(c.publicidadVence).toLocaleDateString('es-AR') : '—';
+  const pubActiva = !!(c.publicidadActiva && c.publicidadVence && new Date(c.publicidadVence) > new Date());
+  const fila = (l, v) => v ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--line);font-size:13px;"><span style="color:var(--muted);font-weight:700;">${l}</span><span>${v}</span></div>` : '';
+
+  let ventasHtml = '<p style="color:var(--muted);font-size:12px;">Sin ventas registradas.</p>';
+  let valoracionesHtml = '<p style="color:var(--muted);font-size:12px;">Sin valoraciones registradas.</p>';
+
+  try{
+    const [snapVentas, snapVal] = await Promise.all([
+      firebaseListo ? db.collection('ventas').where('comercioId','==', c.id||docId).get() : null,
+      firebaseListo ? db.collection('valoraciones').where('hacia','==', c.id||docId).get() : null
+    ]);
+
+    if(snapVentas && !snapVentas.empty){
+      const ventas = snapVentas.docs.map(d=>d.data()).sort((a,b)=>b.fechaReserva>a.fechaReserva?1:-1);
+      const total = ventas.filter(v=>v.estado==='confirmada').length;
+      ventasHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">${ventas.length} reserva(s) · ${total} confirmada(s)</div>` +
+        ventas.map(v=>`
+          <div style="padding:8px 0;border-bottom:.5px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:700;">${v.clienteNombre||'—'}</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;background:${v.estado==='confirmada'?'#E3F3EA':'v.estado==="no_realizada"?"#FDE8E8":"#EAF0F6"};color:${v.estado==='confirmada'?'#2F7A55':'v.estado==="no_realizada"?"#C23B3B":"#3A5A8A"};">${v.estado||'pendiente'}</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${v.codigo} · ${v.fechaReserva ? new Date(v.fechaReserva).toLocaleDateString('es-AR') : '—'} · Comisión: $${(v.comisionMonto||0).toLocaleString('es-AR')}</div>
+          </div>`).join('');
+    }
+
+    if(snapVal && !snapVal.empty){
+      const vals = snapVal.docs.map(d=>d.data());
+      const prom = vals.length ? (vals.reduce((s,v)=>s+(v.estrellas||0),0)/vals.length).toFixed(1) : '—';
+      valoracionesHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">⭐ ${prom} promedio · ${vals.length} valoración(es)</div>` +
+        vals.map(v=>`
+          <div style="padding:8px 0;border-bottom:.5px solid var(--line);">
+            <div style="font-size:12px;">⭐ ${'★'.repeat(v.estrellas||0)}${'☆'.repeat(5-(v.estrellas||0))} — <span style="font-weight:700;">${v.nombreDe||'Anónimo'}</span></div>
+            ${v.comentario ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">"${v.comentario}"</div>` : ''}
+          </div>`).join('');
+    }
+  }catch(e){ console.error(e); }
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+      ${c.img ? `<img src="${c.img}" style="width:56px;height:56px;border-radius:14px;object-fit:cover;flex-shrink:0;">` : `<div style="width:56px;height:56px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏬</div>`}
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--navy);">${c.nombre||'—'}</div>
+        <div style="font-size:12px;color:var(--muted);">${c.rubro||'—'} · ${c.ciudad||'—'}</div>
+        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:${pubActiva?'#E3F3EA':'#FDE8E8'};color:${pubActiva?'#2F7A55':'#C23B3B'};">Publicidad ${pubActiva?'activa hasta '+pubVence:'VENCIDA'}</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${docId}')">✏️ Editar</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminRenovarPublicidad('${docId}')">📅 Renovar publicidad</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarComercio('${docId}','${(c.nombre||'').replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
+    </div>
+
+    <div class="card" style="padding:4px 16px;margin-bottom:14px;">
+      ${fila('Dirección', c.direccion)}
+      ${fila('Teléfono', c.telefono)}
+      ${fila('Email', c.email)}
+      ${fila('Instagram', c.instagram)}
+      ${fila('Web', c.web)}
+      ${fila('Horario', c.horario)}
+      ${fila('Alta', c.fechaAlta ? new Date(c.fechaAlta).toLocaleDateString('es-AR') : null)}
+    </div>
+
+    <div class="section-title" style="margin-bottom:8px;">📦 Reservas / Ventas</div>
+    <div style="margin-bottom:18px;">${ventasHtml}</div>
+
+    <div class="section-title" style="margin-bottom:8px;">⭐ Valoraciones</div>
+    <div>${valoracionesHtml}</div>
+    <div style="height:30px;"></div>`;
+}
+
+/* ---- Editar comercio desde admin ---- */
+function adminAbrirEditar(docId){
+  const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+  if(!c) return;
+  document.getElementById('editAdComercioId').value = docId;
+  document.getElementById('editAdNombre').value = c.nombre||'';
+  document.getElementById('editAdDireccion').value = c.direccion||'';
+  document.getElementById('editAdTelefono').value = c.telefono||'';
+  document.getElementById('editAdEmail').value = c.email||'';
+  document.getElementById('editAdInstagram').value = c.instagram||'';
+  document.getElementById('editAdWeb').value = c.web||'';
+  document.getElementById('editAdDescripcion').value = c.descripcion||'';
+  document.getElementById('editAdHorario').value = c.horario||'';
+  // Ciudad select
+  const selCiudad = document.getElementById('editAdCiudad');
+  for(let opt of selCiudad.options) if(opt.value===c.ciudad) opt.selected=true;
+  // Rubro select
+  const selRubro = document.getElementById('editAdRubro');
+  for(let opt of selRubro.options) if(opt.value===c.rubro) opt.selected=true;
+  // Fecha de publicidad
+  if(c.publicidadVence){
+    document.getElementById('editAdPublicidadVence').value = c.publicidadVence.slice(0,10);
+  }
+  showScreen('admin-editar-comercio');
+}
+
+async function adminGuardarEdicionComercio(){
+  const docId = document.getElementById('editAdComercioId').value;
+  if(!docId){ toast('Error: ID no encontrado'); return; }
+  const cambios = {
+    nombre:     document.getElementById('editAdNombre').value.trim(),
+    ciudad:     document.getElementById('editAdCiudad').value,
+    rubro:      document.getElementById('editAdRubro').value,
+    direccion:  document.getElementById('editAdDireccion').value.trim(),
+    telefono:   document.getElementById('editAdTelefono').value.trim(),
+    email:      document.getElementById('editAdEmail').value.trim(),
+    instagram:  document.getElementById('editAdInstagram').value.trim(),
+    web:        document.getElementById('editAdWeb').value.trim(),
+    descripcion:document.getElementById('editAdDescripcion').value.trim(),
+    horario:    document.getElementById('editAdHorario').value.trim(),
+  };
+  const fechaVence = document.getElementById('editAdPublicidadVence').value;
+  if(fechaVence){
+    cambios.publicidadVence = new Date(fechaVence).toISOString();
+    cambios.publicidadActiva = new Date(fechaVence) > new Date();
+  }
+  try{
+    await db.collection('comercios').doc(docId).set(cambios, {merge:true});
+    // Actualizar state local
+    const idx = state.comercios.findIndex(c=>c.id===docId);
+    if(idx>=0) Object.assign(state.comercios[idx], cambios);
+    const idxA = _adminComercios.findIndex(c=>(c._docId||c.id)===docId);
+    if(idxA>=0) Object.assign(_adminComercios[idxA], cambios);
+    toast('✅ Comercio actualizado');
+    renderLocales(); renderFeed();
+    adminVerComercio(docId);
+  }catch(e){ toast('Error al guardar: '+e.message); }
+}
+
+async function adminRenovarPublicidad(docId){
+  const nuevaFecha = new Date(Date.now()+30*864e5).toISOString();
+  try{
+    await db.collection('comercios').doc(docId).set({publicidadActiva:true, publicidadVence: nuevaFecha},{merge:true});
+    const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+    if(c){ c.publicidadActiva=true; c.publicidadVence=nuevaFecha; }
+    toast('✅ Publicidad renovada por 30 días');
+    adminVerComercio(docId);
+  }catch(e){ toast('Error: '+e.message); }
 }
 
 async function adminAprobarComercio(docId){
