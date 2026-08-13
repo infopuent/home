@@ -4532,7 +4532,16 @@ function adminFiltrarComercios(filtro){
 function adminRenderComercios(lista){
   const el = document.getElementById('adminComerciosList');
   if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
-  el.innerHTML = lista.map(c=>`
+  el.innerHTML = lista.map(c=>{
+    const docId = c._docId || c.id;
+    const nombreSafe = (c.nombre||'').replace(/'/g,'&#39;');
+    const badgeBg = c.aprobado ? '#E3F3EA' : '#FBF1DC';
+    const badgeColor = c.aprobado ? '#2F7A55' : '#93732A';
+    const badgeLabel = c.aprobado ? 'Activo' : 'Pendiente';
+    const btnAprobar = !c.aprobado
+      ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarComercio('${docId}')">✅ Aprobar</button>`
+      : '';
+    return `
     <div class="list-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
       <div style="display:flex;align-items:center;gap:10px;width:100%;">
         <div class="av" style="background:var(--green);">🏬</div>
@@ -4541,15 +4550,16 @@ function adminRenderComercios(lista){
           <div class="s">${c.ciudad||'—'} · ${c.rubro||'—'}</div>
           <div class="s" style="margin-top:1px;">${c.telefono||''} ${c.email ? '· '+c.email : ''}</div>
         </div>
-        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${c.aprobado?'#E3F3EA':'#FBF1DC'};color:${c.aprobado?'#2F7A55':'#93732A'};">${c.aprobado?'Activo':'Pendiente'}</span>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${badgeBg};color:${badgeColor};">${badgeLabel}</span>
       </div>
       <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerComercio('${c._docId||c.id}')">👁️ Ver</button>
-        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${c._docId||c.id}')">✏️ Editar</button>
-        ${!c.aprobado?`<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarComercio('${c._docId||c.id}')">✅ Aprobar</button>`:''}
-        <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarComercio('${c._docId||c.id}','${(c.nombre||'').replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerComercio('${docId}')">👁️ Ver</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${docId}')">✏️ Editar</button>
+        ${btnAprobar}
+        <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarComercio('${docId}','${nombreSafe}')">🗑️ Eliminar</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 /* ---- Ver detalle de un comercio (movimientos, valoraciones) ---- */
@@ -4565,6 +4575,12 @@ async function adminVerComercio(docId){
   // Datos básicos
   const pubVence = c.publicidadVence ? new Date(c.publicidadVence).toLocaleDateString('es-AR') : '—';
   const pubActiva = !!(c.publicidadActiva && c.publicidadVence && new Date(c.publicidadVence) > new Date());
+  const pubBg    = pubActiva ? '#E3F3EA' : '#FDE8E8';
+  const pubColor = pubActiva ? '#2F7A55' : '#C23B3B';
+  const pubLabel = pubActiva ? 'Publicidad activa hasta ' + pubVence : 'Publicidad VENCIDA';
+  const imgHtml  = c.img
+    ? `<img src="${c.img}" style="width:56px;height:56px;border-radius:14px;object-fit:cover;flex-shrink:0;">`
+    : `<div style="width:56px;height:56px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏬</div>`;
   const fila = (l, v) => v ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--line);font-size:13px;"><span style="color:var(--muted);font-weight:700;">${l}</span><span>${v}</span></div>` : '';
 
   let ventasHtml = '<p style="color:var(--muted);font-size:12px;">Sin ventas registradas.</p>';
@@ -4580,14 +4596,20 @@ async function adminVerComercio(docId){
       const ventas = snapVentas.docs.map(d=>d.data()).sort((a,b)=>b.fechaReserva>a.fechaReserva?1:-1);
       const total = ventas.filter(v=>v.estado==='confirmada').length;
       ventasHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">${ventas.length} reserva(s) · ${total} confirmada(s)</div>` +
-        ventas.map(v=>`
-          <div style="padding:8px 0;border-bottom:.5px solid var(--line);">
+        ventas.map(v=>{
+          const eConf = v.estado==='confirmada';
+          const eNo   = v.estado==='no_realizada';
+          const bg    = eConf ? '#E3F3EA' : eNo ? '#FDE8E8' : '#EAF0F6';
+          const fg    = eConf ? '#2F7A55' : eNo ? '#C23B3B' : '#3A5A8A';
+          const fecha = v.fechaReserva ? new Date(v.fechaReserva).toLocaleDateString('es-AR') : '—';
+          return `<div style="padding:8px 0;border-bottom:.5px solid var(--line);">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:13px;font-weight:700;">${v.clienteNombre||'—'}</span>
-              <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;background:${v.estado==='confirmada'?'#E3F3EA':'v.estado==="no_realizada"?"#FDE8E8":"#EAF0F6"};color:${v.estado==='confirmada'?'#2F7A55':'v.estado==="no_realizada"?"#C23B3B":"#3A5A8A"};">${v.estado||'pendiente'}</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;background:${bg};color:${fg};">${v.estado||'pendiente'}</span>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${v.codigo} · ${v.fechaReserva ? new Date(v.fechaReserva).toLocaleDateString('es-AR') : '—'} · Comisión: $${(v.comisionMonto||0).toLocaleString('es-AR')}</div>
-          </div>`).join('');
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${v.codigo} · ${fecha} · Comisión: $${(v.comisionMonto||0).toLocaleString('es-AR')}</div>
+          </div>`;
+        }).join('');
     }
 
     if(snapVal && !snapVal.empty){
@@ -4604,18 +4626,18 @@ async function adminVerComercio(docId){
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-      ${c.img ? `<img src="${c.img}" style="width:56px;height:56px;border-radius:14px;object-fit:cover;flex-shrink:0;">` : `<div style="width:56px;height:56px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏬</div>`}
+      ${imgHtml}
       <div>
         <div style="font-size:20px;font-weight:800;color:var(--navy);">${c.nombre||'—'}</div>
         <div style="font-size:12px;color:var(--muted);">${c.rubro||'—'} · ${c.ciudad||'—'}</div>
-        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:${pubActiva?'#E3F3EA':'#FDE8E8'};color:${pubActiva?'#2F7A55':'#C23B3B'};">Publicidad ${pubActiva?'activa hasta '+pubVence:'VENCIDA'}</span>
+        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:${pubBg};color:${pubColor};">${pubLabel}</span>
       </div>
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${docId}')">✏️ Editar</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminRenovarPublicidad('${docId}')">📅 Renovar publicidad</button>
-      <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarComercio('${docId}','${(c.nombre||'').replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarComercio('${docId}','${(c.nombre||'').replace(/'/g,'&#39;')}')">🗑️ Eliminar</button>
     </div>
 
     <div class="card" style="padding:4px 16px;margin-bottom:14px;">
