@@ -3291,15 +3291,43 @@ function reabrirReserva(idx){
 // Los 3 destinatarios y el contenido del mail ya quedan armados acá.
 const ADMIN_EMAIL = 'admin@elpuente.com.ar'; // reemplazar por tu mail real de admin
 
-function compartirProducto(prodId){
+async function compartirProducto(prodId){
   const p = state.productos.find(x=>x.id===prodId);
   if(!p) return;
   const v = state.currentUser;
   const texto = `*${p.nombre}* — $${p.precio.toLocaleString('es-AR')}\nLo tengo disponible a través de PuenT. Consultame por este producto 👇\nConectorT: ${v ? v.nombre : ''}`;
+
+  // Intentar compartir con imagen adjunta (Android / iOS con soporte de archivos)
+  if(p.img && navigator.canShare && navigator.share){
+    try{
+      let files = [];
+      if(p.img.startsWith('data:')){
+        // dataURL → Blob → File
+        const res = await fetch(p.img);
+        const blob = await res.blob();
+        files = [new File([blob], (p.nombre||'producto').replace(/\s/g,'_')+'.jpg', {type: blob.type||'image/jpeg'})];
+      } else if(p.img.startsWith('http')){
+        // URL externa: intentar fetch (puede fallar por CORS)
+        try{
+          const res = await fetch(p.img);
+          const blob = await res.blob();
+          files = [new File([blob], (p.nombre||'producto').replace(/\s/g,'_')+'.jpg', {type: blob.type||'image/jpeg'})];
+        }catch(e){ /* CORS bloqueado, seguimos sin archivo */ }
+      }
+      if(files.length && navigator.canShare({ files })){
+        await navigator.share({ title: p.nombre, text: texto, files });
+        return;
+      }
+    }catch(e){ /* no soportado o cancelado, usamos fallback */ }
+  }
+
+  // Fallback: compartir solo texto (+ URL de imagen si es pública)
+  const imgExtra = (p.img && p.img.startsWith('http')) ? `\n🖼️ ${p.img}` : '';
+  const textoFinal = texto + imgExtra;
   if(navigator.share){
-    navigator.share({ title: p.nombre, text: texto }).catch(()=>{});
+    navigator.share({ title: p.nombre, text: textoFinal }).catch(()=>{});
   } else {
-    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+    window.open('https://wa.me/?text=' + encodeURIComponent(textoFinal), '_blank');
   }
 }
 
@@ -4406,7 +4434,8 @@ function renderLocales(){
     return !cCiudad || cCiudad === ciudadNorm || cCiudad.includes(ciudadNorm) || ciudadNorm.includes(cCiudad);
   });
 
-  let locales = todos.filter(c=> feedRubroFiltroLocales==='Todos' || c.rubro===feedRubroFiltroLocales);
+  const _rubroNorm = (feedRubroFiltroLocales||'').toLowerCase().trim();
+  let locales = todos.filter(c=> feedRubroFiltroLocales==='Todos' || (c.rubro||'').toLowerCase().trim() === _rubroNorm);
   if(buscadorQuery){
     locales = locales.filter(c=> (c.nombre+' '+c.rubro).toLowerCase().includes(buscadorQuery));
   }
