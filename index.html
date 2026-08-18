@@ -863,6 +863,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-mint" onclick="showScreen('v-stats')"><i class="ti ti-chart-bar ic" aria-hidden="true"></i>Comisiones</button>
       <button class="btn-tile btn-tile-neutral" onclick="abrirEditarVendedor()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
       <button class="btn-tile btn-tile-sage" onclick="contactarAdminSumarComercio()"><i class="ti ti-building-store ic" aria-hidden="true"></i>Sumar comercio</button>
+      <button class="btn-tile" style="background:#EAF0FB;color:#3A5FA0;grid-column:1/-1;" onclick="abrirPedidoPersonalizado()"><i class="ti ti-shopping-cart-plus ic" aria-hidden="true"></i>Pedido personalizado</button>
     </div>
     <div class="section-title" style="margin-bottom:10px;">Mi catálogo</div>
     <div id="vProdList"></div>
@@ -972,6 +973,116 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <h1 class="page-title">QR generados</h1>
     <p class="page-sub">Reservas que hiciste para tus clientes. Tocá una para volver a ver el QR.</p>
     <div id="vReservasList"></div>
+  </div>
+
+
+  <!-- ============ CONECTOR: PEDIDO PERSONALIZADO — PASO 1 ARMAR ============ -->
+  <div class="screen hidden" id="screen-v-pedido-custom">
+    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al panel</div>
+    <div class="kicker">Pedido personalizado</div>
+    <h1 class="page-title">Armá el pedido</h1>
+    <p class="page-sub">Cargá los productos que el cliente quiere comprar en el comercio. Pueden ser varios.</p>
+
+    <!-- Datos del cliente -->
+    <div class="card">
+      <div class="field"><label>Nombre del cliente *</label><input id="pcClienteNombre" placeholder="Ej: María González"></div>
+      <div class="field"><label>Teléfono / WhatsApp (opcional)</label><input id="pcClienteTel" type="tel" placeholder="Para avisarle cuando esté listo"></div>
+    </div>
+
+    <!-- Comercio -->
+    <div class="card">
+      <div class="field">
+        <label>Comercio *</label>
+        <select id="pcComercioSelect" onchange="pcOnComercioChange()">
+          <option value="">— Elegí el comercio —</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Lista de productos cargados -->
+    <div id="pcProductosList" style="margin-bottom:10px;"></div>
+
+    <!-- Formulario para agregar un producto -->
+    <div class="card" id="pcFormProducto">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">➕ Agregar producto</div>
+      <div class="field"><label>Nombre del producto *</label><input id="pcProdNombre" placeholder="Ej: Zapatillas Nike Air Max 90"></div>
+      <div class="field"><label>Precio *</label><input id="pcProdPrecio" type="number" min="0" placeholder="0"></div>
+      <div class="field"><label>Foto (URL o subir)</label><input id="pcProdFoto" placeholder="https://... o dejá vacío"></div>
+      <button class="btn btn-ghost btn-sm" onclick="pcAgregarProducto()" style="width:100%;margin-top:4px;">Agregar al pedido</button>
+    </div>
+
+    <button class="btn btn-primary" style="margin-top:6px;" onclick="pcIrAComision()">Continuar — acordar comisión →</button>
+  </div>
+
+  <!-- ============ CONECTOR: PEDIDO PERSONALIZADO — PASO 2 COMISIÓN ============ -->
+  <div class="screen hidden" id="screen-v-pedido-comision">
+    <div class="link-back" onclick="showScreen('v-pedido-custom')">← Volver</div>
+    <div class="kicker">Pedido personalizado · Paso 2</div>
+    <h1 class="page-title">Acordar comisión</h1>
+    <p class="page-sub">Confirmá el resumen del pedido y registrá la comisión que arreglaste con el comercio.</p>
+
+    <!-- Resumen -->
+    <div class="card" id="pcResumenCard" style="margin-bottom:14px;"></div>
+
+    <!-- Comisión -->
+    <div class="card">
+      <div class="field">
+        <label>Tipo de comisión *</label>
+        <select id="pcComisionTipo" onchange="pcComisionTipoChange()">
+          <option value="porcentaje">Porcentaje del total</option>
+          <option value="monto">Monto fijo</option>
+        </select>
+      </div>
+      <div class="field" id="pcComisionPctField">
+        <label>Porcentaje (%)</label>
+        <input id="pcComisionPct" type="number" min="0" max="100" placeholder="Ej: 10" oninput="pcActualizarComisionPreview()">
+      </div>
+      <div class="field hidden" id="pcComisionMontoField">
+        <label>Monto fijo ($)</label>
+        <input id="pcComisionMonto" type="number" min="0" placeholder="Ej: 500" oninput="pcActualizarComisionPreview()">
+      </div>
+      <div id="pcComisionPreview" style="font-size:13px;color:var(--muted);margin-top:4px;min-height:20px;"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="pcGenerarQR()">Generar QR del pedido</button>
+  </div>
+
+  <!-- ============ CONECTOR: PEDIDO PERSONALIZADO — PASO 3 QR ============ -->
+  <div class="screen hidden" id="screen-v-pedido-qr">
+    <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al panel</div>
+    <div class="kicker">¡Listo para entregar!</div>
+    <h1 class="page-title">QR del pedido</h1>
+    <p class="page-sub" id="pcQrSub">Mostrále este QR al cliente o mandáselo por WhatsApp.</p>
+
+    <div class="code-block">
+      <div class="qr-fake" id="pcQrFake"></div>
+      <div class="code-text" id="pcQrCodigo">PC-0000</div>
+      <div class="code-label" id="pcQrLabel">Pedido personalizado</div>
+      <div id="pcQrTimer" style="margin-top:10px;font-size:12px;font-weight:700;color:var(--blue);"></div>
+    </div>
+
+    <div class="card" id="pcQrDetalle" style="margin-top:14px;"></div>
+
+    <button class="btn btn-primary" id="pcQrBtnWsp" style="margin-top:10px;">📲 Compartir por WhatsApp</button>
+    <button class="btn btn-ghost" style="margin-top:8px;" onclick="pcRegenerarQR()">🔄 Regenerar QR (nueva vigencia)</button>
+    <button class="btn btn-ghost" style="margin-top:8px;" onclick="renderVReservas();showScreen('v-reservas')">Ver todos mis pedidos</button>
+
+    <!-- Cierre: comisión recibida -->
+    <div id="pcComisionCierreBox" class="card" style="margin-top:18px;display:none;">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">¿Ya recibiste la comisión?</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Una vez que el comercio te transfirió, confirmalo acá y dejá tu valoración.</div>
+      <div class="field"><label>Valoración al comercio</label>
+        <div id="pcStarRow" style="display:flex;gap:8px;font-size:24px;margin-bottom:8px;">
+          <span class="pc-star" data-v="1" onclick="pcSetStar(1)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="pc-star" data-v="2" onclick="pcSetStar(2)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="pc-star" data-v="3" onclick="pcSetStar(3)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="pc-star" data-v="4" onclick="pcSetStar(4)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="pc-star" data-v="5" onclick="pcSetStar(5)" style="cursor:pointer;opacity:.4;">★</span>
+        </div>
+      </div>
+      <div class="field"><label>Comentario (opcional)</label><textarea id="pcValComment" rows="2" placeholder="¿Cómo fue la experiencia?"></textarea></div>
+      <button class="btn btn-primary" onclick="pcConfirmarComisionRecibida()">✅ Recibí la comisión</button>
+    </div>
   </div>
 
   <!-- ============ VENDEDOR: ESTADISTICAS ============ -->
@@ -5597,6 +5708,333 @@ function abrirPerfil(){
   updateBottomNav('cl-perfil');
 }
 
+// =============================================
+
+// =============================================
+// PEDIDO PERSONALIZADO (fuera de catálogo)
+// =============================================
+
+let _pcProductos   = [];   // items del pedido en curso
+let _pcComercioId  = null;
+let _pcPedidoActual = null; // pedido guardado (para cierre de comisión)
+let _pcStarVal     = 0;
+
+/* ---- helpers ---- */
+function pcGenCodigo(){
+  return 'PC-' + Math.random().toString(36).slice(2,6).toUpperCase();
+}
+
+function pcTotal(){
+  return _pcProductos.reduce((s, p) => s + Number(p.precio), 0);
+}
+
+function pcComisionCalculada(){
+  const tipo  = document.getElementById('pcComisionTipo')?.value;
+  const total = pcTotal();
+  if(tipo === 'porcentaje'){
+    const pct = parseFloat(document.getElementById('pcComisionPct')?.value || 0);
+    return isNaN(pct) ? 0 : Math.round(total * pct / 100);
+  }
+  const monto = parseFloat(document.getElementById('pcComisionMonto')?.value || 0);
+  return isNaN(monto) ? 0 : monto;
+}
+
+function pcHorasHabilesMs(hs){
+  // aproximación: hora hábil = 8hs del día hábil
+  // para simplicidad usamos 24hs reales × factor; versión mejorable
+  return hs * 60 * 60 * 1000;
+}
+
+/* ---- Paso 1: abrir ---- */
+function abrirPedidoPersonalizado(){
+  _pcProductos  = [];
+  _pcComercioId = null;
+  _pcPedidoActual = null;
+  _pcStarVal    = 0;
+
+  // Poblar select de comercios
+  const sel = document.getElementById('pcComercioSelect');
+  sel.innerHTML = '<option value="">— Elegí el comercio —</option>';
+  (state.comercios || []).forEach(c => {
+    const op = document.createElement('option');
+    op.value = c.id; op.textContent = c.nombre;
+    sel.appendChild(op);
+  });
+
+  document.getElementById('pcClienteNombre').value = '';
+  document.getElementById('pcClienteTel').value    = '';
+  document.getElementById('pcProdNombre').value    = '';
+  document.getElementById('pcProdPrecio').value    = '';
+  document.getElementById('pcProdFoto').value      = '';
+  pcRenderProductosList();
+  showScreen('v-pedido-custom');
+}
+
+function pcOnComercioChange(){
+  _pcComercioId = document.getElementById('pcComercioSelect').value || null;
+}
+
+/* ---- Agregar producto a la lista ---- */
+function pcAgregarProducto(){
+  const nombre = document.getElementById('pcProdNombre').value.trim();
+  const precio = parseFloat(document.getElementById('pcProdPrecio').value);
+  const foto   = document.getElementById('pcProdFoto').value.trim();
+  if(!nombre){ toast('Ingresá el nombre del producto'); return; }
+  if(isNaN(precio) || precio < 0){ toast('Ingresá un precio válido'); return; }
+  _pcProductos.push({ id: nextId('pci'), nombre, precio, foto: foto || null });
+  document.getElementById('pcProdNombre').value = '';
+  document.getElementById('pcProdPrecio').value = '';
+  document.getElementById('pcProdFoto').value   = '';
+  pcRenderProductosList();
+  toast('Producto agregado ✓');
+}
+
+function pcEliminarProducto(id){
+  _pcProductos = _pcProductos.filter(p => p.id !== id);
+  pcRenderProductosList();
+}
+
+function pcRenderProductosList(){
+  const el = document.getElementById('pcProductosList');
+  if(_pcProductos.length === 0){
+    el.innerHTML = `<div style="font-size:12.5px;color:var(--muted);text-align:center;padding:10px 0;">Aún no cargaste productos.</div>`;
+    return;
+  }
+  const total = pcTotal();
+  el.innerHTML = _pcProductos.map(p => `
+    <div class="card" style="padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+      ${p.foto ? `<img src="${p.foto}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:44px;height:44px;border-radius:8px;background:var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">📦</div>`}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</div>
+        <div style="font-size:13px;font-weight:600;color:var(--green);">$${Number(p.precio).toLocaleString('es-AR')}</div>
+      </div>
+      <button onclick="pcEliminarProducto('${p.id}')" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px;" title="Quitar">✕</button>
+    </div>`).join('') +
+    `<div style="text-align:right;font-size:13px;font-weight:800;color:var(--navy);padding:4px 4px 10px;">Total: $${total.toLocaleString('es-AR')}</div>`;
+}
+
+/* ---- Paso 2: comisión ---- */
+function pcIrAComision(){
+  const nombre = document.getElementById('pcClienteNombre').value.trim();
+  if(!nombre){ toast('Ingresá el nombre del cliente'); return; }
+  if(!_pcComercioId){ toast('Elegí el comercio'); return; }
+  if(_pcProductos.length === 0){ toast('Cargá al menos un producto'); return; }
+
+  const com   = (state.comercios || []).find(c => c.id === _pcComercioId);
+  const total = pcTotal();
+
+  // Resumen
+  const itemsHtml = _pcProductos.map(p =>
+    `<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--line);">
+      <span>${p.nombre}</span><span style="font-weight:700;">$${Number(p.precio).toLocaleString('es-AR')}</span>
+    </div>`).join('');
+
+  document.getElementById('pcResumenCard').innerHTML = `
+    <div style="font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Resumen</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">👤 ${nombre} &nbsp;·&nbsp; 🏬 ${com?.nombre || '—'}</div>
+    ${itemsHtml}
+    <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--navy);padding-top:10px;">
+      <span>Total pedido</span><span>$${total.toLocaleString('es-AR')}</span>
+    </div>`;
+
+  // Reset comisión
+  document.getElementById('pcComisionTipo').value = 'porcentaje';
+  document.getElementById('pcComisionPct').value  = '';
+  const mf = document.getElementById('pcComisionMontoField');
+  const pf = document.getElementById('pcComisionPctField');
+  mf.classList.add('hidden'); pf.classList.remove('hidden');
+  document.getElementById('pcComisionPreview').textContent = '';
+
+  showScreen('v-pedido-comision');
+}
+
+function pcComisionTipoChange(){
+  const tipo = document.getElementById('pcComisionTipo').value;
+  document.getElementById('pcComisionPctField').classList.toggle('hidden', tipo !== 'porcentaje');
+  document.getElementById('pcComisionMontoField').classList.toggle('hidden', tipo !== 'monto');
+  pcActualizarComisionPreview();
+}
+
+function pcActualizarComisionPreview(){
+  const monto = pcComisionCalculada();
+  const el = document.getElementById('pcComisionPreview');
+  if(monto > 0)
+    el.innerHTML = `<span style="color:var(--navy);font-weight:700;">Tu comisión: $${monto.toLocaleString('es-AR')}</span>`;
+  else
+    el.textContent = '';
+}
+
+/* ---- Paso 3: generar QR ---- */
+function pcGenerarQR(){
+  const tipo   = document.getElementById('pcComisionTipo').value;
+  const comMonto = pcComisionCalculada();
+  if(comMonto <= 0){ toast('Ingresá la comisión acordada'); return; }
+
+  const nombre    = document.getElementById('pcClienteNombre').value.trim();
+  const tel       = document.getElementById('pcClienteTel').value.trim();
+  const com       = (state.comercios || []).find(c => c.id === _pcComercioId);
+  const codigo    = pcGenCodigo();
+  const total     = pcTotal();
+  const ahora     = new Date();
+  // 24hs hábiles → usamos 24hs reales como aproximación
+  const vencimiento = new Date(ahora.getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+  const pedido = {
+    id:           nextId('pp'),
+    codigo,
+    tipo:         'personalizado',
+    vendedorId:   state.currentUser?.id || state.currentUser?.uid,
+    comercioId:   _pcComercioId,
+    comercioNombre: com?.nombre || '—',
+    clienteNombre: nombre,
+    clienteTel:   tel,
+    productos:    [..._pcProductos],
+    total,
+    comisionTipo: tipo,
+    comisionMonto: comMonto,
+    estado:       'pendiente',   // pendiente → confirmado → comision_recibida
+    fechaCreacion: ahora.toISOString(),
+    fechaVencimiento: vencimiento,
+    origen:       'personalizado'
+  };
+
+  // Guardar en Firestore y localStorage
+  if(typeof guardarVentaEnFirestore === 'function') guardarVentaEnFirestore(pedido);
+  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  reservas.unshift(pedido);
+  localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas.slice(0, 50)));
+
+  _pcPedidoActual = pedido;
+  pcMostrarQR(pedido);
+}
+
+function pcMostrarQR(pedido){
+  const com = (state.comercios || []).find(c => c.id === pedido.comercioId);
+  document.getElementById('pcQrCodigo').textContent = pedido.codigo;
+  document.getElementById('pcQrLabel').textContent  = `Para: ${pedido.clienteNombre} · Retira en ${pedido.comercioNombre}`;
+  document.getElementById('pcQrSub').textContent    = `Mostrále este QR a ${pedido.clienteNombre} o mandáselo por WhatsApp. Válido 24hs hábiles.`;
+
+  const link = construirLinkCodigo ? construirLinkCodigo(pedido.codigo) : pedido.codigo;
+  renderQR(document.getElementById('pcQrFake'), link);
+
+  // Detalle
+  const itemsHtml = pedido.productos.map(p =>
+    `<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:0.5px solid var(--line);">
+      <span>${p.nombre}</span><span style="font-weight:700;">$${Number(p.precio).toLocaleString('es-AR')}</span>
+     </div>`).join('');
+
+  document.getElementById('pcQrDetalle').innerHTML = `
+    <div style="font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Detalle del pedido</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">🏬 ${pedido.comercioNombre}</div>
+    ${itemsHtml}
+    <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--navy);padding-top:8px;">
+      <span>Total</span><span>$${pedido.total.toLocaleString('es-AR')}</span>
+    </div>
+    <div style="margin-top:10px;padding:10px 12px;background:#EAF0E6;border-radius:10px;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--navy-2);letter-spacing:.05em;margin-bottom:2px;">Tu comisión acordada</div>
+      <div style="font-size:17px;font-weight:800;color:#2F7A55;">$${pedido.comisionMonto.toLocaleString('es-AR')}</div>
+    </div>`;
+
+  // WhatsApp
+  const nombresProd = pedido.productos.map(p => `• ${p.nombre} $${Number(p.precio).toLocaleString('es-AR')}`).join('\n');
+  const msgWsp = `Hola ${pedido.clienteNombre}! 🎉 Tu pedido está listo.\n\n${nombresProd}\n\nTotal: $${pedido.total.toLocaleString('es-AR')}\nRetirás en: ${pedido.comercioNombre}\nCódigo QR: *${pedido.codigo}*\n\n¡Te espero por WhatsApp si tenés dudas!`;
+  document.getElementById('pcQrBtnWsp').onclick = () =>
+    window.open('https://wa.me/' + (pedido.clienteTel||'').replace(/\D/g,'') + '?text=' + encodeURIComponent(msgWsp), '_blank');
+
+  // Timer de vencimiento
+  pcIniciarTimer(pedido.fechaVencimiento);
+
+  // Mostrar box de cierre si la venta ya fue confirmada
+  const cierreBox = document.getElementById('pcComisionCierreBox');
+  cierreBox.style.display = (pedido.estado === 'confirmado') ? 'block' : 'none';
+
+  showScreen('v-pedido-qr');
+}
+
+/* ---- Timer de vencimiento ---- */
+let _pcTimerInterval = null;
+
+function pcIniciarTimer(isoVencimiento){
+  if(_pcTimerInterval) clearInterval(_pcTimerInterval);
+  const el = document.getElementById('pcQrTimer');
+  function actualizar(){
+    const diff = new Date(isoVencimiento) - new Date();
+    if(diff <= 0){
+      el.innerHTML = `<span style="color:var(--danger);">⚠️ QR vencido — regenerá uno nuevo</span>`;
+      clearInterval(_pcTimerInterval);
+      return;
+    }
+    const hs  = Math.floor(diff / 3600000);
+    const min = Math.floor((diff % 3600000) / 60000);
+    el.innerHTML = `⏱ Vence en ${hs}h ${min}m`;
+  }
+  actualizar();
+  _pcTimerInterval = setInterval(actualizar, 30000);
+}
+
+/* ---- Regenerar QR ---- */
+function pcRegenerarQR(){
+  if(!_pcPedidoActual){ toast('No hay pedido activo'); return; }
+  const nuevoCodigo     = pcGenCodigo();
+  const nuevaVigencia   = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  _pcPedidoActual.codigo           = nuevoCodigo;
+  _pcPedidoActual.fechaVencimiento = nuevaVigencia;
+  _pcPedidoActual.estado           = 'pendiente';
+
+  // Actualizar localStorage
+  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  const idx = reservas.findIndex(r => r.id === _pcPedidoActual.id);
+  if(idx >= 0){ reservas[idx] = _pcPedidoActual; localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas)); }
+
+  pcMostrarQR(_pcPedidoActual);
+  toast('QR renovado — válido 24hs hábiles ✓');
+}
+
+/* ---- Stars ---- */
+function pcSetStar(v){
+  _pcStarVal = v;
+  document.querySelectorAll('.pc-star').forEach(s => {
+    s.style.opacity = Number(s.dataset.v) <= v ? '1' : '0.3';
+    s.style.color   = Number(s.dataset.v) <= v ? '#C99A3E' : '';
+  });
+}
+
+/* ---- Confirmar comisión recibida ---- */
+function pcConfirmarComisionRecibida(){
+  if(!_pcPedidoActual){ toast('No hay pedido activo'); return; }
+  if(_pcStarVal === 0){ toast('Dejá una valoración al comercio antes de confirmar'); return; }
+
+  const comment = document.getElementById('pcValComment').value.trim();
+
+  // Actualizar estado en localStorage
+  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  const idx = reservas.findIndex(r => r.id === _pcPedidoActual.id);
+  if(idx >= 0){
+    reservas[idx].estado = 'comision_recibida';
+    reservas[idx].valoracion = { estrellas: _pcStarVal, comentario: comment, fecha: new Date().toISOString() };
+    localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas));
+  }
+
+  // Guardar valoración en Firestore si existe la función
+  if(typeof db !== 'undefined' && typeof firebase !== 'undefined'){
+    try {
+      const com = (state.comercios || []).find(c => c.id === _pcPedidoActual.comercioId);
+      if(com){
+        const val = com.valoraciones ? [...com.valoraciones] : [];
+        val.push({ estrellas: _pcStarVal, comentario: comment, fecha: new Date().toISOString(), vendedorId: state.currentUser?.id });
+        const promedio = val.reduce((s,v) => s + v.estrellas, 0) / val.length;
+        db.collection('comercios').doc(com.id).update({ valoraciones: val, rating: promedio.toFixed(1) });
+      }
+    } catch(e){ console.warn('Error al guardar valoración:', e); }
+  }
+
+  document.getElementById('pcComisionCierreBox').style.display = 'none';
+  toast('¡Comisión registrada y valoración enviada! 🎉');
+  showScreen('v-catalogo');
+}
+
+// =============================================
+// FIN PEDIDO PERSONALIZADO
 // =============================================
 // FIN CARRITO
 // =============================================
