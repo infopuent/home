@@ -2266,7 +2266,12 @@ async function cargarDatosPublicosDeFirestore(){
   if(comerciosR.status==='fulfilled'){
     comerciosR.value.forEach(doc=>{
       const c = doc.data();
-      if(c.uid && !state.comercios.some(x=>x.uid===c.uid)) state.comercios.push(c);
+      // Comercios creados via Google tienen uid; los creados por admin solo tienen id.
+      // Hay que incluir ambos tipos, deduplicando por uid si existe, por id si no.
+      const yaExiste = c.uid
+        ? state.comercios.some(x=>x.uid===c.uid)
+        : state.comercios.some(x=>x.id===c.id);
+      if(!yaExiste) state.comercios.push(c);
     });
   } else console.error('No se pudieron cargar los comercios de Firestore:', comerciosR.reason);
   if(productosR.status==='fulfilled'){
