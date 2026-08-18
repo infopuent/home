@@ -1961,14 +1961,47 @@ function genCodigo(){ return 'EP-' + (1000 + Math.floor(Math.random()*8999)); }
 
 function renderQR(container, texto){
   container.innerHTML = '';
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(texto)}`;
+  container.dataset.qrUrl  = url;
+  container.dataset.qrData = texto;
   const img = document.createElement('img');
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=0&data=${encodeURIComponent(texto)}`;
+  img.src = url;
   img.alt = 'Código QR: ' + texto;
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.display = 'block';
+  img.style.cssText = 'width:100%;height:100%;display:block;border-radius:8px;';
   img.onerror = () => { container.textContent = texto; };
   container.appendChild(img);
+}
+
+// Descarga el QR como PNG y lo comparte (imagen adjunta) o abre WhatsApp con el texto
+async function compartirQR(qrContainerId, textoMensaje, nombreArchivo){
+  const container = document.getElementById(qrContainerId);
+  const qrUrl = container?.dataset.qrUrl;
+
+  // Intentar compartir con imagen adjunta (Web Share API — Android Chrome, iOS Safari)
+  if(qrUrl && navigator.canShare){
+    try {
+      const res = await fetch(qrUrl);
+      const blob = await res.blob();
+      const file = new File([blob], (nombreArchivo||'qr') + '.png', { type: 'image/png' });
+      if(navigator.canShare({ files: [file] })){
+        await navigator.share({
+          title: 'Código QR — PuenT',
+          text: textoMensaje,
+          files: [file]
+        });
+        return;
+      }
+    } catch(e){ /* CORS o cancelado — seguimos al fallback */ }
+  }
+
+  // Fallback: link directo al QR + texto (WhatsApp lo previsualiza como imagen)
+  const qrLink = qrUrl || '';
+  const mensajeCompleto = textoMensaje + (qrLink ? '\n\n🔲 ' + qrLink : '');
+  if(navigator.share){
+    navigator.share({ title: 'QR PuenT', text: mensajeCompleto }).catch(()=>{});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(mensajeCompleto), '_blank');
+  }
 }
 
 /* ================= ESCÁNER DE CÁMARA (real) ================= */
@@ -3367,10 +3400,28 @@ function confirmarReservaParaCliente(){
     <div class="field"><label>Comercio donde retira</label>${com?.nombre || '—'}</div>
     <div class="field"><label>Tu comisión</label><span class="pill pill-green">$${comMonto.toLocaleString('es-AR')} (${p.comision}%)</span></div>`;
 
-  // Botón compartir por WhatsApp
-  const msgWsp = `Hola ${clienteNombre}! Tu reserva está lista 🎉\nProducto: ${p.nombre}\nRetirás en: ${com?.nombre||'el local'}\nMostrá este código: *${codigo}*`;
+  // Botón compartir por WhatsApp — con imagen del QR adjunta
+  const msgWsp = `Hola ${clienteNombre}! Tu reserva está lista 🎉\nProducto: ${p.nombre}\nRetirás en: ${com?.nombre||'el local'}\nCódigo: *${codigo}*\n\nPresentá esta imagen en el comercio para retirar.`;
+  const tel = (clienteTel||'').replace(/\D/g,'');
   const btnWsp = document.getElementById('vCodigoBtnWsp');
-  btnWsp.onclick = () => window.open('https://wa.me/' + (clienteTel.replace(/\D/g,'') || '') + '?text=' + encodeURIComponent(msgWsp), '_blank');
+  btnWsp.onclick = async () => {
+    const container = document.getElementById('qrFake');
+    const qrUrl = container?.dataset.qrUrl;
+    if(qrUrl && navigator.canShare){
+      try {
+        const res = await fetch(qrUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `reserva-${codigo}.png`, { type: 'image/png' });
+        if(navigator.canShare({ files: [file] })){
+          await navigator.share({ title: 'Tu reserva — PuenT', text: msgWsp, files: [file] });
+          return;
+        }
+      } catch(e){ /* fallback */ }
+    }
+    const base = tel ? `https://wa.me/${tel}` : 'https://wa.me/';
+    const linkQr = qrUrl ? '\n\n🔲 ' + qrUrl : '';
+    window.open(base + '?text=' + encodeURIComponent(msgWsp + linkQr), '_blank');
+  };
 
   _prodReservando = null;
   showScreen('v-codigo');
@@ -3422,9 +3473,27 @@ function reabrirReserva(idx){
     <div class="field"><label>Producto</label>${r.productoNombre}</div>
     <div class="field"><label>Comercio</label>${r.comercioNombre}</div>
     <div class="field"><label>Comisión</label><span class="pill pill-green">$${r.comisionMonto?.toLocaleString('es-AR') || '—'}</span></div>`;
-  const msgWsp = `Hola ${r.clienteNombre}! Acá te mando tu QR de reserva 🎉\nProducto: ${r.productoNombre}\nRetirás en: ${r.comercioNombre}\nCódigo: *${r.codigo}*`;
+  const msgWsp = `Hola ${r.clienteNombre}! Acá te mando tu QR de reserva 🎉\nProducto: ${r.productoNombre}\nRetirás en: ${r.comercioNombre}\nCódigo: *${r.codigo}*\n\nPresentá esta imagen en el comercio para retirar.`;
+  const tel = (r.clienteTel||'').replace(/\D/g,'');
   const btnWsp = document.getElementById('vCodigoBtnWsp');
-  btnWsp.onclick = () => window.open('https://wa.me/' + (r.clienteTel||'').replace(/\D/g,'') + '?text=' + encodeURIComponent(msgWsp), '_blank');
+  btnWsp.onclick = async () => {
+    const container = document.getElementById('qrFake');
+    const qrUrl = container?.dataset.qrUrl;
+    if(qrUrl && navigator.canShare){
+      try {
+        const res = await fetch(qrUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `reserva-${r.codigo}.png`, { type: 'image/png' });
+        if(navigator.canShare({ files: [file] })){
+          await navigator.share({ title: 'Tu reserva — PuenT', text: msgWsp, files: [file] });
+          return;
+        }
+      } catch(e){ /* fallback */ }
+    }
+    const base = tel ? `https://wa.me/${tel}` : 'https://wa.me/';
+    const linkQr = qrUrl ? '\n\n🔲 ' + qrUrl : '';
+    window.open(base + '?text=' + encodeURIComponent(msgWsp + linkQr), '_blank');
+  };
   showScreen('v-codigo');
 }
 
@@ -5935,11 +6004,31 @@ function pcMostrarQR(pedido){
       <div style="font-size:17px;font-weight:800;color:#2F7A55;">$${pedido.comisionMonto.toLocaleString('es-AR')}</div>
     </div>`;
 
-  // WhatsApp
+  // WhatsApp — compartir QR como imagen adjunta
   const nombresProd = pedido.productos.map(p => `• ${p.nombre} $${Number(p.precio).toLocaleString('es-AR')}`).join('\n');
-  const msgWsp = `Hola ${pedido.clienteNombre}! 🎉 Tu pedido está listo.\n\n${nombresProd}\n\nTotal: $${pedido.total.toLocaleString('es-AR')}\nRetirás en: ${pedido.comercioNombre}\nCódigo QR: *${pedido.codigo}*\n\n¡Te espero por WhatsApp si tenés dudas!`;
-  document.getElementById('pcQrBtnWsp').onclick = () =>
-    window.open('https://wa.me/' + (pedido.clienteTel||'').replace(/\D/g,'') + '?text=' + encodeURIComponent(msgWsp), '_blank');
+  const msgWsp = `Hola ${pedido.clienteNombre}! 🎉 Tu pedido está listo.\n\n${nombresProd}\n\nTotal: $${pedido.total.toLocaleString('es-AR')}\nRetirás en: ${pedido.comercioNombre}\nCódigo: *${pedido.codigo}*\n\nPresentá esta imagen en el comercio para retirar tu pedido.`;
+  const tel = (pedido.clienteTel||'').replace(/\D/g,'');
+  document.getElementById('pcQrBtnWsp').onclick = async () => {
+    // Intentar compartir con imagen (Web Share API)
+    const container = document.getElementById('pcQrFake');
+    const qrUrl = container?.dataset.qrUrl;
+    if(qrUrl && navigator.canShare){
+      try {
+        const res = await fetch(qrUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `pedido-${pedido.codigo}.png`, { type: 'image/png' });
+        if(navigator.canShare({ files: [file] })){
+          await navigator.share({ title: 'Tu pedido — PuenT', text: msgWsp, files: [file] });
+          return;
+        }
+      } catch(e){ /* fallback */ }
+    }
+    // Fallback: abrir WhatsApp con texto + link al QR
+    const linkQr = qrUrl || '';
+    const msgFallback = msgWsp + (linkQr ? '\n\n🔲 ' + linkQr : '');
+    const base = tel ? `https://wa.me/${tel}` : 'https://wa.me/';
+    window.open(base + '?text=' + encodeURIComponent(msgFallback), '_blank');
+  };
 
   // Timer de vencimiento
   pcIniciarTimer(pedido.fechaVencimiento);
