@@ -2106,6 +2106,33 @@ async function manejarUsuarioGoogle(user){
     console.error('Error buscando cuenta en Firestore:', e);
   }
 
+  // ── AUTO-CLAIM: buscar comercio creado por admin con el mismo email ──
+  if(user.email && firebaseListo){
+    try{
+      const snapClaim = await db.collection('comercios').where('email','==',user.email).get();
+      const sinUid = snapClaim.docs.find(d=>{ const v=d.data(); return !v.uid; });
+      if(sinUid){
+        const c = sinUid.data();
+        const docId = sinUid.id;
+        // 1. Vincular uid al comercio
+        const datosVinculados = {...c, uid: user.uid, viaGoogle:true, fotoGoogle: user.photoURL||null};
+        await db.collection('comercios').doc(docId).set(datosVinculados, {merge:true});
+        // 2. Traspasar ownerUid de todos sus productos (antes guardados con ownerUid=c.id)
+        const snapProds = await db.collection('productos').where('comercioId','==',c.id).get();
+        const batch = db.batch();
+        snapProds.forEach(pd=>{ batch.update(pd.ref, {ownerUid: user.uid}); });
+        if(!snapProds.empty) await batch.commit();
+        // 3. Actualizar state local
+        const idx = state.comercios.findIndex(x=>x.id===c.id);
+        if(idx>=0) state.comercios[idx] = datosVinculados; else state.comercios.push(datosVinculados);
+        rolPreElegido = null;
+        toast('¡Tu comercio fue vinculado a esta cuenta! 🏬');
+        entrarConDatosGuardados('comercio', datosVinculados);
+        return;
+      }
+    }catch(e){ console.error('Error en auto-claim de comercio:', e); }
+  }
+
   // Cuenta nueva
   if(rolPreElegido){
     crearCuentaDesdeGoogle(rolPreElegido, user);
@@ -4688,7 +4715,33 @@ async function adminVerComercio(docId){
 
     <div class="section-title" style="margin-bottom:8px;">⭐ Valoraciones</div>
     <div>${valoracionesHtml}</div>
+
+    <div class="section-title" style="margin-top:18px;margin-bottom:8px;">🛍️ Productos del comercio</div>
+    <div id="adminProductosComercioLista" style="margin-bottom:10px;"><p style="color:var(--muted);font-size:12px;">Cargando…</p></div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:8px;" onclick="adminAbrirFormProducto('${docId}')">➕ Agregar producto</button>
+    <div id="adminFormProductoBox" style="display:none;" class="card" data-comercio-doc="${docId}">
+      <div class="field"><label>Nombre del producto</label><input type="text" id="apNombre" placeholder="Ej: Remera básica"></div>
+      <div class="two-col">
+        <div class="field"><label>Precio ($)</label><input type="number" id="apPrecio" placeholder="0"></div>
+        <div class="field"><label>Comisión (%)</label><input type="number" id="apComision" placeholder="0" min="0" max="100"></div>
+      </div>
+      <div class="field"><label>Descripción <span style="font-weight:400;color:var(--muted);">(opcional)</span></label><textarea id="apDescripcion" rows="2" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:11px;font-size:13px;"></textarea></div>
+      <div class="field">
+        <label>Foto <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('apFotoInput').click()">🖼️ Elegir foto</button>
+          <span id="apFotoNombre" style="font-size:12px;color:var(--muted);align-self:center;"></span>
+        </div>
+        <input type="file" id="apFotoInput" accept="image/*" style="display:none" onchange="onAdminFotoProducto(this)">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="adminGuardarProductoEnComercio('${docId}')">Guardar producto</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('adminFormProductoBox').style.display='none'">Cancelar</button>
+      </div>
+    </div>
     <div style="height:30px;"></div>`;
+  // Cargar lista de productos de este comercio
+  adminRenderProductosComercio(c.id);
 }
 
 /* ---- Editar comercio desde admin ---- */
@@ -4748,6 +4801,89 @@ async function adminGuardarEdicionComercio(){
     renderLocales(); renderFeed();
     adminVerComercio(docId);
   }catch(e){ toast('Error al guardar: '+e.message); }
+}
+
+// ---- Admin: productos de un comercio ----
+let _adminFotoProducto = null;
+
+function onAdminFotoProducto(input){
+  const file = input.files[0]; if(!file) return;
+  document.getElementById('apFotoNombre').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => { _adminFotoProducto = e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+async function adminRenderProductosComercio(comercioId){
+  const el = document.getElementById('adminProductosComercioLista');
+  if(!el) return;
+  try{
+    const snap = await db.collection('productos').where('comercioId','==',comercioId).get();
+    if(snap.empty){ el.innerHTML='<p style="color:var(--muted);font-size:12px;">Sin productos cargados.</p>'; return; }
+    el.innerHTML = snap.docs.map(d=>{
+      const p = d.data();
+      const foto = p.img
+        ? `<img src="${p.img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0;">`
+        : '<div style="width:38px;height:38px;border-radius:8px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--line);">
+        ${foto}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'—'}</div>
+          <div style="font-size:11px;color:var(--muted);">$${(p.precio||0).toLocaleString('es-AR')} · Comisión: ${p.comision||0}%</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="color:#c23b3b;border-color:#f0d0d0;flex-shrink:0;"
+          onclick="adminEliminarProducto('${d.id}','${(p.nombre||'').replace(/'/g,"&#39;")}','${comercioId}')">🗑️</button>
+      </div>`;
+    }).join('');
+  }catch(e){ el.innerHTML='<p style="color:#c23b3b;font-size:12px;">Error al cargar productos.</p>'; }
+}
+
+function adminAbrirFormProducto(docId){
+  _adminFotoProducto = null;
+  ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
+  const n = document.getElementById('apFotoNombre'); if(n) n.textContent='';
+  const box = document.getElementById('adminFormProductoBox');
+  if(box) box.style.display = (box.style.display==='none'||!box.style.display) ? 'block' : 'none';
+}
+
+async function adminGuardarProductoEnComercio(docId){
+  const nombre = (document.getElementById('apNombre')?.value||'').trim();
+  const precio = parseFloat(document.getElementById('apPrecio')?.value)||0;
+  if(!nombre){ toast('El nombre es obligatorio'); return; }
+  const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+  if(!c){ toast('Comercio no encontrado'); return; }
+  const comision = parseFloat(document.getElementById('apComision')?.value)||0;
+  const descripcion = (document.getElementById('apDescripcion')?.value||'').trim();
+  const prodId = 'p-' + Date.now();
+  const prod = {
+    id: prodId, comercioId: c.id, nombre, precio, comision, descripcion,
+    img: _adminFotoProducto || null, origen:'comercio', rubro: c.rubro||'',
+    ownerUid: c.uid || c.id,   // uid real si ya fue vinculado, sino id como placeholder
+    creadoPorAdmin: true, fechaAlta: new Date().toISOString()
+  };
+  try{
+    await db.collection('productos').doc(prodId).set(prod);
+    if(!state.productos.some(x=>x.id===prodId)) state.productos.push(prod);
+    toast('Producto guardado ✅');
+    _adminFotoProducto = null;
+    ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
+    const fn = document.getElementById('apFotoNombre'); if(fn) fn.textContent='';
+    const box = document.getElementById('adminFormProductoBox'); if(box) box.style.display='none';
+    adminRenderProductosComercio(c.id);
+    renderFeed();
+  }catch(e){ toast('Error al guardar: '+e.message); }
+}
+
+async function adminEliminarProducto(firestoreId, nombre, comercioId){
+  if(!confirm(`¿Eliminar "${nombre}"?`)) return;
+  try{
+    await db.collection('productos').doc(firestoreId).delete();
+    const idx = state.productos.findIndex(x=>x.id===firestoreId);
+    if(idx>=0) state.productos.splice(idx,1);
+    toast('Producto eliminado');
+    adminRenderProductosComercio(comercioId);
+    renderFeed();
+  }catch(e){ toast('Error al eliminar: '+e.message); }
 }
 
 async function adminRenovarPublicidad(docId){
