@@ -4685,22 +4685,23 @@ async function adminVerComercio(docId){
   }catch(e){ console.error(e); }
 
   el.innerHTML = `
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
       ${imgHtml}
       <div>
         <div style="font-size:20px;font-weight:800;color:var(--navy);">${c.nombre||'—'}</div>
         <div style="font-size:12px;color:var(--muted);">${c.rubro||'—'} · ${c.ciudad||'—'}</div>
         <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:${pubBg};color:${pubColor};">${pubLabel}</span>
+        ${c.uid ? `<div style="font-size:10px;color:#2F7A55;font-weight:700;margin-top:3px;">✅ Cuenta vinculada</div>` : `<div style="font-size:10px;color:var(--muted);margin-top:3px;">⏳ Sin cuenta vinculada</div>`}
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
-      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${docId}')">✏️ Editar</button>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${docId}')">✏️ Editar datos</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminRenovarPublicidad('${docId}')">📅 Renovar publicidad</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarComercio('${docId}','${(c.nombre||'').replace(/'/g,'&#39;')}')">🗑️ Eliminar</button>
     </div>
 
-    <div class="card" style="padding:4px 16px;margin-bottom:14px;">
+    <div class="card" style="padding:4px 16px;margin-bottom:16px;">
       ${fila('Dirección', c.direccion)}
       ${fila('Teléfono', c.telefono)}
       ${fila('Email', c.email)}
@@ -4710,24 +4711,64 @@ async function adminVerComercio(docId){
       ${fila('Alta', c.fechaAlta ? new Date(c.fechaAlta).toLocaleDateString('es-AR') : null)}
     </div>
 
+    <!-- ══ FOTOS DEL COMERCIO ══ -->
+    <div class="section-title" style="margin-bottom:10px;">📸 Fotos del comercio</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+      <!-- Logo -->
+      <div style="flex:1;min-width:130px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Logo principal</div>
+        <div id="adminFotoLogoBox" style="position:relative;border-radius:14px;overflow:hidden;background:var(--line);aspect-ratio:1;display:flex;align-items:center;justify-content:center;max-width:160px;">
+          ${c.img ? `<img src="${c.img}" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:36px;">🏬</span>`}
+        </div>
+        <div style="display:flex;gap:6px;margin-top:7px;max-width:160px;">
+          <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;" onclick="document.getElementById('adminLogoUpload_${docId}').click()">📷 Cambiar</button>
+          ${c.img ? `<button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarFotoComercio('${docId}','img')">🗑️</button>` : ''}
+        </div>
+        <input type="file" id="adminLogoUpload_${docId}" accept="image/*" style="display:none" onchange="adminReemplazarFotoComercio('${docId}','img',this)">
+      </div>
+      <!-- Foto 2 -->
+      <div style="flex:1;min-width:130px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Foto secundaria</div>
+        <div id="adminFotoImg2Box" style="position:relative;border-radius:14px;overflow:hidden;background:var(--line);aspect-ratio:1;display:flex;align-items:center;justify-content:center;max-width:160px;">
+          ${c.img2 ? `<img src="${c.img2}" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:36px;">🖼️</span>`}
+        </div>
+        <div style="display:flex;gap:6px;margin-top:7px;max-width:160px;">
+          <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;" onclick="document.getElementById('adminImg2Upload_${docId}').click()">📷 Cambiar</button>
+          ${c.img2 ? `<button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarFotoComercio('${docId}','img2')">🗑️</button>` : ''}
+        </div>
+        <input type="file" id="adminImg2Upload_${docId}" accept="image/*" style="display:none" onchange="adminReemplazarFotoComercio('${docId}','img2',this)">
+      </div>
+    </div>
+
+    <!-- ══ VENTAS ══ -->
     <div class="section-title" style="margin-bottom:8px;">📦 Reservas / Ventas</div>
     <div style="margin-bottom:18px;">${ventasHtml}</div>
 
+    <!-- ══ VALORACIONES ══ -->
     <div class="section-title" style="margin-bottom:8px;">⭐ Valoraciones</div>
-    <div>${valoracionesHtml}</div>
+    <div style="margin-bottom:18px;">${valoracionesHtml}</div>
 
-    <div class="section-title" style="margin-top:18px;margin-bottom:8px;">🛍️ Productos del comercio</div>
+    <!-- ══ PRODUCTOS ══ -->
+    <div class="section-title" style="margin-bottom:8px;">🛍️ Productos</div>
     <div id="adminProductosComercioLista" style="margin-bottom:10px;"><p style="color:var(--muted);font-size:12px;">Cargando…</p></div>
     <button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:8px;" onclick="adminAbrirFormProducto('${docId}')">➕ Agregar producto</button>
     <div id="adminFormProductoBox" style="display:none;" class="card" data-comercio-doc="${docId}">
-      <div class="field"><label>Nombre del producto</label><input type="text" id="apNombre" placeholder="Ej: Remera básica"></div>
+      <input type="hidden" id="apEditId">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;" id="apFormTitulo">Nuevo producto</div>
+      <div class="field"><label>Nombre</label><input type="text" id="apNombre" placeholder="Ej: Remera básica"></div>
       <div class="two-col">
         <div class="field"><label>Precio ($)</label><input type="number" id="apPrecio" placeholder="0"></div>
         <div class="field"><label>Comisión (%)</label><input type="number" id="apComision" placeholder="0" min="0" max="100"></div>
       </div>
-      <div class="field"><label>Descripción <span style="font-weight:400;color:var(--muted);">(opcional)</span></label><textarea id="apDescripcion" rows="2" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:11px;font-size:13px;"></textarea></div>
+      <div class="field"><label>Descripción <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+        <textarea id="apDescripcion" rows="2" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:11px;font-size:13px;"></textarea>
+      </div>
       <div class="field">
-        <label>Foto <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+        <label>Foto</label>
+        <div id="apFotoPreviewBox" style="display:none;margin-bottom:8px;position:relative;width:80px;height:80px;border-radius:10px;overflow:hidden;">
+          <img id="apFotoPreviewImg" style="width:100%;height:100%;object-fit:cover;">
+          <button type="button" onclick="adminLimpiarFotoProducto()" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:11px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
         <div style="display:flex;gap:8px;">
           <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('apFotoInput').click()">🖼️ Elegir foto</button>
           <span id="apFotoNombre" style="font-size:12px;color:var(--muted);align-self:center;"></span>
@@ -4735,8 +4776,8 @@ async function adminVerComercio(docId){
         <input type="file" id="apFotoInput" accept="image/*" style="display:none" onchange="onAdminFotoProducto(this)">
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button class="btn btn-primary" style="flex:1;" onclick="adminGuardarProductoEnComercio('${docId}')">Guardar producto</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('adminFormProductoBox').style.display='none'">Cancelar</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="adminGuardarProductoEnComercio('${docId}')">Guardar</button>
+        <button class="btn btn-ghost" onclick="adminCerrarFormProducto()">Cancelar</button>
       </div>
     </div>
     <div style="height:30px;"></div>`;
@@ -4803,77 +4844,199 @@ async function adminGuardarEdicionComercio(){
   }catch(e){ toast('Error al guardar: '+e.message); }
 }
 
-// ---- Admin: productos de un comercio ----
-let _adminFotoProducto = null;
+// ════════════════════════════════════════════════
+// ADMIN: CONTROL TOTAL DEL COMERCIO
+// ════════════════════════════════════════════════
+let _adminFotoProducto = null; // dataURL de la foto nueva del producto en edición
 
-function onAdminFotoProducto(input){
+// ── Fotos del comercio (logo e img2) ──────────────────────────
+function adminEliminarFotoComercio(docId, campo){
+  if(!confirm('¿Eliminar esta foto?')) return;
+  db.collection('comercios').doc(docId).update({[campo]: null}).then(()=>{
+    const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+    if(c) c[campo] = null;
+    const idx = state.comercios.findIndex(x=>x.id===docId);
+    if(idx>=0) state.comercios[idx][campo] = null;
+    toast('Foto eliminada');
+    adminVerComercio(docId); // refrescar detalle
+  }).catch(e=>toast('Error: '+e.message));
+}
+
+function adminReemplazarFotoComercio(docId, campo, input){
   const file = input.files[0]; if(!file) return;
-  document.getElementById('apFotoNombre').textContent = file.name;
   const reader = new FileReader();
-  reader.onload = e => { _adminFotoProducto = e.target.result; };
+  reader.onload = async e => {
+    const dataUrl = e.target.result;
+    try{
+      await db.collection('comercios').doc(docId).update({[campo]: dataUrl});
+      const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+      if(c) c[campo] = dataUrl;
+      const idx = state.comercios.findIndex(x=>x.id===docId);
+      if(idx>=0) state.comercios[idx][campo] = dataUrl;
+      toast('Foto actualizada ✅');
+      adminVerComercio(docId);
+    }catch(err){ toast('Error al guardar: '+err.message); }
+  };
   reader.readAsDataURL(file);
 }
 
+// ── Lista de productos del comercio ───────────────────────────
 async function adminRenderProductosComercio(comercioId){
   const el = document.getElementById('adminProductosComercioLista');
   if(!el) return;
   try{
     const snap = await db.collection('productos').where('comercioId','==',comercioId).get();
-    if(snap.empty){ el.innerHTML='<p style="color:var(--muted);font-size:12px;">Sin productos cargados.</p>'; return; }
+    if(snap.empty){ el.innerHTML='<p style="color:var(--muted);font-size:12px;">Sin productos cargados aún.</p>'; return; }
     el.innerHTML = snap.docs.map(d=>{
       const p = d.data();
       const foto = p.img
-        ? `<img src="${p.img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0;">`
-        : '<div style="width:38px;height:38px;border-radius:8px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>';
-      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--line);">
-        ${foto}
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'—'}</div>
-          <div style="font-size:11px;color:var(--muted);">$${(p.precio||0).toLocaleString('es-AR')} · Comisión: ${p.comision||0}%</div>
-        </div>
-        <button class="btn btn-ghost btn-sm" style="color:#c23b3b;border-color:#f0d0d0;flex-shrink:0;"
-          onclick="adminEliminarProducto('${d.id}','${(p.nombre||'').replace(/'/g,"&#39;")}','${comercioId}')">🗑️</button>
-      </div>`;
+        ? `<img src="${p.img}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;cursor:pointer;" onclick="adminVerFotoProducto('${d.id}')">`
+        : `<div style="width:52px;height:52px;border-radius:10px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📦</div>`;
+      const nombreSafe = (p.nombre||'').replace(/'/g,"&#39;");
+      return `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--line);">
+          <div style="position:relative;">${foto}
+            <label title="Cambiar foto" style="position:absolute;bottom:-3px;right:-3px;background:var(--navy);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;">
+              📷<input type="file" accept="image/*" style="display:none" onchange="adminCambiarFotoProducto('${d.id}','${comercioId}',this)">
+            </label>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'—'}</div>
+            <div style="font-size:11px;color:var(--muted);">$${(p.precio||0).toLocaleString('es-AR')} · Comisión: ${p.comision||0}%</div>
+            ${p.descripcion ? `<div style="font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.descripcion}</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+            <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 8px;" onclick="adminEditarProducto('${d.id}','${comercioId}')">✏️</button>
+            <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 8px;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarProducto('${d.id}','${nombreSafe}','${comercioId}')">🗑️</button>
+          </div>
+        </div>`;
     }).join('');
-  }catch(e){ el.innerHTML='<p style="color:#c23b3b;font-size:12px;">Error al cargar productos.</p>'; }
+  }catch(e){ el.innerHTML='<p style="color:#c23b3b;font-size:12px;">Error al cargar.</p>'; console.error(e); }
+}
+
+// ── Foto de producto: ver/cambiar ─────────────────────────────
+function adminVerFotoProducto(firestoreId){
+  // Abre la imagen en pantalla completa / nueva pestaña
+  const p = state.productos.find(x=>x.id===firestoreId);
+  if(p?.img){ const w=window.open(); w.document.write(`<img src="${p.img}" style="max-width:100%;max-height:100vh;">`); }
+}
+
+function adminCambiarFotoProducto(firestoreId, comercioId, input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const dataUrl = e.target.result;
+    try{
+      await db.collection('productos').doc(firestoreId).update({img: dataUrl});
+      const idx = state.productos.findIndex(x=>x.id===firestoreId);
+      if(idx>=0) state.productos[idx].img = dataUrl;
+      toast('Foto del producto actualizada ✅');
+      adminRenderProductosComercio(comercioId);
+      renderFeed();
+    }catch(err){ toast('Error: '+err.message); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Abrir formulario (nuevo o edición) ───────────────────────
+function adminCerrarFormProducto(){
+  _adminFotoProducto = null;
+  const box = document.getElementById('adminFormProductoBox'); if(box) box.style.display='none';
+}
+
+function adminLimpiarFotoProducto(){
+  _adminFotoProducto = null;
+  const prev = document.getElementById('apFotoPreviewBox'); if(prev) prev.style.display='none';
+  const fn = document.getElementById('apFotoNombre'); if(fn) fn.textContent='';
+  const inp = document.getElementById('apFotoInput'); if(inp) inp.value='';
+}
+
+function onAdminFotoProducto(input){
+  const file = input.files[0]; if(!file) return;
+  document.getElementById('apFotoNombre').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _adminFotoProducto = e.target.result;
+    const prev = document.getElementById('apFotoPreviewBox');
+    const img  = document.getElementById('apFotoPreviewImg');
+    if(prev && img){ img.src=_adminFotoProducto; prev.style.display='block'; }
+  };
+  reader.readAsDataURL(file);
 }
 
 function adminAbrirFormProducto(docId){
   _adminFotoProducto = null;
+  const editId = document.getElementById('apEditId'); if(editId) editId.value='';
+  const titulo = document.getElementById('apFormTitulo'); if(titulo) titulo.textContent='Nuevo producto';
   ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
-  const n = document.getElementById('apFotoNombre'); if(n) n.textContent='';
+  adminLimpiarFotoProducto();
   const box = document.getElementById('adminFormProductoBox');
   if(box) box.style.display = (box.style.display==='none'||!box.style.display) ? 'block' : 'none';
 }
 
+async function adminEditarProducto(firestoreId, comercioId){
+  // Buscar en Firestore para tener datos frescos
+  let p;
+  try{ const d = await db.collection('productos').doc(firestoreId).get(); p = d.exists ? d.data() : null; }
+  catch(e){ p = state.productos.find(x=>x.id===firestoreId); }
+  if(!p){ toast('Producto no encontrado'); return; }
+
+  _adminFotoProducto = p.img || null;
+  const editId = document.getElementById('apEditId'); if(editId) editId.value = firestoreId;
+  const titulo  = document.getElementById('apFormTitulo'); if(titulo) titulo.textContent='Editar producto';
+  const fn = el=>document.getElementById(el);
+  if(fn('apNombre'))     fn('apNombre').value     = p.nombre||'';
+  if(fn('apPrecio'))     fn('apPrecio').value     = p.precio||0;
+  if(fn('apComision'))   fn('apComision').value   = p.comision||0;
+  if(fn('apDescripcion'))fn('apDescripcion').value = p.descripcion||'';
+  if(fn('apFotoNombre')) fn('apFotoNombre').textContent = p.img ? 'Foto actual cargada' : '';
+  const prev = fn('apFotoPreviewBox');
+  const img  = fn('apFotoPreviewImg');
+  if(p.img && prev && img){ img.src=p.img; prev.style.display='block'; } else if(prev) prev.style.display='none';
+  const box = fn('adminFormProductoBox'); if(box) box.style.display='block';
+  box.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── Guardar (crear o actualizar) ──────────────────────────────
 async function adminGuardarProductoEnComercio(docId){
   const nombre = (document.getElementById('apNombre')?.value||'').trim();
   const precio = parseFloat(document.getElementById('apPrecio')?.value)||0;
   if(!nombre){ toast('El nombre es obligatorio'); return; }
   const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
   if(!c){ toast('Comercio no encontrado'); return; }
-  const comision = parseFloat(document.getElementById('apComision')?.value)||0;
+  const comision   = parseFloat(document.getElementById('apComision')?.value)||0;
   const descripcion = (document.getElementById('apDescripcion')?.value||'').trim();
-  const prodId = 'p-' + Date.now();
+  const editId = document.getElementById('apEditId')?.value || '';
+
   const prod = {
-    id: prodId, comercioId: c.id, nombre, precio, comision, descripcion,
-    img: _adminFotoProducto || null, origen:'comercio', rubro: c.rubro||'',
-    ownerUid: c.uid || c.id,   // uid real si ya fue vinculado, sino id como placeholder
-    creadoPorAdmin: true, fechaAlta: new Date().toISOString()
+    nombre, precio, comision, descripcion,
+    img: _adminFotoProducto !== undefined ? _adminFotoProducto : null,
+    origen:'comercio', rubro: c.rubro||'',
+    ownerUid: c.uid || c.id,
   };
+
   try{
-    await db.collection('productos').doc(prodId).set(prod);
-    if(!state.productos.some(x=>x.id===prodId)) state.productos.push(prod);
-    toast('Producto guardado ✅');
-    _adminFotoProducto = null;
-    ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
-    const fn = document.getElementById('apFotoNombre'); if(fn) fn.textContent='';
-    const box = document.getElementById('adminFormProductoBox'); if(box) box.style.display='none';
+    if(editId){
+      // Editar existente
+      await db.collection('productos').doc(editId).set(prod, {merge:true});
+      const idx = state.productos.findIndex(x=>x.id===editId);
+      if(idx>=0) Object.assign(state.productos[idx], prod);
+      toast('Producto actualizado ✅');
+    } else {
+      // Nuevo
+      const prodId = 'p-' + Date.now();
+      const prodCompleto = {...prod, id:prodId, comercioId:c.id, creadoPorAdmin:true, fechaAlta:new Date().toISOString()};
+      await db.collection('productos').doc(prodId).set(prodCompleto);
+      if(!state.productos.some(x=>x.id===prodId)) state.productos.push(prodCompleto);
+      toast('Producto creado ✅');
+    }
+    adminCerrarFormProducto();
     adminRenderProductosComercio(c.id);
     renderFeed();
   }catch(e){ toast('Error al guardar: '+e.message); }
 }
 
+// ── Eliminar producto ─────────────────────────────────────────
 async function adminEliminarProducto(firestoreId, nombre, comercioId){
   if(!confirm(`¿Eliminar "${nombre}"?`)) return;
   try{
