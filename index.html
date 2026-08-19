@@ -892,6 +892,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="card">
       <div class="field"><label>Nombre completo</label><input id="editVNombre" placeholder="Tu nombre"></div>
       <div class="field"><label>Teléfono / WhatsApp</label><input id="editVTelefono" type="tel" placeholder="Tu WhatsApp"></div>
+      <div class="field"><label>Alias de transferencia (CBU/CVU)</label><input id="editVAlias" placeholder="Ej: juan.perez.mp o tu CBU" autocomplete="off"><div style="font-size:11px;color:var(--muted);margin-top:3px;">El comercio usa este dato para transferirte la comisión.</div></div>
       <div class="two-col">
         <div class="field"><label>Ciudad</label><input id="editVCiudad" placeholder="Ej: La Paz"></div>
         <div class="field"><label>Zona</label><input id="editVZona" placeholder="Ej: Zona Centro"></div>
@@ -1335,8 +1336,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <option value="no">No, entregué un reemplazo similar</option>
         </select>
       </div>
+      <div class="field" style="margin-top:10px;"><label>Medio de pago</label><select id="cMedioPago" onchange="cOnMedioPagoChange()"><option value="transferencia">Transferencia / Mercado Pago</option><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta de débito / crédito</option><option value="qr">QR Mercado Pago / MODO</option></select></div>
+      <div id="cEfectivoNota" class="hidden" style="padding:10px 12px;background:#FFF8EC;border-radius:10px;margin-top:4px;font-size:12.5px;color:#8A6400;line-height:1.5;">💵 La comisión queda registrada. Acordáte de transferírsela al conector por fuera.</div>
     </div>
-    <button class="btn btn-green" style="margin-bottom:10px;" onclick="confirmarVenta()">✅ Sí, se realizó la venta — acreditar comisión</button>
+    <button class="btn btn-green" style="margin-bottom:10px;" onclick="confirmarVenta()">✅ Confirmar venta — registrar comisión</button>
 
     <div class="link-back" style="text-align:center; margin:6px 0 14px;" onclick="document.getElementById('cVentaNoBox').classList.toggle('hidden')">La venta no se concretó</div>
 
@@ -3430,72 +3433,93 @@ function confirmarReservaParaCliente(){
 
 /* ================= CONECTORT: MIS RESERVAS ================= */
 function renderVReservas(){
-  const list = document.getElementById('vReservasList');
-  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var list = document.getElementById('vReservasList');
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
   if(reservas.length === 0){
-    list.innerHTML = `<div class="empty"><div class="ic">📋</div><div class="t">Sin reservas todavía</div><div class="s">Cuando reserves un producto para un cliente, aparece acá con su QR.</div></div>`;
+    list.innerHTML = '<div class="empty"><div class="ic">📋</div><div class="t">Sin reservas todavía</div><div class="s">Cuando reserves o armés un pedido para un cliente, aparece acá.</div></div>';
     return;
   }
-  list.innerHTML = reservas.map((r, idx) => {
-    const fecha = new Date(r.fechaReserva).toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'2-digit'});
-    const estadoPill = r.estado === 'confirmada'
-      ? `<span class="pill pill-green">Confirmada</span>`
-      : `<span class="pill pill-navy">Pendiente</span>`;
-    return `
-      <div class="list-row" style="align-items:flex-start;gap:12px;cursor:pointer;" onclick="reabrirReserva(${idx})">
-        <div class="av" style="background:var(--navy);flex-shrink:0;">🔖</div>
-        <div class="main" style="flex:1;min-width:0;">
-          <div class="t">${r.clienteNombre}</div>
-          <div class="s">${r.productoNombre} · ${r.comercioNombre}</div>
-          <div style="font-size:10.5px;font-weight:700;color:var(--blue);margin-top:3px;">${fecha} · $${r.precio||r.comisionMonto} · <span style="font-family:monospace">${r.codigo}</span></div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
-          ${estadoPill}
-          <span style="font-size:11px;font-weight:700;background:#EAF0E6;color:var(--navy-2);padding:3px 8px;border-radius:100px;">Ver QR</span>
-        </div>
-      </div>`;
+  list.innerHTML = reservas.map(function(r, idx){
+    var esP = r.origen === 'personalizado';
+    var fechaStr = new Date(r.fechaCreacion || r.fechaReserva).toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'2-digit'});
+    var resumen = esP
+      ? (Array.isArray(r.productos) ? r.productos.map(function(p){ return p.nombre; }).join(', ') : 'Pedido personalizado')
+      : (r.productoNombre || '—');
+    var estadoPill, estadoNota = '';
+    if(r.estado === 'comision_recibida'){
+      estadoPill = '<span class="pill" style="background:#2F7A55;color:#fff;">✓ Cobrada</span>';
+    } else if(r.estado === 'confirmada' || r.estado === 'confirmado'){
+      estadoPill = '<span class="pill pill-green">✅ Confirmada</span>';
+      estadoNota = '<div style="font-size:10.5px;color:#2F7A55;font-weight:700;margin-top:3px;">💰 Pendiente cobrar comisión</div>';
+    } else {
+      estadoPill = '<span class="pill pill-navy">🕒 Pendiente</span>';
+    }
+    var comisionStr = r.comisionMonto ? '$' + Number(r.comisionMonto).toLocaleString('es-AR') : '';
+    var icono = esP ? '🛒' : '🔖';
+    return '<div class="list-row" style="align-items:flex-start;gap:12px;cursor:pointer;" onclick="reabrirReserva('+idx+')">'
+      +'<div class="av" style="background:var(--navy);flex-shrink:0;">'+icono+'</div>'
+      +'<div class="main" style="flex:1;min-width:0;">'
+      +'<div class="t">'+r.clienteNombre+'</div>'
+      +'<div class="s" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+resumen+' · '+(r.comercioNombre||'')+'</div>'
+      +'<div style="font-size:10.5px;font-weight:700;color:var(--blue);margin-top:3px;">'+fechaStr+(comisionStr?' · comisión '+comisionStr:'')+' · <span style="font-family:monospace">'+r.codigo+'</span></div>'
+      +estadoNota
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">'
+      +estadoPill
+      +'<span style="font-size:11px;font-weight:700;background:#EAF0E6;color:var(--navy-2);padding:3px 8px;border-radius:100px;">Ver QR</span>'
+      +'</div></div>';
   }).join('');
 }
 
 function reabrirReserva(idx){
-  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
-  const r = reservas[idx];
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var r = reservas[idx];
   if(!r) return;
-  const p = state.productos.find(x=>x.id===r.productoId) || { nombre: r.productoNombre, precio: 0, comision: 0 };
-  const com = state.comercios.find(x=>x.id===r.comercioId) || { nombre: r.comercioNombre };
-  const linkCodigo = construirLinkCodigo(r.codigo);
+
+  // Pedido personalizado: usar pcMostrarQR con box de cierre integrado
+  if(r.origen === 'personalizado'){
+    _pcPedidoActual = r;
+    pcMostrarQR(r);
+    return;
+  }
+
+  // Reserva normal del catálogo
+  var p = state.productos.find(function(x){ return x.id===r.productoId; }) || { nombre: r.productoNombre, precio: 0, comision: 0 };
+  var com = state.comercios.find(function(x){ return x.id===r.comercioId; }) || { nombre: r.comercioNombre };
+  var linkCodigo = construirLinkCodigo(r.codigo);
   document.getElementById('codigoTexto').textContent = r.codigo;
-  document.getElementById('vCodigoLabel').textContent = `Para: ${r.clienteNombre} · Retira en ${com.nombre}`;
-  document.getElementById('vCodigoSub').textContent = `Reserva para ${r.clienteNombre}. Retira en ${com.nombre}.`;
+  document.getElementById('vCodigoLabel').textContent = 'Para: '+r.clienteNombre+' · Retira en '+com.nombre;
+  document.getElementById('vCodigoSub').textContent = 'Reserva para '+r.clienteNombre+'. Retira en '+com.nombre+'.';
   renderQR(document.getElementById('qrFake'), linkCodigo);
-  document.getElementById('codigoDetalle').innerHTML = `
-    <div class="field"><label>Cliente</label>${r.clienteNombre}${r.clienteTel ? ' · '+r.clienteTel : ''}</div>
-    <div class="field"><label>Producto</label>${r.productoNombre}</div>
-    <div class="field"><label>Comercio</label>${r.comercioNombre}</div>
-    <div class="field"><label>Comisión</label><span class="pill pill-green">$${r.comisionMonto?.toLocaleString('es-AR') || '—'}</span></div>`;
-  const msgWsp = `Hola ${r.clienteNombre}! Acá te mando tu QR de reserva 🎉\nProducto: ${r.productoNombre}\nRetirás en: ${r.comercioNombre}\nCódigo: *${r.codigo}*\n\nPresentá esta imagen en el comercio para retirar.`;
-  const tel = (r.clienteTel||'').replace(/\D/g,'');
-  const btnWsp = document.getElementById('vCodigoBtnWsp');
-  btnWsp.onclick = async () => {
-    const container = document.getElementById('qrFake');
-    const qrUrl = container?.dataset.qrUrl;
+  document.getElementById('codigoDetalle').innerHTML =
+    '<div class="field"><label>Cliente</label>'+r.clienteNombre+(r.clienteTel?' · '+r.clienteTel:'')+' </div>'
+    +'<div class="field"><label>Producto</label>'+r.productoNombre+'</div>'
+    +'<div class="field"><label>Comercio</label>'+r.comercioNombre+'</div>'
+    +'<div class="field"><label>Comisión</label><span class="pill pill-green">$'+(r.comisionMonto ? Number(r.comisionMonto).toLocaleString('es-AR') : '—')+'</span></div>';
+  var msgWsp = 'Hola '+r.clienteNombre+'! Acá te mando tu QR de reserva 🎉\nProducto: '+r.productoNombre+'\nRetirás en: '+r.comercioNombre+'\nCódigo: *'+r.codigo+'*\n\nPresentá esta imagen en el comercio para retirar.';
+  var tel = (r.clienteTel||'').replace(/\D/g,'');
+  var btnWsp = document.getElementById('vCodigoBtnWsp');
+  btnWsp.onclick = async function(){
+    var container = document.getElementById('qrFake');
+    var qrUrl = container && container.dataset.qrUrl;
     if(qrUrl && navigator.canShare){
       try {
-        const res = await fetch(qrUrl);
-        const blob = await res.blob();
-        const file = new File([blob], `reserva-${r.codigo}.png`, { type: 'image/png' });
+        var res = await fetch(qrUrl);
+        var blob = await res.blob();
+        var file = new File([blob], 'reserva-'+r.codigo+'.png', { type: 'image/png' });
         if(navigator.canShare({ files: [file] })){
           await navigator.share({ title: 'Tu reserva — PuenT', text: msgWsp, files: [file] });
           return;
         }
-      } catch(e){ /* fallback */ }
+      } catch(e){}
     }
-    const base = tel ? `https://wa.me/${tel}` : 'https://wa.me/';
-    const linkQr = qrUrl ? '\n\n🔲 ' + qrUrl : '';
+    var base = tel ? 'https://wa.me/'+tel : 'https://wa.me/';
+    var linkQr = qrUrl ? '\n\n🔲 ' + qrUrl : '';
     window.open(base + '?text=' + encodeURIComponent(msgWsp + linkQr), '_blank');
   };
   showScreen('v-codigo');
 }
+
 
 /* ================= NOTIFICACION POR MAIL (simulada) ================= */
 // Cuando tengas la cuenta de EmailJS armada, esta es la única función que hay
@@ -3578,32 +3602,65 @@ async function cargarVentasDeComercio(comercioId){
 }
 
 // Carga las reservas propias del ConectorT al iniciar sesión
+let _conectorPollingInterval = null;
+
 async function cargarReservasDeConector(vendedorId){
   if(!firebaseListo) return;
   try{
-    const snap = await db.collection('ventas')
+    var snap = await db.collection('ventas')
       .where('vendedorId','==', vendedorId)
       .get();
-    snap.forEach(doc=>{
-      const v = doc.data();
-      if(!state.ventas.find(x=>x.id===v.id)) state.ventas.push(v);
-      // Sincronizar también en localStorage para que renderVReservas las vea
+    snap.forEach(function(doc){
+      var v = doc.data();
+      if(!state.ventas.find(function(x){ return x.id===v.id; })) state.ventas.push(v);
       _sincronizarReservaEnLocalStorage(v);
     });
   } catch(e){ console.error('Error cargando reservas del ConectorT:', e); }
+  // Iniciar polling para detectar confirmaciones del comercio en tiempo real
+  if(!_conectorPollingInterval){
+    _conectorPollingInterval = setInterval(function(){
+      _pollingConectorActualizarEstados(vendedorId);
+    }, 15000); // cada 15 segundos
+  }
+}
+
+async function _pollingConectorActualizarEstados(vendedorId){
+  if(!firebaseListo) return;
+  try{
+    // Solo pedir las que no están cerradas
+    var snap = await db.collection('ventas')
+      .where('vendedorId','==', vendedorId)
+      .where('estado','==','confirmada')
+      .get();
+    snap.forEach(function(doc){
+      var v = doc.data();
+      _sincronizarReservaEnLocalStorage(v);
+    });
+  } catch(e){ /* silencioso en polling */ }
 }
 
 function _sincronizarReservaEnLocalStorage(v){
-  if(!v.origen || v.origen !== 'conector') return; // solo las del ConectorT
-  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
-  if(!reservas.find(r=>r.id===v.id)){
-    const prod = state.productos.find(p=>p.id===v.productoId);
-    const com  = state.comercios.find(c=>c.id===v.comercioId);
-    reservas.unshift({
-      ...v,
-      productoNombre: prod?.nombre || '—',
-      comercioNombre: com?.nombre || '—'
-    });
+  // Acepta tanto reservas normales (origen='conector') como personalizadas (origen='personalizado')
+  if(!v.origen || (v.origen !== 'conector' && v.origen !== 'personalizado')) return;
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var idx = reservas.findIndex(function(r){ return r.id===v.id; });
+  if(idx >= 0){
+    // Ya existe: actualizar estado si cambió (el comercio confirmó)
+    if(reservas[idx].estado !== v.estado){
+      reservas[idx].estado = v.estado;
+      reservas[idx].fechaConfirmacion = v.fechaConfirmacion || reservas[idx].fechaConfirmacion;
+      reservas[idx].medioPago = v.medioPago || reservas[idx].medioPago;
+      localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas.slice(0,50)));
+      // Si fue confirmada y el conector tiene la pantalla QR abierta, mostrar el box de cierre
+      _pcActualizarCierreBoxSiAbierto(v);
+    }
+  } else {
+    var prod = state.productos.find(function(p){ return p.id===v.productoId; });
+    var com  = state.comercios.find(function(c){ return c.id===v.comercioId; });
+    reservas.unshift(Object.assign({}, v, {
+      productoNombre: (prod && prod.nombre) || v.productoNombre || '—',
+      comercioNombre: (com && com.nombre)  || v.comercioNombre  || '—'
+    }));
     localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas.slice(0,50)));
   }
 }
@@ -3755,6 +3812,7 @@ function abrirEditarVendedor(){
   const v = state.currentUser;
   document.getElementById('editVNombre').value = v.nombre || '';
   document.getElementById('editVTelefono').value = (v.telefono && v.telefono!=='—') ? v.telefono : '';
+  document.getElementById('editVAlias').value = v.alias || '';
   document.getElementById('editVCiudad').value = v.ciudad || 'La Paz';
   document.getElementById('editVZona').value = v.zona || '';
   showScreen('editar-vendedor');
@@ -3764,6 +3822,7 @@ function guardarEdicionVendedor(){
   const v = state.currentUser;
   v.nombre = document.getElementById('editVNombre').value.trim() || v.nombre;
   v.telefono = document.getElementById('editVTelefono').value.trim() || '—';
+  v.alias = document.getElementById('editVAlias').value.trim();
   v.ciudad = document.getElementById('editVCiudad').value.trim() || 'La Paz';
   v.zona = document.getElementById('editVZona').value.trim();
 
@@ -3868,31 +3927,86 @@ function renderComercioHistorial(){
   }).join('');
 }
 
-function escanearCodigo(){
-  const codigo = document.getElementById('scanCodigo').value.trim().toUpperCase();
-  const venta = state.ventas.find(v=>v.codigo===codigo && v.comercioId===state.currentUser.id);
-  if(!venta){ toast('Código no encontrado para tu comercio'); return; }
-  if(venta.estado==='confirmada'){ toast('Este código ya fue confirmado antes'); return; }
-  if(reservaVencida(venta)){ toast('⏰ Esta reserva venció su plazo de retiro — el cliente tendría que sacar un código nuevo'); return; }
+function cOnMedioPagoChange(){
+  var mp = document.getElementById('cMedioPago').value;
+  document.getElementById('cEfectivoNota').classList.toggle('hidden', mp !== 'efectivo');
+}
 
-  const prod = state.productos.find(p=>p.id===venta.productoId);
-  const vend = venta.vendedorId ? state.vendedores.find(v=>v.id===venta.vendedorId) : null;
-  window._ventaEscaneada = venta.id;
-  document.getElementById('cDetalleCard').innerHTML = `
-    <div class="field"><label>Cliente</label>${venta.clienteNombre}</div>
-    <div class="field"><label>Producto</label>${prod.nombre} — $${prod.precio.toLocaleString('es-AR')}</div>
-    ${vend
-      ? `<div class="field"><label>ConectorT a acreditar</label><span class="pill pill-green">${vend.nombre}</span></div>
-         <div class="field"><label>Comisión a acreditar</label>$${venta.comisionMonto.toLocaleString('es-AR')} (${prod.comision}%)</div>`
-      : `<div class="field"><label>Origen</label><span class="pill pill-blue">Oferta directa del feed — sin vendedor</span></div>`
-    }
-  `;
+function escanearCodigo(){
+  var codigo = document.getElementById('scanCodigo').value.trim().toUpperCase();
+  var venta = state.ventas.find(function(v){ return v.codigo===codigo && v.comercioId===state.currentUser.id; });
+  if(!venta){
+    var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector')||'[]');
+    var r = reservas.find(function(x){ return x.codigo===codigo && x.comercioId===state.currentUser.id; });
+    if(r){ venta=r; state.ventas.push(r); }
+  }
+  if(!venta){ toast('Código no encontrado para tu comercio'); return; }
+  if(venta.estado==='confirmada'||venta.estado==='comision_recibida'){ toast('Este código ya fue confirmado anteriormente'); return; }
+  if(reservaVencida(venta)){ toast('⏰ Esta reserva venció — el conector tiene que regenerar el código'); return; }
+
+  var esP = venta.origen==='personalizado';
+  var vend = venta.vendedorId ? state.vendedores.find(function(v){ return v.id===venta.vendedorId; }) : null;
+  window._ventaEscaneada = venta.id || venta.codigo;
+
+  // Productos
+  var productosHtml = '';
+  if(esP && Array.isArray(venta.productos) && venta.productos.length){
+    var filas = venta.productos.map(function(p){
+      var fotoHtml = p.foto
+        ? '<img src="'+p.foto+'" style="width:38px;height:38px;border-radius:7px;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">'
+        : '<div style="width:38px;height:38px;border-radius:7px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📦</div>';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--line);">'+fotoHtml+'<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:700;color:var(--navy);">'+p.nombre+'</div><div style="font-size:13px;font-weight:600;color:var(--green);">$'+Number(p.precio).toLocaleString('es-AR')+'</div></div></div>';
+    }).join('');
+    productosHtml = '<div style="margin-top:4px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Productos del pedido</div>'+filas+'<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--navy);padding-top:10px;"><span>Total</span><span>$'+Number(venta.total).toLocaleString('es-AR')+'</span></div></div>';
+  } else {
+    var prod = state.productos.find(function(p){ return p.id===venta.productoId; });
+    productosHtml = '<div class="field"><label>Producto</label>'+(prod ? prod.nombre+' — $'+Number(prod.precio).toLocaleString('es-AR') : '—')+'</div>';
+  }
+
+  // Conector
+  var vendHtml = '';
+  if(vend){
+    var tel = (vend.telefono && vend.telefono!=='—') ? vend.telefono : null;
+    var alias = vend.alias || null;
+    var email = vend.email || null;
+    var telHtml = tel
+      ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:15px;">📱</span><a href="tel:'+tel+'" style="font-size:13px;font-weight:600;color:var(--navy);text-decoration:none;">'+tel+'</a><a href="https://wa.me/'+tel.replace(/\D/g,'')+'" target="_blank" style="font-size:11px;background:#25D366;color:#fff;padding:2px 8px;border-radius:20px;text-decoration:none;">WhatsApp</a></div>'
+      : '';
+    var aliasHtml = alias
+      ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:15px;">🏦</span><span style="font-size:13px;color:var(--navy);">Alias:</span><strong style="font-size:13.5px;color:var(--navy);">'+alias+'</strong><button onclick="navigator.clipboard.writeText(\''+alias+'\').then(function(){ toast(\'Alias copiado ✓\'); })" style="font-size:11px;background:var(--navy);color:#fff;padding:2px 8px;border-radius:20px;border:none;cursor:pointer;">Copiar</button></div>'
+      : '<div style="font-size:12px;color:#AA8800;margin-bottom:6px;">⚠️ El conector aún no cargó su alias de transferencia.</div>';
+    var emailHtml = email ? '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15px;">✉️</span><span style="font-size:12.5px;color:var(--muted);">'+email+'</span></div>' : '';
+    var usuHtml = vend.usuario ? '<div style="font-size:12px;color:var(--muted);">@'+vend.usuario+'</div>' : '';
+    vendHtml = '<div style="margin-top:14px;padding:12px 14px;background:#EAF0E6;border-radius:12px;">'
+      +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--navy-2);margin-bottom:10px;">Conector — datos para la comisión</div>'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+      +'<div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🤝</div>'
+      +'<div><div style="font-size:14px;font-weight:800;color:var(--navy);">'+vend.nombre+'</div>'+usuHtml+'</div>'
+      +'</div>'+telHtml+aliasHtml+emailHtml
+      +'<div style="margin-top:10px;padding:8px 10px;background:#fff;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">'
+      +'<span style="font-size:12px;color:var(--navy-2);">Comisión acordada</span>'
+      +'<strong style="font-size:17px;color:#2F7A55;">$'+Number(venta.comisionMonto||0).toLocaleString('es-AR')+'</strong>'
+      +'</div></div>';
+  } else {
+    vendHtml = '<div style="margin-top:10px;padding:8px 12px;background:var(--line);border-radius:8px;font-size:13px;color:var(--muted);">📢 Oferta directa del feed — sin conector asociado</div>';
+  }
+
+  var pillHtml = esP ? '<div style="margin-bottom:6px;"><span class="pill pill-blue">Pedido personalizado</span></div>' : '';
+  document.getElementById('cDetalleCard').innerHTML =
+    '<div class="field"><label>Cliente</label><strong>'+(venta.clienteNombre||'—')+'</strong></div>'
+    + pillHtml + productosHtml + vendHtml;
+
+  document.getElementById('cMedioPago').value = 'transferencia';
+  document.getElementById('cEfectivoNota').classList.add('hidden');
   document.getElementById('cVentaNoBox').classList.add('hidden');
   document.getElementById('cMotivoNoVenta').value = '';
   document.getElementById('cMotivoOtroWrap').style.display = 'none';
   document.getElementById('cMotivoOtroTexto').value = '';
+  var sf = document.getElementById('cSustituto');
+  if(sf) sf.closest('.field').style.display = esP ? 'none' : '';
   showScreen('c-detalle');
 }
+
 
 document.addEventListener('change', (e)=>{
   if(e.target && e.target.id === 'cMotivoNoVenta'){
@@ -3904,8 +4018,9 @@ function confirmarVenta(){
   const venta = state.ventas.find(v=>v.id===window._ventaEscaneada);
   venta.estado = 'confirmada';
   venta.sustituto = document.getElementById('cSustituto').value === 'no';
+  venta.medioPago = (document.getElementById('cMedioPago')||{value:'transferencia'}).value;
   venta.fechaConfirmacion = new Date().toISOString();
-  actualizarEstadoVentaFirestore(venta.id, { estado:'confirmada', sustituto: venta.sustituto, fechaConfirmacion: venta.fechaConfirmacion });
+  actualizarEstadoVentaFirestore(venta.id, { estado:'confirmada', sustituto: venta.sustituto, medioPago: venta.medioPago, fechaConfirmacion: venta.fechaConfirmacion });
   document.getElementById('scanCodigo').value='';
   const vend = state.vendedores.find(v=>v.id===venta.vendedorId);
   if(vend) vend.ultimaVenta = new Date().toISOString();
@@ -5977,6 +6092,20 @@ function pcGenerarQR(){
   pcMostrarQR(pedido);
 }
 
+function _pcActualizarCierreBoxSiAbierto(v){
+  // Si el conector tiene abierta la pantalla del QR del pedido confirmado, mostrar box de cierre
+  var pantalla = document.querySelector('.screen:not(.hidden)');
+  if(!pantalla || pantalla.id !== 'screen-v-pedido-qr') return;
+  if(!_pcPedidoActual || _pcPedidoActual.id !== v.id) return;
+  _pcPedidoActual.estado = v.estado;
+  var cierreBox = document.getElementById('pcComisionCierreBox');
+  if(cierreBox && (v.estado === 'confirmada' || v.estado === 'confirmado')){
+    cierreBox.style.display = 'block';
+    // Notificacion visual
+    toast('\u2705 El comercio confirmó la venta — ¡ya podés cobrar tu comisión!');
+  }
+}
+
 function pcMostrarQR(pedido){
   const com = (state.comercios || []).find(c => c.id === pedido.comercioId);
   document.getElementById('pcQrCodigo').textContent = pedido.codigo;
@@ -6035,7 +6164,7 @@ function pcMostrarQR(pedido){
 
   // Mostrar box de cierre si la venta ya fue confirmada
   const cierreBox = document.getElementById('pcComisionCierreBox');
-  cierreBox.style.display = (pedido.estado === 'confirmado') ? 'block' : 'none';
+  cierreBox.style.display = (pedido.estado === 'confirmada' || pedido.estado === 'confirmado') ? 'block' : 'none';
 
   showScreen('v-pedido-qr');
 }
