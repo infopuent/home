@@ -965,6 +965,21 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="card" id="codigoDetalle"></div>
     <button class="btn btn-primary" id="vCodigoBtnWsp" onclick="">📲 Compartir por WhatsApp</button>
     <button class="btn btn-ghost" style="margin-top:10px;" onclick="renderVReservas();showScreen('v-reservas')">Ver mis reservas activas</button>
+    <div id="vCodCierreBox" class="card" style="margin-top:18px;display:none;">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">¿Ya recibiste la comisión?</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Una vez que el comercio te transfirió, confirmálo acá y dejá tu valoración.</div>
+      <div class="field"><label>Valoración al comercio</label>
+        <div id="vCodStarRow" style="display:flex;gap:8px;font-size:24px;margin-bottom:8px;">
+          <span class="vc-star" data-v="1" onclick="vcSetStar(1)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="vc-star" data-v="2" onclick="vcSetStar(2)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="vc-star" data-v="3" onclick="vcSetStar(3)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="vc-star" data-v="4" onclick="vcSetStar(4)" style="cursor:pointer;opacity:.4;">★</span>
+          <span class="vc-star" data-v="5" onclick="vcSetStar(5)" style="cursor:pointer;opacity:.4;">★</span>
+        </div>
+      </div>
+      <div class="field"><label>Comentario (opcional)</label><textarea id="vCodValComment" rows="2" placeholder="¿Cómo fue la experiencia?"></textarea></div>
+      <button class="btn btn-primary" onclick="vcConfirmarComisionRecibida()">✅ Recibí la comisión</button>
+    </div>
   </div>
 
   <!-- ============ CONECTORT: MIS RESERVAS ACTIVAS ============ -->
@@ -3429,6 +3444,11 @@ function confirmarReservaParaCliente(){
   };
 
   _prodReservando = null;
+  _vcVentaActiva = { id: venta.id, comercioId: venta.comercioId };
+  _vcStarVal = 0;
+  document.querySelectorAll('.vc-star').forEach(function(s){ s.style.opacity='.4'; s.style.color=''; });
+  var vcBox = document.getElementById('vCodCierreBox');
+  if(vcBox) vcBox.style.display = 'none';
   showScreen('v-codigo');
   toast('¡Reserva generada para ' + clienteNombre + '! 🎉');
 }
@@ -3519,6 +3539,14 @@ function reabrirReserva(idx){
     var linkQr = qrUrl ? '\n\n🔲 ' + qrUrl : '';
     window.open(base + '?text=' + encodeURIComponent(msgWsp + linkQr), '_blank');
   };
+  // Conectar box de cierre de comision
+  _vcVentaActiva = { id: r.id, comercioId: r.comercioId };
+  _vcStarVal = 0;
+  document.querySelectorAll('.vc-star').forEach(function(s){ s.style.opacity='.4'; s.style.color=''; });
+  var vcBox = document.getElementById('vCodCierreBox');
+  var yaConfirmada = r.estado === 'confirmada' || r.estado === 'confirmado';
+  var yaCobrada = r.estado === 'comision_recibida';
+  if(vcBox) vcBox.style.display = (yaConfirmada && !yaCobrada) ? 'block' : 'none';
   showScreen('v-codigo');
 }
 
@@ -6208,16 +6236,22 @@ function pcGenerarQR(){
 }
 
 function _pcActualizarCierreBoxSiAbierto(v){
-  // Si el conector tiene abierta la pantalla del QR del pedido confirmado, mostrar box de cierre
   var pantalla = document.querySelector('.screen:not(.hidden)');
-  if(!pantalla || pantalla.id !== 'screen-v-pedido-qr') return;
-  if(!_pcPedidoActual || _pcPedidoActual.id !== v.id) return;
-  _pcPedidoActual.estado = v.estado;
-  var cierreBox = document.getElementById('pcComisionCierreBox');
-  if(cierreBox && (v.estado === 'confirmada' || v.estado === 'confirmado')){
-    cierreBox.style.display = 'block';
-    // Notificacion visual
-    toast('\u2705 El comercio confirmó la venta — ¡ya podés cobrar tu comisión!');
+  if(!pantalla) return;
+  var confirmada = v.estado === 'confirmada' || v.estado === 'confirmado';
+  if(!confirmada) return;
+  // Pedido personalizado en screen-v-pedido-qr
+  if(pantalla.id === 'screen-v-pedido-qr' && _pcPedidoActual && _pcPedidoActual.id === v.id){
+    _pcPedidoActual.estado = v.estado;
+    var cierreBox = document.getElementById('pcComisionCierreBox');
+    if(cierreBox){ cierreBox.style.display = 'block'; }
+    toast('✅ El comercio confirmó la venta — ¡ya podés cobrar tu comisión!');
+  }
+  // Reserva normal en screen-v-codigo
+  if(pantalla.id === 'screen-v-codigo' && _vcVentaActiva && _vcVentaActiva.id === v.id){
+    var vcBox = document.getElementById('vCodCierreBox');
+    if(vcBox){ vcBox.style.display = 'block'; }
+    toast('✅ El comercio confirmó la venta — ¡ya podés cobrar tu comisión!');
   }
 }
 
@@ -6333,37 +6367,64 @@ function pcSetStar(v){
 }
 
 /* ---- Confirmar comisión recibida ---- */
+// Funcion generica de cierre: actualiza localStorage + state.ventas + Firestore
+function _cerrarComision(ventaId, comercioId, estrellas, comentario, cierreBoxId){
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var idx = reservas.findIndex(function(r){ return r.id === ventaId; });
+  if(idx >= 0){
+    reservas[idx].estado = 'comision_recibida';
+    reservas[idx].valoracion = { estrellas: estrellas, comentario: comentario, fecha: new Date().toISOString() };
+    localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas));
+  }
+  var sv = state.ventas.find(function(v){ return v.id === ventaId; });
+  if(sv){ sv.estado = 'comision_recibida'; sv.fechaCobro = new Date().toISOString(); }
+  actualizarEstadoVentaFirestore(ventaId, {
+    estado: 'comision_recibida',
+    fechaCobro: new Date().toISOString(),
+    valoracion: { estrellas: estrellas, comentario: comentario, fecha: new Date().toISOString() }
+  });
+  if(typeof db !== 'undefined'){
+    try {
+      var com = (state.comercios || []).find(function(c){ return c.id === comercioId; });
+      if(com){
+        var val = com.valoraciones ? com.valoraciones.slice() : [];
+        val.push({ estrellas: estrellas, comentario: comentario, fecha: new Date().toISOString(), vendedorId: (state.currentUser||{}).id });
+        var promedio = val.reduce(function(s,v){ return s+v.estrellas; },0) / val.length;
+        com.valoraciones = val; com.rating = promedio.toFixed(1);
+        db.collection('comercios').doc(com.id).update({ valoraciones: val, rating: com.rating });
+      }
+    } catch(e){ console.warn('Error valoracion:', e); }
+  }
+  var box = document.getElementById(cierreBoxId);
+  if(box) box.style.display = 'none';
+  toast('¡Comisión registrada! El comercio recibe la confirmación. 🎉');
+  renderVendedorStats();
+  showScreen('v-catalogo');
+}
+
+var _vcStarVal = 0;
+var _vcVentaActiva = null;
+function vcSetStar(v){
+  _vcStarVal = v;
+  document.querySelectorAll('.vc-star').forEach(function(s){
+    s.style.opacity = Number(s.dataset.v) <= v ? '1' : '0.3';
+    s.style.color   = Number(s.dataset.v) <= v ? '#C99A3E' : '';
+  });
+}
+function vcConfirmarComisionRecibida(){
+  if(!_vcVentaActiva){ toast('No hay reserva activa'); return; }
+  if(_vcStarVal === 0){ toast('Dejá una valoración al comercio antes de confirmar'); return; }
+  var comment = (document.getElementById('vCodValComment')||{value:''}).value.trim();
+  _cerrarComision(_vcVentaActiva.id, _vcVentaActiva.comercioId, _vcStarVal, comment, 'vCodCierreBox');
+  _vcStarVal = 0; _vcVentaActiva = null;
+}
+
 function pcConfirmarComisionRecibida(){
   if(!_pcPedidoActual){ toast('No hay pedido activo'); return; }
   if(_pcStarVal === 0){ toast('Dejá una valoración al comercio antes de confirmar'); return; }
-
-  const comment = document.getElementById('pcValComment').value.trim();
-
-  // Actualizar estado en localStorage
-  const reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
-  const idx = reservas.findIndex(r => r.id === _pcPedidoActual.id);
-  if(idx >= 0){
-    reservas[idx].estado = 'comision_recibida';
-    reservas[idx].valoracion = { estrellas: _pcStarVal, comentario: comment, fecha: new Date().toISOString() };
-    localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas));
-  }
-
-  // Guardar valoración en Firestore si existe la función
-  if(typeof db !== 'undefined' && typeof firebase !== 'undefined'){
-    try {
-      const com = (state.comercios || []).find(c => c.id === _pcPedidoActual.comercioId);
-      if(com){
-        const val = com.valoraciones ? [...com.valoraciones] : [];
-        val.push({ estrellas: _pcStarVal, comentario: comment, fecha: new Date().toISOString(), vendedorId: state.currentUser?.id });
-        const promedio = val.reduce((s,v) => s + v.estrellas, 0) / val.length;
-        db.collection('comercios').doc(com.id).update({ valoraciones: val, rating: promedio.toFixed(1) });
-      }
-    } catch(e){ console.warn('Error al guardar valoración:', e); }
-  }
-
-  document.getElementById('pcComisionCierreBox').style.display = 'none';
-  toast('¡Comisión registrada y valoración enviada! 🎉');
-  showScreen('v-catalogo');
+  var comment = (document.getElementById('pcValComment')||{value:''}).value.trim();
+  _cerrarComision(_pcPedidoActual.id, _pcPedidoActual.comercioId, _pcStarVal, comment, 'pcComisionCierreBox');
+  _pcStarVal = 0; _pcPedidoActual = null;
 }
 
 // =============================================
