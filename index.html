@@ -3619,16 +3619,24 @@ function actualizarEstadoVentaFirestore(ventaId, campos){
 async function cargarVentasDeComercio(comercioId){
   if(!firebaseListo) return;
   try{
-    const snap = await db.collection('ventas')
+    var snap = await db.collection('ventas')
       .where('comercioId','==', comercioId)
       .get();
-    snap.forEach(doc=>{
-      const v = doc.data();
-      if(!state.ventas.find(x=>x.id===v.id)) state.ventas.push(v);
+    snap.forEach(function(doc){
+      var v = doc.data();
+      var existing = state.ventas.findIndex(function(x){ return x.id===v.id; });
+      if(existing >= 0) state.ventas[existing] = v; // actualizar si ya existe
+      else state.ventas.push(v);
     });
     renderComercioPanel();
     actualizarBadgeReservas();
   } catch(e){ console.error('Error cargando ventas del comercio:', e); }
+  // Polling cada 30s para ver nuevas reservas sin recargar
+  if(!window._comercioPolling){
+    window._comercioPolling = setInterval(function(){
+      cargarVentasDeComercio(comercioId);
+    }, 30000);
+  }
 }
 
 // Carga las reservas propias del ConectorT al iniciar sesión
@@ -4075,15 +4083,37 @@ function cOnMedioPagoChange(){
   document.getElementById('cEfectivoNota').classList.toggle('hidden', mp !== 'efectivo');
 }
 
-function escanearCodigo(){
+async function escanearCodigo(){
   var codigo = document.getElementById('scanCodigo').value.trim().toUpperCase();
+  if(!codigo){ toast('Ingresá o escaneá un código'); return; }
+
+  // 1. Buscar en memoria
   var venta = state.ventas.find(function(v){ return v.codigo===codigo && v.comercioId===state.currentUser.id; });
+
+  // 2. Buscar en Firestore si no está en memoria (venta generada despues del login)
+  if(!venta && firebaseListo){
+    try{
+      toast('🔍 Buscando el pedido...');
+      var snap = await db.collection('ventas')
+        .where('codigo','==', codigo)
+        .where('comercioId','==', state.currentUser.id)
+        .limit(1)
+        .get();
+      if(!snap.empty){
+        venta = snap.docs[0].data();
+        state.ventas.push(venta); // cachear para proximas veces
+      }
+    } catch(e){ console.error('Error buscando venta en Firestore:', e); }
+  }
+
+  // 3. Fallback localStorage (mismo dispositivo, sin Firestore)
   if(!venta){
     var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector')||'[]');
     var r = reservas.find(function(x){ return x.codigo===codigo && x.comercioId===state.currentUser.id; });
     if(r){ venta=r; state.ventas.push(r); }
   }
-  if(!venta){ toast('Código no encontrado para tu comercio'); return; }
+
+  if(!venta){ toast('Código no encontrado para este comercio'); return; }
   if(venta.estado==='confirmada'||venta.estado==='comision_recibida'){ toast('Este código ya fue confirmado anteriormente'); return; }
   if(reservaVencida(venta)){ toast('⏰ Esta reserva venció — el conector tiene que regenerar el código'); return; }
 
