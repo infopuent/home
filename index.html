@@ -1110,6 +1110,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="progress-track"><div class="progress-fill" id="desafioVentaBar" style="width:0%"></div></div>
     </div>
+    <div class="page-sub" style="margin:18px 0 10px;font-weight:700;color:var(--navy);">Historial de comisiones</div>
+    <div id="vComisionesHistorial"></div>
   </div>
 
   <!-- ============ MI QR DE IDENTIFICACION ============ -->
@@ -3761,6 +3763,46 @@ function renderVendedorStats(){
   const ventaGoal = Math.min(misVentas.length,1);
   document.getElementById('desafioVentaTxt').textContent = ventaGoal+'/1';
   document.getElementById('desafioVentaBar').style.width = (ventaGoal/1*100)+'%';
+  // Historial de comisiones
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var hc = document.getElementById('vComisionesHistorial');
+  if(!hc) return;
+  var conEstado = reservas.filter(function(r){ return r.comisionMonto; });
+  conEstado.sort(function(a,b){ return new Date(b.fechaCreacion||b.fechaReserva||0) - new Date(a.fechaCreacion||a.fechaReserva||0); });
+  if(conEstado.length === 0){
+    hc.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0;">Todavía no tenés comisiones registradas.</div>';
+    return;
+  }
+  hc.innerHTML = conEstado.map(function(r){
+    var esP = r.origen === 'personalizado';
+    var resumen = esP
+      ? (Array.isArray(r.productos) ? r.productos.map(function(p){ return p.nombre; }).join(', ') : 'Pedido personalizado')
+      : (r.productoNombre || '—');
+    var fecha = new Date(r.fechaCreacion||r.fechaReserva).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+    var estadoHtml, bgColor;
+    if(r.estado === 'comision_recibida'){
+      estadoHtml = '<span style="font-size:11px;background:#EAF0E6;color:#2F7A55;padding:2px 8px;border-radius:20px;font-weight:700;">✓ Cobrada</span>';
+      bgColor = '#F8FBF8';
+    } else if(r.estado === 'confirmada' || r.estado === 'confirmado'){
+      estadoHtml = '<span style="font-size:11px;background:#FFF8EC;color:#8A6400;padding:2px 8px;border-radius:20px;font-weight:700;">⏳ A cobrar</span>';
+      bgColor = '#FFFDF5';
+    } else {
+      estadoHtml = '<span style="font-size:11px;background:#F0F4FA;color:var(--navy);padding:2px 8px;border-radius:20px;font-weight:700;">🕒 Pendiente</span>';
+      bgColor = '#fff';
+    }
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:'+bgColor+';border-radius:10px;margin-bottom:6px;">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.clienteNombre+' · '+r.comercioNombre+'</div>'
+      +'<div style="font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+resumen+'</div>'
+      +'<div style="font-size:10.5px;color:var(--muted);margin-top:2px;">'+fecha+' · '+r.codigo+'</div>'
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0;">'
+      +'<div style="font-size:16px;font-weight:800;color:#2F7A55;">$'+Number(r.comisionMonto).toLocaleString('es-AR')+'</div>'
+      +estadoHtml
+      +'</div>'
+      +'</div>';
+  }).join('');
+
 }
 
 /* ================= COMERCIO ================= */
@@ -3916,14 +3958,87 @@ function volverDeQR(){
 }
 
 function renderComercioHistorial(){
-  const hist = state.ventas.filter(v=>v.comercioId===state.currentUser.id && v.estado==='confirmada');
-  const el = document.getElementById('cHistorial');
-  if(hist.length===0){ el.innerHTML = `<div class="empty" style="padding:24px;"><div class="s">Todavía no confirmaste ninguna venta.</div></div>`; return; }
-  el.innerHTML = hist.map(v=>{
-    const prod = state.productos.find(p=>p.id===v.productoId);
-    const vend = state.vendedores.find(x=>x.id===v.vendedorId);
-    return `<div class="list-row"><div class="av" style="background:var(--navy)">✓</div>
-      <div class="main"><div class="t">${prod?prod.nombre:'—'}</div><div class="s">Vendedor: ${vend?vend.nombre:'—'} · Comisión $${v.comisionMonto.toLocaleString('es-AR')}</div></div></div>`;
+  var estados = ['confirmada','comision_recibida'];
+  var hist = state.ventas.filter(function(v){
+    return v.comercioId===state.currentUser.id && estados.indexOf(v.estado) >= 0;
+  });
+  hist.sort(function(a,b){ return new Date(b.fechaConfirmacion||0) - new Date(a.fechaConfirmacion||0); });
+  var el = document.getElementById('cHistorial');
+  if(hist.length===0){
+    el.innerHTML = '<div class="empty" style="padding:24px;"><div class="s">Todavía no confirmaste ninguna venta.</div></div>';
+    return;
+  }
+  el.innerHTML = hist.map(function(v){
+    var esP = v.origen === 'personalizado';
+    var vend = v.vendedorId ? state.vendedores.find(function(x){ return x.id===v.vendedorId; }) : null;
+    var fecha = v.fechaConfirmacion
+      ? new Date(v.fechaConfirmacion).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'})
+      : '—';
+
+    // Productos
+    var resumenHtml = '';
+    if(esP && Array.isArray(v.productos) && v.productos.length){
+      var items = v.productos.map(function(p){
+        return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:0.5px solid var(--line);">'
+          +'<span style="color:var(--navy);">'+p.nombre+'</span>'
+          +'<span style="font-weight:700;color:var(--navy);">$'+Number(p.precio).toLocaleString('es-AR')+'</span>'
+          +'</div>';
+      }).join('');
+      resumenHtml = '<div style="margin:8px 0 4px;">'
+        +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;">Productos</div>'
+        +items
+        +'<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--navy);padding-top:6px;">'
+        +'<span>Total</span><span>$'+Number(v.total||0).toLocaleString('es-AR')+'</span>'
+        +'</div></div>';
+    } else {
+      var prod = state.productos.find(function(p){ return p.id===v.productoId; });
+      resumenHtml = '<div style="font-size:12px;color:var(--navy);margin:4px 0;">'+(prod ? prod.nombre+' — $'+Number(prod.precio||0).toLocaleString('es-AR') : '—')+'</div>';
+    }
+
+    // Medio de pago
+    var medioIconos = { transferencia:'🏦', efectivo:'💵', tarjeta:'💳', qr:'🔲' };
+    var medioLabel = { transferencia:'Transferencia', efectivo:'Efectivo', tarjeta:'Tarjeta', qr:'QR/MODO' };
+    var medio = v.medioPago || 'transferencia';
+    var medioHtml = '<span style="font-size:11px;background:#F0F4FA;color:var(--navy);padding:2px 8px;border-radius:20px;">'
+      +(medioIconos[medio]||'💳')+' '+(medioLabel[medio]||medio)+'</span>';
+
+    // Estado comisión
+    var cobroHtml = v.estado === 'comision_recibida'
+      ? '<span style="font-size:11px;background:#EAF0E6;color:#2F7A55;padding:2px 8px;border-radius:20px;font-weight:700;">✓ Comisión cobrada</span>'
+      : '<span style="font-size:11px;background:#FFF8EC;color:#8A6400;padding:2px 8px;border-radius:20px;font-weight:700;">⏳ Pendiente de cobro</span>';
+
+    // Conector
+    var comStr = v.comisionMonto ? '$'+Number(v.comisionMonto).toLocaleString('es-AR') : '—';
+    var conectorHtml = '';
+    if(vend){
+      var tel = (vend.telefono && vend.telefono !== '—') ? vend.telefono : null;
+      var alias = vend.alias || null;
+      conectorHtml = '<div style="margin-top:8px;padding:8px 10px;background:#EAF0E6;border-radius:8px;">'
+        +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--navy-2);margin-bottom:4px;">Conector</div>'
+        +'<div style="font-size:12.5px;font-weight:700;color:var(--navy);">🤝 '+vend.nombre+(vend.usuario?' <span style="font-weight:400;color:var(--muted);">@'+vend.usuario+'</span>':'')+'</div>'
+        +(tel ? '<div style="font-size:12px;color:var(--muted);margin-top:2px;">📱 <a href="https://wa.me/'+tel.replace(/\D/g,'')+'" style="color:var(--navy);text-decoration:none;">'+tel+'</a></div>' : '')
+        +(alias ? '<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--navy);margin-top:2px;">🏦 '+alias
+          +'<button onclick="navigator.clipboard.writeText(\''+alias+'\').then(function(){ toast(\'Alias copiado ✓\'); })" style="font-size:10px;background:var(--navy);color:#fff;padding:1px 6px;border-radius:12px;border:none;cursor:pointer;">Copiar</button></div>' : '')
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:6px;border-top:0.5px solid rgba(0,0,0,.08);">'
+        +'<span style="font-size:12px;color:var(--navy-2);">Comisión acordada</span>'
+        +'<strong style="font-size:15px;color:#2F7A55;">'+comStr+'</strong>'
+        +'</div>'
+        +'<div style="margin-top:6px;">'+cobroHtml+'</div>'
+        +'</div>';
+    }
+
+    return '<div class="card" style="margin-bottom:10px;padding:12px 14px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">'
+      +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
+      +(esP ? '<span class="pill pill-blue" style="font-size:10px;">🛒 Personalizado</span>' : '<span class="pill" style="font-size:10px;background:#EAF0FB;color:#3A5FA0;">Catálogo</span>')
+      +medioHtml
+      +'</div>'
+      +'<span style="font-size:11px;color:var(--muted);white-space:nowrap;margin-left:6px;">'+fecha+'</span>'
+      +'</div>'
+      +'<div style="font-size:12.5px;color:var(--muted);">Cliente: <strong style="color:var(--navy);">'+(v.clienteNombre||'—')+'</strong></div>'
+      +resumenHtml
+      +conectorHtml
+      +'</div>';
   }).join('');
 }
 
