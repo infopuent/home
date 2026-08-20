@@ -2060,8 +2060,15 @@ function detenerEscaneoCamara(){
 }
 
 function escanearCodigoConCamara(){
-  iniciarEscaneoCamara('Escaneá el código del cliente', (texto)=>{
-    document.getElementById('scanCodigo').value = texto.trim().toUpperCase();
+  iniciarEscaneoCamara('Escaneá el código del cliente', function(texto){
+    // Si el QR contiene una URL con ?codigo=EP-XXX, extraer solo el codigo
+    var codigo = texto.trim();
+    try {
+      var url = new URL(codigo);
+      var param = url.searchParams.get('codigo');
+      if(param) codigo = param;
+    } catch(e) {}
+    document.getElementById('scanCodigo').value = codigo.toUpperCase().trim();
     escanearCodigo();
   });
 }
@@ -3995,8 +4002,9 @@ function volverDeQR(){
 
 function renderComercioHistorial(){
   var estados = ['confirmada','comision_recibida'];
+  var _cIds = [state.currentUser.id, state.currentUser.uid].filter(Boolean);
   var hist = state.ventas.filter(function(v){
-    return v.comercioId===state.currentUser.id && estados.indexOf(v.estado) >= 0;
+    return _cIds.indexOf(v.comercioId) >= 0 && estados.indexOf(v.estado) >= 0;
   });
   hist.sort(function(a,b){ return new Date(b.fechaConfirmacion||0) - new Date(a.fechaConfirmacion||0); });
   var el = document.getElementById('cHistorial');
@@ -4084,32 +4092,46 @@ function cOnMedioPagoChange(){
 }
 
 async function escanearCodigo(){
-  var codigo = document.getElementById('scanCodigo').value.trim().toUpperCase();
-  if(!codigo){ toast('Ingresá o escaneá un código'); return; }
+  var raw_input = document.getElementById('scanCodigo').value.trim();
+  if(!raw_input){ toast('Ingresá o escaneá un código'); return; }
+  // Si el QR contiene una URL con ?codigo=EP-XXX, extraer solo el codigo
+  var codigo = raw_input;
+  try {
+    var url = new URL(raw_input);
+    var paramCodigo = url.searchParams.get('codigo');
+    if(paramCodigo) codigo = paramCodigo;
+  } catch(e) { /* no es una URL, usar el valor directo */ }
+  codigo = codigo.toUpperCase().trim();
 
   // 1. Buscar en memoria
-  var venta = state.ventas.find(function(v){ return v.codigo===codigo && v.comercioId===state.currentUser.id; });
+  // IDs posibles del comercio actual (puede tener id interno Y uid de Auth)
+  var misIds = [state.currentUser.id, state.currentUser.uid].filter(Boolean);
+  function esMiVenta(v){ return v.codigo===codigo && misIds.indexOf(v.comercioId) >= 0; }
 
-  // 2. Buscar en Firestore si no está en memoria (venta generada despues del login)
+  var venta = state.ventas.find(esMiVenta);
+
+  // 2. Buscar en Firestore si no está en memoria
   if(!venta && firebaseListo){
     try{
       toast('🔍 Buscando el pedido...');
       var snap = await db.collection('ventas')
         .where('codigo','==', codigo)
-        .where('comercioId','==', state.currentUser.id)
-        .limit(1)
         .get();
-      if(!snap.empty){
-        venta = snap.docs[0].data();
-        state.ventas.push(venta); // cachear para proximas veces
-      }
-    } catch(e){ console.error('Error buscando venta en Firestore:', e); }
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if(misIds.indexOf(d.comercioId) >= 0) venta = d;
+      });
+      if(venta && !state.ventas.find(esMiVenta)) state.ventas.push(venta);
+    } catch(e){
+      console.error('Error buscando venta en Firestore:', e);
+      toast('⚠️ Error Firestore: ' + (e.code || e.message || 'error desconocido'));
+    }
   }
 
-  // 3. Fallback localStorage (mismo dispositivo, sin Firestore)
+  // 3. Fallback localStorage
   if(!venta){
     var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector')||'[]');
-    var r = reservas.find(function(x){ return x.codigo===codigo && x.comercioId===state.currentUser.id; });
+    var r = reservas.find(function(x){ return x.codigo===codigo && misIds.indexOf(x.comercioId) >= 0; });
     if(r){ venta=r; state.ventas.push(r); }
   }
 
