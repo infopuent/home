@@ -2396,6 +2396,7 @@ function entrarConDatosGuardados(rol, data){
     renderComercioPanel();
     cargarProductosGuardados(data.uid);
     cargarVentasDeComercio(data.id || data.uid);
+    cargarVendedoresParaComercio();
     iniciarListenerVentasComercio(data.id || data.uid);
     if(window._codigoPendienteDesdeURL) procesarCodigoPendienteDesdeURL();
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
@@ -3343,7 +3344,7 @@ function enviarPedidoProducto(){
   const nota = document.getElementById('vppNota').value.trim();
   if(!nombreSugerido){ toast('Contanos qué producto te gustaría vender'); return; }
   state.pedidosProducto.push({
-    id: nextId('ped'), comercioId: comercioElegido, vendedorId: state.currentUser.id,
+    id: nextId('ped'), comercioId: comercioElegido, vendedorId: state.currentUser.id || state.currentUser.uid,
     vendedorNombre: state.currentUser.nombre, nombreSugerido, nota, estado:'pendiente', fecha: new Date().toISOString()
   });
   toast('¡Pedido enviado! El comercio lo va a ver en su panel.');
@@ -3623,6 +3624,18 @@ function actualizarEstadoVentaFirestore(ventaId, campos){
 }
 
 // Carga todas las ventas de un comercio al iniciar sesión
+async function cargarVendedoresParaComercio(){
+  if(!firebaseListo || state.vendedores.length > 0) return;
+  try{
+    var snap = await db.collection('vendedores').get();
+    snap.forEach(function(doc){
+      var v = doc.data();
+      if(!state.vendedores.find(function(x){ return x.id===v.id || x.uid===v.uid; }))
+        state.vendedores.push(v);
+    });
+  } catch(e){ console.warn('No se pudieron cargar vendedores:', e); }
+}
+
 async function cargarVentasDeComercio(comercioId){
   if(!firebaseListo) return;
   try{
@@ -4014,7 +4027,9 @@ function renderComercioHistorial(){
   }
   el.innerHTML = hist.map(function(v){
     var esP = v.origen === 'personalizado';
-    var vend = v.vendedorId ? state.vendedores.find(function(x){ return x.id===v.vendedorId; }) : null;
+    var vend = v.vendedorId ? state.vendedores.find(function(x){
+      return x.id===v.vendedorId || x.uid===v.vendedorId;
+    }) : null;
     var fecha = v.fechaConfirmacion
       ? new Date(v.fechaConfirmacion).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'})
       : '—';
@@ -4140,7 +4155,19 @@ async function escanearCodigo(){
   if(reservaVencida(venta)){ toast('⏰ Esta reserva venció — el conector tiene que regenerar el código'); return; }
 
   var esP = venta.origen==='personalizado';
-  var vend = venta.vendedorId ? state.vendedores.find(function(v){ return v.id===venta.vendedorId; }) : null;
+  var vend = venta.vendedorId ? state.vendedores.find(function(v){
+    return v.id===venta.vendedorId || v.uid===venta.vendedorId;
+  }) : null;
+  if(!vend && venta.vendedorId && firebaseListo){
+    try {
+      var vSnap = await db.collection('vendedores').doc(venta.vendedorId).get();
+      if(vSnap.exists){ vend = vSnap.data(); state.vendedores.push(vend); }
+      else {
+        var vSnap2 = await db.collection('vendedores').where('id','==',venta.vendedorId).limit(1).get();
+        if(!vSnap2.empty){ vend = vSnap2.docs[0].data(); state.vendedores.push(vend); }
+      }
+    } catch(e){ console.warn('vendedor no encontrado:', e); }
+  }
   window._ventaEscaneada = venta.id || venta.codigo;
 
   // Productos
