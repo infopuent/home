@@ -1024,7 +1024,16 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">➕ Agregar producto</div>
       <div class="field"><label>Nombre del producto *</label><input id="pcProdNombre" placeholder="Ej: Zapatillas Nike Air Max 90"></div>
       <div class="field"><label>Precio *</label><input id="pcProdPrecio" type="number" min="0" placeholder="0"></div>
-      <div class="field"><label>Foto (URL o subir)</label><input id="pcProdFoto" placeholder="https://... o dejá vacío"></div>
+      <div class="field">
+        <label>Fotos del producto (opcional)</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button type="button" onclick="document.getElementById('pcFotoInputCam').click()" class="btn btn-ghost btn-sm" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">📷 Cámara</button>
+          <button type="button" onclick="document.getElementById('pcFotoInputGal').click()" class="btn btn-ghost btn-sm" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">🖼 Galería</button>
+        </div>
+        <input type="file" id="pcFotoInputCam" accept="image/*" capture="environment" multiple style="display:none" onchange="pcOnFotosSeleccionadas(this)">
+        <input type="file" id="pcFotoInputGal" accept="image/*" multiple style="display:none" onchange="pcOnFotosSeleccionadas(this)">
+        <div id="pcFotosPreview" style="display:flex;flex-wrap:wrap;gap:8px;min-height:0;"></div>
+      </div>
       <button class="btn btn-ghost btn-sm" onclick="pcAgregarProducto()" style="width:100%;margin-top:4px;">Agregar al pedido</button>
     </div>
 
@@ -6195,7 +6204,7 @@ function abrirPedidoPersonalizado(){
   document.getElementById('pcClienteTel').value    = '';
   document.getElementById('pcProdNombre').value    = '';
   document.getElementById('pcProdPrecio').value    = '';
-  document.getElementById('pcProdFoto').value      = '';
+  pcLimpiarFotos();
   pcRenderProductosList();
   showScreen('v-pedido-custom');
 }
@@ -6205,16 +6214,56 @@ function pcOnComercioChange(){
 }
 
 /* ---- Agregar producto a la lista ---- */
+// Fotos actuales del producto siendo cargado (dataURLs)
+var _pcFotosActuales = [];
+
+function pcOnFotosSeleccionadas(input){
+  var files = Array.from(input.files);
+  if(!files.length) return;
+  var preview = document.getElementById('pcFotosPreview');
+  var procesadas = 0;
+  files.forEach(function(file){
+    comprimirImagen(file, LIMITE_FOTO_BYTES).then(function(dataUrl){
+      _pcFotosActuales.push(dataUrl);
+      // Agregar miniatura con boton quitar
+      var idx = _pcFotosActuales.length - 1;
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;';
+      wrap.dataset.idx = idx;
+      wrap.innerHTML = '<img src="'+dataUrl+'" style="width:100%;height:100%;object-fit:cover;">'
+        +'<button onclick="pcQuitarFoto('+idx+',this.parentNode)" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;">×</button>';
+      if(preview) preview.appendChild(wrap);
+      procesadas++;
+      if(procesadas === files.length) toast(procesadas+' foto'+(procesadas>1?'s':'')+' lista'+(procesadas>1?'s':'')+' ✓');
+    }).catch(function(){ toast('No se pudo procesar una foto, probá con otra.'); });
+  });
+  input.value = ''; // reset para poder seleccionar de nuevo
+}
+
+function pcQuitarFoto(idx, wrap){
+  _pcFotosActuales[idx] = null; // null en vez de splice para mantener indices
+  if(wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+}
+
+function pcLimpiarFotos(){
+  _pcFotosActuales = [];
+  var preview = document.getElementById('pcFotosPreview');
+  if(preview) preview.innerHTML = '';
+}
+
 function pcAgregarProducto(){
-  const nombre = document.getElementById('pcProdNombre').value.trim();
-  const precio = parseFloat(document.getElementById('pcProdPrecio').value);
-  const foto   = document.getElementById('pcProdFoto').value.trim();
+  var nombre = document.getElementById('pcProdNombre').value.trim();
+  var precio = parseFloat(document.getElementById('pcProdPrecio').value);
+  var fotos = _pcFotosActuales.filter(Boolean); // quitar los null
   if(!nombre){ toast('Ingresá el nombre del producto'); return; }
   if(isNaN(precio) || precio < 0){ toast('Ingresá un precio válido'); return; }
-  _pcProductos.push({ id: nextId('pci'), nombre, precio, foto: foto || null });
+  _pcProductos.push({ id: nextId('pci'), nombre: nombre, precio: precio,
+    foto: fotos.length ? fotos[0] : null,   // primera foto para el preview de la lista
+    fotos: fotos.length ? fotos : null       // todas las fotos
+  });
   document.getElementById('pcProdNombre').value = '';
   document.getElementById('pcProdPrecio').value = '';
-  document.getElementById('pcProdFoto').value   = '';
+  pcLimpiarFotos();
   pcRenderProductosList();
   toast('Producto agregado ✓');
 }
