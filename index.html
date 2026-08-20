@@ -857,6 +857,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div id="vMiValoracion" style="margin:-8px 0 14px;"></div>
     <p class="page-sub">Elegí productos de la plataforma, arma tu catálogo y cuando un cliente quiera comprar, reservá por él y mandále el QR.</p>
     <div id="actividadBox"></div>
+    <div id="vAlertasBox" style="margin-bottom:10px;"></div>
     <div class="btn-grid" style="margin-bottom:16px">
       <button class="btn-tile btn-tile-coral" onclick="showScreen('v-elegir-comercio'); renderVElegirComercio();"><i class="ti ti-plus ic" aria-hidden="true"></i>Agregar productos</button>
       <button class="btn-tile btn-tile-rose" onclick="renderVReservas();showScreen('v-reservas')"><i class="ti ti-qrcode ic" aria-hidden="true"></i>Mis reservas</button>
@@ -1157,6 +1158,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-sage" onclick="showScreen('c-productos'); renderProductosPropios('cProductosPropiosPage');"><i class="ti ti-package ic" aria-hidden="true"></i>Productos</button>
       <button class="btn-tile btn-tile-gold" onclick="mostrarMiQR('comercio')"><i class="ti ti-qrcode ic" aria-hidden="true"></i>Mi código QR</button>
       <button class="btn-tile btn-tile-neutral" onclick="abrirEditarComercio()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
+      <button class="btn-tile btn-tile-mint" style="grid-column:1/-1;" onclick="renderCOperaciones();showScreen('c-operaciones')"><i class="ti ti-list-check ic" aria-hidden="true"></i>Operaciones y comisiones</button>
     </div>
     <p class="page-sub">Cuando un cliente te presente un código, escribilo acá para confirmar la entrega.</p>
     <div class="card">
@@ -1268,6 +1270,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
     <button class="btn btn-primary" id="cnpBtnGuardar" onclick="crearProductoComercio()">Publicar producto</button>
     <button class="btn btn-ghost hidden" id="cnpBtnEliminar" style="margin-top:10px; color:#B65B5B;" onclick="eliminarProductoPropio()">Eliminar producto</button>
+  </div>
+
+  <!-- ============ COMERCIO: OPERACIONES Y COMISIONES ============ -->
+  <div class="screen hidden" id="screen-c-operaciones">
+    <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
+    <div class="kicker">Comercio</div>
+    <h1 class="page-title">Operaciones y comisiones</h1>
+    <p class="page-sub">Reservas y pedidos de conectores. Marcá las comisiones que ya transferiste.</p>
+    <div id="cOperacionesList"></div>
   </div>
 
   <!-- ============ COMERCIO: EDITAR MI INFORMACIÓN ============ -->
@@ -2728,6 +2739,7 @@ function misProductos(){
 }
 function renderVendedorCatalogo(){
   renderActividadCard();
+  renderAlertasConector();
   if(state.currentUser?.uid){
     document.getElementById('vMiValoracion').innerHTML = estrellasHtml(...Object.values(promedioDe(state.currentUser.uid)));
   }
@@ -2975,8 +2987,9 @@ function stockDisponible(p){
   return Math.max(0, p.stock - reservadas);
 }
 function reservaVencida(venta){
-  if(!venta.vencePickup) return false;
-  return new Date() > new Date(venta.vencePickup);
+  var vence = venta.vencePickup || venta.fechaVencimiento;
+  if(!vence) return false;
+  return new Date() > new Date(vence);
 }
 // Estado de una oferta relámpago: 'antes' | 'abierta' | 'agotada' | 'cerrada'
 function estadoRayo(p){
@@ -3345,6 +3358,7 @@ function enviarPedidoProducto(){
   if(!nombreSugerido){ toast('Contanos qué producto te gustaría vender'); return; }
   state.pedidosProducto.push({
     id: nextId('ped'), comercioId: comercioElegido, vendedorId: state.currentUser.id || state.currentUser.uid,
+    fechaVencimiento: new Date(Date.now() + 12*60*60*1000).toISOString(), // 12hs habiles
     vendedorNombre: state.currentUser.nombre, nombreSugerido, nota, estado:'pendiente', fecha: new Date().toISOString()
   });
   toast('¡Pedido enviado! El comercio lo va a ver en su panel.');
@@ -6508,6 +6522,168 @@ function pcConfirmarComisionRecibida(){
 
 // =============================================
 // FIN PEDIDO PERSONALIZADO
+// =============================================
+
+// =============================================
+// ALERTAS DEL CONECTOR — panel principal
+// =============================================
+
+function renderAlertasConector(){
+  var box = document.getElementById('vAlertasBox');
+  if(!box) return;
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+
+  // Ventas confirmadas pendientes de cobrar comision
+  var pendientes = reservas.filter(function(r){
+    return r.estado === 'confirmada' || r.estado === 'confirmado';
+  });
+
+  // Reservas vencidas (mas de 12hs desde creacion sin confirmacion)
+  var ahora = Date.now();
+  var vencidas = reservas.filter(function(r){
+    if(r.estado !== 'pendiente') return false;
+    var fecha = new Date(r.fechaCreacion || r.fechaReserva || 0).getTime();
+    var limite = r.origen === 'personalizado' ? 24*3600000 : 12*3600000;
+    return (ahora - fecha) > limite;
+  });
+
+  var html = '';
+
+  if(pendientes.length > 0){
+    var items = pendientes.map(function(r){
+      var esP = r.origen === 'personalizado';
+      var resumen = esP
+        ? (Array.isArray(r.productos) ? r.productos.map(function(p){ return p.nombre; }).join(', ') : 'Pedido personalizado')
+        : (r.productoNombre || '—');
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,.2);">'
+        +'<div style="min-width:0;flex:1;">'
+        +'<div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.clienteNombre+'</div>'
+        +'<div style="font-size:11.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+resumen+'</div>'
+        +'</div>'
+        +'<div style="text-align:right;flex-shrink:0;margin-left:10px;">'
+        +'<div style="font-size:14px;font-weight:800;">$'+Number(r.comisionMonto||0).toLocaleString('es-AR')+'</div>'
+        +'<button onclick="renderVReservas();showScreen(\'v-reservas\')" style="font-size:10px;background:rgba(255,255,255,.25);color:#fff;padding:2px 8px;border-radius:12px;border:none;cursor:pointer;margin-top:2px;">Ver QR</button>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+    html += '<div style="background:#2F7A55;color:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;">'
+      +'<div style="font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;opacity:.85;">💰 Comisiones para cobrar ('+pendientes.length+')</div>'
+      +items
+      +'<button onclick="renderVReservas();showScreen(\'v-reservas\')" style="width:100%;margin-top:10px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:8px;padding:8px;font-size:12.5px;font-weight:700;cursor:pointer;">Ver todas mis reservas →</button>'
+      +'</div>';
+  }
+
+  if(vencidas.length > 0){
+    html += '<div style="background:#FFF8EC;border:1.5px solid #E8C84A;border-radius:14px;padding:12px 14px;margin-bottom:8px;">'
+      +'<div style="font-size:12px;font-weight:800;color:#8A6400;margin-bottom:6px;">⏰ Reservas vencidas ('+vencidas.length+')</div>'
+      +'<div style="font-size:12.5px;color:#8A6400;">Estas reservas superaron el tiempo límite. Podés regenerar el código desde Mis reservas.</div>'
+      +'<button onclick="renderVReservas();showScreen(\'v-reservas\')" style="margin-top:8px;background:#E8C84A;color:#5A3E00;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">Ir a Mis reservas</button>'
+      +'</div>';
+  }
+
+  box.innerHTML = html;
+}
+
+// =============================================
+// FIN ALERTAS CONECTOR
+// =============================================
+
+// =============================================
+// OPERACIONES DEL COMERCIO
+// =============================================
+
+function renderCOperaciones(){
+  var el = document.getElementById('cOperacionesList');
+  if(!el) return;
+
+  var misIds = [state.currentUser.id, state.currentUser.uid].filter(Boolean);
+  var todas = state.ventas.filter(function(v){
+    return misIds.indexOf(v.comercioId) >= 0;
+  });
+  todas.sort(function(a,b){ return new Date(b.fechaConfirmacion||b.fecha||0) - new Date(a.fechaConfirmacion||a.fecha||0); });
+
+  if(todas.length === 0){
+    el.innerHTML = '<div class="empty" style="padding:24px;"><div class="s">No hay operaciones registradas todavía.</div></div>';
+    return;
+  }
+
+  // Separar por estado
+  var pendientes  = todas.filter(function(v){ return v.estado === 'pendiente'; });
+  var confirmadas = todas.filter(function(v){ return v.estado === 'confirmada' || v.estado === 'confirmado'; });
+  var cobradas    = todas.filter(function(v){ return v.estado === 'comision_recibida'; });
+
+  function filaVenta(v){
+    var esP  = v.origen === 'personalizado';
+    var vend = v.vendedorId ? state.vendedores.find(function(x){ return x.id===v.vendedorId||x.uid===v.vendedorId; }) : null;
+    var fecha = v.fechaConfirmacion||v.fecha
+      ? new Date(v.fechaConfirmacion||v.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'})
+      : '—';
+    var resumen = esP && Array.isArray(v.productos)
+      ? v.productos.map(function(p){ return p.nombre; }).join(', ')
+      : (v.productoNombre || '—');
+    var comStr = v.comisionMonto ? '$'+Number(v.comisionMonto).toLocaleString('es-AR') : '—';
+    var conectorInfo = vend
+      ? vend.nombre + (vend.alias ? ' · '+vend.alias : '') + (vend.telefono && vend.telefono!=='—' ? ' · '+vend.telefono : '')
+      : (v.vendedorId ? 'ID: '+v.vendedorId : 'Sin conector');
+
+    var estadoHtml = '';
+    var accionHtml = '';
+    if(v.estado === 'comision_recibida'){
+      estadoHtml = '<span style="font-size:10px;background:#EAF0E6;color:#2F7A55;padding:2px 7px;border-radius:12px;font-weight:700;">✓ Cobrada</span>';
+    } else if(v.estado === 'confirmada' || v.estado === 'confirmado'){
+      estadoHtml = '<span style="font-size:10px;background:#FFF8EC;color:#8A6400;padding:2px 7px;border-radius:12px;font-weight:700;">⏳ Pendiente cobro</span>';
+      accionHtml = '<button onclick="cMarcarComisionPagada(\''+v.id+'\')" style="font-size:11px;background:var(--navy);color:#fff;padding:4px 10px;border-radius:8px;border:none;cursor:pointer;margin-top:6px;width:100%;">Marcar comisión transferida</button>';
+    } else {
+      estadoHtml = '<span style="font-size:10px;background:#F0F4FA;color:var(--navy);padding:2px 7px;border-radius:12px;">🕒 Sin confirmar</span>';
+    }
+
+    return '<div class="card" style="padding:12px 14px;margin-bottom:8px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--navy);">'+(v.clienteNombre||'—')+'</div>'
+      +'<div style="font-size:11.5px;color:var(--muted);margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+resumen+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);">'+conectorInfo+'</div>'
+      +'<div style="font-size:10.5px;color:var(--muted);margin-top:2px;">'+fecha+' · <span style="font-family:monospace;">'+v.codigo+'</span></div>'
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0;margin-left:10px;">'
+      +estadoHtml+'<br>'
+      +'<strong style="font-size:15px;color:#2F7A55;">'+comStr+'</strong>'
+      +'</div>'
+      +'</div>'
+      +accionHtml
+      +'</div>';
+  }
+
+  var html = '';
+  if(confirmadas.length > 0){
+    html += '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 8px;">⏳ Pendientes de pago ('+confirmadas.length+')</div>';
+    html += confirmadas.map(filaVenta).join('');
+  }
+  if(pendientes.length > 0){
+    html += '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 8px;">🕒 Sin confirmar ('+pendientes.length+')</div>';
+    html += pendientes.map(filaVenta).join('');
+  }
+  if(cobradas.length > 0){
+    html += '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 8px;">✓ Comisiones pagadas ('+cobradas.length+')</div>';
+    html += cobradas.map(filaVenta).join('');
+  }
+  el.innerHTML = html;
+}
+
+function cMarcarComisionPagada(ventaId){
+  // El comercio marca que ya transfirió la comisión — el conector lo verá y confirmará
+  actualizarEstadoVentaFirestore(ventaId, {
+    estadoComision: 'transferida',
+    fechaTransferencia: new Date().toISOString()
+  });
+  var sv = state.ventas.find(function(v){ return v.id===ventaId; });
+  if(sv) sv.estadoComision = 'transferida';
+  toast('Marcado como transferido — el conector recibirá la confirmación ✓');
+  renderCOperaciones();
+}
+
+// =============================================
+// FIN OPERACIONES COMERCIO
 // =============================================
 // FIN CARRITO
 // =============================================
