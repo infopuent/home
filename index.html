@@ -1169,6 +1169,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-neutral" onclick="abrirEditarComercio()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
       <button class="btn-tile btn-tile-mint" style="grid-column:1/-1;" onclick="renderCOperaciones();showScreen('c-operaciones')"><i class="ti ti-list-check ic" aria-hidden="true"></i>Operaciones y comisiones</button>
     </div>
+    <div id="cAlertasBox" style="margin-bottom:10px;"></div>
     <p class="page-sub">Cuando un cliente te presente un código, escribilo acá para confirmar la entrega.</p>
     <div class="card">
       <div class="field"><label>Código presentado por el cliente</label><input id="scanCodigo" placeholder="Ej: EP-1042" style="text-transform:uppercase"></div>
@@ -2126,7 +2127,7 @@ const navByRole = {
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
     {key:'c-panel',     ic:'ti-building-store',  label:'Panel',   action:"showScreen('c-panel')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
-    {key:'c-panel-actividad',ic:'ti-bell',       label:'Actividad',action:"showScreen('c-panel')"},
+    {key:'c-panel-actividad',ic:'ti-bell',       label:'Actividad',action:"renderCOperaciones();showScreen('c-operaciones')"},
     {key:'c-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
   ],
   cliente:[
@@ -3684,10 +3685,10 @@ async function cargarVentasDeComercio(comercioId){
     renderComercioPanel();
     actualizarBadgeReservas();
   } catch(e){ console.error('Error cargando ventas del comercio:', e); }
-  // Polling cada 30s para ver nuevas reservas sin recargar
+  // Polling cada 30s
   if(!window._comercioPolling){
     window._comercioPolling = setInterval(function(){
-      cargarVentasDeComercio(comercioId);
+      cargarVentasDeComercio(comercioId).then(function(){ actualizarBadgeReservas(); });
     }, 30000);
   }
 }
@@ -3805,21 +3806,28 @@ function notificarNuevaReservaAComercio(venta){
 /* ---- Badge de reservas pendientes en el nav ---- */
 function actualizarBadgeReservas(){
   if(state.role !== 'comercio' || !state.currentUser) return;
-  const pendientes = state.ventas.filter(v=>
-    (v.comercioId===state.currentUser.id || v.comercioId===state.currentUser.uid)
-    && v.estado==='pendiente'
-  ).length;
-  const nav = document.getElementById('bottomnav');
+  var misIds = [state.currentUser.id, state.currentUser.uid].filter(Boolean);
+  // Pendientes = sin confirmar + confirmadas con comision pendiente
+  var total = state.ventas.filter(function(v){
+    return misIds.indexOf(v.comercioId) >= 0
+      && (v.estado === 'pendiente' || v.estado === 'confirmada' || v.estado === 'confirmado');
+  }).length;
+  var nav = document.getElementById('bottomnav');
   if(!nav) return;
-  nav.querySelectorAll('.nav-item').forEach(btn=>{
-    if(btn.dataset.key === 'c-escanear'){
-      let badge = btn.querySelector('.nav-badge');
-      if(pendientes > 0){
-        if(!badge){ badge = document.createElement('span'); badge.className='nav-badge'; btn.appendChild(badge); }
-        badge.textContent = pendientes > 9 ? '9+' : pendientes;
-      } else {
-        badge?.remove();
+  // Buscar el boton de la campanita (key c-panel-actividad)
+  nav.querySelectorAll('.navbtn').forEach(function(btn){
+    var icon = btn.querySelector('.ti-bell');
+    if(!icon) return;
+    var badge = btn.querySelector('.nav-badge');
+    if(total > 0){
+      if(!badge){
+        badge = document.createElement('span');
+        badge.className = 'nav-badge';
+        btn.appendChild(badge);
       }
+      badge.textContent = total > 9 ? '9+' : String(total);
+    } else {
+      if(badge) badge.remove();
     }
   });
 }
@@ -3975,6 +3983,7 @@ function renderComercioPanel(){
   renderPublicidadBox();
   renderProductosPropios();
   renderPedidosProducto();
+  renderCAlertasComercio();
   if(state.currentUser?.uid){
     document.getElementById('cMiValoracion').innerHTML = estrellasHtml(...Object.values(promedioDe(state.currentUser.uid)));
   }
@@ -6581,6 +6590,72 @@ function pcConfirmarComisionRecibida(){
 
 // =============================================
 // FIN PEDIDO PERSONALIZADO
+// =============================================
+
+// =============================================
+// ALERTAS DEL COMERCIO — panel principal
+// =============================================
+
+function renderCAlertasComercio(){
+  var box = document.getElementById('cAlertasBox');
+  if(!box) return;
+  var misIds = [state.currentUser.id, state.currentUser.uid].filter(Boolean);
+
+  var sinConfirmar = state.ventas.filter(function(v){
+    return misIds.indexOf(v.comercioId) >= 0 && v.estado === 'pendiente';
+  });
+  var porPagar = state.ventas.filter(function(v){
+    return misIds.indexOf(v.comercioId) >= 0 && (v.estado === 'confirmada' || v.estado === 'confirmado');
+  });
+
+  var html = '';
+
+  if(sinConfirmar.length > 0){
+    var items = sinConfirmar.slice(0,3).map(function(v){
+      var esP = v.origen === 'personalizado';
+      var resumen = esP && Array.isArray(v.productos)
+        ? v.productos.map(function(p){ return p.nombre; }).join(', ')
+        : (v.productoNombre || '—');
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(255,255,255,.2);">'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(v.clienteNombre||'—')+'</div>'
+        +'<div style="font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+resumen+'</div>'
+        +'</div>'
+        +'<span style="font-size:10px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;margin-left:8px;white-space:nowrap;font-weight:700;">'+(v.codigo||'')+'</span>'
+        +'</div>';
+    }).join('');
+    if(sinConfirmar.length > 3) items += '<div style="font-size:11px;opacity:.7;padding-top:4px;">y '+(sinConfirmar.length-3)+' más...</div>';
+    html += '<div style="background:#3A5FA0;color:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;cursor:pointer;" onclick="renderCOperaciones();showScreen(\'c-operaciones\')">'
+      +'<div style="font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;opacity:.85;">🕒 Reservas pendientes ('+sinConfirmar.length+')</div>'
+      +items
+      +'<div style="margin-top:10px;font-size:12px;font-weight:700;opacity:.9;">Tap para gestionar →</div>'
+      +'</div>';
+  }
+
+  if(porPagar.length > 0){
+    var items2 = porPagar.slice(0,3).map(function(v){
+      var vend = v.vendedorId ? state.vendedores.find(function(x){ return x.id===v.vendedorId||x.uid===v.vendedorId; }) : null;
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(200,160,0,.2);">'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(v.clienteNombre||'—')+'</div>'
+        +'<div style="font-size:11px;color:#8A6400;">Conector: '+(vend ? vend.nombre : '—')+'</div>'
+        +'</div>'
+        +'<strong style="font-size:14px;color:#2F7A55;margin-left:8px;">$'+Number(v.comisionMonto||0).toLocaleString('es-AR')+'</strong>'
+        +'</div>';
+    }).join('');
+    if(porPagar.length > 3) items2 += '<div style="font-size:11px;color:#8A6400;padding-top:4px;">y '+(porPagar.length-3)+' más...</div>';
+    html += '<div style="background:#FFF8EC;border:1.5px solid #E8C84A;border-radius:14px;padding:14px 16px;margin-bottom:8px;cursor:pointer;" onclick="renderCOperaciones();showScreen(\'c-operaciones\')">'
+      +'<div style="font-size:12px;font-weight:800;color:#8A6400;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">⏳ Comisiones pendientes ('+porPagar.length+')</div>'
+      +items2
+      +'<div style="margin-top:10px;font-size:12px;font-weight:700;color:#8A6400;">Tap para transferir →</div>'
+      +'</div>';
+  }
+
+  box.innerHTML = html;
+}
+
+// =============================================
+// FIN ALERTAS COMERCIO
 // =============================================
 
 // =============================================
