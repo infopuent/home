@@ -2523,6 +2523,16 @@ async function cargarDatosPublicosDeFirestore(){
 }
 // Por si Firebase ya había terminado de cargar antes de que este script se ejecutara.
 if(firebaseListo) onFirebaseReady();
+// Retry para guests que abren la app antes de que Firebase cargue
+else {
+  var _fbRetry = setInterval(function(){
+    if(firebaseListo){
+      clearInterval(_fbRetry);
+      onFirebaseReady();
+    }
+  }, 500);
+  setTimeout(function(){ clearInterval(_fbRetry); }, 10000);
+}
 
 function logoutFirebase(){
   goHome();
@@ -5850,8 +5860,28 @@ async function adminGuardarNuevoComercio(){
 // Estructura: carrito[comercioId] = { comercioNombre, items: [{prodId, nombre, precio}] }
 
 function reservarProducto(){
-  const p = state.productos.find(x=>x.id===ofertaAbierta);
+  // Buscar en state.productos (cargados por cargarDatosPublicosDeFirestore)
+  var p = state.productos.find(function(x){ return x.id===ofertaAbierta; });
+
+  // Si Firebase aun no termino de cargar, reintentar en 1.5s
+  if(!p && ofertaAbierta){
+    if(!window._reservarReintentando){
+      window._reservarReintentando = true;
+      toast('⏳ Cargando producto...');
+      setTimeout(function(){
+        window._reservarReintentando = false;
+        reservarProducto();
+      }, 1500);
+    } else {
+      window._reservarReintentando = false;
+      toast('No se pudo cargar el producto. Revisá tu conexión.');
+    }
+    return;
+  }
+  window._reservarReintentando = false;
+
   if(!p){ toast('Producto no encontrado'); return; }
+
 
   // Verificar stock
   if(p.tipoOferta==='h24'){
