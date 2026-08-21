@@ -2480,6 +2480,10 @@ function onFirebaseReady(){
     } else if(!user && window._codigoPendienteDesdeURL){
       toast('Escaneaste un código de cliente — iniciá sesión como comercio para validarlo');
       showScreen('home');
+    } else if(!user && !state.role){
+      firebaseAuth.signInAnonymously().then(function(cred){
+        if(cred && cred.user){ window._guestUid = cred.user.uid; }
+      }).catch(function(e){ console.warn('anon auth fallo:', e.code); });
     }
   });
 }
@@ -3655,9 +3659,22 @@ async function compartirProducto(prodId){
 
 // Guarda o actualiza una venta en Firestore
 function guardarVentaEnFirestore(venta){
-  if(!firebaseListo || !venta?.id) return;
-  db.collection('ventas').doc(venta.id).set(venta, {merge:true})
-    .catch(e => console.error('Error guardando venta en Firestore:', e));
+  if(!firebaseListo || !venta || !venta.id) return;
+  var doSave = function(){
+    db.collection('ventas').doc(venta.id).set(venta, {merge:true})
+      .catch(function(e){
+        if(e.code === 'permission-denied'){
+          setTimeout(function(){ guardarVentaEnFirestore(venta); }, 2000);
+        } else {
+          console.error('Error guardando venta:', e);
+        }
+      });
+  };
+  if(firebaseAuth && !firebaseAuth.currentUser){
+    setTimeout(doSave, 1500);
+  } else {
+    doSave();
+  }
 }
 
 // Actualiza solo el estado de una venta en Firestore
@@ -4954,10 +4971,15 @@ function quieroEstaOferta(){
   const codigo = genCodigo();
   const clienteNombre = (state.role==='cliente' && state.currentUser?.nombre) ? state.currentUser.nombre : 'Cliente del feed';
   const vencePickup = p.tipoOferta==='h24' ? finDeProximoTurno(c) : null;
+  var ownerUid = (state.currentUser && (state.currentUser.uid || state.currentUser.id))
+    || window._guestUid
+    || (firebaseAuth && firebaseAuth.currentUser && firebaseAuth.currentUser.uid)
+    || null;
   const venta = {
     id: nextId('t'), codigo, vendedorId:null, productoId:p.id, comercioId:c.id,
-    clienteNombre, estado:'pendiente', comisionMonto:0, origen:'oferta',
-    vencePickup: vencePickup ? vencePickup.toISOString() : null
+    clienteNombre, ownerUid: ownerUid, estado:'pendiente', comisionMonto:0, origen:'oferta',
+    vencePickup: vencePickup ? vencePickup.toISOString() : null,
+    fecha: new Date().toISOString()
   };
   state.ventas.push(venta);
   guardarVentaEnFirestore(venta);
