@@ -4132,7 +4132,7 @@ function renderComercioHistorial(){
 
     // Estado comisión
     var cobroHtml = v.estado === 'comision_recibida'
-      ? '<span style="font-size:11px;background:#EAF0E6;color:#2F7A55;padding:2px 8px;border-radius:20px;font-weight:700;">✓ Comisión cobrada</span>'
+      ? '<span style="font-size:11px;background:#EAF0E6;color:#2F7A55;padding:2px 8px;border-radius:20px;font-weight:700;">✓ Comisión pagada</span>'
       : '<span style="font-size:11px;background:#FFF8EC;color:#8A6400;padding:2px 8px;border-radius:20px;font-weight:700;">⏳ Pendiente de cobro</span>';
 
     // Conector
@@ -6843,7 +6843,7 @@ function renderCOperaciones(){
     html += pendientes.map(tarjeta).join('');
   }
   if(cobradas.length > 0){
-    html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">✓ Comisiones cobradas ('+cobradas.length+')</div>';
+    html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">✓ Comisiones pagadas ('+cobradas.length+')</div>';
     html += cobradas.map(tarjeta).join('');
   }
   el.innerHTML = html;
