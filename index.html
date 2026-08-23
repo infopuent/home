@@ -22,9 +22,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bai+Jamjuree:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy:#5C7355; --navy-2:#47593F; --green:#D98080; --blue:#C99A3E;
-  --cream:#FBF7EF; --paper:#FFFFFF; --ink:#3A3F35; --muted:#7A8271; --line:#E6E0D2;
-  --danger:#C4362A;
+  --navy:#FF6600; --navy-2:#E05500; --green:#FF8C00; --blue:#FFB300;
+  --cream:#FFF8F0; --paper:#FFFFFF; --ink:#1A1A1A; --muted:#888888; --line:#EAEAEA;
+  --danger:#E03A2A;
+  --orange:#FF6600; --orange-2:#FF4500; --orange-light:#FFF3E8;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 body{font-family:'Manrope',sans-serif; background:var(--cream); color:var(--ink); min-height:100vh;}
@@ -33,28 +34,33 @@ button{font-family:inherit; cursor:pointer; border:none;}
 input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 /* ---- App shell ---- */
-#app{max-width:480px; margin:0 auto; min-height:100vh; background:var(--cream); position:relative; padding-bottom:78px;}
+#app{max-width:480px; margin:0 auto; min-height:100vh; background:#F8F8F8; position:relative; padding-bottom:78px;}
 .topbar{
-  position:sticky; top:0; z-index:20; background:rgba(251,247,239,0.92); backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--line); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  position:sticky; top:0; z-index:20;
+  background:linear-gradient(135deg, #FF6600 0%, #FF9500 60%, #FFB300 100%);
+  padding:10px 16px 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  box-shadow:0 2px 12px rgba(255,102,0,0.35);
 }
 .brand{font-weight:800; font-size:18px; color:var(--navy);}
 .brand-logo{height:52px; width:auto; cursor:pointer; transition:transform .1s ease; flex-shrink:0;}
 .brand-logo:active{transform:scale(0.94);}
 .topbar-search{
-  flex:1 1 140px; display:flex; align-items:center; gap:6px; background:white; border:1px solid var(--line);
-  border-radius:100px; padding:8px 14px; min-width:0;
+  flex:1 1 140px; display:flex; align-items:center; gap:6px; background:white;
+  border:none; border-radius:100px; padding:10px 16px; min-width:0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.12);
 }
-.topbar-search-ic{font-size:13px; flex-shrink:0; opacity:.6;}
-.topbar-search input{border:none; outline:none; background:transparent; font-size:13px; width:100%; color:var(--ink); min-width:0;}
-.topbar-search input::placeholder{color:var(--muted);}
+.topbar-search-ic{font-size:14px; flex-shrink:0; opacity:.5;}
+.topbar-search input{border:none; outline:none; background:transparent; font-size:13.5px; width:100%; color:var(--ink); min-width:0;}
+.topbar-search input::placeholder{color:#AAA;}
 .topbar-ciudad{flex:1 1 140px; min-width:0;}
 .topbar-city-btn{
-  width:100%; display:flex; align-items:center; gap:6px; background:white; border:1px solid var(--line);
-  border-radius:100px; padding:8px 14px; font-size:12px; font-weight:700; color:var(--navy); cursor:pointer; white-space:nowrap; overflow:hidden;
+  width:100%; display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.22);
+  border:1.5px solid rgba(255,255,255,0.4);
+  border-radius:100px; padding:8px 14px; font-size:12px; font-weight:700; color:white; cursor:pointer; white-space:nowrap; overflow:hidden;
+  backdrop-filter:blur(4px);
 }
 .topbar-city-btn span:nth-child(2){overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-.topbar-city-btn .filter-dd-chev{color:var(--muted); flex-shrink:0; margin-left:auto;}
+.topbar-city-btn .filter-dd-chev{color:rgba(255,255,255,0.8); flex-shrink:0; margin-left:auto;}
 .feed-toolbar-row{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
 .feed-toolbar-row .chiprow{margin-bottom:0; flex-shrink:0;}
 .feed-search-inline{flex:1 1 auto; min-width:0; margin-bottom:0; padding:7px 14px;}
@@ -83,12 +89,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .btn-tile{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:16px 8px; border-radius:16px; border:none; font-weight:700; font-size:12.5px; text-align:center; transition:transform .1s;}
 .btn-tile:active{transform:scale(0.97);}
 .btn-tile .ic{font-size:22px;}
-.btn-tile-coral{background:#FBE7E7; color:#B65B5B;}
-.btn-tile-sage{background:#EAF0E6; color:var(--navy-2);}
-.btn-tile-gold{background:#FBF1DC; color:#93732A;}
-.btn-tile-neutral{background:#F1EEE5; color:var(--muted);}
-.btn-tile-rose{background:#FBE7F0; color:#A34C74;}
-.btn-tile-mint{background:#E3F3EA; color:#2F7A55;}
+.btn-tile-coral{background:#FFF0E8; color:#CC4400;}
+.btn-tile-sage{background:#E8F5E9; color:#2E7D32;}
+.btn-tile-gold{background:#FFF8E1; color:#E65100;}
+.btn-tile-neutral{background:#F5F5F5; color:#555;}
+.btn-tile-rose{background:#FCE4EC; color:#880E4F;}
+.btn-tile-mint{background:#E0F2F1; color:#00695C;}
 
 /* ---- Cards / inputs ---- */
 .card{background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px;}
@@ -118,21 +124,21 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .navbtn{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:4px 2px; border-radius:10px; background:transparent; color:var(--muted);}
 .navbtn .ic{font-size:22px;}
 .navbtn .nav-label{font-size:9px; font-weight:500;}
-.navbtn.active{color:var(--navy-2);}
+.navbtn.active{color:var(--orange);}
 .navbtn-cart{
-  flex:none; width:54px; height:54px; border-radius:50%;
-  background:var(--green); color:white;
+  flex:none; width:58px; height:58px; border-radius:50%;
+  background:linear-gradient(135deg, #FF6600, #FF9500); color:white;
   display:flex; align-items:center; justify-content:center;
-  margin-top:-28px; margin-bottom:2px;
+  margin-top:-30px; margin-bottom:2px;
   border:3px solid white;
-  box-shadow:0 4px 14px rgba(92,115,85,.30);
+  box-shadow:0 4px 18px rgba(255,102,0,0.45);
   position:relative; cursor:pointer;
   flex-shrink:0;
 }
 .navbtn-cart .ic{font-size:26px; color:white;}
 .navbtn-cart .cart-badge{
   position:absolute; top:-2px; right:-2px;
-  background:#D98080; color:white;
+  background:#E03A2A; color:white;
   font-size:8px; font-weight:800;
   border-radius:100px; padding:1px 4px; min-width:14px;
   text-align:center; border:1.5px solid white;
@@ -150,14 +156,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 /* ---- Product grid ---- */
 .prod-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-.prod-card{background:white; border:1px solid var(--line); border-radius:16px; overflow:hidden;}
-.prod-photo{height:88px; background:linear-gradient(135deg,#eef1ea,#e3ece9); display:flex; align-items:center; justify-content:center; font-size:34px; overflow:hidden; position:relative;}
+.prod-card{background:white; border:none; border-radius:18px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+.prod-photo{height:82px; background:linear-gradient(135deg,#FFF0E8,#FFE8D0); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; position:relative;}
 .prod-photo img{width:100%; height:100%; object-fit:cover; display:block;}
-.prod-body{padding:11px 12px;}
-.prod-name{font-size:13px; font-weight:700; color:var(--navy); line-height:1.25; margin-bottom:3px;}
-.prod-price{font-size:14px; font-weight:800; color:var(--ink);}
-.prod-tag{font-size:10px; color:var(--muted); margin-top:3px;}
-.prod-comm{display:inline-block; margin-top:6px; font-size:10.5px; font-weight:700; color:var(--green); background:#F9E6E6; padding:2px 8px; border-radius:100px;}
+.prod-body{padding:9px 10px 11px;}
+.prod-name{font-size:12px; font-weight:700; color:#1A1A1A; line-height:1.25; margin-bottom:4px;}
+.prod-price{font-size:13px; font-weight:800; color:#FF6600; display:inline-flex; align-items:baseline; gap:4px;}
+.prod-tag{font-size:9.5px; color:var(--muted); margin-top:3px; display:flex; align-items:center; gap:3px;}
+.prod-comm{display:inline-block; margin-top:5px; font-size:9.5px; font-weight:700; color:#CC5500; background:#FFF0E8; padding:2px 7px; border-radius:100px;}
 
 /* ---- List rows ---- */
 .list-row{display:flex; align-items:center; gap:12px; background:white; border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px;}
@@ -178,7 +184,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .chiprow{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px;}
 .chiprow::-webkit-scrollbar{display:none;}
 .chip{white-space:nowrap; font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:100px; background:white; border:1.5px solid var(--line); color:var(--muted);}
-.chip.active{background:var(--navy); color:white; border-color:var(--navy);}
+.chip.active{background:var(--orange); color:white; border-color:var(--orange);}
 
 /* ---- Dropdown de filtro por rubro (reemplaza los chips, anda bien en desktop y mobile) ---- */
 .filter-dd{position:relative; margin-bottom:16px;}
@@ -275,7 +281,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 @keyframes splashPop{from{opacity:0; transform:scale(.85) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
 
 /* ---- Feed público ---- */
-.feed-hero{background:linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%); border-radius:0 0 26px 26px; margin:-1px -1px 18px; color:white; overflow:hidden;}
+.feed-hero{background:linear-gradient(160deg, #FF6600 0%, #FF9500 60%, #FFB300 100%); border-radius:0 0 28px 28px; margin:-1px -1px 0; color:white; overflow:hidden; box-shadow:0 4px 20px rgba(255,102,0,0.3);}
 .feed-banner-slider{position:relative; width:100%; aspect-ratio:1774/887; overflow:hidden;}
 .feed-banner-slider img{position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1s ease;}
 .feed-banner-slider img.active{opacity:1;}
@@ -283,8 +289,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .ciudad-dd{position:relative; display:inline-block;}
 .feed-title{font-family:'Bai Jamjuree',sans-serif; font-size:22px; font-weight:700; line-height:1.25; margin-bottom:6px;}
 .feed-sub{font-size:13px; color:rgba(255,255,255,0.7); line-height:1.5;}
-.feed-prod-card{background:white; border:1px solid var(--line); border-radius:16px; overflow:hidden; cursor:pointer;}
-.feed-prod-card .prod-photo{height:110px;}
+.feed-prod-card{background:white; border:none; border-radius:18px; overflow:hidden; cursor:pointer; flex:0 0 140px; width:140px; box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+.feed-prod-card .prod-photo{height:100px;}
 .feed-vendor{display:flex; align-items:center; gap:6px; font-size:10.5px; color:var(--navy-2); font-weight:700; margin-top:6px;}
 .feed-vendor .dot{width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0;}
 .feed-comision{display:inline-block; background:#fff4d6; color:#8a5a00; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:100px; margin-top:6px;}
@@ -293,19 +299,25 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;
 }
 
+/* ---- Category icons ---- */
+.cat-item{display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; cursor:pointer; transition:transform .1s;}
+.cat-item:active{transform:scale(0.92);}
+.cat-icon{width:58px; height:58px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.cat-label{font-size:11px; font-weight:700; color:#333; white-space:nowrap; text-align:center;}
+
 /* ---- Feed tabs ---- */
 .feed-tabs{display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; -webkit-overflow-scrolling:touch;}
 .feed-tabs::-webkit-scrollbar{display:none;}
 .feed-tab-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;}
-.feed-tab-tile{display:flex; align-items:center; gap:10px; padding:15px 14px; border-radius:16px; border:none; font-weight:700; font-size:13.5px; text-align:left; transition:transform .1s, box-shadow .1s;}
+.feed-tab-tile{display:flex; align-items:center; gap:10px; padding:15px 14px; border-radius:18px; border:none; font-weight:700; font-size:13.5px; text-align:left; transition:transform .1s, box-shadow .1s; box-shadow:0 2px 8px rgba(0,0,0,0.06);}
 .feed-tab-tile:active{transform:scale(0.97);}
-.feed-tab-tile .ic{font-size:20px; flex-shrink:0;}
-.feed-tab-tile.active{box-shadow:inset 0 0 0 2px currentColor;}
+.feed-tab-tile .ic{font-size:22px; flex-shrink:0;}
+.feed-tab-tile.active{box-shadow:inset 0 0 0 2.5px currentColor, 0 2px 8px rgba(0,0,0,0.08);}
 .rayo-ofertas-btn{
   position:relative; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
-  padding:15px; border-radius:16px; border:none; margin-bottom:18px;
-  background:linear-gradient(135deg, #2b3a4a, #445b73); color:#fff; font-weight:800; font-size:15px;
-  box-shadow:0 4px 14px rgba(43,58,74,0.28); transition:transform .1s;
+  padding:16px; border-radius:18px; border:none; margin-bottom:18px;
+  background:linear-gradient(135deg, #FF6600, #FF9500); color:#fff; font-weight:800; font-size:15px;
+  box-shadow:0 4px 16px rgba(255,102,0,0.38); transition:transform .1s;
 }
 .rayo-ofertas-btn:active{transform:scale(0.98);}
 .rayo-badge{
@@ -315,26 +327,26 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 }
 .sumar-negocio-btn{
   width:100%; display:flex; align-items:center; gap:12px; text-align:left;
-  padding:13px 14px; border-radius:16px; margin-bottom:18px; border:1.5px dashed var(--navy);
-  background:#EAF0E6;
+  padding:14px 16px; border-radius:18px; margin-bottom:18px; border:1.5px dashed #FF8C00;
+  background:#FFF3E8;
 }
-.sumar-negocio-btn .ic{font-size:20px; flex-shrink:0;}
+.sumar-negocio-btn .ic{font-size:22px; flex-shrink:0;}
 .sumar-negocio-btn .txt{flex:1; min-width:0;}
-.sumar-negocio-btn .t{font-weight:800; font-size:13.5px; color:var(--navy);}
-.sumar-negocio-btn .s{font-size:11.5px; color:var(--muted); margin-top:1px;}
-.sumar-negocio-btn .chev{color:var(--navy); font-size:18px; flex-shrink:0;}
+.sumar-negocio-btn .t{font-weight:800; font-size:13.5px; color:#FF6600;}
+.sumar-negocio-btn .s{font-size:11.5px; color:#B36B00; margin-top:1px;}
+.sumar-negocio-btn .chev{color:#FF6600; font-size:18px; flex-shrink:0;}
 .feed-tab{flex:1 1 auto; white-space:nowrap; text-align:center; padding:10px 12px; border-radius:12px; background:white; border:1.5px solid var(--line); font-size:12px; font-weight:700; color:var(--muted);}
 .feed-tab.active{background:var(--navy); color:white; border-color:var(--navy);}
 
 /* ---- Locales (publicidad de comercios) ---- */
 .local-card{background:white; border:1px solid var(--line); border-radius:18px; overflow:hidden; margin-bottom:16px;}
-.local-cover{height:130px; position:relative; background:linear-gradient(135deg,#eef1ea,#e3ece9);}
+.local-cover{height:130px; position:relative; background:linear-gradient(135deg,#FFF0E0,#FFE4C0);}
 .local-cover img{width:100%; height:100%; object-fit:cover; display:block;}
 .local-badge{
-  position:absolute; top:10px; left:10px; background:rgba(18,44,74,0.88); color:white; font-size:10.5px; font-weight:700;
+  position:absolute; top:10px; left:10px; background:rgba(255,102,0,0.92); color:white; font-size:10.5px; font-weight:700;
   padding:5px 10px; border-radius:100px; display:flex; align-items:center; gap:5px;
 }
-.local-badge .dot{width:6px; height:6px; border-radius:50%; background:var(--green);}
+.local-badge .dot{width:6px; height:6px; border-radius:50%; background:white;}
 .local-body{padding:15px 16px;}
 .local-name{font-family:'Bai Jamjuree',sans-serif; font-size:16.5px; font-weight:700; color:var(--navy); margin-bottom:3px;}
 .local-meta{font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:10px;}
@@ -343,7 +355,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 /* ---- Guía / Útil ---- */
 .turno-card{
-  background:linear-gradient(135deg, #1c6b4f, #14523c); border-radius:18px; padding:18px 18px 16px; color:white;
+  background:linear-gradient(135deg, #FF6600, #FF9500); border-radius:18px; padding:18px 18px 16px; color:white;
   display:flex; flex-direction:column; gap:4px;
 }
 .turno-card .kicker{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; opacity:.85;}
@@ -399,37 +411,77 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 /* ---- Badge de tipo de oferta ---- */
 .oferta-badge{
-  position:absolute; top:6px; left:6px; background:var(--green); color:white; font-size:9.5px; font-weight:700;
-  padding:3px 8px; border-radius:100px; box-shadow:0 2px 6px rgba(0,0,0,0.15); max-width:calc(100% - 12px);
+  position:absolute; top:6px; left:6px; background:#E03A2A; color:white; font-size:9.5px; font-weight:800;
+  padding:3px 9px; border-radius:100px; box-shadow:0 2px 6px rgba(0,0,0,0.18); max-width:calc(100% - 12px);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
+/* Discount badge (top-right) */
+.descuento-badge{
+  position:absolute; top:6px; right:6px; background:#E03A2A; color:white; font-size:11px; font-weight:800;
+  padding:4px 8px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.18);
+}
+/* Precio tachado */
+.prod-price-old{font-size:11px; color:#aaa; text-decoration:line-through; margin-left:4px; font-weight:400;}
+/* Promo banner */
+.promo-banner{
+  border-radius:18px; padding:16px 18px; margin-bottom:20px; position:relative; overflow:hidden;
+  display:flex; align-items:center; gap:14px; cursor:pointer;
+  background:linear-gradient(135deg, #1A3A6A, #2A5BAA);
+  box-shadow:0 4px 16px rgba(26,58,106,0.28);
+}
+.promo-banner .pb-text{flex:1; min-width:0;}
+.promo-banner .pb-title{font-family:'Bai Jamjuree',sans-serif; font-size:16px; font-weight:800; color:white; margin-bottom:3px;}
+.promo-banner .pb-sub{font-size:11.5px; color:rgba(255,255,255,0.8);}
+.promo-banner .pb-btn{flex-shrink:0; background:#FF6600; color:white; font-size:11.5px; font-weight:800; padding:8px 14px; border-radius:100px; white-space:nowrap;}
+.promo-banner .pb-img{font-size:32px; flex-shrink:0;}
+/* "Explorá tu ciudad" bottom banner */
+.explora-banner{
+  border-radius:18px; padding:16px 18px; margin-bottom:20px; display:flex; align-items:center; gap:14px;
+  background:linear-gradient(135deg, #FFF0E8, #FFE4CC); border:1px solid #FFD4B0; cursor:pointer;
+}
+.explora-banner .eb-icon{font-size:36px; flex-shrink:0;}
+.explora-banner .eb-text{flex:1;}
+.explora-banner .eb-title{font-size:15px; font-weight:800; color:#CC4400; margin-bottom:2px;}
+.explora-banner .eb-sub{font-size:12px; color:#885500;}
+/* Comidas cerca tuyo grid */
+.comidas-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px;}
+.comida-item{display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;}
+.comida-foto{width:100%; aspect-ratio:1; border-radius:14px; background:#f0f0f0; overflow:hidden; position:relative;}
+.comida-foto img{width:100%; height:100%; object-fit:cover; display:block;}
+.comida-foto-emoji{width:100%; aspect-ratio:1; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:30px;}
+.comida-label{font-size:11.5px; font-weight:700; color:#1A1A1A; text-align:center;}
+.comida-zona{font-size:10px; color:var(--muted); display:flex; align-items:center; gap:2px;}
+.comida-cart-ic{position:absolute; bottom:4px; right:4px; width:22px; height:22px; border-radius:50%; background:var(--orange); display:flex; align-items:center; justify-content:center; font-size:11px; color:white;}
+
 
 /* ---- Explorá tu ciudad / Destacados / Cerca tuyo (estilo guía de ciudad) ---- */
-.section-title{font-family:'Bai Jamjuree',sans-serif; font-size:16px; font-weight:700; color:var(--navy); margin-bottom:10px;}
+.section-title{font-family:'Bai Jamjuree',sans-serif; font-size:17px; font-weight:800; color:#1A1A1A; margin-bottom:10px;}
 .section-title-row{display:flex; align-items:center; justify-content:space-between; margin-top:6px; margin-bottom:10px;}
 .section-title-row .section-title{margin-bottom:0;}
-.ver-todo{font-size:12px; font-weight:700; color:var(--green); cursor:pointer;}
+.ver-todo{font-size:12px; font-weight:700; color:white; cursor:pointer; background:var(--orange); padding:6px 14px; border-radius:100px;}
+
 
 .explora-ciudad{margin-bottom:20px;}
 .explora-row{display:flex; gap:14px; overflow-x:auto; padding-bottom:4px;}
 .explora-row::-webkit-scrollbar{display:none;}
 .explora-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
 .explora-item{
-  display:flex; flex-direction:column; align-items:flex-start; gap:10px;
-  padding:14px 12px; border-radius:16px; background:#EAF0E6; border:0.5px solid #c8dac0;
-  cursor:pointer; transition:transform .1s ease, background .15s ease;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding:14px 10px; border-radius:18px; background:white; border:0.5px solid var(--line);
+  cursor:pointer; transition:transform .1s ease; box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
-.explora-item:active{transform:scale(0.95); background:#daebd2;}
+.explora-item:active{transform:scale(0.95);}
 .explora-ic{
-  width:100%; display:flex; align-items:center;
+  width:100%; display:flex; align-items:center; justify-content:center;
 }
-.explora-ic img{width:36px; height:36px; object-fit:contain;}
-.explora-label{font-size:11px; font-weight:700; color:var(--navy); line-height:1.25;}
+.explora-ic img{width:38px; height:38px; object-fit:contain;}
+.explora-ic-emoji{font-size:28px; width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;}
+.explora-label{font-size:11.5px; font-weight:700; color:#1A1A1A; line-height:1.25; text-align:center;}
 
 .destacados-row{display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:22px;}
 .destacados-row::-webkit-scrollbar{display:none;}
 .destacado-card{flex-shrink:0; width:150px; background:white; border:1px solid var(--line); border-radius:14px; overflow:hidden; cursor:pointer;}
-.destacado-card .cover{height:92px; background:linear-gradient(135deg,#eef1ea,#e3ece9);}
+.destacado-card .cover{height:92px; background:linear-gradient(135deg,#FFF0E0,#FFE4C0);}
 .destacado-card .cover img{width:100%; height:100%; object-fit:cover; display:block;}
 .destacado-body{padding:9px 10px 11px;}
 .destacado-name{font-size:12.5px; font-weight:700; color:var(--navy); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -481,10 +533,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 <div id="app">
 
   <div class="topbar" id="topbar">
-    <div id="topbarUserStrip" class="hidden" style="width:100%;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:4px;">
-      <span id="topbarRoleBadge" style="font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:100px;background:var(--navy);color:white;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0;"></span>
-      <span id="topbarUserName" style="font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-      <button onclick="abrirPerfil()" style="margin-left:auto;background:none;border:none;font-size:11.5px;font-weight:700;color:var(--navy-2);flex-shrink:0;padding:0;cursor:pointer;">Ver perfil →</button>
+    <div id="topbarUserStrip" class="hidden" style="width:100%;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:4px;">
+      <span id="topbarRoleBadge" style="font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:100px;background:rgba(255,255,255,0.25);color:white;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0;"></span>
+      <span id="topbarUserName" style="font-size:13px;font-weight:700;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button onclick="abrirPerfil()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;font-size:11.5px;font-weight:700;color:white;flex-shrink:0;padding:5px 10px;border-radius:100px;cursor:pointer;">Ver perfil →</button>
     </div>
     <img class="brand-logo" src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente" onclick="irInicio()">
     <div class="filter-dd ciudad-dd topbar-ciudad" id="ciudadDd">
@@ -495,57 +547,151 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ SCREEN: FEED PUBLICO (INICIAL) ============ -->
-  <div class="screen" id="screen-feed">
+  <div class="screen" id="screen-feed" style="padding:0 0 20px;">
+    <!-- Hero banner -->
     <div class="feed-hero">
       <div class="feed-banner-slider" id="feedBannerSlider">
         <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner1.png" class="active" alt="">
         <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner2.png" alt="">
       </div>
-      <div class="feed-title hidden" id="feedHeroTitle">Todo tu pueblo, en un solo lugar</div>
-      <div class="feed-sub hidden" id="feedHeroSub">PuenT reúne a todos los comercios y locales de la ciudad — y las mejores ofertas del día.</div>
-    </div>
-    <div class="topbar-search" id="buscadorFeedBox" style="margin-bottom:14px; padding:11px 14px;">
-      <span class="topbar-search-ic">🔎</span>
-      <input id="buscadorTop" placeholder="Buscar productos, comercios o vendedores…" oninput="onBuscadorInput(this.value)">
+      <div class="feed-title hidden" id="feedHeroTitle">Todo lo que necesitás, en tu ciudad</div>
+      <div class="feed-sub hidden" id="feedHeroSub">Comprá · Descubrí · Conectá</div>
     </div>
 
-    <button class="rayo-ofertas-btn" id="rayoOfertasBtn" onclick="renderRayoOfertas(); showScreen('rayo-ofertas')">
-      <span class="rayo-badge hidden" id="rayoOfertasBadge">0</span>
-      ⚡ Rayo Ofertas
-    </button>
-
-    <button class="sumar-negocio-btn" onclick="showScreen('bienvenida-comercio')">
-      <span class="ic">➕</span>
-      <div class="txt"><div class="t">Sumá tu negocio a PuenT</div><div class="s">Aparecé gratis en el feed de la ciudad</div></div>
-      <span class="chev">›</span>
-    </button>
-
-    <div class="explora-ciudad">
-      <div class="section-title">Comercios de la ciudad</div>
-      <div class="explora-grid" id="exploraRow"></div>
+    <!-- Search bar below hero -->
+    <div style="padding:16px 16px 4px;">
+      <div class="topbar-search" id="buscadorFeedBox" style="padding:12px 16px; box-shadow:0 3px 14px rgba(0,0,0,0.1);">
+        <span class="topbar-search-ic">🔎</span>
+        <input id="buscadorTop" placeholder="Buscar productos, comercios o vendedores…" oninput="onBuscadorInput(this.value)">
+        <span style="font-size:18px; flex-shrink:0; opacity:.5;">🎤</span>
+      </div>
     </div>
 
-    <div class="feed-tab-grid">
-      <button class="feed-tab-tile btn-tile-coral active" id="tabProductos" onclick="setFeedTab('productos')"><i class="ti ti-flame ic" aria-hidden="true"></i>Ofertas del día</button>
-      <button class="feed-tab-tile btn-tile-sage" id="tabVendedores" onclick="setFeedTab('vendedores')"><i class="ti ti-shopping-bag ic" aria-hidden="true"></i>Vendedores</button>
-      <button class="feed-tab-tile btn-tile-gold" id="tabLocales" onclick="setFeedTab('locales')"><i class="ti ti-map-pin ic" aria-hidden="true"></i>Locales</button>
-      <button class="feed-tab-tile btn-tile-neutral" id="tabUtil" onclick="setFeedTab('util')"><i class="ti ti-book-2 ic" aria-hidden="true"></i>Guía útil</button>
+    <!-- Categorías -->
+    <div style="padding:14px 16px 4px;">
+      <div style="display:flex; gap:12px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
+        <div class="cat-item" onclick="setFeedTab('productos'); document.getElementById('tabProductos').click()">
+          <div class="cat-icon" style="background:#FFF3E0;">🍔</div>
+          <div class="cat-label">Comidas</div>
+        </div>
+        <div class="cat-item" onclick="">
+          <div class="cat-icon" style="background:#FCE4EC;">👕</div>
+          <div class="cat-label">Ropa</div>
+        </div>
+        <div class="cat-item" onclick="">
+          <div class="cat-icon" style="background:#E3F2FD;">🔧</div>
+          <div class="cat-label">Herramientas</div>
+        </div>
+        <div class="cat-item" onclick="">
+          <div class="cat-icon" style="background:#E8F5E9;">🚗</div>
+          <div class="cat-label">Autos</div>
+        </div>
+        <div class="cat-item" onclick="">
+          <div class="cat-icon" style="background:#EDE7F6;">🏠</div>
+          <div class="cat-label">Hogar</div>
+        </div>
+        <div class="cat-item" onclick="">
+          <div class="cat-icon" style="background:#E3F2FD;">📱</div>
+          <div class="cat-label">Tecnología</div>
+        </div>
+        <div class="cat-item" onclick="setFeedTab('locales')">
+          <div class="cat-icon" style="background:#F5F5F5;">•••</div>
+          <div class="cat-label">Más</div>
+        </div>
+      </div>
     </div>
 
-    <div id="feedProductosView">
+    <!-- Rayo ofertas / CTA -->
+    <div style="padding:6px 16px 0;">
+      <button class="rayo-ofertas-btn" id="rayoOfertasBtn" onclick="renderRayoOfertas(); showScreen('rayo-ofertas')">
+        <span class="rayo-badge hidden" id="rayoOfertasBadge">0</span>
+        ⚡ Rayo Ofertas
+      </button>
+    </div>
+
+    <!-- Ofertas destacadas -->
+    <div style="padding:4px 16px 0;">
+      <div class="section-title-row">
+        <div class="section-title">🔥 Ofertas destacadas</div>
+        <span class="ver-todo" onclick="setFeedTab('productos')">Ver todas →</span>
+      </div>
+      <div id="feedGrid" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:18px; scrollbar-width:none; -webkit-overflow-scrolling:touch;"></div>
+    </div>
+
+    <!-- Promo banner repuestos -->
+    <div style="padding:0 16px;">
+      <div class="promo-banner" style="padding:0; overflow:hidden; background:none; box-shadow:none;">
+        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner4.png" alt="¿Buscás repuestos?" style="width:100%; height:auto; display:block; border-radius:18px;">
+      </div>
+    </div>
+
+    <!-- Comidas cerca tuyo -->
+    <div style="padding:0 16px;">
+      <div class="section-title-row">
+        <div class="section-title">🍽️ Comidas cerca tuyo</div>
+        <span class="ver-todo" onclick="setFeedTab('productos')">Ver todas →</span>
+      </div>
+      <div class="comidas-grid">
+        <div class="comida-item">
+          <div class="comida-foto-emoji" style="background:#FFE0B2;">🍕</div>
+          <div class="comida-label">Pizza</div>
+          <div class="comida-zona">📍 Centro</div>
+        </div>
+        <div class="comida-item">
+          <div class="comida-foto-emoji" style="background:#FFD180;">🍔</div>
+          <div class="comida-label">Hamburguesas</div>
+          <div class="comida-zona">📍 Zona Norte</div>
+        </div>
+        <div class="comida-item">
+          <div class="comida-foto-emoji" style="background:#D7CCC8;">🥟</div>
+          <div class="comida-label">Empanadas</div>
+          <div class="comida-zona">📍 Centro</div>
+        </div>
+        <div class="comida-item">
+          <div class="comida-foto-emoji" style="background:#FFE0B2;">🍗</div>
+          <div class="comida-label">Pollo</div>
+          <div class="comida-zona">📍 Zona Sur</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explorar ciudad -->
+    <div style="padding:0 16px;">
+      <div class="explora-banner" onclick="setFeedTab('locales')" style="padding:0; overflow:hidden; border:none; background:none;">
+        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner3.png" alt="Explorá tu ciudad" style="width:100%; height:auto; display:block; border-radius:18px;">
+      </div>
+    </div>
+
+    <!-- Comercios ciudad -->
+    <div style="padding:0 16px;">
+      <div class="section-title-row">
+        <div class="section-title">🏪 Comercios de la ciudad</div>
+      </div>
+      <div class="explora-grid" id="exploraRow" style="margin-bottom:18px;"></div>
+    </div>
+
+    <!-- Banners Locales y Guía útil -->
+    <div style="padding:0 16px;">
+      <div style="cursor:pointer; margin-bottom:14px;" onclick="setFeedTab('locales')">
+        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner7.PNG" alt="Locales de la Ciudad" style="width:100%; height:auto; display:block; border-radius:18px;">
+      </div>
+      <div style="cursor:pointer; margin-bottom:14px;" onclick="setFeedTab('util')">
+        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner5.png" alt="Guía útil" style="width:100%; height:auto; display:block; border-radius:18px;">
+      </div>
+    </div>
+
+    <div id="feedProductosView" style="padding:0 16px;">
       <div class="feed-toolbar-row">
         <div class="chiprow" id="feedChips"></div>
       </div>
-      <div class="prod-grid" id="feedGrid"></div>
     </div>
 
-    <div id="feedVendedoresView" class="hidden">
+    <div id="feedVendedoresView" class="hidden" style="padding:0 16px;">
       <p class="page-sub" style="margin-bottom:14px;">Productos que arman los vendedores independientes de La Paz con lo que consiguen en los comercios.</p>
       <div class="chiprow" id="feedChipsVend"></div>
-      <div class="prod-grid" id="feedGridVend"></div>
     </div>
 
-    <div id="feedLocalesView" class="hidden">
+    <div id="feedLocalesView" class="hidden" style="padding:0 16px;">
 
       <div class="section-title" style="margin-top:4px;">Comercios destacados</div>
       <div class="destacados-row" id="destacadosRow"></div>
@@ -561,7 +707,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div id="localesGrid"></div>
     </div>
 
-    <div id="feedUtilView" class="hidden">
+    <div id="feedUtilView" class="hidden" style="padding:0 16px;">
 
       <div class="turno-card" id="turnoCard"></div>
 
@@ -585,9 +731,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <p style="text-align:center; font-size:11.5px; color:var(--muted); margin-top:16px;">¿Tenés un comercio de salud o mecánica y querés aparecer acá? Sumate como local en PuenT.</p>
     </div>
 
-    <div class="divider"></div>
-    <button class="btn btn-primary" onclick="showScreen('home')">Ingresar / Registrarme</button>
-    <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Vendedores, comercios y clientes entran desde acá.</p>
+    <div style="padding:18px 16px 8px;">
+      <div class="divider"></div>
+      <button class="btn btn-primary" onclick="showScreen('home')" style="background:linear-gradient(135deg,#FF6600,#FF9500); font-size:15.5px; padding:16px; border-radius:16px; box-shadow:0 4px 16px rgba(255,102,0,0.38);">🚀 Ingresar / Registrarme</button>
+      <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Vendedores, comercios y clientes entran desde acá.</p>
+    </div>
   </div>
 
   <!-- ============ BIENVENIDA: SUMÁ TU COMERCIO ============ -->
