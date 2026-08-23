@@ -4686,8 +4686,8 @@ let buscadorQuery = '';
 
 function onBuscadorInput(valor){
   buscadorQuery = valor.trim().toLowerCase();
-  if(document.getElementById('tabVendedores').classList.contains('active')) renderFeedVendedores();
-  else if(document.getElementById('tabLocales').classList.contains('active')) renderLocales();
+  if(document.getElementById('tabVendedores')?.classList.contains('active')) renderFeedVendedores();
+  else if(document.getElementById('tabLocales')?.classList.contains('active')) renderLocales();
   else renderFeed();
 }
 
@@ -4760,8 +4760,10 @@ const ICONOS_RUBRO = {
 };
 function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
 function renderExploraCiudad(){
+  const el = document.getElementById('exploraRow');
+  if(!el) return;
   const rubros = Object.keys(ICONOS_RUBRO);
-  document.getElementById('exploraRow').innerHTML = rubros.map(r=>`
+  el.innerHTML = rubros.map(r=>`
     <div class="explora-item" onclick="irALocalesPorRubro('${r}')">
       <div class="explora-ic">${fluentImg(ICONOS_RUBRO[r])}</div>
       <div class="explora-label">${r}</div>
@@ -4931,14 +4933,14 @@ function actualizarSubtituloHero(){
 
 function setFeedTab(tab){
   tabActiva = tab;
-  document.getElementById('tabProductos').classList.toggle('active', tab==='productos');
-  document.getElementById('tabVendedores').classList.toggle('active', tab==='vendedores');
-  document.getElementById('tabLocales').classList.toggle('active', tab==='locales');
-  document.getElementById('tabUtil').classList.toggle('active', tab==='util');
-  document.getElementById('feedProductosView').classList.toggle('hidden', tab!=='productos');
-  document.getElementById('feedVendedoresView').classList.toggle('hidden', tab!=='vendedores');
-  document.getElementById('feedLocalesView').classList.toggle('hidden', tab!=='locales');
-  document.getElementById('feedUtilView').classList.toggle('hidden', tab!=='util');
+  document.getElementById('tabProductos')?.classList.toggle('active', tab==='productos');
+  document.getElementById('tabVendedores')?.classList.toggle('active', tab==='vendedores');
+  document.getElementById('tabLocales')?.classList.toggle('active', tab==='locales');
+  document.getElementById('tabUtil')?.classList.toggle('active', tab==='util');
+  document.getElementById('feedProductosView')?.classList.toggle('hidden', tab!=='productos');
+  document.getElementById('feedVendedoresView')?.classList.toggle('hidden', tab!=='vendedores');
+  document.getElementById('feedLocalesView')?.classList.toggle('hidden', tab!=='locales');
+  document.getElementById('feedUtilView')?.classList.toggle('hidden', tab!=='util');
 
   actualizarSubtituloHero();
 
