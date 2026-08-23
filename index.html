@@ -290,7 +290,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 /* ---- Feed público ---- */
 .feed-hero{background:linear-gradient(160deg, #FF6600 0%, #FF9500 60%, #FFB300 100%); border-radius:0 0 28px 28px; margin:-1px -1px 0; color:white; overflow:hidden; box-shadow:0 4px 20px rgba(255,102,0,0.3);}
-.feed-banner-slider{position:relative; width:100%; aspect-ratio:1805/871; overflow:hidden;}
+.feed-banner-slider{position:relative; width:100%; aspect-ratio:836/380; overflow:hidden;}
 .feed-banner-slider img{position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; object-position:center center; opacity:0; transition:opacity 1s ease;}
 .feed-banner-slider img.active{opacity:1;}
 .feed-city{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; background:rgba(255,255,255,0.12); padding:5px 12px; border-radius:100px; margin-bottom:12px; color:white; border:none; cursor:pointer;}
@@ -321,14 +321,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .feed-tab-tile:active{transform:scale(0.97);}
 .feed-tab-tile .ic{font-size:22px; flex-shrink:0;}
 .feed-tab-tile.active{box-shadow:inset 0 0 0 2.5px currentColor, 0 2px 8px rgba(0,0,0,0.08);}
-.rayo-ofertas-btn{
+.tornado-ofertas-btn{
   position:relative; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
   padding:16px; border-radius:18px; border:none; margin-bottom:18px;
   background:linear-gradient(135deg, #FF6600, #FF9500); color:#fff; font-weight:800; font-size:15px;
   box-shadow:0 4px 16px rgba(255,102,0,0.38); transition:transform .1s;
 }
-.rayo-ofertas-btn:active{transform:scale(0.98);}
-.rayo-badge{
+.tornado-ofertas-btn:active{transform:scale(0.98);}
+.tornado-badge{
   position:absolute; top:-8px; right:-8px; background:#e0453f; color:#fff; font-size:12px; font-weight:800;
   min-width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
   padding:0 5px; border:2px solid var(--bg, #fff);
@@ -611,11 +611,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
 
-    <!-- Rayo ofertas / CTA -->
+    <!-- Tornado ofertas / CTA -->
     <div style="padding:6px 16px 0;">
-      <button class="rayo-ofertas-btn" id="rayoOfertasBtn" onclick="renderRayoOfertas(); showScreen('rayo-ofertas')">
-        <span class="rayo-badge hidden" id="rayoOfertasBadge">0</span>
-        ⚡ Rayo Ofertas
+      <button class="tornado-ofertas-btn" id="tornadoOfertasBtn" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
+        <span class="tornado-badge hidden" id="tornadoOfertasBadge">0</span>
+        🌪️ Tornado de Ofertas
       </button>
     </div>
 
@@ -775,12 +775,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ RAYO OFERTAS: LISTADO DE 24HS PROGRAMADAS/ACTIVAS ============ -->
-  <div class="screen hidden" id="screen-rayo-ofertas">
+  <div class="screen hidden" id="screen-tornado-ofertas">
     <div class="link-back" onclick="showScreen('feed')">← Volver</div>
-    <div class="kicker">⚡ Rayo Ofertas</div>
+    <div class="kicker">🌪️ Tornado de Ofertas</div>
     <h1 class="page-title">Ofertas 24hs</h1>
     <p class="page-sub">Acá aparecen todas las ofertas relámpago programadas por los comercios — cuándo se largan y cuáles ya están activas.</p>
-    <div id="rayoOfertasList"></div>
+    <div id="tornadoOfertasList"></div>
   </div>
 
   <!-- ============ OFERTA DEL DIA: DETALLE PUBLICO ============ -->
@@ -1393,7 +1393,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <select id="cnpTipoOferta" onchange="onTipoOfertaChange()">
           <option value="unica">Oferta única</option>
           <option value="tiempo">Oferta por tiempo limitado</option>
-          <option value="h24">⚡ Oferta relámpago — potenciá tu comercio</option>
+          <option value="h24">🌪️ Tornado de oferta — potenciá tu comercio</option>
           <option value="normal">Precio normal</option>
           <option value="ddp">Descuento DDP — Día del Padre</option>
           <option value="ddm">Descuento DDM — Día de la Madre</option>
@@ -1407,7 +1407,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <input id="cnpHoraInicio" type="time">
           <input id="cnpHoraHasta" type="time">
         </div>
-        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Entre esas dos horas, los clientes pueden reservarla — según el stock que cargues abajo. Si se agota antes de esa hora, les va a aparecer "Agotado". Aparece en ⚡ Rayo Ofertas.</p>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Entre esas dos horas, los clientes pueden reservarla — según el stock que cargues abajo. Si se agota antes de esa hora, les va a aparecer "Agotado". Aparece en 🌪️ Tornado de Ofertas.</p>
       </div>
       <div class="field" id="cnpDescuentoBox">
         <label>Porcentaje de descuento</label>
@@ -2269,7 +2269,7 @@ const carrito = {};
 const navByRole = {
   guest:[
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
-    {key:'rayo-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderRayoOfertas();showScreen('rayo-ofertas')"},
+    {key:'tornado-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderTornadoOfertas();showScreen('tornado-ofertas')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:"abrirCarrito()"},
     {key:'cl-buscador', ic:'ti-search',          label:'Buscar',  action:"showScreen('cl-buscador')"},
     {key:'home',        ic:'ti-user',            label:'Ingresar',action:"showScreen('home')"},
@@ -2290,7 +2290,7 @@ const navByRole = {
   ],
   cliente:[
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
-    {key:'rayo-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderRayoOfertas();showScreen('rayo-ofertas')"},
+    {key:'tornado-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderTornadoOfertas();showScreen('tornado-ofertas')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:"abrirCarrito()"},
     {key:'cl-buscador', ic:'ti-search',          label:'Buscar',  action:"showScreen('cl-buscador')"},
     {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
@@ -3148,7 +3148,7 @@ function subirFotoAFirebase(prefix, dataUrl){
 const TIPOS_OFERTA = {
   unica: {label:'🎯 Oferta única', descuento:false},
   tiempo: {label:'⏳ Oferta por tiempo limitado', descuento:false},
-  h24: {label:'⚡ Oferta relámpago', descuento:false, hora:true},
+  h24: {label:'🌪️ Tornado de oferta', descuento:false, hora:true},
   normal: {label:'Precio normal', descuento:false},
   ddp: {label:'👔 Descuento Día del Padre', descuento:true},
   ddm: {label:'💐 Descuento Día de la Madre', descuento:true},
@@ -3184,7 +3184,7 @@ function reservaVencida(venta){
   return new Date() > new Date(vence);
 }
 // Estado de una oferta relámpago: 'antes' | 'abierta' | 'agotada' | 'cerrada'
-function estadoRayo(p){
+function estadoTornado(p){
   if(!p.fechaInicio || !p.horaInicio || !p.horaHasta) return null;
   const inicio = new Date(`${p.fechaInicio}T${p.horaInicio}`);
   const fin = new Date(`${p.fechaInicio}T${p.horaHasta}`);
@@ -3196,21 +3196,21 @@ function estadoRayo(p){
   if(disp !== null && disp <= 0) return 'agotada';
   return 'abierta';
 }
-function ofertasRayoVigentes(){
-  return state.productos.filter(p=>p.tipoOferta==='h24').map(p=>({p, estado:estadoRayo(p)})).filter(x=>x.estado && x.estado!=='cerrada');
+function ofertasTornadoVigentes(){
+  return state.productos.filter(p=>p.tipoOferta==='h24').map(p=>({p, estado:estadoTornado(p)})).filter(x=>x.estado && x.estado!=='cerrada');
 }
-function actualizarBadgeRayo(){
-  const badge = document.getElementById('rayoOfertasBadge');
+function actualizarBadgeTornado(){
+  const badge = document.getElementById('tornadoOfertasBadge');
   if(!badge) return;
-  const n = ofertasRayoVigentes().length;
+  const n = ofertasTornadoVigentes().length;
   badge.textContent = n;
   badge.classList.toggle('hidden', n===0);
 }
-function renderRayoOfertas(){
-  const lista = ofertasRayoVigentes().sort((a,b)=> new Date(`${a.p.fechaInicio}T${a.p.horaInicio}`) - new Date(`${b.p.fechaInicio}T${b.p.horaInicio}`));
-  const box = document.getElementById('rayoOfertasList');
+function renderTornadoOfertas(){
+  const lista = ofertasTornadoVigentes().sort((a,b)=> new Date(`${a.p.fechaInicio}T${a.p.horaInicio}`) - new Date(`${b.p.fechaInicio}T${b.p.horaInicio}`));
+  const box = document.getElementById('tornadoOfertasList');
   if(lista.length===0){
-    box.innerHTML = `<div class="empty"><div class="ic">⚡</div><div class="t">Todavía no hay ofertas 24hs programadas</div><div class="s">Cuando un comercio active una, va a aparecer acá con fecha y hora.</div></div>`;
+    box.innerHTML = `<div class="empty"><div class="ic">🌪️</div><div class="t">Todavía no hay ofertas 24hs programadas</div><div class="s">Cuando un comercio active una, va a aparecer acá con fecha y hora.</div></div>`;
     return;
   }
   box.innerHTML = `<div class="prod-grid">` + lista.map(({p, estado})=>{
@@ -4861,7 +4861,7 @@ function v_ciudadOk(vendedorId){
 
 function renderFeed(){
   renderFeedGrid('comercio', 'feedChips', 'feedGrid', feedRubroFiltro, 'setFeedRubro');
-  actualizarBadgeRayo();
+  actualizarBadgeTornado();
 }
 function setFeedRubro(r){ feedRubroFiltro = r; renderFeed(); }
 
@@ -5021,7 +5021,7 @@ function abrirOferta(prodId){
     mostrarCodigoDeOferta(ventaPrevia);
   } else if(estaRegistrado){
     if(p.tipoOferta==='h24'){
-      const estado = estadoRayo(p);
+      const estado = estadoTornado(p);
       let html;
       if(estado==='antes'){
         html = `<div style="text-align:center; padding:16px 0; color:var(--navy); font-weight:700; font-size:14px;">🕐 Todavía no arrancó<br><span style="font-weight:500; font-size:12.5px; color:var(--muted);">Se larga a las ${p.horaInicio}hs</span></div>`;
@@ -5115,7 +5115,7 @@ function vincularVentaConCliente(clienteData){
 function quieroEstaOferta(){
   const p = state.productos.find(x=>x.id===ofertaAbierta);
   if(p.tipoOferta==='h24'){
-    const estado = estadoRayo(p);
+    const estado = estadoTornado(p);
     if(estado!=='abierta'){
       toast(estado==='agotada' ? 'Se acaba de agotar 😔' : 'Esta oferta no está disponible para reservar ahora mismo');
       abrirOferta(p.id);
@@ -6065,7 +6065,7 @@ function reservarProducto(){
 
   // Verificar stock
   if(p.tipoOferta==='h24'){
-    const est = estadoRayo(p);
+    const est = estadoTornado(p);
     if(est!=='abierta'){ toast(est==='agotada'?'Se agotó 😔':'No disponible ahora'); abrirOferta(p.id); return; }
   } else if(p.stock !== null && p.stock !== undefined && p.stock <= 0){
     toast('Sin stock disponible 😔'); return;
