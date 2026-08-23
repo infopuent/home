@@ -612,7 +612,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div class="cat-icon" style="background:#E3F2FD;">📱</div>
           <div class="cat-label">Tecnología</div>
         </div>
-        <div class="cat-item" onclick="setFeedTab('locales')">
+        <div class="cat-item" onclick="abrirTodosRubros()">
           <div class="cat-icon" style="background:#F5F5F5;">•••</div>
           <div class="cat-label">Más</div>
         </div>
@@ -778,6 +778,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <button class="btn btn-primary" onclick="elegirRolParaRegistro('comercio')">Registrar mi comercio</button>
     <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Es gratis empezar. Te lleva un par de minutos.</p>
+  </div>
+
+  <!-- ============ TODOS LOS RUBROS ============ -->
+  <div class="screen hidden" id="screen-todos-rubros">
+    <div class="link-back" onclick="showScreen('feed')">← Volver</div>
+    <div class="kicker">Explorar</div>
+    <h1 class="page-title">Todos los rubros</h1>
+    <div class="explora-grid" style="margin-top:12px;" id="rubrosGridFull"></div>
   </div>
 
   <!-- ============ LOCALES DE LA CIUDAD: PANTALLA DEDICADA ============ -->
@@ -4987,6 +4995,21 @@ function renderAdheridosGrid(){
       <div class="adherido-nombre">${c.nombre}</div>
       <div class="adherido-rubro">${c.rubro||''}</div>
     </div>`).join('');
+}
+
+function abrirTodosRubros(){
+  showScreen('todos-rubros');
+  const grid = document.getElementById('rubrosGridFull');
+  if(!grid) return;
+  grid.innerHTML = Object.entries(ICONOS_RUBRO).map(([r, img])=>`
+    <div class="explora-item" onclick="irALocalesPorRubro('${r}'); showScreen('feed')">
+      <div class="explora-ic">${fluentImg(img)}</div>
+      <div class="explora-label">${r}</div>
+    </div>`).join('') + `
+    <div class="explora-item" onclick="irALocalesPorRubro('Todos'); showScreen('feed')">
+      <div class="explora-ic">${fluentImg('1f4cd_3d.png')}</div>
+      <div class="explora-label">Ver todos</div>
+    </div>`;
 }
 
 function abrirLocales(){
