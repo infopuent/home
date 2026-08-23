@@ -4978,7 +4978,7 @@ function renderAdheridosGrid(){
     return;
   }
   grid.innerHTML = comercios.map(c=>`
-    <div class="adherido-item" onclick="abrirComercio('${c.id}')">
+    <div class="adherido-item" onclick="verProductosDeLocal('${c.id}')">
       <div class="adherido-logo">
         ${c.img ? `<img src="${c.img}" alt="${c.nombre}">` : `<span>${c.nombre.charAt(0).toUpperCase()}</span>`}
       </div>
@@ -5001,7 +5001,7 @@ function renderLocalesEnScreen(){
     return;
   }
   grid.innerHTML = todos.map(c=>`
-    <div class="explora-card" onclick="abrirComercio('${c.id}')">
+    <div class="explora-card" onclick="verProductosDeLocal('${c.id}')">
       ${c.logo ? `<img src="${c.logo}" class="explora-img" alt="${c.nombre}">` : `<div class="explora-img" style="background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:28px;">🏪</div>`}
       <div class="explora-nombre">${c.nombre}</div>
       <div class="explora-rubro">${c.rubro||''}</div>
