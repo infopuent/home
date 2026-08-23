@@ -37,9 +37,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 #app{max-width:480px; margin:0 auto; min-height:100vh; background:#F8F8F8; position:relative; padding-bottom:78px;}
 .topbar{
   position:sticky; top:0; z-index:20;
-  background:#0d5c6e;
+  background:#ffffff;
   padding:10px 16px 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  box-shadow:0 2px 12px rgba(13,92,110,0.4);
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
 }
 .brand{font-weight:800; font-size:18px; color:var(--navy);}
 .brand-logo-wrap{
@@ -53,22 +53,22 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 }
 .brand-logo:active{transform:scale(0.94);}
 .topbar-search{
-  flex:1 1 140px; display:flex; align-items:center; gap:6px; background:white;
+  flex:1 1 140px; display:flex; align-items:center; gap:6px; background:#f2f2f2;
   border:none; border-radius:100px; padding:10px 16px; min-width:0;
-  box-shadow:0 2px 8px rgba(0,0,0,0.12);
+  box-shadow:none;
 }
 .topbar-search-ic{font-size:14px; flex-shrink:0; opacity:.5;}
 .topbar-search input{border:none; outline:none; background:transparent; font-size:13.5px; width:100%; color:var(--ink); min-width:0;}
 .topbar-search input::placeholder{color:#AAA;}
 .topbar-ciudad{flex:0 0 auto; min-width:0; max-width:48%; margin-left:auto;}
 .topbar-city-btn{
-  width:100%; display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.22);
-  border:1.5px solid rgba(255,255,255,0.4);
-  border-radius:100px; padding:7px 11px; font-size:11px; font-weight:700; color:white; cursor:pointer; white-space:nowrap; overflow:hidden;
-  backdrop-filter:blur(4px);
+  width:100%; display:flex; align-items:center; gap:5px; background:#f2f2f2;
+  border:1.5px solid #e0e0e0;
+  border-radius:100px; padding:7px 11px; font-size:11px; font-weight:700; color:#333; cursor:pointer; white-space:nowrap; overflow:hidden;
+  backdrop-filter:none;
 }
 .topbar-city-btn span:nth-child(2){overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-.topbar-city-btn .filter-dd-chev{color:rgba(255,255,255,0.8); flex-shrink:0; margin-left:auto;}
+.topbar-city-btn .filter-dd-chev{color:#666; flex-shrink:0; margin-left:auto;}
 .feed-toolbar-row{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
 .feed-toolbar-row .chiprow{margin-bottom:0; flex-shrink:0;}
 .feed-search-inline{flex:1 1 auto; min-width:0; margin-bottom:0; padding:7px 14px;}
@@ -672,17 +672,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
 
-    <!-- Comercios ciudad -->
-    <div style="padding:0 16px;">
-      <div class="section-title-row">
-        <div class="section-title">🏪 Comercios de la ciudad</div>
-      </div>
-      <div class="explora-grid" id="exploraRow" style="margin-bottom:18px;"></div>
-    </div>
 
     <!-- Banners Locales y Guía útil -->
     <div style="padding:0 16px;">
-      <div style="cursor:pointer; margin-bottom:14px;" onclick="setFeedTab('locales')">
+      <div style="cursor:pointer; margin-bottom:14px;" onclick="abrirLocales()">
         <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner3.png" alt="Locales de la Ciudad" style="width:100%; height:auto; display:block; border-radius:18px;">
       </div>
       <div style="cursor:pointer; margin-bottom:14px;" onclick="abrirGuiaUtil()">
@@ -772,6 +765,23 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <button class="btn btn-primary" onclick="elegirRolParaRegistro('comercio')">Registrar mi comercio</button>
     <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Es gratis empezar. Te lleva un par de minutos.</p>
+  </div>
+
+  <!-- ============ LOCALES DE LA CIUDAD: PANTALLA DEDICADA ============ -->
+  <div class="screen hidden" id="screen-locales">
+    <div class="link-back" onclick="showScreen('feed')">← Volver</div>
+    <div class="kicker">🏪 Comercios</div>
+    <h1 class="page-title">Locales de la ciudad</h1>
+    <p class="page-sub">Todos los comercios de La Paz que ya están en PuenT.</p>
+    <div class="section-title" style="margin-top:4px;">Comercios destacados</div>
+    <div class="destacados-row" id="destacadosRowScreen"></div>
+    <div class="section-title-row">
+      <div class="section-title">Cerca tuyo</div>
+    </div>
+    <div id="cercaTuyoListScreen"></div>
+    <div class="section-title" style="margin-top:6px;">Todos los locales</div>
+    <div id="localesFiltroActivoScreen"></div>
+    <div id="localesGridScreen"></div>
   </div>
 
   <!-- ============ GUIA UTIL: PANTALLA DEDICADA ============ -->
@@ -4943,6 +4953,27 @@ const TELEFONOS_UTILES = [
 function farmaciaDeTurnoHoy(){
   const dia = Math.floor(Date.now() / 86400000); // día absoluto, cambia cada 24hs
   return FARMACIAS_TURNO[dia % FARMACIAS_TURNO.length];
+}
+
+function abrirLocales(){
+  showScreen('locales');
+  renderLocalesEnScreen();
+}
+
+function renderLocalesEnScreen(){
+  const todos = state.comercios.filter(c=> !ciudadSeleccionada || c.ciudad===ciudadSeleccionada);
+  const grid = document.getElementById('localesGridScreen');
+  if(!grid) return;
+  if(!todos.length){
+    grid.innerHTML = `<div class="empty"><div class="ic">📍</div><div class="t">Todavía no hay locales en ${ciudadSeleccionada}</div></div>`;
+    return;
+  }
+  grid.innerHTML = todos.map(c=>`
+    <div class="explora-card" onclick="abrirComercio('${c.id}')">
+      ${c.logo ? `<img src="${c.logo}" class="explora-img" alt="${c.nombre}">` : `<div class="explora-img" style="background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:28px;">🏪</div>`}
+      <div class="explora-nombre">${c.nombre}</div>
+      <div class="explora-rubro">${c.rubro||''}</div>
+    </div>`).join('');
 }
 
 function abrirGuiaUtil(){
