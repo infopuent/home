@@ -452,11 +452,19 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .explora-banner .eb-title{font-size:15px; font-weight:800; color:#CC4400; margin-bottom:2px;}
 .explora-banner .eb-sub{font-size:12px; color:#885500;}
 /* Comidas cerca tuyo grid */
+.adheridos-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px;}
+.adherido-item{display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; padding:12px 8px; border-radius:16px; background:white; border:0.5px solid var(--line); box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:transform .1s ease;}
+.adherido-item:active{transform:scale(0.95);}
+.adherido-logo{width:58px; height:58px; border-radius:14px; object-fit:cover; background:var(--cream); display:flex; align-items:center; justify-content:center; font-size:26px; overflow:hidden; flex-shrink:0;}
+.adherido-logo img{width:100%; height:100%; object-fit:cover; border-radius:14px;}
+.adherido-nombre{font-size:11px; font-weight:700; color:#1A1A1A; text-align:center; line-height:1.25; word-break:break-word;}
+.adherido-rubro{font-size:10px; color:var(--muted); text-align:center;}
 .comidas-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px;}
 .comida-item{display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;}
 .comida-foto{width:100%; aspect-ratio:1; border-radius:14px; background:#f0f0f0; overflow:hidden; position:relative;}
 .comida-foto img{width:100%; height:100%; object-fit:cover; display:block;}
-.comida-foto-emoji{width:100%; aspect-ratio:1; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:30px; overflow:hidden;}
+.comida-foto-emoji{width:100%; aspect-ratio:1; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:30px; overflow:hidden; position:relative;}
+.comida-foto-emoji img{position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;}
 .comida-label{font-size:11.5px; font-weight:700; color:#1A1A1A; text-align:center;}
 .comida-zona{font-size:10px; color:var(--muted); display:flex; align-items:center; gap:2px;}
 .comida-cart-ic{position:absolute; bottom:4px; right:4px; width:22px; height:22px; border-radius:50%; background:var(--orange); display:flex; align-items:center; justify-content:center; font-size:11px; color:white;}
@@ -643,22 +651,22 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="comidas-grid">
         <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pizza.PNG" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></div>
+          <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pizza.PNG" ></div>
           <div class="comida-label">Pizza</div>
           <div class="comida-zona">📍 Centro</div>
         </div>
         <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#FFD180;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/hamburg.PNG" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></div>
+          <div class="comida-foto-emoji" style="background:#FFD180;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/hamburg.PNG" ></div>
           <div class="comida-label">Hamburguesas</div>
           <div class="comida-zona">📍 Zona Norte</div>
         </div>
         <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#D7CCC8;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/empa.PNG" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></div>
+          <div class="comida-foto-emoji" style="background:#D7CCC8;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/empa.PNG" ></div>
           <div class="comida-label">Empanadas</div>
           <div class="comida-zona">📍 Centro</div>
         </div>
         <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pollo.PNG" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></div>
+          <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pollo.PNG" ></div>
           <div class="comida-label">Pollo</div>
           <div class="comida-zona">📍 Zona Sur</div>
         </div>
@@ -670,6 +678,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="explora-banner" onclick="setFeedTab('locales')" style="padding:0; overflow:hidden; border:none; background:none;">
         <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner7.PNG" alt="Locales de la Ciudad" style="width:100%; height:auto; display:block; border-radius:18px;">
       </div>
+    </div>
+
+    <!-- Grilla de comercios adheridos -->
+    <div style="padding:0 16px; margin-top:14px;">
+      <div id="adheridosGrid" class="adheridos-grid"></div>
     </div>
 
 
@@ -4896,6 +4909,7 @@ function v_ciudadOk(vendedorId){
 function renderFeed(){
   renderFeedGrid('comercio', 'feedChips', 'feedGrid', feedRubroFiltro, 'setFeedRubro');
   actualizarBadgeTornado();
+  renderAdheridosGrid();
 }
 function setFeedRubro(r){ feedRubroFiltro = r; renderFeed(); }
 
@@ -4953,6 +4967,24 @@ const TELEFONOS_UTILES = [
 function farmaciaDeTurnoHoy(){
   const dia = Math.floor(Date.now() / 86400000); // día absoluto, cambia cada 24hs
   return FARMACIAS_TURNO[dia % FARMACIAS_TURNO.length];
+}
+
+function renderAdheridosGrid(){
+  const grid = document.getElementById('adheridosGrid');
+  if(!grid) return;
+  const comercios = (state.comercios||[]).filter(c=> !ciudadSeleccionada || c.ciudad===ciudadSeleccionada);
+  if(!comercios.length){
+    grid.innerHTML = '';
+    return;
+  }
+  grid.innerHTML = comercios.map(c=>`
+    <div class="adherido-item" onclick="abrirComercio('${c.id}')">
+      <div class="adherido-logo">
+        ${c.img ? `<img src="${c.img}" alt="${c.nombre}">` : `<span>${c.nombre.charAt(0).toUpperCase()}</span>`}
+      </div>
+      <div class="adherido-nombre">${c.nombre}</div>
+      <div class="adherido-rubro">${c.rubro||''}</div>
+    </div>`).join('');
 }
 
 function abrirLocales(){
