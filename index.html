@@ -1818,8 +1818,34 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ SCREEN: ADMIN VENTAS ============ -->
   <div class="screen hidden" id="screen-admin-ventas">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
-    <div class="page-title">Ventas realizadas</div>
+    <div class="page-title">Operaciones</div>
+    <div class="page-sub" style="margin-bottom:14px;">Todos los movimientos entre comercios y conectores T</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <select id="adminFiltroEstado" onchange="adminFiltrarOps()" style="flex:1;min-width:120px;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;background:#fff;">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">🕒 Pendientes</option>
+        <option value="confirmada">✅ Confirmadas</option>
+        <option value="cancelada">❌ Canceladas</option>
+        <option value="comision_recibida">💰 Cobradas</option>
+      </select>
+      <select id="adminFiltroTipo" onchange="adminFiltrarOps()" style="flex:1;min-width:120px;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;background:#fff;">
+        <option value="">Todos los tipos</option>
+        <option value="con_conector">🤝 Con conector T</option>
+        <option value="sin_conector">🏪 Sin conector (directo)</option>
+      </select>
+      <select id="adminFiltroComercio" onchange="adminFiltrarOps()" style="flex:1 1 100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;background:#fff;">
+        <option value="">Todos los comercios</option>
+      </select>
+    </div>
+    <div id="adminVentasContador" style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;"></div>
     <div id="adminVentasList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN DETALLE OPERACION ============ -->
+  <div class="screen hidden" id="screen-admin-op-detalle">
+    <div class="link-back" onclick="showScreen('admin-ventas')">← Operaciones</div>
+    <div class="kicker" id="adminOpKicker">Detalle de operación</div>
+    <div id="adminOpContenido"></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN USUARIOS ============ -->
@@ -3824,6 +3850,11 @@ function renderVReservas(){
     } else if(r.estado === 'confirmada' || r.estado === 'confirmado'){
       estadoPill = '<span class="pill pill-green">✅ Confirmada</span>';
       estadoNota = '<div style="font-size:10.5px;color:#2F7A55;font-weight:700;margin-top:3px;">💰 Pendiente cobrar comisión</div>';
+    } else if(r.estado === 'cancelada'){
+      estadoPill = '<span class="pill" style="background:#C0392B;color:#fff;">❌ Cancelada</span>';
+      var motLabel = { no_se_presento:'El cliente no se presentó', sin_stock:'Sin stock', precio_cambio:'El precio cambió', cliente_desistio:'El cliente desistió', otro:'Otro motivo' };
+      var motTxt = r.textoCancelacion || (motLabel[r.motivoCancelacion] || 'Motivo no especificado');
+      estadoNota = '<div style="font-size:10.5px;color:#C0392B;font-weight:700;margin-top:3px;">ℹ️ ' + motTxt + '</div>';
     } else {
       estadoPill = '<span class="pill pill-navy">🕒 Pendiente</span>';
     }
@@ -6288,26 +6319,290 @@ async function adminEliminarVendedor(docId, nombre){
 }
 
 // ---- VENTAS ----
+// =============================================
+// ADMIN — OPERACIONES (VENTAS + MOVIMIENTOS)
+// =============================================
+let _adminOpsAll = [];
+
 async function adminCargarVentas(){
   const el = document.getElementById('adminVentasList');
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
-    const snap = await db.collection('ventas').orderBy('fecha','desc').limit(100).get();
-    if(snap.empty){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin ventas registradas.</p>'; return; }
-    el.innerHTML = snap.docs.map(d=>{
-      const v = d.data();
-      const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-AR') : '—';
-      return `<div class="list-row">
-        <div class="av" style="background:#C99A3E;">💰</div>
-        <div class="main">
-          <div class="t">${v.productoNombre||'Producto'}</div>
-          <div class="s">Vendedor: ${v.vendedorNombre||'—'} · ${fecha}</div>
-        </div>
-        <div style="font-size:14px;font-weight:800;color:var(--navy);">$${v.precio||0}</div>
-      </div>`;
-    }).join('');
-  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar ventas.</p>'; }
+    const snap = await db.collection('ventas').orderBy('fecha','desc').limit(200).get();
+    _adminOpsAll = snap.docs.map(d => ({ ...d.data(), _docId: d.id }));
+
+    // Poblar filtro de comercios
+    const comerciosSel = document.getElementById('adminFiltroComercio');
+    if(comerciosSel){
+      const nombres = [...new Set(_adminOpsAll.map(v => v.comercioNombre).filter(Boolean))].sort();
+      comerciosSel.innerHTML = '<option value="">Todos los comercios</option>'
+        + nombres.map(n => `<option value="${n}">${n}</option>`).join('');
+    }
+
+    adminFiltrarOps();
+  }catch(e){
+    document.getElementById('adminVentasList').innerHTML = '<p style="color:red;font-size:13px;">Error al cargar operaciones.</p>';
+  }
 }
+
+function adminFiltrarOps(){
+  const filtroEstado   = (document.getElementById('adminFiltroEstado')   || {}).value || '';
+  const filtroTipo     = (document.getElementById('adminFiltroTipo')     || {}).value || '';
+  const filtroComercio = (document.getElementById('adminFiltroComercio') || {}).value || '';
+
+  let lista = _adminOpsAll.slice();
+
+  if(filtroEstado){
+    if(filtroEstado === 'confirmada'){
+      lista = lista.filter(v => v.estado === 'confirmada' || v.estado === 'confirmado');
+    } else {
+      lista = lista.filter(v => v.estado === filtroEstado);
+    }
+  }
+  if(filtroTipo === 'con_conector'){
+    lista = lista.filter(v => !!v.vendedorId);
+  } else if(filtroTipo === 'sin_conector'){
+    lista = lista.filter(v => !v.vendedorId);
+  }
+  if(filtroComercio){
+    lista = lista.filter(v => v.comercioNombre === filtroComercio);
+  }
+
+  adminRenderOps(lista);
+}
+
+function adminRenderOps(lista){
+  const el = document.getElementById('adminVentasList');
+  const cont = document.getElementById('adminVentasContador');
+  if(cont) cont.textContent = lista.length + ' operación' + (lista.length !== 1 ? 'es' : '');
+
+  if(!lista.length){
+    el.innerHTML = '<div class="empty"><div class="s">Sin operaciones para este filtro.</div></div>';
+    return;
+  }
+
+  const estadoMap = {
+    pendiente:        { bg:'#F0F4FA', label:'🕒 Pendiente',        color:'#444' },
+    confirmada:       { bg:'#EAF5EA', label:'✅ Confirmada',        color:'#2F7A55' },
+    confirmado:       { bg:'#EAF5EA', label:'✅ Confirmada',        color:'#2F7A55' },
+    cancelada:        { bg:'#FDECEA', label:'❌ Cancelada',         color:'#C0392B' },
+    comision_recibida:{ bg:'#FFF8EC', label:'💰 Comisión cobrada',  color:'#8A6400' }
+  };
+
+  el.innerHTML = lista.map(v => {
+    const tieneConector = !!v.vendedorId;
+    const esPersonalizado = v.origen === 'personalizado';
+
+    // Ícono distinto según tipo
+    let icono, icoColor;
+    if(tieneConector && esPersonalizado){ icono = '🛒'; icoColor = '#5C7355'; }
+    else if(tieneConector){               icono = '🤝'; icoColor = '#C99A3E'; }
+    else {                                icono = '🏪'; icoColor = '#4A90D9'; }
+
+    const est = estadoMap[v.estado] || { bg:'#F5F5F5', label: v.estado || '—', color:'#555' };
+    const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+    const resumen = esPersonalizado && Array.isArray(v.productos)
+      ? v.productos.map(p => p.nombre).join(', ')
+      : (v.productoNombre || '—');
+    const comStr = v.comisionMonto ? '$' + Number(v.comisionMonto).toLocaleString('es-AR') : '';
+    const totalStr = v.total ? '$' + Number(v.total).toLocaleString('es-AR') : (v.precio ? '$' + Number(v.precio).toLocaleString('es-AR') : '—');
+
+    return `<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden;cursor:pointer;" onclick="adminAbrirOpDetalle('${v._docId}')">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;">
+        <div style="width:42px;height:42px;border-radius:12px;background:${icoColor};display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;">${icono}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:700;color:var(--navy);">${v.clienteNombre || '—'}</div>
+          <div style="font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${resumen}</div>
+          <div style="font-size:11px;color:var(--muted);">${v.comercioNombre || '—'} · ${fecha}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:14px;font-weight:800;color:var(--ink);">${totalStr}</div>
+          ${comStr ? `<div style="font-size:11px;color:#2F7A55;font-weight:700;">com. ${comStr}</div>` : ''}
+          <span style="font-size:10px;background:${est.bg};color:${est.color};padding:2px 7px;border-radius:10px;font-weight:700;display:inline-block;margin-top:2px;">${est.label}</span>
+        </div>
+      </div>
+      <div style="border-top:0.5px solid var(--line);padding:7px 14px;display:flex;justify-content:space-between;align-items:center;background:#FAFBFC;">
+        <span style="font-size:10.5px;font-family:monospace;color:var(--muted);">${v.codigo || ''}</span>
+        <span style="font-size:11px;color:${icoColor};font-weight:700;">${tieneConector ? '🤝 Con conector T' : '🏪 Venta directa'} · Ver →</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function adminAbrirOpDetalle(docId){
+  const v = _adminOpsAll.find(x => x._docId === docId);
+  if(!v){ toast('Operación no encontrada'); return; }
+
+  const tieneConector = !!v.vendedorId;
+  const esP = v.origen === 'personalizado';
+  const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+
+  const estadoMap = {
+    pendiente:        '🕒 Pendiente de confirmación',
+    confirmada:       '✅ Confirmada — comisión pendiente',
+    confirmado:       '✅ Confirmada — comisión pendiente',
+    cancelada:        '❌ Cancelada',
+    comision_recibida:'💰 Cerrada — comisión cobrada'
+  };
+
+  const motivoLabels = {
+    no_se_presento:'El cliente no se presentó',
+    sin_stock:'Sin stock del producto',
+    precio_cambio:'El precio cambió y no se acordó',
+    cliente_desistio:'El cliente desistió de la compra',
+    otro: v.textoCancelacion || 'Otro motivo'
+  };
+
+  // Resumen
+  let html = `<div class="card">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Resumen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">ESTADO</div>
+        <div style="font-size:12px;font-weight:700;">${estadoMap[v.estado] || v.estado || '—'}</div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">TIPO</div>
+        <div style="font-size:12px;font-weight:700;">${tieneConector ? '🤝 Con conector T' : '🏪 Venta directa'}</div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">CLIENTE</div>
+        <div style="font-size:12px;font-weight:700;">${v.clienteNombre || '—'}</div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">FECHA</div>
+        <div style="font-size:12px;font-weight:700;">${fecha}</div>
+      </div>
+    </div>
+    ${v.estado === 'cancelada' ? `<div style="margin-top:10px;background:#FDECEA;border-radius:10px;padding:10px;">
+      <div style="font-size:10px;color:#C0392B;font-weight:800;margin-bottom:2px;">MOTIVO DE CANCELACIÓN</div>
+      <div style="font-size:12.5px;font-weight:600;color:#C0392B;">${motivoLabels[v.motivoCancelacion] || v.textoCancelacion || '—'}</div>
+    </div>` : ''}
+  </div>`;
+
+  // Comercio
+  html += `<div class="card">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">🏪 Comercio</div>
+    <div style="font-size:14px;font-weight:700;color:var(--navy);">${v.comercioNombre || '—'}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:2px;font-family:monospace;">${v.comercioId || ''}</div>
+  </div>`;
+
+  // Conector T
+  if(tieneConector){
+    html += `<div class="card">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">🤝 Conector T</div>
+      <div style="font-size:14px;font-weight:700;color:var(--navy);">${v.vendedorNombre || 'Conector'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;font-family:monospace;">${v.vendedorId || ''}</div>
+      ${v.comisionMonto ? `<div style="margin-top:10px;background:#EAF0E6;border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:#2F7A55;font-weight:700;">Comisión acordada</span>
+        <span style="font-size:16px;font-weight:800;color:#2F7A55;">$${Number(v.comisionMonto).toLocaleString('es-AR')}</span>
+      </div>` : ''}
+    </div>`;
+  } else {
+    html += `<div class="card" style="border:1.5px dashed #DDD;background:#FAFAFA;">
+      <div style="font-size:13px;color:var(--muted);">🏪 Venta directa — sin conector T asociado</div>
+    </div>`;
+  }
+
+  // Productos
+  html += `<div class="card">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">${esP ? '🛒 Productos del pedido' : '🔖 Producto'}</div>`;
+  if(esP && Array.isArray(v.productos) && v.productos.length){
+    v.productos.forEach(p => {
+      html += `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--line);">
+        <span style="font-size:13px;">${p.nombre}</span>
+        <span style="font-size:13px;font-weight:700;">$${Number(p.precio).toLocaleString('es-AR')}</span>
+      </div>`;
+    });
+    html += `<div style="display:flex;justify-content:space-between;padding-top:8px;font-size:15px;font-weight:800;color:var(--navy);">
+      <span>Total</span><span>$${Number(v.total||0).toLocaleString('es-AR')}</span>
+    </div>`;
+  } else {
+    html += `<div style="font-size:13px;color:var(--navy);">${v.productoNombre || '—'}${v.precio ? ' — $' + Number(v.precio).toLocaleString('es-AR') : ''}</div>`;
+  }
+  const medioLabel = { transferencia:'Transferencia', efectivo:'Efectivo', tarjeta:'Tarjeta', qr:'QR/MODO' };
+  if(v.medioPago) html += `<div style="margin-top:8px;font-size:12px;color:var(--muted);">Medio de pago: <strong>${medioLabel[v.medioPago]||v.medioPago}</strong></div>`;
+  html += `<div style="margin-top:4px;font-size:11px;color:var(--muted);font-family:monospace;">${v.codigo||''}</div></div>`;
+
+  // Acciones admin
+  html += `<div class="card" style="border:1.5px solid var(--line);background:#FAFAFA;">
+    <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">⚙️ Intervención admin</div>`;
+
+  if(v.estado === 'cancelada'){
+    html += `<button class="btn btn-ghost" style="margin-bottom:10px;border-color:#2F7A55;color:#2F7A55;" onclick="adminReabrirOp('${v._docId}')">🔄 Reabrir como pendiente</button>`;
+  }
+  if(v.estado === 'pendiente'){
+    html += `<button class="btn" style="background:#C0392B;color:white;margin-bottom:10px;" onclick="adminCancelarOp('${v._docId}')">❌ Cancelar esta operación</button>`;
+  }
+  if(v.estado === 'pendiente' || v.estado === 'confirmada' || v.estado === 'confirmado'){
+    html += `<button class="btn btn-primary" style="margin-bottom:10px;" onclick="adminConfirmarOp('${v._docId}')">✅ Forzar confirmación</button>`;
+  }
+
+  // Contactar por WhatsApp
+  if(v.comercioTel || v.vendedorTel){
+    html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 8px;">Contactar</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">`;
+    if(v.comercioTel){
+      const tel = v.comercioTel.replace(/\D/g,'');
+      html += `<a href="https://wa.me/${tel}?text=${encodeURIComponent('Hola '+v.comercioNombre+', te contacto por la operación '+v.codigo+' en PuenT.')}" target="_blank"
+        style="flex:1;text-align:center;padding:10px;background:#25D366;color:#fff;border-radius:10px;font-size:12.5px;font-weight:700;text-decoration:none;">
+        💬 Comercio</a>`;
+    }
+    if(v.vendedorTel){
+      const tel2 = v.vendedorTel.replace(/\D/g,'');
+      html += `<a href="https://wa.me/${tel2}?text=${encodeURIComponent('Hola '+v.vendedorNombre+', te contacto por la operación '+v.codigo+' en PuenT.')}" target="_blank"
+        style="flex:1;text-align:center;padding:10px;background:#128C7E;color:#fff;border-radius:10px;font-size:12.5px;font-weight:700;text-decoration:none;">
+        💬 Conector T</a>`;
+    }
+    html += '</div>';
+  }
+
+  html += '</div>';
+
+  document.getElementById('adminOpContenido').innerHTML = html;
+  document.getElementById('adminOpKicker').textContent =
+    (tieneConector ? '🤝 Con conector T' : '🏪 Venta directa') + ' · ' + (v.codigo || '');
+  showScreen('admin-op-detalle');
+}
+
+async function adminReabrirOp(docId){
+  if(!confirm('¿Reabrir esta operación como pendiente?')) return;
+  try{
+    await db.collection('ventas').doc(docId).update({ estado:'pendiente', motivoCancelacion:null, textoCancelacion:null, fechaCancelacion:null });
+    const v = _adminOpsAll.find(x => x._docId === docId);
+    if(v){ v.estado='pendiente'; v.motivoCancelacion=null; v.textoCancelacion=null; }
+    toast('Operación reabierta ✓');
+    adminAbrirOpDetalle(docId);
+  }catch(e){ toast('Error: ' + e.message); }
+}
+
+async function adminCancelarOp(docId){
+  if(!confirm('¿Cancelar esta operación? Se notificará al comercio.')) return;
+  const fecha = new Date().toISOString();
+  try{
+    await db.collection('ventas').doc(docId).update({ estado:'cancelada', motivoCancelacion:'admin', textoCancelacion:'Cancelada por administrador PuenT', fechaCancelacion:fecha });
+    const v = _adminOpsAll.find(x => x._docId === docId);
+    if(v){ v.estado='cancelada'; v.motivoCancelacion='admin'; v.textoCancelacion='Cancelada por administrador PuenT'; }
+    toast('Operación cancelada ✓');
+    adminAbrirOpDetalle(docId);
+  }catch(e){ toast('Error: ' + e.message); }
+}
+
+async function adminConfirmarOp(docId){
+  if(!confirm('¿Forzar la confirmación de esta operación?')) return;
+  const fecha = new Date().toISOString();
+  try{
+    await db.collection('ventas').doc(docId).update({ estado:'confirmada', fechaConfirmacion:fecha });
+    const v = _adminOpsAll.find(x => x._docId === docId);
+    if(v){ v.estado='confirmada'; v.fechaConfirmacion=fecha; }
+    toast('Operación confirmada ✓');
+    adminAbrirOpDetalle(docId);
+  }catch(e){ toast('Error: ' + e.message); }
+}
+
+// =============================================
+// FIN ADMIN OPERACIONES
+// =============================================
 
 // ---- USUARIOS ----
 let _adminUsuarios = [];
@@ -7368,6 +7663,7 @@ function renderCOperaciones(){
   var pendientes  = todas.filter(function(v){ return v.estado === 'pendiente'; });
   var confirmadas = todas.filter(function(v){ return v.estado === 'confirmada' || v.estado === 'confirmado'; });
   var cobradas    = todas.filter(function(v){ return v.estado === 'comision_recibida'; });
+  var canceladas  = todas.filter(function(v){ return v.estado === 'cancelada'; });
 
   function tarjeta(v){
     var esP  = v.origen === 'personalizado';
@@ -7383,6 +7679,7 @@ function renderCOperaciones(){
     var estadoBg, estadoLabel;
     if(v.estado==='comision_recibida'){ estadoBg='#EAF0E6'; estadoLabel='✓ Cobrada'; }
     else if(v.estado==='confirmada'||v.estado==='confirmado'){ estadoBg='#FFF8EC'; estadoLabel='⏳ Pendiente cobro'; }
+    else if(v.estado==='cancelada'){ estadoBg='#FDECEA'; estadoLabel='❌ Cancelada'; }
     else { estadoBg='#F0F4FA'; estadoLabel='🕒 Sin confirmar'; }
 
     var icono = esP ? '🛒' : '🔖';
@@ -7420,6 +7717,10 @@ function renderCOperaciones(){
   if(cobradas.length > 0){
     html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">✓ Comisiones pagadas ('+cobradas.length+')</div>';
     html += cobradas.map(tarjeta).join('');
+  }
+  if(canceladas.length > 0){
+    html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#C0392B;margin:14px 0 8px;">❌ Canceladas ('+canceladas.length+')</div>';
+    html += canceladas.map(tarjeta).join('');
   }
   el.innerHTML = html;
 }
@@ -7496,7 +7797,43 @@ function cAbrirDetalleOperacion(ventaId){
       +'<div class="field"><label>Medio de pago</label>'
       +'<select id="copMedioPago"><option value="transferencia">Transferencia / Mercado Pago</option><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option><option value="qr">QR / MODO</option></select></div>'
       +'<button class="btn btn-green" style="margin-top:8px;" onclick="cConfirmarDesdeOp(\''+v.id+'\')">✅ Confirmar venta</button>'
+      +'</div>'
+      +'<div class="card" style="border:1.5px solid #FDD;background:#FFF5F5;" id="cancelarVentaCard-'+v.id+'">'
+      +'<div style="font-size:13px;font-weight:700;color:#C0392B;margin-bottom:4px;">❌ Cancelar esta venta</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Si la venta no se concretó, indicá el motivo. El conector recibirá una notificación automática.</div>'
+      +'<div class="field" style="margin-bottom:10px;"><label>¿Qué pasó?</label>'
+      +'<div style="display:flex;flex-direction:column;gap:8px;" id="motivosCancel-'+v.id+'">'
+      +'<label style="display:flex;align-items:flex-start;gap:10px;background:#FFF;border:1.5px solid #EEE;border-radius:11px;padding:11px 12px;cursor:pointer;font-weight:500;font-size:13px;color:var(--ink);">'
+      +'<input type="radio" name="motivoCancel" value="no_se_presento" style="margin-top:2px;width:auto;flex-shrink:0;"> 🙅 El cliente no se presentó</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:10px;background:#FFF;border:1.5px solid #EEE;border-radius:11px;padding:11px 12px;cursor:pointer;font-weight:500;font-size:13px;color:var(--ink);">'
+      +'<input type="radio" name="motivoCancel" value="sin_stock" style="margin-top:2px;width:auto;flex-shrink:0;"> 📦 Me quedé sin el producto</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:10px;background:#FFF;border:1.5px solid #EEE;border-radius:11px;padding:11px 12px;cursor:pointer;font-weight:500;font-size:13px;color:var(--ink);">'
+      +'<input type="radio" name="motivoCancel" value="precio_cambio" style="margin-top:2px;width:auto;flex-shrink:0;"> 💸 El precio cambió y no se acordó</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:10px;background:#FFF;border:1.5px solid #EEE;border-radius:11px;padding:11px 12px;cursor:pointer;font-weight:500;font-size:13px;color:var(--ink);">'
+      +'<input type="radio" name="motivoCancel" value="cliente_desistio" style="margin-top:2px;width:auto;flex-shrink:0;"> 🔙 El cliente desistió de la compra</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:10px;background:#FFF;border:1.5px solid #EEE;border-radius:11px;padding:11px 12px;cursor:pointer;font-weight:500;font-size:13px;color:var(--ink);">'
+      +'<input type="radio" name="motivoCancel" value="otro" style="margin-top:2px;width:auto;flex-shrink:0;"> ✏️ Otro motivo</label>'
+      +'</div></div>'
+      +'<div class="field" id="campoOtroMotivo" style="display:none;margin-bottom:10px;">'
+      +'<label>Describí el motivo</label>'
+      +'<textarea id="textoOtroMotivo" rows="2" style="resize:none;" placeholder="Ej: el producto llegó dañado..."></textarea>'
+      +'</div>'
+      +'<button class="btn" style="background:#C0392B;color:white;margin-top:4px;" onclick="cCancelarVentaPendiente(\''+v.id+'\')">Cancelar y avisar al conector</button>'
       +'</div>';
+
+    // Mostrar/ocultar campo "Otro motivo" al seleccionar radio
+    setTimeout(function(){
+      var radios = document.querySelectorAll('input[name="motivoCancel"]');
+      radios.forEach(function(r){
+        r.addEventListener('change', function(){
+          var campo = document.getElementById('campoOtroMotivo');
+          if(campo) campo.style.display = (r.value === 'otro' && r.checked) ? 'block' : 'none';
+          // Resaltar opción seleccionada
+          document.querySelectorAll('#motivosCancel-'+v.id+' label').forEach(function(l){ l.style.borderColor='#EEE'; l.style.background='#FFF'; });
+          if(r.checked){ r.closest('label').style.borderColor='#C0392B'; r.closest('label').style.background='#FFF0EE'; }
+        });
+      });
+    }, 0);
   } else if(v.estado==='confirmada'||v.estado==='confirmado'){
     acHtml = '<div class="card" style="background:#FFF8EC;">'
       +'<div style="font-size:13px;font-weight:700;color:#8A6400;margin-bottom:6px;">⏳ Comisión pendiente de pago</div>'
@@ -7539,6 +7876,75 @@ function cMarcarComisionPagada(ventaId){
   if(sv) sv.estadoComision = 'transferida';
   toast('Marcado como transferido — el conector recibirá la confirmación ✓');
   cAbrirDetalleOperacion(ventaId);
+}
+
+function cCancelarVentaPendiente(ventaId){
+  var v = state.ventas.find(function(x){ return x.id===ventaId; });
+  if(!v){ toast('Operación no encontrada'); return; }
+
+  var radioSel = document.querySelector('input[name="motivoCancel"]:checked');
+  if(!radioSel){ toast('Seleccioná un motivo antes de cancelar'); return; }
+
+  var motivoClave = radioSel.value;
+  var motivoLabels = {
+    no_se_presento: 'El cliente no se presentó',
+    sin_stock: 'Sin stock del producto',
+    precio_cambio: 'El precio cambió y no se acordó',
+    cliente_desistio: 'El cliente desistió de la compra',
+    otro: 'Otro motivo'
+  };
+  var motivoTexto = motivoLabels[motivoClave] || motivoClave;
+  if(motivoClave === 'otro'){
+    var extra = (document.getElementById('textoOtroMotivo')||{}).value || '';
+    if(!extra.trim()){ toast('Describí el motivo antes de continuar'); return; }
+    motivoTexto = extra.trim();
+  }
+
+  // Actualizar estado en memoria local
+  v.estado = 'cancelada';
+  v.motivoCancelacion = motivoClave;
+  v.textoCancelacion = motivoTexto;
+  v.fechaCancelacion = new Date().toISOString();
+
+  // Persistir en Firestore
+  actualizarEstadoVentaFirestore(ventaId, {
+    estado: 'cancelada',
+    motivoCancelacion: motivoClave,
+    textoCancelacion: motivoTexto,
+    fechaCancelacion: v.fechaCancelacion
+  });
+
+  // Notificar al conector T (vendedor) si existe
+  if(v.vendedorId){
+    var vendedorObj = state.vendedores.find(function(x){ return x.id===v.vendedorId||x.uid===v.vendedorId; });
+    var nombreConector = vendedorObj ? vendedorObj.nombre : 'Conector';
+    var comercioNombre = (state.currentUser && state.currentUser.nombre) ? state.currentUser.nombre : 'El comercio';
+    var notif = {
+      id: 'n_' + Date.now(),
+      para: v.vendedorId,
+      tipo: 'venta_cancelada',
+      ventaId: ventaId,
+      titulo: '❌ Venta cancelada',
+      mensaje: comercioNombre + ' canceló la venta "' + (v.clienteNombre||v.codigo) + '".\nMotivo: ' + motivoTexto,
+      fecha: new Date().toISOString(),
+      leida: false
+    };
+    // Guardar notificación en state y Firestore si existe la función
+    if(!state.notificaciones) state.notificaciones = [];
+    state.notificaciones.push(notif);
+    if(typeof guardarNotificacionFirestore === 'function'){
+      guardarNotificacionFirestore(notif);
+    }
+    // También dejar registro en la venta para que el conector lo vea en "Mis reservas"
+    _sincronizarReservaEnLocalStorage(v);
+    toast('Venta cancelada — ' + nombreConector + ' fue notificado/a ✓');
+  } else {
+    toast('Venta cancelada ✓');
+  }
+
+  // Volver a la lista de operaciones
+  renderCOperaciones();
+  showScreen('c-operaciones');
 }
 
 // =============================================
