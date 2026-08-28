@@ -6328,8 +6328,14 @@ async function adminCargarVentas(){
   const el = document.getElementById('adminVentasList');
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
-    const snap = await db.collection('ventas').orderBy('fecha','desc').limit(200).get();
+    const snap = await db.collection('ventas').limit(200).get();
     _adminOpsAll = snap.docs.map(d => ({ ...d.data(), _docId: d.id }));
+    // Ordenar por la fecha disponible en cada documento (fechaCreacion, fechaReserva, o fechaConfirmacion)
+    _adminOpsAll.sort(function(a, b){
+      var fa = a.fechaCreacion || a.fechaReserva || a.fechaConfirmacion || a.fecha || '';
+      var fb = b.fechaCreacion || b.fechaReserva || b.fechaConfirmacion || b.fecha || '';
+      return fb.localeCompare(fa);
+    });
 
     // Poblar filtro de comercios
     const comerciosSel = document.getElementById('adminFiltroComercio');
@@ -6400,7 +6406,8 @@ function adminRenderOps(lista){
     else {                                icono = '🏪'; icoColor = '#4A90D9'; }
 
     const est = estadoMap[v.estado] || { bg:'#F5F5F5', label: v.estado || '—', color:'#555' };
-    const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+    var _fecha = v.fechaCreacion || v.fechaReserva || v.fechaConfirmacion || v.fecha || '';
+    const fecha = _fecha ? new Date(_fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
     const resumen = esPersonalizado && Array.isArray(v.productos)
       ? v.productos.map(p => p.nombre).join(', ')
       : (v.productoNombre || '—');
@@ -6435,7 +6442,8 @@ function adminAbrirOpDetalle(docId){
 
   const tieneConector = !!v.vendedorId;
   const esP = v.origen === 'personalizado';
-  const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  var _fechaD = v.fechaCreacion || v.fechaReserva || v.fechaConfirmacion || v.fecha || '';
+  const fecha = _fechaD ? new Date(_fechaD).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
 
   const estadoMap = {
     pendiente:        '🕒 Pendiente de confirmación',
