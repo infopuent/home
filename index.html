@@ -5587,33 +5587,15 @@ function abrirOferta(prodId){
     banner.classList.add('hidden');
   }
 
-  // --- Bloque envío ---
-  const envioBloque = document.getElementById('ofEnvioBloque');
-  const envioForm = document.getElementById('ofEnvioForm');
-  if(p.envio && c?.envioActivo && estaRegistrado){
-    envioBloque.classList.remove('hidden');
-    envioForm.classList.add('hidden');
-    modoEntregaActual = 'retiro';
-    document.getElementById('ofBtnRetiro').className='btn btn-primary';
-    document.getElementById('ofBtnEnvio').className='btn btn-ghost';
-    document.getElementById('ofTextoReserva').textContent='Elegí cómo querés recibir el producto.';
-    const COSTO_CAJA = {chica:3000, mediana:4500, grande:7000};
-    const costo = COSTO_CAJA[p.caja]||3000;
-    const gratis = c.envioPolitica==='comercio';
-    document.getElementById('ofEnvioCosto').innerHTML = gratis
-      ? `<div style="background:#e8f7ee;border-radius:10px;padding:10px 12px;">
-           🚚 <strong style="color:#1a8a4a;">Envío gratis a domicilio</strong> — lo cubre el comercio<br>
-           <span style="font-size:11px;color:#555;">Solo pagás el envío en mano al repartidor cuando recibís</span>
-         </div>`
-      : `<div style="background:#f5f5f5;border-radius:10px;padding:10px 12px;">
-           🚚 <strong>Envío a domicilio: $${costo.toLocaleString('es-AR')}</strong><br>
-           <span style="font-size:11px;color:#555;">Le pagás al repartidor en mano cuando te entrega el pedido</span>
-         </div>`;
-  } else {
-    envioBloque.classList.add('hidden');
-    modoEntregaActual = 'retiro';
-    document.getElementById('ofTextoReserva').textContent='Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.';
-  }
+  // --- Bloque envío — siempre visible para usuarios registrados ---
+  // Resetear checkbox al abrir un producto nuevo
+  var _chkBox = document.getElementById('ofEnvioCheckBox');
+  var _chkDet = document.getElementById('ofEnvioDetalleDireccion');
+  var _dirInput = document.getElementById('ofEnvioDireccion');
+  if(_chkBox){ _chkBox.dataset.activo='0'; _chkBox.style.background='white'; _chkBox.innerHTML=''; }
+  if(_chkDet){ _chkDet.style.display='none'; }
+  if(_dirInput){ _dirInput.value=''; }
+  document.getElementById('ofTextoReserva').textContent='Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.';
 
   // ¿Ya habíamos generado un código para este producto antes?
   const ventaPrevia = buscarVentaPropiaGuardada(prodId);
