@@ -902,7 +902,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button id="ofBtnEnvio" style="display:none;"></button>
 
       <!-- Aviso post-reserva: aparece después de reservar -->
-      <div id="ofEnvioAviso" style="display:none;background:#F0F4FA;border-radius:12px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+      <div id="ofEnvioAviso" style="display:none;background:#F0F4FA;border-radius:12px;padding:11px 14px;margin-bottom:12px;align-items:center;gap:10px;">
         <span style="font-size:18px;">🛵</span>
         <div style="font-size:12px;color:var(--navy);line-height:1.5;">
           <strong>PuenT tiene envío a domicilio.</strong><br>
@@ -5624,7 +5624,7 @@ function mostrarCodigoDeOferta(venta){
   document.getElementById('ofDespues').classList.remove('hidden');
   // Mostrar aviso de envío post-reserva
   var aviso = document.getElementById('ofEnvioAviso');
-  if(aviso) aviso.style.display = 'flex';
+  if(aviso){ aviso.style.display = 'flex'; }
   document.getElementById('ofGuardarBanner').classList.toggle('hidden', !!venta.ownerUid);
   const venceBox = document.getElementById('ofVencePickup');
   if(venta.vencePickup){
@@ -7200,6 +7200,10 @@ function reservarProducto(){
   if(btnReservar) btnReservar.classList.add('hidden');
   if(yaReservado) yaReservado.classList.remove('hidden');
 
+  // Mostrar aviso de envío post-reserva
+  var _avisoEnvio = document.getElementById('ofEnvioAviso');
+  if(_avisoEnvio) _avisoEnvio.style.display = 'flex';
+
   updateBottomNav('oferta');
   toast('¡Reservado! Lo encontrás en tu carrito 🛒');
 }
@@ -7224,11 +7228,10 @@ function renderCarrito(){
     return;
   }
 
-  // Ver cuántas ventas confirmadas hay (para mostrar tarjeta de envío)
-  const ventasConfirmadas = (state.ventas||[]).filter(v=>
-    (v.estado==='confirmada'||v.estado==='confirmado') && v.origen==='carrito' && !v.envioSolicitado
-  );
-  const hayConfirmadas = ventasConfirmadas.length > 0;
+  // Tarjeta de envío: aparece siempre que haya items en el carrito
+  // El cliente puede solicitarlo; el repartidor lo coordina una vez que el comercio confirme
+  const ventasConfirmadas = comercios; // usamos los grupos del carrito directamente
+  const hayConfirmadas = comercios.length > 0;
 
   const gruposHtml = comercios.map(grupo=>{
     const total = grupo.items.reduce((s,i)=>s+i.precio,0);
@@ -7288,7 +7291,7 @@ function renderCarrito(){
           </div>
         </div>
         <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
-          Tus compras confirmadas se pueden enviar a domicilio. Un solo viaje cubre todas las confirmadas.<br>Abonás al repartidor en mano al recibir.
+          Reservaste en más de un local? Pedí que te lleven todo a casa.<br>Un repartidor pasa por cada local. Abonás al recibirlo.
         </div>
         <!-- Checkbox -->
         <div id="carritoEnvioCheckWrap" style="display:flex;align-items:center;gap:10px;background:white;border-radius:10px;padding:11px 13px;cursor:pointer;border:1.5px solid var(--line);" onclick="carritoToggleEnvio()">
@@ -7314,7 +7317,7 @@ function renderCarrito(){
           </select>
         </div>
         <div style="font-size:11px;color:var(--muted);background:white;border-radius:8px;padding:8px 10px;line-height:1.5;margin-bottom:10px;">
-          Se genera un pedido de envío por cada comercio confirmado (${ventasConfirmadas.length} pedido${ventasConfirmadas.length!==1?'s':''}). El repartidor retira en el local y te lo lleva.
+          Se genera un pedido de envío por cada comercio (${comercios.length} pedido${comercios.length!==1?'s':''}). El repartidor retira en el local y te lo lleva.
         </div>
         <button class="btn btn-primary" style="width:100%;" onclick="carritoConfirmarEnvio()">🛵 Confirmar envío a domicilio</button>
       </div>
@@ -7342,18 +7345,13 @@ function carritoConfirmarEnvio(){
   var franja = document.getElementById('carritoEnvioFranja')?.value || 'tarde';
   if(!direccion){ toast('📍 Ingresá tu dirección de entrega'); return; }
 
-  // Crear un pedido de envío por cada comercio con venta confirmada
-  const ventasConf = (state.ventas||[]).filter(v=>
-    (v.estado==='confirmada'||v.estado==='confirmado') && v.origen==='carrito' && !v.envioSolicitado
-  );
-  if(!ventasConf.length){ toast('No hay compras confirmadas para enviar'); return; }
+  // Crear un pedido de envío por cada comercio en el carrito
+  const grupos = Object.values(carrito).filter(g=>g.items.length>0);
+  if(!grupos.length){ toast('Tu carrito está vacío'); return; }
 
-  // Agrupar por comercio — un pedido por comercio
   const porComercio = {};
-  ventasConf.forEach(v=>{
-    if(!porComercio[v.comercioId]) porComercio[v.comercioId] = { comercioId:v.comercioId, comercioNombre:v.comercioNombre||'—', productos:[] };
-    porComercio[v.comercioId].productos.push(v.productoId);
-    v.envioSolicitado = true; // marcar para no pedir doble
+  grupos.forEach(g=>{
+    porComercio[g.comercioId] = { comercioId:g.comercioId, comercioNombre:g.comercioNombre||'—', productos: g.items.map(i=>i.prodId) };
   });
 
   var cantPedidos = 0;
