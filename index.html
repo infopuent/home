@@ -902,7 +902,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button id="ofBtnEnvio" style="display:none;"></button>
 
       <!-- Aviso post-reserva: aparece después de reservar -->
-      <div id="ofEnvioAviso" style="display:none;background:#F0F4FA;border-radius:12px;padding:11px 14px;margin-bottom:12px;align-items:center;gap:10px;">
+      <div id="ofEnvioAviso" style="display:flex;background:#F0F4FA;border-radius:12px;padding:11px 14px;margin-bottom:12px;align-items:center;gap:10px;">
         <span style="font-size:18px;">🛵</span>
         <div style="font-size:12px;color:var(--navy);line-height:1.5;">
           <strong>PuenT tiene envío a domicilio.</strong><br>
@@ -5553,9 +5553,9 @@ function abrirOferta(prodId){
     banner.classList.add('hidden');
   }
 
-  // --- Resetear aviso de envío al abrir un producto nuevo ---
+  // Aviso de envío — siempre visible al abrir un producto
   var _aviso = document.getElementById('ofEnvioAviso');
-  if(_aviso) _aviso.style.display = 'none';
+  if(_aviso) _aviso.style.display = 'flex';
 
   // ¿Ya habíamos generado un código para este producto antes?
   const ventaPrevia = buscarVentaPropiaGuardada(prodId);
