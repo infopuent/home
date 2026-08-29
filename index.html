@@ -1742,6 +1742,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="code-label">Código de retiro del carrito</div>
       <div id="qrCarritoItems" style="margin-top:16px;text-align:left;"></div>
     </div>
+    <!-- Aviso de envío — se llena por JS -->
+    <div id="qrCarritoEnvioAviso" style="display:none;background:#F0F4FA;border:1.5px solid var(--navy);border-radius:12px;padding:12px 14px;margin-top:12px;gap:12px;align-items:flex-start;"></div>
     <button class="btn btn-ghost" style="margin-top:12px;" onclick="showScreen('feed')">🏠 Seguir comprando</button>
     <button class="btn btn-ghost" style="margin-top:8px;" onclick="abrirPerfil()">📋 Ver mis QR anteriores</button>
   </div>
@@ -7462,8 +7464,13 @@ function generarQRCarrito(comercioId){
     fecha: new Date().toISOString()
   });
 
+  // ¿Hay pedido de envío ya confirmado para este comercio?
+  const tieneEnvioPedido = (state.pedidosEnvio||[]).some(p=>
+    p.comercioId === comercioId && p.estado === 'pendiente'
+  );
+
   // Mostrar pantalla QR
-  mostrarPantallaQRCarrito({ codigo, comercioNombre: grupo.comercioNombre, items: grupo.items, total });
+  mostrarPantallaQRCarrito({ codigo, comercioNombre: grupo.comercioNombre, items: grupo.items, total, tieneEnvio: tieneEnvioPedido });
 
   // Limpiar carrito de este comercio
   delete carrito[comercioId];
@@ -7488,6 +7495,29 @@ function mostrarPantallaQRCarrito({ codigo, comercioNombre, items, total, fecha 
       <span>Total</span><span>$${total.toLocaleString('es-AR')}</span>
     </div>`;
   renderQR(document.getElementById('qrCarritoFake'), codigo);
+
+  // Aviso de envío coordinado
+  var envioAviso = document.getElementById('qrCarritoEnvioAviso');
+  if(envioAviso){
+    if(tieneEnvio){
+      envioAviso.style.display = 'flex';
+      envioAviso.innerHTML = `
+        <span style="font-size:20px;flex-shrink:0;">🛵</span>
+        <div style="font-size:12px;line-height:1.6;">
+          <strong style="color:var(--navy);font-size:13px;">¡Envío coordinado!</strong><br>
+          <span style="color:var(--muted);">Concretá la compra presentando este QR. Luego un repartidor PuenT retira el producto y te lo lleva a tu domicilio.</span>
+        </div>`;
+    } else {
+      envioAviso.style.display = 'flex';
+      envioAviso.innerHTML = `
+        <span style="font-size:20px;flex-shrink:0;">🛵</span>
+        <div style="font-size:12px;line-height:1.6;">
+          <strong style="color:var(--navy);font-size:13px;">¿Querés recibirlo en casa?</strong><br>
+          <span style="color:var(--muted);">Una vez que el comercio confirme la compra, podés coordinar el envío desde tu carrito con un repartidor PuenT.</span>
+        </div>`;
+    }
+  }
+
   showScreen('cl-qr-carrito');
 }
 
