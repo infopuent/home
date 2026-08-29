@@ -429,8 +429,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .envio-badge{
-  position:absolute; bottom:6px; left:6px; background:rgba(0,0,0,0.55); color:white; font-size:9px; font-weight:700;
-  padding:3px 9px; border-radius:100px; max-width:calc(100% - 12px);
+  position:absolute; bottom:6px; left:6px; background:var(--navy); color:white; font-size:9px; font-weight:800;
+  padding:3px 9px; border-radius:100px; box-shadow:0 2px 6px rgba(0,0,0,0.18); max-width:calc(100% - 12px);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 /* Discount badge (top-right) */
@@ -892,27 +892,43 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
       <div id="ofAntes">
         <!-- Elección retiro / envío -->
-        <div id="ofEnvioBloque" class="hidden" style="margin-bottom:14px;">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
-            <button id="ofBtnRetiro" class="btn btn-primary" onclick="elegirModoEntrega('retiro')" style="font-size:13px;">🏪 Retiro en local</button>
-            <button id="ofBtnEnvio" class="btn btn-ghost" onclick="elegirModoEntrega('envio')" style="font-size:13px;">🚚 Envío a domicilio</button>
-          </div>
-          <div id="ofEnvioForm" class="hidden card" style="background:var(--cream); text-align:left; margin-bottom:0;">
-            <div class="field" style="margin-bottom:10px;">
-              <label>📍 Dirección de entrega <span style="font-weight:400;color:var(--muted);">(dentro de La Paz)</span></label>
-              <input id="ofEnvioDireccion" placeholder="Ej: San Martín 450, La Paz">
+        <!-- ENVÍO A DOMICILIO — servicio de la plataforma PuenT -->
+        <div style="background:#FFF3E8;border:1.5px solid var(--navy);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="font-size:22px;">🛵</span>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:var(--navy);">Envío a domicilio disponible</div>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:1px;">Servicio de repartidores PuenT · El repartidor te contacta</div>
             </div>
-            <div class="field" style="margin-bottom:10px;">
-              <label>⏰ Franja horaria preferida</label>
-              <select id="ofEnvioFranja">
-                <option value="manana">🌅 Mañana (9 a 12)</option>
-                <option value="tarde">☀️ Tarde (14 a 18)</option>
-                <option value="noche">🌙 Noche (18 a 21)</option>
+          </div>
+          <div id="ofEnvioCheckWrap" style="display:flex;align-items:center;gap:10px;background:white;border-radius:10px;padding:11px 13px;cursor:pointer;" onclick="ofToggleEnvio()">
+            <div id="ofEnvioCheckBox" style="width:20px;height:20px;border-radius:6px;border:2px solid var(--navy);background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);">Quiero que me lo lleven a casa</div>
+          </div>
+          <div id="ofEnvioDetalleDireccion" style="display:none;margin-top:10px;">
+            <div class="field" style="margin-bottom:8px;">
+              <label style="font-size:12px;">📍 Dirección de entrega</label>
+              <input id="ofEnvioDireccion" placeholder="Ej: San Martín 450, La Paz" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label style="font-size:12px;">⏰ ¿Cuándo lo necesitás?</label>
+              <select id="ofEnvioFranja" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;">
+                <option value="manana">🌅 Mañana (9 a 12hs)</option>
+                <option value="tarde">☀️ Tarde (14 a 18hs)</option>
+                <option value="noche">🌙 Noche (18 a 21hs)</option>
               </select>
             </div>
-            <div id="ofEnvioCosto" style="font-size:13px; font-weight:700; color:var(--navy); padding:8px 0;"></div>
+            <div style="margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.5;">
+              El repartidor ve tu pedido y te contacta para coordinar. El costo del envío se abona en mano al recibir.
+            </div>
           </div>
         </div>
+        <!-- ids fantasma para no romper código JS existente -->
+        <div id="ofEnvioBloque" style="display:none;"></div>
+        <div id="ofEnvioForm" style="display:none;"></div>
+        <div id="ofEnvioCosto" style="display:none;"></div>
+        <button id="ofBtnRetiro" style="display:none;"></button>
+        <button id="ofBtnEnvio" style="display:none;"></button>
         <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;" id="ofTextoReserva">Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.</p>
         <button class="btn btn-primary" id="ofBtnReservar" onclick="reservarProducto()">🛒 Reservar</button>
         <div id="ofYaReservado" class="hidden" style="margin-top:10px;">
@@ -1527,21 +1543,18 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
     <div class="card" style="background:var(--cream);">
-      <div class="field" style="margin-bottom:0;">
-        <label>🚚 ¿Este producto admite envío a domicilio?</label>
-        <select id="cnpEnvio" onchange="document.getElementById('cnpCajaBox').classList.toggle('hidden', this.value==='no')">
-          <option value="si">Sí, se puede enviar</option>
-          <option value="no">No, solo retiro en local</option>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🚚 Envío a domicilio</div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>¿Este producto se puede enviar?</label>
+        <select id="cnpEnvio" onchange="cnpOnEnvioChange()">
+          <option value="heredar">Igual que el comercio (por defecto)</option>
+          <option value="si_gratis">✅ Sí, con envío gratis</option>
+          <option value="si_costo">🚚 Sí, con costo (a coordinar)</option>
+          <option value="no">❌ No — solo retiro en local</option>
         </select>
       </div>
-      <div class="field" id="cnpCajaBox" style="margin-top:12px; margin-bottom:0;">
-        <label>Tamaño de caja</label>
-        <select id="cnpCaja">
-          <option value="chica">📦 Chica — $3.000</option>
-          <option value="mediana">📦 Mediana — $4.500</option>
-          <option value="grande">📦 Grande — $7.000</option>
-        </select>
-        <p style="font-size:11.5px; color:var(--muted); margin-top:4px;">El tamaño determina el costo de envío que se le muestra al cliente (según la política de tu local).</p>
+      <div id="cnpEnvioNota" style="font-size:12px;color:var(--muted);line-height:1.5;padding:8px 10px;background:#fff;border-radius:8px;display:none;">
+        El cliente verá la etiqueta en el feed y podrá coordinar el envío directamente con vos.
       </div>
     </div>
     <button class="btn btn-primary" id="cnpBtnGuardar" onclick="crearProductoComercio()">Publicar producto</button>
@@ -1633,20 +1646,25 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
     <div class="card" style="background:var(--cream); margin-top:0;">
-      <div class="field" style="margin-bottom:12px;">
-        <label>🚚 Envío a domicilio</label>
-        <select id="editCEnvioActivo">
-          <option value="si">✅ Ofrezco envío a domicilio</option>
-          <option value="no">❌ Solo retiro en local</option>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🚚 Envío a domicilio</div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>¿Tu comercio hace envíos?</label>
+        <select id="editCEnvioActivo" onchange="document.getElementById('editCEnvioPoliticaBox').style.display=this.value==='no'?'none':'block'">
+          <option value="no">❌ No — solo retiro en local</option>
+          <option value="si">✅ Sí, hacemos envíos</option>
         </select>
       </div>
-      <div class="field" style="margin-bottom:0;">
-        <label>¿Quién paga el costo del envío?</label>
-        <select id="editCEnvioPolitica">
-          <option value="comercio">🟢 Lo pago yo — el cliente lo recibe gratis</option>
-          <option value="cliente">🔴 Lo paga el cliente — se suma al total</option>
-        </select>
-        <p style="font-size:11.5px; color:var(--muted); margin-top:6px;">Si lo pagás vos, el cliente ve "🚚 Envío gratis, cortesía del comercio" — genera mejor valoración.</p>
+      <div id="editCEnvioPoliticaBox">
+        <div class="field" style="margin-bottom:6px;">
+          <label>¿El envío tiene costo?</label>
+          <select id="editCEnvioPolitica">
+            <option value="gratis">🟢 Gratis — lo incluyo yo</option>
+            <option value="costo">🟡 Con costo — lo coordina el cliente con nosotros</option>
+          </select>
+        </div>
+        <p style="font-size:11.5px;color:var(--muted);line-height:1.5;">
+          El cliente verá la etiqueta en el feed. El precio y la logística los coordina directamente con vos.
+        </p>
       </div>
     </div>
     <button class="btn btn-primary" onclick="guardarEdicionComercio()">Guardar cambios</button>
@@ -3478,6 +3496,24 @@ function eliminarProductoPropio(){
   showScreen('c-productos');
 }
 
+function cnpOnEnvioChange(){
+  var val = document.getElementById('cnpEnvio').value;
+  var nota = document.getElementById('cnpEnvioNota');
+  if(!nota) return;
+  if(val === 'heredar'){
+    nota.style.display = 'none';
+  } else if(val === 'si_gratis'){
+    nota.style.display = 'block';
+    nota.innerHTML = '🟢 El cliente verá <strong>"🚚 Envío gratis"</strong> en el feed. Coordinan por WhatsApp o teléfono.';
+  } else if(val === 'si_costo'){
+    nota.style.display = 'block';
+    nota.innerHTML = '🟡 El cliente verá <strong>"🚚 Con envío"</strong> en el feed. El costo lo coordinan directamente.';
+  } else {
+    nota.style.display = 'block';
+    nota.innerHTML = '❌ Este producto no tiene envío aunque el comercio lo ofrezca en otros productos.';
+  }
+}
+
 function crearProductoComercio(){
   const c = state.currentUser;
   if(!publicidadActiva(c)){ toast('Necesitás tener la publicidad mensual activa para cargar productos propios'); return; }
@@ -3513,13 +3549,15 @@ function crearProductoComercio(){
   const stock = stockInput !== '' ? parseInt(stockInput) : null; // null = sin límite
   if(TIPOS_OFERTA[tipoOferta].hora && (stock===null || stock<=0)){ toast('Para una oferta relámpago necesitás cargar cuántas unidades hay disponibles (stock)'); return; }
 
-  const envio = document.getElementById('cnpEnvio').value === 'si';
-  const caja = envio ? document.getElementById('cnpCaja').value : null;
+  const cnpEnvioVal = document.getElementById('cnpEnvio').value;
+  const envio = cnpEnvioVal === 'si_gratis' || cnpEnvioVal === 'si_costo';
+  const envioPolitica = cnpEnvioVal;
+  const caja = null;
 
   if(productoEditandoId){
     const p = state.productos.find(x=>x.id===productoEditandoId);
     if(!p){ toast('No se encontró el producto'); return; }
-    Object.assign(p, {nombre, precio, comision, rubro, img:foto, tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, caja});
+    Object.assign(p, {nombre, precio, comision, rubro, img:foto, tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja});
     guardarProductoEnFirestore(p, c.uid);
     toast('Cambios guardados ✅');
     productoEditandoId = null;
@@ -3529,7 +3567,7 @@ function crearProductoComercio(){
     return;
   }
 
-  const p = {id: nextId('p'), comercioId:c.id, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, caja};
+  const p = {id: nextId('p'), comercioId:c.id, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja};
   state.productos.push(p);
   guardarProductoEnFirestore(p, c.uid);
   toast('Producto publicado en tu ficha y en el feed de La Paz ✅');
@@ -5006,11 +5044,8 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
     const click = origenTipo==='comercio' ? `abrirOferta('${p.id}')` : `abrirCatalogoVendedor('${p._vendedorId}')`;
     const badge = etiquetaOferta(p);
     const comercioDelProd = state.comercios.find(x=>x.id===p.comercioId);
-    const envioBadge = p.envio && comercioDelProd?.envioActivo
-      ? (comercioDelProd.envioPolitica==='comercio'
-          ? `<span class="envio-gratis-badge">🚚 Envío gratis</span>`
-          : `<span class="envio-badge">🚚 Con envío</span>`)
-      : '';
+    // Todos los productos tienen envío disponible via repartidor PuenT
+    const envioBadge = '<span class="envio-badge">🛵 Con envío</span>';
     const comisionBadge = (state.role==='vendedor' && p.comision>0) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
     let botonVendedor = '';
     if(state.role==='vendedor' && p.comision>0){
@@ -5247,7 +5282,6 @@ function crearPedidoEnvio(prodId, direccion, franja){
   const p = state.productos.find(x=>x.id===prodId);
   const c = state.comercios.find(x=>x.id===p?.comercioId);
   if(!p||!c){ toast('Error al crear el pedido'); return null; }
-  const costo = c.envioPolitica==='comercio' ? 0 : (COSTO_CAJA[p.caja]||3000);
   const pedido = {
     id: nextId('env'),
     productoId: prodId,
@@ -5257,11 +5291,12 @@ function crearPedidoEnvio(prodId, direccion, franja){
     comercioNombre: c.nombre,
     clienteId: state.currentUser?.uid||state.currentUser?.id,
     clienteNombre: state.currentUser?.nombre||'Cliente',
+    clienteTel: state.currentUser?.tel||'',
     direccion,
     franja,
-    caja: p.caja||'chica',
-    costoEnvio: costo,
-    pagaEnvio: c.envioPolitica||'cliente',
+    // El cliente paga el envío al repartidor en mano; el comercio puede cubrirlo opcionalmente
+    pagaEnvio: 'cliente',
+    comercioCubreEnvio: false, // el comercio puede tildar esto después
     estado: 'pendiente',
     fechaCreacion: new Date().toISOString(),
     repartidorId: null
@@ -5282,44 +5317,85 @@ function abrirPanelRepartidor(){
 function renderPanelRepartidor(){
   const lista = document.getElementById('repartidorPedidosList');
   if(!lista) return;
-  const pedidos = (state.pedidosEnvio||[]).filter(p=>
-    p.estado==='asignado' || p.estado==='en_camino' || p.estado==='pendiente'
-  );
-  if(!pedidos.length){
-    lista.innerHTML=`<div class="empty"><div class="ic">🚚</div><div class="t">No hay pedidos por ahora</div><div class="s">Cuando un comercio te asigne un envío, va a aparecer acá.</div></div>`;
-    return;
-  }
   const franjas = {manana:'🌅 Mañana (9-12)', tarde:'☀️ Tarde (14-18)', noche:'🌙 Noche (18-21)'};
-  const pedidosFiltrados = (state.pedidosEnvio||[]).filter(p=>
-    p.estado==='asignado' || p.estado==='en_camino'
-  );
-  if(!pedidosFiltrados.length){
-    lista.innerHTML=`<div class="empty"><div class="ic">🚚</div><div class="t">No hay pedidos por ahora</div><div class="s">Cuando un comercio te asigne un envío, va a aparecer acá.</div></div>`;
-    return;
-  }
-  // Agrupar por franja
-  const porFranja = {};
-  pedidosFiltrados.forEach(p=>{ if(!porFranja[p.franja]) porFranja[p.franja]=[];porFranja[p.franja].push(p); });
-  lista.innerHTML = Object.entries(porFranja).map(([franja, pedidos])=>`
-    <div style="margin-bottom:18px;">
-      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px;">${franjas[franja]||franja} — ${pedidos.length} pedido${pedidos.length>1?'s':''}</div>
-      ${pedidos.map(p=>`
-        <div class="card" style="margin-bottom:10px;">
-          <div style="font-size:13px;font-weight:700;margin-bottom:4px;">${p.productoNombre}</div>
+  const estadoLabel = {pendiente:'🆕 Disponible',asignado:'📦 Tomado',en_camino:'🚴 En camino',entregado:'✅ Entregado'};
+
+  // Cargar desde Firestore si hay conexión
+  function _renderRepartidorLista(pedidos){
+    const activos = pedidos.filter(p=> p.estado!=='entregado');
+    if(!activos.length){
+      lista.innerHTML='<div class="empty"><div class="ic">🛵</div><div class="t">No hay pedidos activos</div><div class="s">Cuando un cliente pida envío, aparece acá.</div></div>';
+      return;
+    }
+    // Agrupar: disponibles primero, luego mis asignados
+    const disponibles = activos.filter(p=>p.estado==='pendiente');
+    const mios = activos.filter(p=>p.estado==='asignado'||p.estado==='en_camino');
+
+    var html = '';
+    if(disponibles.length){
+      html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">🆕 Disponibles para tomar ('+disponibles.length+')</div>';
+      html += disponibles.map(p=>`
+        <div class="card" style="margin-bottom:10px;border:1.5px solid var(--navy);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+            <div style="font-size:13px;font-weight:700;">${p.productoNombre}</div>
+            <span style="font-size:10px;background:var(--navy);color:white;padding:3px 9px;border-radius:100px;font-weight:700;">🆕 Libre</span>
+          </div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">🏪 Retirá en: <strong>${p.comercioNombre}</strong></div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 Entregá en: <strong>${p.direccion}</strong></div>
-          <div style="font-size:12px;font-weight:700;margin-bottom:10px;margin-top:6px;
-            ${p.costoEnvio>0?'color:#1a8a4a;':'color:var(--muted);'}">
-            ${p.costoEnvio>0
-              ? `💵 Cobrá al cliente: $${p.costoEnvio.toLocaleString('es-AR')} en mano`
-              : '✅ Envío gratis — no cobrás nada al cliente'}
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${franjas[p.franja]||p.franja}</div>
+          <div style="font-size:12px;font-weight:700;color:#1a6b3a;background:#EAF5EA;border-radius:8px;padding:8px 10px;margin-bottom:10px;">
+            ${p.comercioCubreEnvio ? '✅ Envío cubierto por el comercio — no cobrás al cliente' : '💵 Cobrá el envío al cliente en mano al entregar'}
           </div>
-          <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" style="width:100%;" onclick="repartidorTomarPedido('${p.id}')">🛵 Tomar este pedido</button>
+        </div>`).join('');
+    }
+    if(mios.length){
+      html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">📦 Mis pedidos activos</div>';
+      html += mios.map(p=>`
+        <div class="card" style="margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px;">${p.productoNombre}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">🏪 <strong>${p.comercioNombre}</strong></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 <strong>${p.direccion}</strong> · ${franjas[p.franja]||p.franja}</div>
+          ${p.clienteTel ? `<a href="tel:${p.clienteTel}" style="display:inline-block;margin:6px 0;font-size:12px;color:var(--navy);font-weight:700;">📞 Llamar al cliente</a><br>` : ''}
+          <div style="display:flex;gap:8px;margin-top:8px;">
             ${p.estado==='asignado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','en_camino')">🚴 Salí a entregar</button>`:''}
             ${p.estado==='en_camino'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','entregado')">✅ Marcar entregado</button>`:''}
           </div>
-        </div>`).join('')}
-    </div>`).join('');
+        </div>`).join('');
+    }
+    lista.innerHTML = html;
+  }
+
+  // Cargar de Firestore si hay conexión, sino de state local
+  if(firebaseListo && db){
+    db.collection('pedidosEnvio').where('estado','in',['pendiente','asignado','en_camino'])
+      .get().then(snap=>{
+        const pedidos = snap.docs.map(d=>({...d.data(), id:d.id}));
+        if(!state.pedidosEnvio) state.pedidosEnvio=[];
+        pedidos.forEach(p=>{ if(!state.pedidosEnvio.find(x=>x.id===p.id)) state.pedidosEnvio.push(p); });
+        _renderRepartidorLista(pedidos);
+      }).catch(()=>_renderRepartidorLista(state.pedidosEnvio||[]));
+  } else {
+    _renderRepartidorLista(state.pedidosEnvio||[]);
+  }
+}
+
+function repartidorTomarPedido(pedidoId){
+  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
+  if(!p){ toast('Pedido no encontrado'); return; }
+  if(p.estado !== 'pendiente'){ toast('Este pedido ya fue tomado'); renderPanelRepartidor(); return; }
+  p.estado = 'asignado';
+  p.repartidorId = state.currentUser?.uid||state.currentUser?.id||'rep';
+  p.repartidorNombre = state.currentUser?.nombre||'Repartidor';
+  if(firebaseListo && db){
+    db.collection('pedidosEnvio').doc(pedidoId).update({
+      estado:'asignado',
+      repartidorId: p.repartidorId,
+      repartidorNombre: p.repartidorNombre
+    }).catch(e=>console.error(e));
+  }
+  toast('🛵 ¡Pedido tomado! Retirá el producto en el comercio.');
+  renderPanelRepartidor();
 }
 
 function cambiarEstadoPedido(pedidoId, nuevoEstado){
@@ -5330,6 +5406,24 @@ function cambiarEstadoPedido(pedidoId, nuevoEstado){
   toast(nuevoEstado==='en_camino'?'📲 El cliente fue notificado que saliste':'✅ Pedido marcado como entregado');
   renderPanelRepartidor();
   if(nuevoEstado==='entregado') renderCPedidosEnvio();
+}
+
+function comercioToggleCubreEnvio(pedidoId, el){
+  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
+  if(!p) return;
+  p.comercioCubreEnvio = !p.comercioCubreEnvio;
+  const chk = document.getElementById('chkCubre-'+pedidoId);
+  if(chk){
+    chk.style.background = p.comercioCubreEnvio ? 'var(--navy)' : 'white';
+    chk.innerHTML = p.comercioCubreEnvio
+      ? '<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'
+      : '';
+  }
+  if(firebaseListo && db){
+    db.collection('pedidosEnvio').doc(pedidoId)
+      .update({comercioCubreEnvio: p.comercioCubreEnvio}).catch(e=>console.error(e));
+  }
+  toast(p.comercioCubreEnvio ? '🎁 Vas a cubrir el envío — gracias por la cortesía ✓' : 'El cliente pagará el envío al repartidor');
 }
 
 function renderCPedidosEnvio(){
@@ -5359,10 +5453,20 @@ function renderCPedidosEnvio(){
       <div style="background:#fff8e6;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#7a5a00;">
         💬 El pago del producto se arregla con el cliente por fuera de la app. Confirmá cuando recibas la transferencia.
       </div>
+      <!-- Opción de cubrir el envío como cortesía -->
+      <div style="display:flex;align-items:center;gap:10px;background:#FFF8EC;border-radius:10px;padding:10px 12px;margin-bottom:10px;cursor:pointer;" onclick="comercioToggleCubreEnvio('${p.id}',this)">
+        <div id="chkCubre-${p.id}" style="width:20px;height:20px;border-radius:6px;border:2px solid var(--navy);background:${p.comercioCubreEnvio?'var(--navy)':'white'};flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          ${p.comercioCubreEnvio?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>':''}
+        </div>
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:var(--navy);">🎁 Cubrir el envío como cortesía</div>
+          <div style="font-size:11px;color:var(--muted);">Se te cobrará junto a la comisión de venta</div>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         ${p.estado==='pendiente'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','confirmado')">📩 Confirmar pedido</button>`:''}
-        ${p.estado==='confirmado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','pagado')">✅ Confirmar pago recibido</button>`:''}
-        ${p.estado==='pagado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="asignarRepartidor('${p.id}')">🚚 Convocar repartidor</button>`:''}
+        ${p.estado==='confirmado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','pagado')">✅ Confirmar recepción</button>`:''}
+        ${p.estado==='pagado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','asignado')">🛵 Pedir repartidor</button>`:''}
       </div>
     </div>`).join('');
 }
@@ -6747,6 +6851,19 @@ async function adminGuardarNuevoComercio(){
 // =============================================
 // Estructura: carrito[comercioId] = { comercioNombre, items: [{prodId, nombre, precio}] }
 
+function ofToggleEnvio(){
+  var wrap = document.getElementById('ofEnvioCheckWrap');
+  var box  = document.getElementById('ofEnvioCheckBox');
+  var det  = document.getElementById('ofEnvioDetalleDireccion');
+  if(!box) return;
+  var activo = box.dataset.activo === '1';
+  activo = !activo;
+  box.dataset.activo = activo ? '1' : '0';
+  box.style.background = activo ? 'var(--navy)' : 'white';
+  box.innerHTML = activo ? '<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>' : '';
+  if(det) det.style.display = activo ? 'block' : 'none';
+}
+
 function reservarProducto(){
   // Buscar en state.productos (cargados por cargarDatosPublicosDeFirestore)
   var p = state.productos.find(function(x){ return x.id===ofertaAbierta; });
@@ -6770,14 +6887,15 @@ function reservarProducto(){
 
   if(!p){ toast('Producto no encontrado'); return; }
 
-  // Si el modo es envío, crear pedido de envío
-  if(modoEntregaActual === 'envio'){
-    const direccion = document.getElementById('ofEnvioDireccion')?.value.trim();
-    const franja = document.getElementById('ofEnvioFranja')?.value;
-    if(!direccion){ toast('Ingresá tu dirección de entrega'); return; }
+  // Si el cliente eligió envío a domicilio
+  var _checkBox = document.getElementById('ofEnvioCheckBox');
+  if(_checkBox && _checkBox.dataset.activo === '1'){
+    const direccion = (document.getElementById('ofEnvioDireccion')?.value||'').trim();
+    const franja = document.getElementById('ofEnvioFranja')?.value || 'tarde';
+    if(!direccion){ toast('📍 Ingresá tu dirección de entrega'); return; }
     const pedido = crearPedidoEnvio(ofertaAbierta, direccion, franja);
     if(pedido){
-      toast('🚚 ¡Pedido de envío creado! El comercio va a confirmar y convocar al repartidor.');
+      toast('🛵 ¡Pedido de envío creado! Un repartidor PuenT te va a contactar.');
       showScreen('feed');
     }
     return;
