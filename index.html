@@ -1806,6 +1806,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-usuarios');adminCargarUsuarios()"><i class="ti ti-user-circle ic"></i>Usuarios</button>
       <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
       <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
+      <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="adminCargarRepartidores();showScreen('admin-repartidores')"><i class="ti ti-bike ic"></i>Repartidores 🛵</button>
     </div>
   </div>
 
@@ -1872,6 +1873,49 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="page-title">Usuarios</div>
     <input class="feed-search-inline" type="text" placeholder="🔍 Buscar por nombre o email…" oninput="adminBuscarUsuario(this.value)" style="width:100%;margin-bottom:14px;">
     <div id="adminUsuariosList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN REPARTIDORES ============ -->
+  <div class="screen hidden" id="screen-admin-repartidores">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Repartidores</div>
+    <div class="page-sub" style="margin-bottom:14px;">Alta, estado y gestión de todos los viajes</div>
+
+    <!-- Formulario alta -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px;">➕ Nuevo repartidor</div>
+      <div class="field"><label>Nombre completo</label><input id="repNombre" placeholder="Ej: Luciano Pérez"></div>
+      <div class="field"><label>Teléfono / WhatsApp</label><input id="repTel" type="tel" placeholder="3434..."></div>
+      <div class="field"><label>Vehículo</label>
+        <select id="repVehiculo">
+          <option value="moto">🛵 Moto</option>
+          <option value="bici">🚴 Bicicleta</option>
+          <option value="auto">🚗 Auto</option>
+          <option value="pie">🚶 A pie</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="field"><label>Notas internas <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+        <textarea id="repNotas" rows="2" style="resize:none;" placeholder="Horarios, observaciones..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="adminAltaRepartidor()">Dar de alta</button>
+    </div>
+
+    <!-- Filtros -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltroRep('todos')" id="repFiltroTodos" style="flex:1;">Todos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltroRep('activo')" id="repFiltroActivo" style="flex:1;">Activos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltroRep('inactivo')" id="repFiltroInactivo" style="flex:1;">Inactivos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltroRep('suspendido')" id="repFiltroSuspendido" style="flex:1;">Suspendidos</button>
+    </div>
+    <div id="adminRepList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN REPARTIDOR DETALLE ============ -->
+  <div class="screen hidden" id="screen-admin-rep-detalle">
+    <div class="link-back" onclick="showScreen('admin-repartidores')">← Repartidores</div>
+    <div class="kicker" id="adminRepDetalleKicker">Repartidor</div>
+    <div id="adminRepDetalleContenido"></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN MENSAJES ============ -->
@@ -6714,6 +6758,267 @@ async function adminConfirmarOp(docId){
 
 // =============================================
 // FIN ADMIN OPERACIONES
+
+// =============================================
+// ADMIN — REPARTIDORES
+// =============================================
+let _adminReps = [];
+let _adminRepFiltro = 'todos';
+
+const REP_VEHICULO = { moto:'🛵 Moto', bici:'🚴 Bicicleta', auto:'🚗 Auto', pie:'🚶 A pie', otro:'Otro' };
+const REP_ESTADO_CFG = {
+  activo:     { bg:'#EAF5EA', color:'#2F7A55', label:'✅ Activo' },
+  inactivo:   { bg:'#F0F0F0', color:'#666',    label:'⏸ Inactivo' },
+  suspendido: { bg:'#FDECEA', color:'#C0392B', label:'🚫 Suspendido' }
+};
+
+async function adminCargarRepartidores(){
+  const el = document.getElementById('adminRepList');
+  if(el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const snap = await db.collection('repartidores').orderBy('fechaAlta','desc').get();
+    _adminReps = snap.docs.map(d=>({...d.data(), _docId:d.id}));
+    adminFiltroRep(_adminRepFiltro);
+  }catch(e){
+    // Firestore puede fallar si no existe la colección aún — mostrar vacío
+    _adminReps = [];
+    adminFiltroRep('todos');
+  }
+}
+
+function adminFiltroRep(filtro){
+  _adminRepFiltro = filtro;
+  // Resaltar botón activo
+  ['todos','activo','inactivo','suspendido'].forEach(f=>{
+    var btn = document.getElementById('repFiltro'+f.charAt(0).toUpperCase()+f.slice(1));
+    if(btn) btn.style.fontWeight = f===filtro ? '800' : '600';
+    if(btn) btn.style.borderColor = f===filtro ? 'var(--navy)' : 'var(--line)';
+  });
+  var lista = filtro==='todos' ? _adminReps : _adminReps.filter(r=>r.estado===filtro);
+  adminRenderReps(lista);
+}
+
+function adminRenderReps(lista){
+  const el = document.getElementById('adminRepList');
+  if(!el) return;
+  if(!lista.length){
+    el.innerHTML = '<div class="empty"><div class="s">Sin repartidores en este estado.</div></div>';
+    return;
+  }
+  el.innerHTML = lista.map(r=>{
+    const est = REP_ESTADO_CFG[r.estado||'inactivo'] || REP_ESTADO_CFG.inactivo;
+    const veh = REP_VEHICULO[r.vehiculo] || r.vehiculo || '—';
+    const fecha = r.fechaAlta ? new Date(r.fechaAlta).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+    return `<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden;cursor:pointer;" onclick="adminAbrirRepDetalle('${r._docId}')">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;">
+        <div style="width:42px;height:42px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${r.vehiculo==='bici'?'🚴':r.vehiculo==='auto'?'🚗':r.vehiculo==='pie'?'🚶':'🛵'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:700;color:var(--navy);">${r.nombre||'—'}</div>
+          <div style="font-size:12px;color:var(--muted);">${veh} · Alta: ${fecha}</div>
+          <div style="font-size:11.5px;color:var(--muted);">📞 ${r.tel||'—'}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <span style="font-size:10px;background:${est.bg};color:${est.color};padding:3px 9px;border-radius:100px;font-weight:800;display:block;margin-bottom:4px;">${est.label}</span>
+          <div style="font-size:11px;color:var(--muted);font-weight:700;">${r.totalEntregas||0} entregas</div>
+        </div>
+      </div>
+      <div style="border-top:0.5px solid var(--line);padding:7px 14px;display:flex;justify-content:flex-end;background:#FAFBFC;">
+        <span style="font-size:11px;color:var(--navy);font-weight:700;">Ver detalle →</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function adminAltaRepartidor(){
+  const nombre = (document.getElementById('repNombre')?.value||'').trim();
+  const tel    = (document.getElementById('repTel')?.value||'').trim();
+  const veh    = document.getElementById('repVehiculo')?.value||'moto';
+  const notas  = (document.getElementById('repNotas')?.value||'').trim();
+  if(!nombre){ toast('Ingresá el nombre'); return; }
+  if(!tel){ toast('Ingresá el teléfono'); return; }
+  const rep = {
+    nombre, tel, vehiculo:veh, notas,
+    estado: 'activo',
+    fechaAlta: new Date().toISOString(),
+    totalEntregas: 0
+  };
+  try{
+    const ref = await db.collection('repartidores').add(rep);
+    rep._docId = ref.id;
+    _adminReps.unshift(rep);
+    adminFiltroRep(_adminRepFiltro);
+    // Limpiar form
+    ['repNombre','repTel','repNotas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    toast('✅ Repartidor dado de alta');
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+async function adminCambiarEstadoRep(docId, nuevoEstado){
+  try{
+    await db.collection('repartidores').doc(docId).update({estado:nuevoEstado});
+    const r = _adminReps.find(x=>x._docId===docId);
+    if(r) r.estado = nuevoEstado;
+    toast('Estado actualizado ✓');
+    adminAbrirRepDetalle(docId);
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+async function adminAbrirRepDetalle(docId){
+  const r = _adminReps.find(x=>x._docId===docId);
+  if(!r){ toast('Repartidor no encontrado'); return; }
+  const est = REP_ESTADO_CFG[r.estado||'inactivo'] || REP_ESTADO_CFG.inactivo;
+  const veh = REP_VEHICULO[r.vehiculo] || r.vehiculo || '—';
+  const fechaAlta = r.fechaAlta ? new Date(r.fechaAlta).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+
+  // Datos del repartidor
+  var html = `<div class="card">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Datos</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">ESTADO</div>
+        <div style="font-size:12px;font-weight:700;color:${est.color};">${est.label}</div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">VEHÍCULO</div>
+        <div style="font-size:12px;font-weight:700;">${veh}</div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">TELÉFONO</div>
+        <div style="font-size:12px;font-weight:700;">${r.tel||'—'}</div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">ALTA</div>
+        <div style="font-size:12px;font-weight:700;">${fechaAlta}</div>
+      </div>
+    </div>
+    ${r.notas ? `<div style="font-size:12px;color:var(--muted);background:#F5F5F5;border-radius:10px;padding:10px;">📝 ${r.notas}</div>` : ''}
+    ${r.tel ? `<a href="https://wa.me/54${r.tel.replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+r.nombre+', te contactamos desde PuenT.')}" target="_blank"
+      style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:10px;background:#25D366;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
+      💬 Escribir por WhatsApp</a>` : ''}
+  </div>`;
+
+  // Cambiar estado
+  html += `<div class="card">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">⚙️ Cambiar estado</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      ${r.estado!=='activo'     ? `<button class="btn btn-ghost btn-sm" style="flex:1;border-color:#2F7A55;color:#2F7A55;" onclick="adminCambiarEstadoRep('${docId}','activo')">✅ Activar</button>` : ''}
+      ${r.estado!=='inactivo'   ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminCambiarEstadoRep('${docId}','inactivo')">⏸ Desactivar</button>` : ''}
+      ${r.estado!=='suspendido' ? `<button class="btn btn-ghost btn-sm" style="flex:1;border-color:#C0392B;color:#C0392B;" onclick="adminCambiarEstadoRep('${docId}','suspendido')">🚫 Suspender</button>` : ''}
+    </div>
+  </div>`;
+
+  // Métricas
+  html += `<div class="card">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">📊 Métricas</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="adminRepMetricas-${docId}">
+      <div style="text-align:center;background:#F5F5F5;border-radius:10px;padding:12px;">
+        <div style="font-size:24px;font-weight:800;color:var(--navy);">${r.totalEntregas||0}</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Total entregas</div>
+      </div>
+      <div style="text-align:center;background:#F5F5F5;border-radius:10px;padding:12px;" id="adminRepActivas-${docId}">
+        <div style="font-size:24px;font-weight:800;color:#C99A3E;">—</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;">Activas ahora</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Viajes
+  html += `<div class="card" id="adminRepViajes-${docId}">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🛵 Viajes</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;font-weight:800;" onclick="adminRepMostrarViajes('${docId}','activos')">Activos</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminRepMostrarViajes('${docId}','finalizados')">Finalizados</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminRepMostrarViajes('${docId}','cancelados')">Cancelados</button>
+    </div>
+    <div id="adminRepViajesList-${docId}"><p style="font-size:12px;color:var(--muted);">Cargando viajes…</p></div>
+  </div>`;
+
+  document.getElementById('adminRepDetalleContenido').innerHTML = html;
+  document.getElementById('adminRepDetalleKicker').textContent = '🛵 ' + (r.nombre||'Repartidor');
+  showScreen('admin-rep-detalle');
+
+  // Cargar viajes automáticamente
+  adminRepMostrarViajes(docId, 'activos');
+}
+
+async function adminRepMostrarViajes(docId, tipo){
+  const listEl = document.getElementById('adminRepViajesList-'+docId);
+  const activasEl = document.getElementById('adminRepActivas-'+docId);
+  if(!listEl) return;
+  listEl.innerHTML = '<p style="font-size:12px;color:var(--muted);">Cargando…</p>';
+
+  // Resaltar tab
+  var card = document.getElementById('adminRepViajes-'+docId);
+  if(card){
+    card.querySelectorAll('.btn-ghost').forEach((b,i)=>{
+      var tipos = ['activos','finalizados','cancelados'];
+      b.style.fontWeight = tipos[i]===tipo ? '800' : '600';
+      b.style.borderColor = tipos[i]===tipo ? 'var(--navy)' : 'var(--line)';
+    });
+  }
+
+  const estadosFiltro = {
+    activos:     ['pendiente','asignado','en_camino'],
+    finalizados: ['entregado'],
+    cancelados:  ['cancelado']
+  };
+
+  const franjas = {manana:'🌅 Mañana',tarde:'☀️ Tarde',noche:'🌙 Noche'};
+  const estLabel = {pendiente:'🆕 Pendiente',asignado:'📦 Asignado',en_camino:'🚴 En camino',entregado:'✅ Entregado',cancelado:'❌ Cancelado'};
+
+  try{
+    var query = db.collection('pedidosEnvio');
+    if(tipo === 'activos'){
+      query = query.where('repartidorId','==',docId).where('estado','in',estadosFiltro.activos);
+    } else {
+      var estado = tipo === 'finalizados' ? 'entregado' : 'cancelado';
+      query = query.where('repartidorId','==',docId).where('estado','==',estado);
+    }
+    const snap = await query.get();
+    const viajes = snap.docs.map(d=>({...d.data(),_id:d.id}));
+
+    // Actualizar métricas activas
+    if(tipo==='activos' && activasEl){
+      activasEl.querySelector('div').textContent = viajes.length;
+    }
+
+    if(!viajes.length){
+      listEl.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:16px 0;">Sin viajes en esta categoría</div>';
+      return;
+    }
+
+    listEl.innerHTML = viajes.map(v=>{
+      const fecha = v.fechaCreacion ? new Date(v.fechaCreacion).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) : '—';
+      const estCfg = {pendiente:{bg:'#F0F4FA',c:'#444'},asignado:{bg:'#FFF8EC',c:'#8A6400'},en_camino:{bg:'#EAF5EA',c:'#2F7A55'},entregado:{bg:'#EAF5EA',c:'#2F7A55'},cancelado:{bg:'#FDECEA',c:'#C0392B'}};
+      const cfg = estCfg[v.estado]||estCfg.pendiente;
+      return `<div style="border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div style="font-size:13px;font-weight:700;">${v.productoNombre||'—'}</div>
+          <span style="font-size:10px;background:${cfg.bg};color:${cfg.c};padding:2px 8px;border-radius:100px;font-weight:800;">${estLabel[v.estado]||v.estado}</span>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:2px;">🏪 ${v.comercioNombre||'—'} · 📍 ${v.direccion||'—'}</div>
+        <div style="font-size:11.5px;color:var(--muted);">${franjas[v.franja]||v.franja||'—'} · ${fecha}</div>
+        ${v.comercioCubreEnvio ? '<div style="font-size:11px;color:#2F7A55;font-weight:700;margin-top:4px;">🎁 Envío cubierto por el comercio</div>' : ''}
+        ${tipo==='activos' && v.estado==='asignado' ? `<button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;color:#C0392B;border-color:#C0392B;" onclick="adminCancelarViaje('${v._id}','${docId}')">❌ Cancelar viaje</button>` : ''}
+      </div>`;
+    }).join('');
+  }catch(e){
+    listEl.innerHTML = '<p style="font-size:12px;color:red;">Error al cargar viajes</p>';
+  }
+}
+
+async function adminCancelarViaje(pedidoId, repDocId){
+  if(!confirm('¿Cancelar este viaje? El pedido volverá a estar disponible.')) return;
+  try{
+    await db.collection('pedidosEnvio').doc(pedidoId).update({estado:'cancelado'});
+    toast('Viaje cancelado ✓');
+    adminRepMostrarViajes(repDocId, 'activos');
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+// =============================================
+// FIN ADMIN REPARTIDORES
+// =============================================
 // =============================================
 
 // ---- USUARIOS ----
