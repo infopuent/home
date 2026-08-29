@@ -890,58 +890,25 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn btn-primary btn-sm" style="width:100%" id="ofVendedorBtn" onclick="agregarProductoAMiCatalogo(ofertaAbierta)">➕ Sumar a mi catálogo</button>
       </div>
 
-      <!-- ENVÍO A DOMICILIO — fuera de ofAntes para que no se pise -->
-      <div id="ofEnvioCardWrap">
-        <div style="background:#FFF3E8;border:1.5px solid var(--navy);border-radius:14px;overflow:hidden;margin-bottom:14px;">
-          <div style="padding:14px 16px 12px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-              <div style="display:flex;align-items:center;gap:9px;">
-                <span style="font-size:20px;">🛵</span>
-                <div>
-                  <div style="font-size:13px;font-weight:800;color:var(--navy);">Envío a domicilio</div>
-                  <div style="font-size:11px;color:var(--muted);">Repartidores PuenT · dentro de La Paz</div>
-                </div>
-              </div>
-              <div style="text-align:right;">
-                <div style="font-size:11px;color:var(--muted);text-decoration:line-through;">precio normal</div>
-                <div style="font-size:17px;font-weight:800;color:var(--navy);">$5.899</div>
-                <div style="font-size:9px;background:var(--navy);color:white;padding:2px 7px;border-radius:100px;font-weight:800;margin-top:1px;">PROMO 🎉</div>
-              </div>
-            </div>
-            <div id="ofEnvioCheckWrap" style="display:flex;align-items:center;gap:10px;background:white;border-radius:10px;padding:11px 13px;cursor:pointer;border:1.5px solid var(--line);" onclick="ofToggleEnvio()">
-              <div id="ofEnvioCheckBox" style="width:20px;height:20px;border-radius:6px;border:2px solid var(--navy);background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
-              <div>
-                <div style="font-size:13px;font-weight:700;color:var(--ink);">Quiero envío a domicilio</div>
-                <div style="font-size:11px;color:var(--muted);">+ $5.899 · lo abonás al recibir en mano</div>
-              </div>
-            </div>
-          </div>
-          <div id="ofEnvioDetalleDireccion" style="display:none;border-top:1px solid #FFE0C8;padding:12px 16px;background:#FFF8F3;">
-            <div class="field" style="margin-bottom:8px;">
-              <label style="font-size:12px;font-weight:700;">📍 Dirección de entrega</label>
-              <input id="ofEnvioDireccion" placeholder="Ej: San Martín 450, La Paz" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:white;">
-            </div>
-            <div class="field" style="margin-bottom:8px;">
-              <label style="font-size:12px;font-weight:700;">⏰ ¿Cuándo lo necesitás?</label>
-              <select id="ofEnvioFranja" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:white;">
-                <option value="manana">🌅 Mañana (9 a 12hs)</option>
-                <option value="tarde">☀️ Tarde (14 a 18hs)</option>
-                <option value="noche">🌙 Noche (18 a 21hs)</option>
-              </select>
-            </div>
-            <div style="font-size:11.5px;color:var(--muted);line-height:1.5;background:white;border-radius:8px;padding:8px 10px;">
-              Un repartidor PuenT va a retirar el producto en el local y te lo lleva. Abonás los <strong>$5.899</strong> directamente al repartidor cuando lo recibís.
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- ids fantasma para no romper código JS existente -->
       <div id="ofEnvioBloque" style="display:none;"></div>
       <div id="ofEnvioForm" style="display:none;"></div>
       <div id="ofEnvioCosto" style="display:none;"></div>
+      <div id="ofEnvioCheckBox" style="display:none;" data-activo="0"></div>
+      <div id="ofEnvioDetalleDireccion" style="display:none;"></div>
+      <input id="ofEnvioDireccion" type="hidden">
+      <select id="ofEnvioFranja" style="display:none;"><option value="tarde">Tarde</option></select>
       <button id="ofBtnRetiro" style="display:none;"></button>
       <button id="ofBtnEnvio" style="display:none;"></button>
+
+      <!-- Aviso post-reserva: aparece después de reservar -->
+      <div id="ofEnvioAviso" style="display:none;background:#F0F4FA;border-radius:12px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">🛵</span>
+        <div style="font-size:12px;color:var(--navy);line-height:1.5;">
+          <strong>PuenT tiene envío a domicilio.</strong><br>
+          Una vez confirmada la compra, coordinalo desde tu carrito.
+        </div>
+      </div>
 
       <div id="ofAntes">
         <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;" id="ofTextoReserva">Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.</p>
@@ -5586,27 +5553,18 @@ function abrirOferta(prodId){
     banner.classList.add('hidden');
   }
 
-  // --- Bloque envío — resetear al abrir un producto nuevo ---
-  var _chkBox = document.getElementById('ofEnvioCheckBox');
-  var _chkDet = document.getElementById('ofEnvioDetalleDireccion');
-  var _dirInput = document.getElementById('ofEnvioDireccion');
-  var _envioWrap = document.getElementById('ofEnvioCardWrap');
-  if(_chkBox){ _chkBox.dataset.activo='0'; _chkBox.style.background='white'; _chkBox.innerHTML=''; }
-  if(_chkDet){ _chkDet.style.display='none'; }
-  if(_dirInput){ _dirInput.value=''; }
-  // Se mostrará u ocultará según el estado del producto más abajo
-  if(_envioWrap) _envioWrap.style.display = 'none';
+  // --- Resetear aviso de envío al abrir un producto nuevo ---
+  var _aviso = document.getElementById('ofEnvioAviso');
+  if(_aviso) _aviso.style.display = 'none';
 
   // ¿Ya habíamos generado un código para este producto antes?
   const ventaPrevia = buscarVentaPropiaGuardada(prodId);
   if(ventaPrevia && estaRegistrado){
     mostrarCodigoDeOferta(ventaPrevia);
   } else if(estaRegistrado){
-    const envioWrap = document.getElementById('ofEnvioCardWrap');
     if(p.tipoOferta==='h24'){
       const estado = estadoTornado(p);
       let html;
-      let mostrarEnvio = false;
       if(estado==='antes'){
         html = `<div style="text-align:center; padding:16px 0; color:var(--navy); font-weight:700; font-size:14px;">🕐 Todavía no arrancó<br><span style="font-weight:500; font-size:12.5px; color:var(--muted);">Se larga a las ${p.horaInicio}hs</span></div>`;
       } else if(estado==='cerrada'){
@@ -5614,21 +5572,17 @@ function abrirOferta(prodId){
       } else if(estado==='agotada'){
         html = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">🚫 Agotado — ya se reservó todo</div>`;
       } else {
-        mostrarEnvio = true;
         html = `<p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">⚡ Quedan ${stockDisponible(p)} disponibles hasta las ${p.horaHasta}hs.</p>
           <button class="btn btn-primary" onclick="reservarProducto()">🛒 Reservar</button>`;
       }
-      if(envioWrap) envioWrap.style.display = mostrarEnvio ? 'block' : 'none';
       ofAntes.innerHTML = html;
       ofAntes.classList.remove('hidden');
       document.getElementById('ofDespues').classList.add('hidden');
     } else if(p.stock !== null && p.stock !== undefined && p.stock <= 0){
-      if(envioWrap) envioWrap.style.display = 'none';
       ofAntes.innerHTML = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">😔 Este producto ya no tiene stock disponible</div>`;
       ofAntes.classList.remove('hidden');
       document.getElementById('ofDespues').classList.add('hidden');
     } else {
-      if(envioWrap) envioWrap.style.display = 'block';
       ofAntes.innerHTML = `
         <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Reservá el producto. Generás el QR cuando llegues al local.</p>
         <button class="btn btn-primary" onclick="reservarProducto()">🛒 Reservar</button>`;
@@ -5668,6 +5622,9 @@ function mostrarCodigoDeOferta(venta){
   renderQR(document.getElementById('ofQrFake'), construirLinkCodigo(venta.codigo));
   document.getElementById('ofAntes').classList.add('hidden');
   document.getElementById('ofDespues').classList.remove('hidden');
+  // Mostrar aviso de envío post-reserva
+  var aviso = document.getElementById('ofEnvioAviso');
+  if(aviso) aviso.style.display = 'flex';
   document.getElementById('ofGuardarBanner').classList.toggle('hidden', !!venta.ownerUid);
   const venceBox = document.getElementById('ofVencePickup');
   if(venta.vencePickup){
@@ -7267,8 +7224,22 @@ function renderCarrito(){
     return;
   }
 
-  el.innerHTML = comercios.map(grupo=>{
+  // Ver cuántas ventas confirmadas hay (para mostrar tarjeta de envío)
+  const ventasConfirmadas = (state.ventas||[]).filter(v=>
+    (v.estado==='confirmada'||v.estado==='confirmado') && v.origen==='carrito' && !v.envioSolicitado
+  );
+  const hayConfirmadas = ventasConfirmadas.length > 0;
+
+  const gruposHtml = comercios.map(grupo=>{
     const total = grupo.items.reduce((s,i)=>s+i.precio,0);
+    // Ver si algún item de este grupo tiene venta confirmada
+    const tieneConfirmada = grupo.items.some(item=>
+      (state.ventas||[]).some(v=> v.productoId===item.prodId && (v.estado==='confirmada'||v.estado==='confirmado'))
+    );
+    const estadoPill = tieneConfirmada
+      ? '<span style="font-size:10px;background:#EAF5EA;color:#2F7A55;padding:3px 9px;border-radius:100px;font-weight:800;">✅ Confirmado</span>'
+      : '<span style="font-size:10px;background:#F0F4FA;color:#555;padding:3px 9px;border-radius:100px;font-weight:700;">🕒 Pendiente</span>';
+
     const itemsHtml = grupo.items.map(item=>`
       <div class="list-row" style="align-items:center;">
         <div class="av" style="background:var(--cream);border-radius:10px;overflow:hidden;flex-shrink:0;">
@@ -7282,22 +7253,137 @@ function renderCarrito(){
       </div>`).join('');
 
     return `<div class="card" style="margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Local</div>
-          <div style="font-size:16px;font-weight:800;color:var(--navy);">${grupo.comercioNombre}</div>
+          <div style="font-size:15px;font-weight:800;color:var(--navy);">${grupo.comercioNombre}</div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);">Total</div>
-          <div style="font-size:16px;font-weight:800;color:var(--navy);">$${total.toLocaleString('es-AR')}</div>
+        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          ${estadoPill}
+          <div style="font-size:15px;font-weight:800;color:var(--navy);">$${total.toLocaleString('es-AR')}</div>
         </div>
       </div>
       ${itemsHtml}
       <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="generarQRCarrito('${grupo.comercioId}')">
-        📲 Generar QR para retirar en ${grupo.comercioNombre}
+        📲 Generar QR · ${grupo.comercioNombre}
       </button>
     </div>`;
   }).join('');
+
+  // Tarjeta de envío — solo si hay al menos una venta confirmada
+  const envioCardHtml = hayConfirmadas ? `
+    <div style="background:#FFF3E8;border:1.5px solid var(--navy);border-radius:14px;overflow:hidden;margin-bottom:16px;">
+      <div style="padding:14px 16px 12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="font-size:20px;">🛵</span>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:var(--navy);">Envío a domicilio</div>
+              <div style="font-size:11px;color:var(--muted);">Repartidores PuenT · dentro de La Paz</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:15px;font-weight:800;color:var(--navy);">$5.899</div>
+            <div style="font-size:9px;background:var(--navy);color:white;padding:2px 7px;border-radius:100px;font-weight:800;">PROMO 🎉</div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
+          Tus compras confirmadas se pueden enviar a domicilio. Un solo viaje cubre todas las confirmadas.<br>Abonás al repartidor en mano al recibir.
+        </div>
+        <!-- Checkbox -->
+        <div id="carritoEnvioCheckWrap" style="display:flex;align-items:center;gap:10px;background:white;border-radius:10px;padding:11px 13px;cursor:pointer;border:1.5px solid var(--line);" onclick="carritoToggleEnvio()">
+          <div id="carritoEnvioCheckBox" style="width:20px;height:20px;border-radius:6px;border:2px solid var(--navy);background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);">Quiero envío a domicilio</div>
+            <div style="font-size:11px;color:var(--muted);">+ $5.899 por viaje · lo abonás al recibir</div>
+          </div>
+        </div>
+      </div>
+      <!-- Formulario de dirección -->
+      <div id="carritoEnvioForm" style="display:none;border-top:1px solid #FFE0C8;padding:12px 16px;background:#FFF8F3;">
+        <div class="field" style="margin-bottom:8px;">
+          <label style="font-size:12px;font-weight:700;">📍 Dirección de entrega</label>
+          <input id="carritoEnvioDireccion" placeholder="Ej: San Martín 450, La Paz" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:white;">
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label style="font-size:12px;font-weight:700;">⏰ ¿Cuándo lo necesitás?</label>
+          <select id="carritoEnvioFranja" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:white;">
+            <option value="manana">🌅 Mañana (9 a 12hs)</option>
+            <option value="tarde">☀️ Tarde (14 a 18hs)</option>
+            <option value="noche">🌙 Noche (18 a 21hs)</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--muted);background:white;border-radius:8px;padding:8px 10px;line-height:1.5;margin-bottom:10px;">
+          Se genera un pedido de envío por cada comercio confirmado (${ventasConfirmadas.length} pedido${ventasConfirmadas.length!==1?'s':''}). El repartidor retira en el local y te lo lleva.
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="carritoConfirmarEnvio()">🛵 Confirmar envío a domicilio</button>
+      </div>
+    </div>` : '';
+
+  el.innerHTML = envioCardHtml + gruposHtml;
+}
+
+function carritoToggleEnvio(){
+  var box  = document.getElementById('carritoEnvioCheckBox');
+  var form = document.getElementById('carritoEnvioForm');
+  var wrap = document.getElementById('carritoEnvioCheckWrap');
+  if(!box) return;
+  var activo = box.dataset.activo === '1';
+  activo = !activo;
+  box.dataset.activo = activo ? '1' : '0';
+  box.style.background = activo ? 'var(--navy)' : 'white';
+  box.innerHTML = activo ? '<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>' : '';
+  if(form) form.style.display = activo ? 'block' : 'none';
+  if(wrap) wrap.style.borderColor = activo ? 'var(--navy)' : 'var(--line)';
+}
+
+function carritoConfirmarEnvio(){
+  var direccion = (document.getElementById('carritoEnvioDireccion')?.value||'').trim();
+  var franja = document.getElementById('carritoEnvioFranja')?.value || 'tarde';
+  if(!direccion){ toast('📍 Ingresá tu dirección de entrega'); return; }
+
+  // Crear un pedido de envío por cada comercio con venta confirmada
+  const ventasConf = (state.ventas||[]).filter(v=>
+    (v.estado==='confirmada'||v.estado==='confirmado') && v.origen==='carrito' && !v.envioSolicitado
+  );
+  if(!ventasConf.length){ toast('No hay compras confirmadas para enviar'); return; }
+
+  // Agrupar por comercio — un pedido por comercio
+  const porComercio = {};
+  ventasConf.forEach(v=>{
+    if(!porComercio[v.comercioId]) porComercio[v.comercioId] = { comercioId:v.comercioId, comercioNombre:v.comercioNombre||'—', productos:[] };
+    porComercio[v.comercioId].productos.push(v.productoId);
+    v.envioSolicitado = true; // marcar para no pedir doble
+  });
+
+  var cantPedidos = 0;
+  Object.values(porComercio).forEach(grupo=>{
+    const pedido = {
+      id: nextId('env'),
+      comercioId: grupo.comercioId,
+      comercioNombre: grupo.comercioNombre,
+      clienteId: state.currentUser?.uid||state.currentUser?.id,
+      clienteNombre: state.currentUser?.nombre||'Cliente',
+      clienteTel: state.currentUser?.tel||'',
+      productoNombre: grupo.productos.length > 1 ? grupo.productos.length + ' productos' : (state.productos.find(p=>p.id===grupo.productos[0])?.nombre||'—'),
+      direccion,
+      franja,
+      pagaEnvio: 'cliente',
+      comercioCubreEnvio: false,
+      estado: 'pendiente',
+      fechaCreacion: new Date().toISOString(),
+      repartidorId: null
+    };
+    if(!state.pedidosEnvio) state.pedidosEnvio = [];
+    state.pedidosEnvio.push(pedido);
+    if(firebaseListo && db){
+      db.collection('pedidosEnvio').doc(pedido.id).set(pedido).catch(e=>console.error(e));
+    }
+    cantPedidos++;
+  });
+
+  toast('🛵 ¡Listo! Se generaron ' + cantPedidos + ' pedido' + (cantPedidos!==1?'s':'') + ' de envío. Un repartidor te va a contactar.');
+  renderCarrito();
 }
 
 function quitarDelCarrito(comercioId, prodId){
