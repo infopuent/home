@@ -1103,6 +1103,20 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn btn-ghost" onclick="showScreen('feed')">Seguir viendo ofertas</button>
       </div>
     </div>
+
+    <!-- Solapas: Detalle del producto / Info del comercio / Calificaciones -->
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div style="display:flex; border-bottom:1px solid var(--line);">
+        <button class="of-tab-btn active" id="ofTabBtnDetalle" onclick="setOfertaTab('detalle')" style="flex:1;padding:13px 4px;background:none;border:none;font-size:12px;font-weight:700;color:var(--navy);border-bottom:2.5px solid var(--navy);cursor:pointer;">Detalle del producto</button>
+        <button class="of-tab-btn" id="ofTabBtnComercio" onclick="setOfertaTab('comercio')" style="flex:1;padding:13px 4px;background:none;border:none;font-size:12px;font-weight:700;color:var(--muted);border-bottom:2.5px solid transparent;cursor:pointer;">Info del comercio</button>
+        <button class="of-tab-btn" id="ofTabBtnCalif" onclick="setOfertaTab('calif')" style="flex:1;padding:13px 4px;background:none;border:none;font-size:12px;font-weight:700;color:var(--muted);border-bottom:2.5px solid transparent;cursor:pointer;">Calificaciones</button>
+      </div>
+      <div style="padding:16px;">
+        <div id="ofTabDetallePanel"><div id="ofTabDetalleContenido" style="font-size:13px;color:var(--ink);line-height:1.8;"></div></div>
+        <div id="ofTabComercioPanel" class="hidden"><div id="ofTabComercioContenido" style="font-size:13px;color:var(--ink);line-height:1.8;"></div></div>
+        <div id="ofTabCalifPanel" class="hidden"><div id="ofTabCalifContenido" style="font-size:13px;color:var(--ink);line-height:1.8;"></div></div>
+      </div>
+    </div>
   </div>
 
   <!-- ============ SCREEN: PRODUCTOS DE UN LOCAL (vidriera del comercio) ============ -->
@@ -5878,7 +5892,81 @@ function abrirOferta(prodId){
       document.getElementById('ofDespues').classList.add('hidden');
     }
   }
+  renderOfertaTabs(p, c);
+  setOfertaTab('detalle');
   showScreen('oferta');
+}
+
+// --- Solapas del detalle de producto: Detalle del producto / Info del comercio / Calificaciones ---
+function setOfertaTab(tab){
+  const tabs = {detalle:'ofTabBtnDetalle', comercio:'ofTabBtnComercio', calif:'ofTabBtnCalif'};
+  const paneles = {detalle:'ofTabDetallePanel', comercio:'ofTabComercioPanel', calif:'ofTabCalifPanel'};
+  Object.keys(tabs).forEach(k=>{
+    const btn = document.getElementById(tabs[k]);
+    const panel = document.getElementById(paneles[k]);
+    if(!btn || !panel) return;
+    if(k===tab){
+      btn.style.color = 'var(--navy)';
+      btn.style.borderBottomColor = 'var(--navy)';
+      panel.classList.remove('hidden');
+    } else {
+      btn.style.color = 'var(--muted)';
+      btn.style.borderBottomColor = 'transparent';
+      panel.classList.add('hidden');
+    }
+  });
+}
+
+function renderOfertaTabs(p, c){
+  // --- Detalle del producto ---
+  const filas = [];
+  if(p.rubro) filas.push(['Rubro', p.rubro]);
+  if(p.stockInicial!==undefined && p.stockInicial!==null) filas.push(['Stock inicial', p.stockInicial + ' unidad' + (p.stockInicial===1?'':'es')]);
+  if(p.tipoOferta) filas.push(['Tipo de oferta', TIPOS_OFERTA[p.tipoOferta]?.label || p.tipoOferta]);
+  if(p.descuento) filas.push(['Descuento', p.descuento + '%']);
+  if(p.envio==='si' || p.envioPolitica) filas.push(['Envío', p.envioPolitica || 'Con envío a domicilio disponible']);
+  document.getElementById('ofTabDetalleContenido').innerHTML = filas.length
+    ? filas.map(f=>`<div style="display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line);"><span style="color:var(--muted); font-weight:600;">${f[0]}</span><span style="font-weight:700; text-align:right;">${f[1]}</span></div>`).join('')
+    : '<p style="color:var(--muted);">Este producto todavía no tiene más detalles cargados.</p>';
+
+  // --- Info del comercio ---
+  if(c){
+    const estaRegistrado = !!state.role && state.role !== null;
+    const prom = c.rating ? Number(c.rating).toFixed(1) : null;
+    document.getElementById('ofTabComercioContenido').innerHTML = `
+      <div style="font-weight:800; font-size:15px; color:var(--navy); margin-bottom:2px;">${estaRegistrado ? c.nombre : '🔒 Comercio verificado'}</div>
+      <div style="color:var(--muted); margin-bottom:10px;">${c.rubro || ''}${prom ? ' · ⭐ '+prom : ''}</div>
+      ${estaRegistrado ? `
+        <div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Dirección:</span> ${c.direccion || 'La Paz, Entre Ríos'}</div>
+        ${c.horario ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Horario:</span> ${c.horario}</div>` : ''}
+        ${c.telefono ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
+        <button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>
+      ` : `<p style="color:var(--muted);">Registrate para ver la dirección, el horario y cómo llegar a este comercio.</p>`}
+    `;
+  } else {
+    document.getElementById('ofTabComercioContenido').innerHTML = '<p style="color:var(--muted);">No encontramos información de este comercio.</p>';
+  }
+
+  // --- Calificaciones ---
+  const uidComercio = c ? (c.uid || c.id) : null;
+  const vals = uidComercio ? state.valoraciones.filter(v=>v.paraUid===uidComercio) : [];
+  let califHtml;
+  if(vals.length){
+    const prom = vals.reduce((a,v)=>a+v.estrellas,0) / vals.length;
+    califHtml = `<div style="font-weight:800; font-size:15px; color:var(--navy); margin-bottom:12px;">${estrellas(prom)} · ${vals.length} valoración${vals.length===1?'':'es'}</div>`
+      + vals.slice().sort((a,b)=> new Date(b.fecha)-new Date(a.fecha)).map(v=>`
+        <div style="padding:10px 0; border-top:1px solid var(--line);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+            <span style="font-weight:700;">${v.deNombre || 'Cliente'}</span>
+            <span>${estrellas(v.estrellas)}</span>
+          </div>
+          ${v.comentario ? `<div style="color:var(--muted); font-size:12.5px;">${v.comentario}</div>` : ''}
+        </div>
+      `).join('');
+  } else {
+    califHtml = '<p style="color:var(--muted);">Este comercio todavía no tiene calificaciones.</p>';
+  }
+  document.getElementById('ofTabCalifContenido').innerHTML = califHtml;
 }
 
 // Guardamos en el navegador (localStorage) qué código le corresponde a cada producto,
