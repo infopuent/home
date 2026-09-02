@@ -1021,7 +1021,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   <!-- ============ OFERTA DEL DIA: DETALLE PUBLICO ============ -->
   <div class="screen hidden" id="screen-oferta">
-    <div class="link-back" onclick="showScreen('feed')">← Volver a ofertas</div>
+    <div class="link-back" onclick="state.role==='vendedor' ? showScreen('v-catalogo') : showScreen('feed')">← Volver</div>
     <div class="kicker">Oferta del día</div>
 
     <!-- Foto full-width fuera del card -->
@@ -5023,7 +5023,7 @@ function abrirCatalogoVendedor(vendedorId){
   const prodIds = state.catalogoVendedor.filter(sel=>sel.vendedorId===vendedorId).map(sel=>sel.productoId);
   const prods = prodIds.map(id=>state.productos.find(p=>p.id===id)).filter(Boolean);
   document.getElementById('clProdGrid').innerHTML = prods.map(p=>`
-    <div class="prod-card" onclick="abrirProducto('${p.id}')" style="cursor:pointer">
+    <div class="prod-card" onclick="abrirOferta('${p.id}')" style="cursor:pointer">
       <div class="prod-photo">${p.img ? `<img src="${p.img}" alt="${p.nombre}">` : p.foto}</div>
       <div class="prod-body">
         <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
@@ -5035,13 +5035,8 @@ function abrirCatalogoVendedor(vendedorId){
 
 let productoAbierto = null;
 function abrirProducto(prodId){
-  productoAbierto = prodId;
-  const p = state.productos.find(x=>x.id===prodId);
-  document.getElementById('clPFoto').innerHTML = p.img ? `<img src="${p.img}" alt="${p.nombre}" style="width:100%; height:100%; object-fit:cover; border-radius:14px;">` : p.foto;
-  document.getElementById('clPNombre').textContent = p.nombre;
-  document.getElementById('clPPrecio').textContent = '$'+p.precio.toLocaleString('es-AR');
-  document.getElementById('clPZona').textContent = p.rubro;
-  showScreen('cl-producto');
+  // Redirigir siempre a la ficha completa con botón Reservar
+  abrirOferta(prodId);
 }
 
 function pedirProducto(){
