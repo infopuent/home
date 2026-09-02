@@ -3439,7 +3439,7 @@ function renderProductosPropios(elId){
   const box = document.getElementById(elId || 'cProductosPropiosPage');
   if(!box) return;
   const c = state.currentUser;
-  const propios = state.productos.filter(p=>p.comercioId===c.id && p.origen==='comercio');
+  const propios = state.productos.filter(p=>p.comercioId===c.id && (p.origen==='comercio' || !p.origen));
   if(propios.length===0){
     box.innerHTML = `<div class="empty"><div class="ic">📣</div><div class="t">${publicidadActiva(c) ? 'Todavía no cargaste productos propios' : 'Activá la publicidad mensual para cargar productos propios'}</div></div>`;
     return;
@@ -3761,7 +3761,7 @@ function crearProductoComercio(){
   if(productoEditandoId){
     const p = state.productos.find(x=>x.id===productoEditandoId);
     if(!p){ toast('No se encontró el producto'); return; }
-    Object.assign(p, {nombre, precio, comision, rubro, img:foto, tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja});
+    Object.assign(p, {nombre, precio, comision, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja});
     guardarProductoEnFirestore(p, c.uid);
     toast('Cambios guardados ✅');
     productoEditandoId = null;
@@ -3795,10 +3795,10 @@ async function cargarProductosGuardados(ownerUid){
   try{
     const snap = await db.collection('productos').where('ownerUid','==',ownerUid).get();
     snap.forEach(doc=>{
-      const p = doc.data();
-      if(!state.productos.some(existing=>existing.id===p.id)){
-        state.productos.push(p);
-      }
+      const p = {...doc.data(), id: doc.id};
+      const idx = state.productos.findIndex(existing=>existing.id===p.id);
+      if(idx>=0) state.productos[idx] = p;
+      else state.productos.push(p);
     });
     renderProductosPropios();
   }catch(e){
@@ -5211,7 +5211,7 @@ document.addEventListener('click', (e)=>{
 function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
   let universo;
   if(origenTipo==='comercio'){
-    universo = state.productos.filter(p=>p.origen==='comercio').filter(p=>{
+    universo = state.productos.filter(p=>p.origen==='comercio' || !p.origen).filter(p=>{
       const c = state.comercios.find(x=>x.id===p.comercioId);
       return c && c.ciudad===ciudadSeleccionada;
     });
@@ -5336,7 +5336,7 @@ function renderFeedEncantar(){
   var prods = [];
   (state.comercios||[]).forEach(function(c){
     if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
-      (state.productos||[]).filter(function(p){ return p.comercioId===c.id && p.origen==='comercio'; })
+      (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
         .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
     }
   });
@@ -5371,7 +5371,7 @@ function renderFeedInfinito(reset){
     _feedInfinitoTodos = [];
     (state.comercios||[]).forEach(function(c){
       if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
-        (state.productos||[]).filter(function(p){ return p.comercioId===c.id && p.origen==='comercio'; })
+        (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
           .forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
       }
     });
