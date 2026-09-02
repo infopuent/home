@@ -3027,16 +3027,19 @@ async function cargarDatosPublicosDeFirestore(){
       const c = doc.data();
       // Comercios creados via Google tienen uid; los creados por admin solo tienen id.
       // Hay que incluir ambos tipos, deduplicando por uid si existe, por id si no.
-      const yaExiste = c.uid
-        ? state.comercios.some(x=>x.uid===c.uid)
-        : state.comercios.some(x=>x.id===c.id);
-      if(!yaExiste) state.comercios.push(c);
+      const idxExiste = c.uid
+        ? state.comercios.findIndex(x=>x.uid===c.uid)
+        : state.comercios.findIndex(x=>x.id===c.id);
+      if(idxExiste>=0) state.comercios[idxExiste] = c; // ya existía en memoria: actualizar con lo último de Firestore
+      else state.comercios.push(c);
     });
   } else console.error('No se pudieron cargar los comercios de Firestore:', comerciosR.reason);
   if(productosR.status==='fulfilled'){
     productosR.value.forEach(doc=>{
       const p = doc.data();
-      if(!state.productos.some(x=>x.id===p.id)) state.productos.push(p);
+      const idx = state.productos.findIndex(x=>x.id===p.id);
+      if(idx>=0) state.productos[idx] = p; // ya existía en memoria: actualizar con lo último de Firestore (ej: stock)
+      else state.productos.push(p);
     });
   } else console.error('No se pudieron cargar los productos de Firestore:', productosR.reason);
   if(valoracionesR.status==='fulfilled'){
@@ -5321,7 +5324,8 @@ function renderFeedEncantar(){
   var prods = [];
   (state.comercios||[]).forEach(function(c){
     if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
-      (c.productos||[]).forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
+      (state.productos||[]).filter(function(p){ return p.comercioId===c.id && p.origen==='comercio'; })
+        .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
     }
   });
   // Mezclar y tomar 10 (5x2)
@@ -5355,7 +5359,8 @@ function renderFeedInfinito(reset){
     _feedInfinitoTodos = [];
     (state.comercios||[]).forEach(function(c){
       if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
-        (c.productos||[]).forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
+        (state.productos||[]).filter(function(p){ return p.comercioId===c.id && p.origen==='comercio'; })
+          .forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
       }
     });
     var grid = document.getElementById('feedGridInfinito');
