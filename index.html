@@ -167,10 +167,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .prod-card{background:white; border:none; border-radius:18px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08);}
 .prod-photo{height:140px; background:linear-gradient(135deg,#FFF0E8,#FFE8D0); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; position:relative;}
 .prod-photo img{width:100%; height:100%; object-fit:cover; display:block;}
-.prod-body{padding:9px 10px 11px;}
-.prod-name{font-size:12px; font-weight:700; color:#1A1A1A; line-height:1.25; margin-bottom:4px;}
+.prod-body{padding:7px 10px 8px; display:flex; align-items:center; justify-content:space-between; gap:6px;}
+.prod-name{display:none;}
 .prod-price{font-size:13px; font-weight:800; color:#FF6600; display:inline-flex; align-items:baseline; gap:4px;}
-.prod-tag{font-size:9.5px; color:var(--muted); margin-top:3px; display:flex; align-items:center; gap:3px;}
+.prod-tag{display:none;}
+.prod-like{background:none; border:none; padding:0; cursor:pointer; font-size:18px; line-height:1; color:#ddd; transition:color .15s;}
+.prod-like.liked{color:#e05a5a;}
 .prod-comm{display:inline-block; margin-top:5px; font-size:9.5px; font-weight:700; color:#CC5500; background:#FFF0E8; padding:2px 7px; border-radius:100px;}
 
 /* ---- List rows ---- */
@@ -1017,8 +1019,20 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-oferta">
     <div class="link-back" onclick="showScreen('feed')">← Volver a ofertas</div>
     <div class="kicker">Oferta del día</div>
+
+    <!-- Foto full-width fuera del card -->
+    <div id="ofFoto" onclick="abrirFotoGrande()" style="width:calc(100% + 40px); margin-left:-20px; height:260px; background:linear-gradient(135deg,#FFF0E8,#FFE8D0); display:flex; align-items:center; justify-content:center; font-size:72px; overflow:hidden; position:relative; cursor:zoom-in; margin-bottom:16px;">🎣
+      <div style="position:absolute; bottom:10px; right:12px; background:rgba(0,0,0,.35); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+      </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="ofLightbox" onclick="this.style.display='none'" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out;">
+      <img id="ofLightboxImg" src="" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px;" alt="Foto del producto">
+    </div>
+
     <div class="card" style="text-align:center;">
-      <div class="prod-photo" style="height:150px; border-radius:14px; font-size:56px; margin-bottom:14px; overflow:hidden;" id="ofFoto">🎣</div>
       <h1 class="page-title" id="ofNombre" style="margin-bottom:4px;">Producto</h1>
       <div class="prod-price" style="font-size:20px; margin-bottom:6px;" id="ofPrecio">$0</div>
       <div id="ofStockInfo" style="margin-bottom:12px;"></div>
@@ -3612,9 +3626,8 @@ function renderTornadoOfertas(){
       <div class="prod-card" style="cursor:pointer;" onclick="abrirOferta('${p.id}')">
         <div class="prod-photo" style="position:relative;">${foto}${chip}</div>
         <div class="prod-body">
-          <div class="prod-name">${p.nombre}</div>
           <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-          <div class="prod-tag">${c ? c.nombre : '—'}</div>
+          <button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle('liked'); this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
         </div>
       </div>`;
   }).join('') + `</div>`;
@@ -5009,9 +5022,8 @@ function abrirCatalogoVendedor(vendedorId){
     <div class="prod-card" onclick="abrirProducto('${p.id}')" style="cursor:pointer">
       <div class="prod-photo">${p.img ? `<img src="${p.img}" alt="${p.nombre}">` : p.foto}</div>
       <div class="prod-body">
-        <div class="prod-name">${p.nombre}</div>
         <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-        <div class="prod-tag">${p.rubro}</div>
+        <button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle('liked'); this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
       </div>
     </div>`).join('');
   showScreen('cl-catalogo');
@@ -5359,9 +5371,8 @@ function renderFeedEncantar(){
     return '<div class="prod-card" onclick="abrirOferta(\''+p.id+'\')" style="cursor:pointer;">'
       +'<div class="prod-photo">'+foto+'</div>'
       +'<div class="prod-body">'
-      +'<div class="prod-name">'+p.nombre+'</div>'
       +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
-      +'<div class="prod-tag">🏪 '+p._comercioNombre+'</div>'
+      +'<button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle(\'liked\'); this.textContent=this.classList.contains(\'liked\')?\'❤️\':\'🤍\'">🤍</button>'
       +'</div></div>';
   }).join('');
 }
@@ -5399,9 +5410,8 @@ function renderFeedInfinito(reset){
     return '<div class="prod-card" onclick="abrirOferta(\''+p.id+'\')" style="cursor:pointer;">'
       +'<div class="prod-photo">'+foto+'</div>'
       +'<div class="prod-body">'
-      +'<div class="prod-name">'+p.nombre+'</div>'
       +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
-      +'<div class="prod-tag">🏪 '+p._comercioNombre+'</div>'
+      +'<button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle(\'liked\'); this.textContent=this.classList.contains(\'liked\')?\'❤️\':\'🤍\'">🤍</button>'
       +'</div></div>';
   }).join('');
   if(loader) loader.style.display = (_feedInfinitoOffset < _feedInfinitoTodos.length) ? 'block' : 'none';
@@ -5815,7 +5825,24 @@ function abrirOferta(prodId){
   ofertaAbierta = prodId;
   const p = state.productos.find(x=>x.id===prodId);
   const c = state.comercios.find(x=>x.id===p.comercioId);
-  document.getElementById('ofFoto').innerHTML = p.img ? `<img src="${p.img}" alt="${p.nombre}" style="width:100%; height:100%; object-fit:cover;">` : p.foto;
+  const fotoEl = document.getElementById('ofFoto');
+  const iconZoom = fotoEl.querySelector('div');
+  if(p.img){
+    fotoEl.style.background = '#111';
+    fotoEl.innerHTML = `<img src="${p.img}" alt="${p.nombre}" style="width:100%; height:100%; object-fit:cover; display:block;">
+      <div style="position:absolute; bottom:10px; right:12px; background:rgba(0,0,0,.35); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+      </div>`;
+  } else {
+    fotoEl.style.background = 'linear-gradient(135deg,#FFF0E8,#FFE8D0)';
+    fotoEl.innerHTML = (p.foto || '🛍️') + `<div style="position:absolute; bottom:10px; right:12px; background:rgba(0,0,0,.35); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+      </div>`;
+  }
+  // Lightbox
+  const lb = document.getElementById('ofLightbox');
+  const lbImg = document.getElementById('ofLightboxImg');
+  if(p.img){ lbImg.src = p.img; lb.style.display = 'flex'; lb.style.display = 'none'; }
   document.getElementById('ofNombre').textContent = p.nombre;
   const badge = etiquetaOferta(p);
   document.getElementById('ofPrecio').innerHTML = '$'+p.precio.toLocaleString('es-AR') + (badge ? ` <span class="oferta-badge" style="position:static; display:inline-block; margin-left:8px; vertical-align:middle;">${badge}</span>` : '');
@@ -5972,6 +5999,15 @@ function renderOfertaTabs(p, c){
   document.getElementById('ofTabCalifContenido').innerHTML = califHtml;
 }
 
+function abrirFotoGrande(){
+  const lb = document.getElementById('ofLightbox');
+  const lbImg = document.getElementById('ofLightboxImg');
+  const p = state.productos.find(x=>x.id===ofertaAbierta);
+  if(!p || !p.img) return;
+  lbImg.src = p.img;
+  lb.style.display = 'flex';
+}
+
 // Guardamos en el navegador (localStorage) qué código le corresponde a cada producto,
 // para poder recuperarlo si el cliente cierra la pestaña o vuelve más tarde al mismo producto.
 function guardarVentaPropiaLocal(prodId, ventaId){
@@ -6117,10 +6153,8 @@ function verProductosDeLocal(comercioId){
         <div class="feed-prod-card" onclick="abrirOferta('${p.id}')">
           <div class="prod-photo">${foto}${badge ? `<span class="oferta-badge">${badge}</span>` : ''}</div>
           <div class="prod-body">
-            <div class="prod-name">${p.nombre}</div>
             <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-            ${comisionBadge}
-            ${botonVendedor}
+            <button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle('liked'); this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
           </div>
         </div>`;
     }).join('');
