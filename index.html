@@ -3038,27 +3038,25 @@ async function cargarDatosPublicosDeFirestore(){
   ]);
   if(comerciosR.status==='fulfilled'){
     comerciosR.value.forEach(doc=>{
-      const c = doc.data();
-      // Comercios creados via Google tienen uid; los creados por admin solo tienen id.
-      // Hay que incluir ambos tipos, deduplicando por uid si existe, por id si no.
+      const c = {...doc.data(), id: doc.id}; // forzar id del documento siempre
       const idxExiste = c.uid
         ? state.comercios.findIndex(x=>x.uid===c.uid)
         : state.comercios.findIndex(x=>x.id===c.id);
-      if(idxExiste>=0) state.comercios[idxExiste] = c; // ya existía en memoria: actualizar con lo último de Firestore
+      if(idxExiste>=0) state.comercios[idxExiste] = c;
       else state.comercios.push(c);
     });
   } else console.error('No se pudieron cargar los comercios de Firestore:', comerciosR.reason);
   if(productosR.status==='fulfilled'){
     productosR.value.forEach(doc=>{
-      const p = doc.data();
+      const p = {...doc.data(), id: doc.id}; // doc.data() no incluye el id del documento — lo forzamos siempre
       const idx = state.productos.findIndex(x=>x.id===p.id);
-      if(idx>=0) state.productos[idx] = p; // ya existía en memoria: actualizar con lo último de Firestore (ej: stock)
+      if(idx>=0) state.productos[idx] = p;
       else state.productos.push(p);
     });
   } else console.error('No se pudieron cargar los productos de Firestore:', productosR.reason);
   if(valoracionesR.status==='fulfilled'){
     valoracionesR.value.forEach(doc=>{
-      const v = doc.data();
+      const v = {...doc.data(), id: doc.id};
       if(!state.valoraciones.some(x=>x.id===v.id)) state.valoraciones.push(v);
     });
   } else console.error('No se pudieron cargar las valoraciones de Firestore:', valoracionesR.reason);
@@ -5353,7 +5351,7 @@ function renderFeedEncantar(){
     var foto = p.img
       ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">'
       : '<span style="font-size:28px;">🛍️</span>';
-    return '<div class="prod-card" onclick="abrirOferta('+JSON.stringify(p).replace(/"/g,'&quot;')+')" style="cursor:pointer;">'
+    return '<div class="prod-card" onclick="abrirOferta(\''+p.id+'\')" style="cursor:pointer;">'
       +'<div class="prod-photo">'+foto+'</div>'
       +'<div class="prod-body">'
       +'<div class="prod-name">'+p.nombre+'</div>'
@@ -5393,7 +5391,7 @@ function renderFeedInfinito(reset){
     var foto = p.img
       ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">'
       : '<span style="font-size:28px;">🛍️</span>';
-    return '<div class="prod-card" onclick="abrirOferta('+JSON.stringify(p).replace(/"/g,'&quot;')+')" style="cursor:pointer;">'
+    return '<div class="prod-card" onclick="abrirOferta(\''+p.id+'\')" style="cursor:pointer;">'
       +'<div class="prod-photo">'+foto+'</div>'
       +'<div class="prod-body">'
       +'<div class="prod-name">'+p.nombre+'</div>'
