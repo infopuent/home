@@ -536,6 +536,71 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .actividad-vencido{background:#FDEDEC; border-color:#F3B9B4;}
 .actividad-vencido .actividad-title{color:#B3261E;}
 
+/* ---- FILTROS DE RUBRO (chips con tilde) ---- */
+.filtros-rubro-wrap{padding:12px 0 4px;}
+.filtros-rubro-label{
+  font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:10px;
+}
+.filtros-rubro-chips{display:flex; flex-wrap:wrap; gap:8px;}
+.filtro-chip{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 14px; border-radius:100px;
+  border:1.5px solid var(--line); background:white;
+  font-size:13px; font-weight:600; color:#444;
+  cursor:pointer; transition:all .15s ease;
+  white-space:nowrap;
+}
+.filtro-chip:active{transform:scale(0.96);}
+.filtro-chip.active{
+  background:var(--orange); color:white;
+  border-color:var(--orange);
+  font-weight:700;
+}
+.filtro-check{
+  font-size:11px; font-weight:900;
+  width:16px; height:16px;
+  background:rgba(255,255,255,0.25);
+  border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+
+/* ---- SOLAPAS DE NAVEGACIÓN FEED ---- */
+.feed-solapas{
+  display:flex; gap:0; overflow-x:auto; scrollbar-width:none;
+  background:white; border-bottom:2px solid var(--line);
+  padding:0 4px; position:sticky; top:0; z-index:15;
+  box-shadow:0 1px 8px rgba(0,0,0,0.06);
+}
+.feed-solapas::-webkit-scrollbar{display:none;}
+.feed-solapa{
+  flex:1 0 auto; padding:12px 14px; border:none; background:transparent;
+  font-size:12.5px; font-weight:700; color:var(--muted); white-space:nowrap;
+  border-bottom:2.5px solid transparent; margin-bottom:-2px; cursor:pointer;
+  transition:color .15s ease, border-color .15s ease;
+}
+.feed-solapa.active{color:var(--orange); border-bottom-color:var(--orange);}
+.feed-solapa:active{opacity:.75;}
+
+/* ---- GRILLA 5x2 "Te va a encantar" ---- */
+.feed-grid-encantar{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:18px;
+}
+
+/* ---- MENÚ "MÁS" ---- */
+.mas-menu-item{
+  width:100%; display:flex; align-items:center; gap:14px;
+  background:white; border:1px solid var(--line); border-radius:16px;
+  padding:14px 16px; text-align:left; cursor:pointer; transition:transform .1s ease;
+}
+.mas-menu-item:active{transform:scale(0.98);}
+.mas-ic{font-size:22px; flex-shrink:0; width:36px; text-align:center;}
+.mas-text{flex:1; min-width:0;}
+.mas-t{font-size:14px; font-weight:700; color:var(--navy); margin-bottom:2px;}
+.mas-s{font-size:12px; color:var(--muted);}
+.mas-chev{font-size:20px; color:var(--muted); flex-shrink:0;}
+
 /* ---- Publicidad mensual del comercio ---- */
 .pub-card{border-radius:16px; padding:16px; margin-bottom:16px; position:relative; overflow:hidden;}
 .pub-card.inactiva{background:linear-gradient(135deg,#122C4A,#1c4066); color:white;}
@@ -574,194 +639,286 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   </div>
 
+  <!-- ============ SCREEN: BIENVENIDA LANDING ============ -->
+  <div class="screen" id="screen-bienvenida" style="padding:0; overflow:hidden;">
+
+    <!-- Hero gradiente -->
+    <div style="background:linear-gradient(160deg,#FF6600 0%,#FF9500 55%,#FFB300 100%); padding:36px 24px 40px; text-align:center; color:white; position:relative; overflow:hidden;">
+      <!-- Círculos decorativos -->
+      <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
+
+      <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png"
+           alt="PuenT" style="height:72px; width:auto; margin-bottom:18px; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.2)); position:relative; z-index:1;">
+
+      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:8px;position:relative;z-index:1;">Te damos la bienvenida a</div>
+      <h1 style="font-family:'Bai Jamjuree',sans-serif;font-size:34px;font-weight:800;line-height:1.1;margin-bottom:14px;position:relative;z-index:1;">PuenT</h1>
+      <p style="font-size:14.5px;line-height:1.6;opacity:.92;max-width:340px;margin:0 auto;position:relative;z-index:1;">
+        Explorá miles de catálogos, contactá directamente con los comercios verificados y comprá fácil y rápido al mejor precio de tu ciudad — todos los locales disponibles en un solo lugar.
+      </p>
+    </div>
+
+    <!-- Scroll de cards -->
+    <div style="padding:24px 20px 20px; display:flex; flex-direction:column; gap:16px;">
+
+      <!-- Card 1: Compradores -->
+      <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 2px 16px rgba(255,102,0,0.12); border:1.5px solid #FFE8D0;">
+        <div style="background:linear-gradient(135deg,#FFF3E8,#FFE8D0); padding:18px 18px 14px; display:flex; align-items:center; gap:14px;">
+          <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#FF6600,#FF9500);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(255,102,0,0.35);">🛍️</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#CC4400;margin-bottom:3px;">Para compradores</div>
+            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:17px;font-weight:700;color:#1A1A1A;line-height:1.2;">Todo tu comercio local, en un lugar</div>
+          </div>
+        </div>
+        <div style="padding:14px 18px 18px;">
+          <p style="font-size:13.5px;color:#555;line-height:1.6;margin-bottom:16px;">
+            Explorá catálogos de los comercios de La Paz, contactalos directo y comprá fácil al mejor precio de la ciudad. Sin rodeos, sin sorpresas.
+          </p>
+          <button onclick="showScreen('feed')" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FF6600,#FF9500);color:white;font-weight:800;font-size:14.5px;cursor:pointer;box-shadow:0 4px 14px rgba(255,102,0,0.38);transition:transform .1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
+            🔍 Quiero comprar
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 2: Comercios -->
+      <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 2px 16px rgba(255,140,0,0.12); border:1.5px solid #FFE0B0;">
+        <div style="background:linear-gradient(135deg,#FFF8E8,#FFEED0); padding:18px 18px 14px; display:flex; align-items:center; gap:14px;">
+          <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#FF8C00,#FFB300);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(255,140,0,0.35);">🏬</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#B36B00;margin-bottom:3px;">Para comercios</div>
+            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:17px;font-weight:700;color:#1A1A1A;line-height:1.2;">Potenciá tu negocio local</div>
+          </div>
+        </div>
+        <div style="padding:14px 18px 18px;">
+          <p style="font-size:13.5px;color:#555;line-height:1.6;margin-bottom:16px;">
+            ¿Tenés local en La Paz, Entre Ríos? Publicá tu catálogo y empezá a sumar clientes. Creá una vidriera online con todo tu catálogo para que nuevos clientes te descubran, se contacten con vos y vayan directo a tu local — con la tecnología de un código QR.
+          </p>
+          <button onclick="showScreen('bienvenida-comercio')" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FF8C00,#FFB300);color:white;font-weight:800;font-size:14.5px;cursor:pointer;box-shadow:0 4px 14px rgba(255,140,0,0.38);transition:transform .1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
+            🏬 Tengo local en La Paz, Entre Ríos
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 3: ConectorT (próximamente) -->
+      <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07); border:1.5px solid #E8E8E8; position:relative;">
+        <div style="position:absolute;top:14px;right:14px;background:#1A1A1A;color:white;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:100px;z-index:2;">Próximamente</div>
+        <div style="background:linear-gradient(135deg,#F5F5F5,#EFEFEF); padding:18px 18px 14px; display:flex; align-items:center; gap:14px;">
+          <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#666,#999);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.15);">🔗</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#777;margin-bottom:3px;">Para independientes</div>
+            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:17px;font-weight:700;color:#1A1A1A;line-height:1.2;">ConectorT</div>
+          </div>
+        </div>
+        <div style="padding:14px 18px 18px;">
+          <p style="font-size:13.5px;color:#666;line-height:1.6;margin-bottom:16px;">
+            Vendé sin invertir, en tus redes, productos de tu misma ciudad y ganá una comisión arreglada con el mismo comercio. Sumate a la nueva era de venta.
+          </p>
+          <button disabled style="width:100%;padding:14px;border-radius:14px;border:1.5px solid #DDD;background:#F5F5F5;color:#999;font-weight:800;font-size:14.5px;cursor:not-allowed;">
+            🔔 Avisame cuando esté listo
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align:center;padding:8px 0 4px;">
+        <button onclick="showScreen('feed')" style="background:none;border:none;font-size:13px;color:var(--muted);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">
+          Explorar sin registrarme →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ============ SCREEN: FEED PUBLICO (INICIAL) ============ -->
-  <div class="screen" id="screen-feed" style="padding:0 0 20px;">
-    <!-- Hero banner -->
-    <div class="feed-hero">
-      <div class="feed-banner-slider" id="feedBannerSlider">
-        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner1.png" class="active" alt="">
-        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner2.png" alt="">
-      </div>
-      <div class="feed-title hidden" id="feedHeroTitle">Todo lo que necesitás, en tu ciudad</div>
-      <div class="feed-sub hidden" id="feedHeroSub">Comprá · Descubrí · Conectá</div>
+  <div class="screen hidden" id="screen-feed" style="padding:0 0 20px;">
+
+    <!-- ===== SOLAPAS DE NAVEGACIÓN ===== -->
+    <div class="feed-solapas" id="feedSolapas">
+      <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">🏠 Home</button>
+      <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">🔥 Ofertas</button>
+      <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">🏪 Locales</button>
+      <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">📋 Guía</button>
+      <button class="feed-solapa" id="tabMas" onclick="setFeedTab('mas')">• • •</button>
     </div>
 
-    <!-- Search bar below hero -->
-    <div style="padding:16px 16px 4px;">
-      <div class="topbar-search" id="buscadorFeedBox" style="padding:12px 16px; box-shadow:0 3px 14px rgba(0,0,0,0.1);">
+    <!-- ===== BARRA DE BÚSQUEDA ===== -->
+    <div style="padding:10px 16px 4px;">
+      <div class="topbar-search" id="buscadorFeedBox" style="padding:11px 16px; box-shadow:0 2px 10px rgba(0,0,0,0.09);">
         <span class="topbar-search-ic">🔎</span>
-        <input id="buscadorTop" placeholder="Buscar productos, comercios o vendedores…" oninput="onBuscadorInput(this.value)">
-        <span style="font-size:18px; flex-shrink:0; opacity:.5;">🎤</span>
+        <input id="buscadorTop" placeholder="Buscar productos, comercios…" oninput="onBuscadorInput(this.value)">
       </div>
     </div>
 
-    <!-- Categorías -->
-    <div style="padding:14px 16px 4px;">
-      <div style="display:flex; gap:12px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
-        <div class="cat-item" onclick="setFeedTab('productos'); document.getElementById('tabProductos').click()">
-          <div class="cat-icon" style="background:#FFF3E0;">🍔</div>
-          <div class="cat-label">Comidas</div>
+    <!-- ================================================================
+         TAB: HOME
+    ================================================================ -->
+    <div id="feedHomeView">
+
+      <!-- Comercios adheridos (logos) -->
+      <div style="padding:14px 16px 0;">
+        <div class="section-title-row">
+          <div class="section-title">🏪 En PuenT</div>
+          <span class="ver-todo" onclick="setFeedTab('locales')">Ver todos →</span>
         </div>
-        <div class="cat-item" onclick="">
-          <div class="cat-icon" style="background:#FCE4EC;">👕</div>
-          <div class="cat-label">Ropa</div>
+        <div id="adheridosGrid" class="adheridos-grid"></div>
+      </div>
+
+      <!-- Te va a encantar — grilla 5x2 de productos -->
+      <div style="padding:0 16px;">
+        <div class="section-title-row">
+          <div class="section-title">✨ Te va a encantar</div>
         </div>
-        <div class="cat-item" onclick="">
-          <div class="cat-icon" style="background:#E3F2FD;">🔧</div>
-          <div class="cat-label">Herramientas</div>
+        <div id="feedGridEncantar" class="feed-grid-encantar"></div>
+      </div>
+
+      <!-- Botón Tornado de Ofertas -->
+      <div style="padding:4px 16px 0;">
+        <button class="tornado-ofertas-btn" id="tornadoOfertasBtn" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
+          <span class="tornado-badge hidden" id="tornadoOfertasBadge">0</span>
+          🌪️ Tornado de Ofertas
+        </button>
+      </div>
+
+      <!-- Comidas cerca tuyo -->
+      <div style="padding:4px 16px 0;">
+        <div class="section-title-row">
+          <div class="section-title">🍽️ Comidas cerca tuyo</div>
         </div>
-        <div class="cat-item" onclick="">
-          <div class="cat-icon" style="background:#E8F5E9;">🚗</div>
-          <div class="cat-label">Autos</div>
+        <div class="comidas-grid" style="margin-bottom:6px;">
+          <div class="comida-item">
+            <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pizza.PNG"></div>
+            <div class="comida-label">Pizza</div>
+            <div class="comida-zona">📍 Centro</div>
+          </div>
+          <div class="comida-item">
+            <div class="comida-foto-emoji" style="background:#FFD180;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/hamburg.PNG"></div>
+            <div class="comida-label">Hamburguesas</div>
+            <div class="comida-zona">📍 Norte</div>
+          </div>
+          <div class="comida-item">
+            <div class="comida-foto-emoji" style="background:#D7CCC8;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/empa.PNG"></div>
+            <div class="comida-label">Empanadas</div>
+            <div class="comida-zona">📍 Centro</div>
+          </div>
+          <div class="comida-item">
+            <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pollo.PNG"></div>
+            <div class="comida-label">Pollo</div>
+            <div class="comida-zona">📍 Sur</div>
+          </div>
         </div>
-        <div class="cat-item" onclick="">
-          <div class="cat-icon" style="background:#EDE7F6;">🏠</div>
-          <div class="cat-label">Hogar</div>
+
+        <!-- Locales de comida (scroll horizontal) -->
+        <div id="feedLocalesComida" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:18px; scrollbar-width:none; -webkit-overflow-scrolling:touch;"></div>
+      </div>
+
+      <!-- Grilla infinita de todos los productos adheridos -->
+      <div style="padding:0 16px;">
+        <div class="section-title-row">
+          <div class="section-title">🛍️ Todos los productos</div>
+          <span class="ver-todo" onclick="setFeedTab('ofertas')">Ver más →</span>
         </div>
-        <div class="cat-item" onclick="">
-          <div class="cat-icon" style="background:#E3F2FD;">📱</div>
-          <div class="cat-label">Tecnología</div>
-        </div>
-        <div class="cat-item" onclick="abrirTodosRubros()">
-          <div class="cat-icon" style="background:#F5F5F5;">•••</div>
-          <div class="cat-label">Más</div>
-        </div>
+        <div id="feedGridInfinito" class="feed-grid-encantar"></div>
+        <div id="feedGridInfinitoLoader" style="text-align:center; padding:16px 0; color:var(--muted); font-size:13px; display:none;">Cargando más...</div>
+      </div>
+
+      <!-- CTA ingreso (solo si no está logueado) -->
+      <div id="feedCtaIngreso" style="padding:18px 16px 8px;">
+        <div class="divider"></div>
+        <button class="btn btn-primary" onclick="showScreen('home')" style="background:linear-gradient(135deg,#FF6600,#FF9500); font-size:15.5px; padding:16px; border-radius:16px; box-shadow:0 4px 16px rgba(255,102,0,0.38);">🚀 Ingresar / Registrarme</button>
+        <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Vendedores, comercios y clientes entran desde acá.</p>
       </div>
     </div>
 
-    <!-- Tornado ofertas / CTA -->
-    <div style="padding:6px 16px 0;">
-      <button class="tornado-ofertas-btn" id="tornadoOfertasBtn" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
-        <span class="tornado-badge hidden" id="tornadoOfertasBadge">0</span>
-        🌪️ Tornado de Ofertas
-      </button>
-    </div>
-
-    <!-- Ofertas destacadas -->
-    <div style="padding:4px 16px 0;">
-      <div class="section-title-row">
-        <div class="section-title">🔥 Ofertas destacadas</div>
-        <span class="ver-todo" onclick="setFeedTab('productos')">Ver todas →</span>
-      </div>
-      <div id="feedGrid" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:18px; scrollbar-width:none; -webkit-overflow-scrolling:touch;"></div>
-    </div>
-
-    <!-- Promo banner repuestos -->
-    <div style="padding:0 8px;">
-      <div class="promo-banner" style="padding:0; overflow:hidden; background:none; box-shadow:none;">
-        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner4.png" alt="¿Buscás repuestos?" style="width:100%; height:auto; display:block; border-radius:14px;">
-      </div>
-    </div>
-
-    <!-- Comidas cerca tuyo -->
-    <div style="padding:0 16px;">
-      <div class="section-title-row">
-        <div class="section-title">🍽️ Comidas cerca tuyo</div>
-        <span class="ver-todo" onclick="setFeedTab('productos')">Ver todas →</span>
-      </div>
-      <div class="comidas-grid">
-        <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pizza.PNG" ></div>
-          <div class="comida-label">Pizza</div>
-          <div class="comida-zona">📍 Centro</div>
-        </div>
-        <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#FFD180;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/hamburg.PNG" ></div>
-          <div class="comida-label">Hamburguesas</div>
-          <div class="comida-zona">📍 Zona Norte</div>
-        </div>
-        <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#D7CCC8;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/empa.PNG" ></div>
-          <div class="comida-label">Empanadas</div>
-          <div class="comida-zona">📍 Centro</div>
-        </div>
-        <div class="comida-item">
-          <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pollo.PNG" ></div>
-          <div class="comida-label">Pollo</div>
-          <div class="comida-zona">📍 Zona Sur</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Explorar ciudad -->
-    <div style="padding:0 16px;">
-      <div class="explora-banner" onclick="setFeedTab('locales')" style="padding:0; overflow:hidden; border:none; background:none;">
-        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner7.PNG" alt="Locales de la Ciudad" style="width:100%; height:auto; display:block; border-radius:18px;">
-      </div>
-    </div>
-
-    <!-- Grilla de comercios adheridos -->
-    <div style="padding:0 16px; margin-top:14px;">
-      <div id="adheridosGrid" class="adheridos-grid"></div>
-    </div>
-
-
-    <!-- Banners Locales y Guía útil -->
-    <div style="padding:0 16px;">
-      <div style="cursor:pointer; margin-bottom:14px;" onclick="abrirLocales()">
-        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner3.png" alt="Locales de la Ciudad" style="width:100%; height:auto; display:block; border-radius:18px;">
-      </div>
-      <div style="cursor:pointer; margin-bottom:14px;" onclick="abrirGuiaUtil()">
-        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner5.png" alt="Guía útil" style="width:100%; height:auto; display:block; border-radius:18px;">
-      </div>
-    </div>
-
-    <div id="feedProductosView" style="padding:0 16px;">
-      <div class="feed-toolbar-row">
+    <!-- ================================================================
+         TAB: OFERTAS
+    ================================================================ -->
+    <div id="feedOfertasView" class="hidden" style="padding:0 16px;">
+      <div class="feed-toolbar-row" style="margin-top:12px;">
         <div class="chiprow" id="feedChips"></div>
       </div>
+      <div id="feedGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px;"></div>
     </div>
 
-    <div id="feedVendedoresView" class="hidden" style="padding:0 16px;">
-      <p class="page-sub" style="margin-bottom:14px;">Productos que arman los vendedores independientes de La Paz con lo que consiguen en los comercios.</p>
-      <div class="chiprow" id="feedChipsVend"></div>
-    </div>
-
-    <div id="feedLocalesView" class="hidden" style="padding:0 16px;">
-
+    <!-- ================================================================
+         TAB: LOCALES
+    ================================================================ -->
+    <div id="feedLocalesView" class="hidden" style="padding:0 16px; margin-top:12px;">
       <div class="section-title" style="margin-top:4px;">Comercios destacados</div>
       <div class="destacados-row" id="destacadosRow"></div>
-
       <div class="section-title-row">
         <div class="section-title">Cerca tuyo</div>
         <span class="ver-todo" onclick="document.getElementById('localesGrid').scrollIntoView({behavior:'smooth'})">Ver todo</span>
       </div>
       <div id="cercaTuyoList"></div>
-
       <div class="section-title" style="margin-top:6px;">Todos los locales</div>
       <div id="localesFiltroActivo"></div>
       <div id="localesGrid"></div>
     </div>
 
-    <div id="feedUtilView" class="hidden" style="padding:0 16px;">
-
+    <!-- ================================================================
+         TAB: GUÍA ÚTIL
+    ================================================================ -->
+    <div id="feedUtilView" class="hidden" style="padding:0 16px; margin-top:12px;">
       <div class="turno-card" id="turnoCard"></div>
-
       <div class="section-title-row" style="margin-top:18px;">
         <div class="section-title">📞 Teléfonos útiles</div>
       </div>
       <div class="telefonos-grid" id="telefonosGrid"></div>
-
       <div class="section-title-row" style="margin-top:18px;">
         <div class="section-title">🏥 Salud</div>
         <span class="ver-todo" onclick="verMasRubro('Salud')">Ver todo</span>
       </div>
       <div id="guiaSaludList"></div>
-
       <div class="section-title-row" style="margin-top:18px;">
         <div class="section-title">🔧 Mecánicos</div>
         <span class="ver-todo" onclick="verMasRubro('Mecánica del Automotor')">Ver todo</span>
       </div>
       <div id="guiaMecanicosList"></div>
-
       <p style="text-align:center; font-size:11.5px; color:var(--muted); margin-top:16px;">¿Tenés un comercio de salud o mecánica y querés aparecer acá? Sumate como local en PuenT.</p>
     </div>
 
-    <div style="padding:18px 16px 8px;">
-      <div class="divider"></div>
-      <button class="btn btn-primary" onclick="showScreen('home')" style="background:linear-gradient(135deg,#FF6600,#FF9500); font-size:15.5px; padding:16px; border-radius:16px; box-shadow:0 4px 16px rgba(255,102,0,0.38);">🚀 Ingresar / Registrarme</button>
-      <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Vendedores, comercios y clientes entran desde acá.</p>
+    <!-- ================================================================
+         TAB: MÁS
+    ================================================================ -->
+    <div id="feedMasView" class="hidden" style="padding:16px;">
+      <div class="section-title" style="margin-bottom:16px;">Más opciones</div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="mas-menu-item" onclick="setFeedTab('locales')">
+          <span class="mas-ic">🏪</span>
+          <div class="mas-text"><div class="mas-t">Todos los locales</div><div class="mas-s">Comercios de La Paz en PuenT</div></div>
+          <span class="mas-chev">›</span>
+        </button>
+        <button class="mas-menu-item" onclick="abrirTodosRubros()">
+          <span class="mas-ic">📂</span>
+          <div class="mas-text"><div class="mas-t">Explorar por rubro</div><div class="mas-s">Indumentaria, tecnología, hogar y más</div></div>
+          <span class="mas-chev">›</span>
+        </button>
+        <button class="mas-menu-item" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
+          <span class="mas-ic">🌪️</span>
+          <div class="mas-text"><div class="mas-t">Tornado de Ofertas</div><div class="mas-s">Ofertas relámpago de 24hs</div></div>
+          <span class="mas-chev">›</span>
+        </button>
+        <button class="mas-menu-item" onclick="showScreen('bienvenida-comercio')">
+          <span class="mas-ic">🏬</span>
+          <div class="mas-text"><div class="mas-t">Registrar mi comercio</div><div class="mas-s">Sumá tu local a PuenT gratis</div></div>
+          <span class="mas-chev">›</span>
+        </button>
+        <button class="mas-menu-item" onclick="showScreen('bienvenida')">
+          <span class="mas-ic">💡</span>
+          <div class="mas-text"><div class="mas-t">¿Qué es PuenT?</div><div class="mas-s">Conocé la plataforma</div></div>
+          <span class="mas-chev">›</span>
+        </button>
+      </div>
+
+      <div id="feedVendedoresView" style="margin-top:24px;">
+        <div class="section-title" style="margin-bottom:10px;">🔗 Catálogos de ConectoresT</div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:14px; line-height:1.5;">Productos armados por vendedores independientes de La Paz.</p>
+        <div class="chiprow" id="feedChipsVend"></div>
+        <div id="feedGridVend" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"></div>
+      </div>
     </div>
+
   </div>
 
   <!-- ============ BIENVENIDA: SUMÁ TU COMERCIO ============ -->
@@ -2237,6 +2394,9 @@ function showScreen(name){
   if(el) el.classList.remove('hidden');
   window.scrollTo(0,0);
   updateBottomNav(name);
+  // Ocultar topbar en la pantalla de bienvenida (tiene su propio hero)
+  var topbar = document.getElementById('topbar');
+  if(topbar) topbar.style.display = (name === 'bienvenida') ? 'none' : '';
 }
 function goHome(){
   state.role = 'guest';
@@ -2255,6 +2415,7 @@ function setRoleChip(texto, esCta){
 function irInicio(){
   renderFeed();
   showScreen('feed');
+  setFeedTab('home');
 }
 function onRoleChipClick(){
   if(!state.role){ showScreen('home'); return; }
@@ -4996,18 +5157,25 @@ function renderDestacadosYCerca(){
     </div>`).join('') : `<div class="empty"><div class="ic">📍</div><div class="t">Todavía no hay locales cerca tuyo en ${ciudadSeleccionada}</div></div>`;
 }
 
-function renderRubroDropdown(containerId, rubros, filtroActual, setFiltroFn){
-  const panelId = containerId + 'Dd';
-  document.getElementById(containerId).innerHTML = `
-    <div class="filter-dd">
-      <button type="button" class="filter-dd-btn" onclick="toggleFilterDd(event, '${panelId}')">
-        <span>Rubro: <b>${filtroActual}</b></span><span class="filter-dd-chev">▾</span>
-      </button>
-      <div class="filter-dd-panel hidden" id="${panelId}">
-        ${rubros.map(r=>`<button type="button" class="filter-dd-opt ${r===filtroActual?'active':''}" onclick="${setFiltroFn}('${r}')">${r}</button>`).join('')}
+function renderFiltrosRubro(containerId, rubros, filtroActual, setFiltroFn){
+  const cont = document.getElementById(containerId);
+  if(!cont) return;
+  cont.innerHTML = `
+    <div class="filtros-rubro-wrap">
+      <div class="filtros-rubro-label">Filtrar por tipo</div>
+      <div class="filtros-rubro-chips">
+        ${rubros.map(r=>{
+          const activo = r === filtroActual;
+          return `<button class="filtro-chip ${activo?'active':''}" onclick="${setFiltroFn}('${r}')">`
+            +(activo ? '<span class="filtro-check">✓</span>' : '')
+            +r
+            +'</button>';
+        }).join('')}
       </div>
     </div>`;
 }
+
+// Mantenemos toggleFilterDd para otros usos en la app (ciudad dropdown, etc.)
 function toggleFilterDd(evt, id){
   const btn = evt.currentTarget;
   const panel = document.getElementById(id);
@@ -5042,8 +5210,8 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
       return {...prod, _vendedorId: v.id};
     }).filter(p=>p && p.origen!=='comercio' && v_ciudadOk(p._vendedorId));
   }
-  const rubros = ['Todos', ...new Set(universo.map(p=>p.rubro))];
-  renderRubroDropdown(chipsId, rubros, filtroActual, setFiltroFn);
+  const rubros = ['Todos', ...new Set(universo.map(p=>p.rubro).filter(Boolean))];
+  renderFiltrosRubro(chipsId, rubros, filtroActual, setFiltroFn);
 
   let prods = universo.filter(p=> filtroActual==='Todos' || p.rubro===filtroActual);
   if(buscadorQuery){
@@ -5104,6 +5272,7 @@ function renderFeed(){
   renderFeedGrid('comercio', 'feedChips', 'feedGrid', feedRubroFiltro, 'setFeedRubro');
   actualizarBadgeTornado();
   renderAdheridosGrid();
+  renderHomeTab();
 }
 function setFeedRubro(r){ feedRubroFiltro = r; renderFeed(); }
 
@@ -5112,33 +5281,145 @@ function renderFeedVendedores(){
 }
 function setFeedRubroVend(r){ feedRubroFiltroVend = r; renderFeedVendedores(); }
 
-let tabActiva = 'productos';
-function actualizarSubtituloHero(){
-  const subtextos = {
-    productos: '🔥 Ofertas del día: elegí una, generá tu código y presentalo en el local para retirarlo.',
-    vendedores: `Catálogos armados por vendedores de ${ciudadSeleccionada} con productos de distintos comercios. Elegís, coordinás y lo tenés hoy.`,
-    locales: `Todos los comercios que ya cuentan con PuenT en ${ciudadSeleccionada}.`,
-    util: `Farmacia de turno, teléfonos útiles y más info de ${ciudadSeleccionada} a mano.`
-  };
-  document.getElementById('feedHeroSub').textContent = subtextos[tabActiva];
-}
+let tabActiva = 'home';
 
 function setFeedTab(tab){
   tabActiva = tab;
-  document.getElementById('tabProductos')?.classList.toggle('active', tab==='productos');
-  document.getElementById('tabVendedores')?.classList.toggle('active', tab==='vendedores');
-  document.getElementById('tabLocales')?.classList.toggle('active', tab==='locales');
-  document.getElementById('tabUtil')?.classList.toggle('active', tab==='util');
-  document.getElementById('feedProductosView')?.classList.toggle('hidden', tab!=='productos');
-  document.getElementById('feedVendedoresView')?.classList.toggle('hidden', tab!=='vendedores');
-  document.getElementById('feedLocalesView')?.classList.toggle('hidden', tab!=='locales');
-  document.getElementById('feedUtilView')?.classList.toggle('hidden', tab!=='util');
+  // Botones de solapa
+  ['home','ofertas','locales','util','mas'].forEach(t=>{
+    var btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(btn) btn.classList.toggle('active', t===tab);
+  });
+  // Vistas
+  var views = {
+    home:'feedHomeView', ofertas:'feedOfertasView', locales:'feedLocalesView',
+    util:'feedUtilView', mas:'feedMasView'
+  };
+  Object.entries(views).forEach(([t, id])=>{
+    var el = document.getElementById(id);
+    if(el) el.classList.toggle('hidden', t!==tab);
+  });
+  window.scrollTo(0,0);
+  if(tab==='ofertas'){ renderFeed(); }
+  if(tab==='locales'){ renderLocales(); }
+  if(tab==='util'){ renderGuiaUtil(); }
+  if(tab==='mas'){ renderFeedVendedores(); }
+  if(tab==='home'){ renderHomeTab(); }
+}
 
-  actualizarSubtituloHero();
+function renderHomeTab(){
+  renderAdheridosGrid();
+  renderFeedEncantar();
+  actualizarBadgeTornado();
+  renderLocalesComida();
+  renderFeedInfinito(true);
+}
 
-  if(tab==='vendedores') renderFeedVendedores();
-  if(tab==='locales') renderLocales();
-  if(tab==='util') renderGuiaUtil();
+function renderFeedEncantar(){
+  var grid = document.getElementById('feedGridEncantar');
+  if(!grid) return;
+  var prods = [];
+  (state.comercios||[]).forEach(function(c){
+    if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
+      (c.productos||[]).forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
+    }
+  });
+  // Mezclar y tomar 10 (5x2)
+  prods.sort(()=>Math.random()-.5);
+  var top10 = prods.slice(0,10);
+  if(!top10.length){
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ic">🛍️</div><div class="t">Pronto vas a ver productos acá</div></div>';
+    return;
+  }
+  grid.innerHTML = top10.map(function(p){
+    var foto = p.img
+      ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">'
+      : '<span style="font-size:28px;">🛍️</span>';
+    return '<div class="prod-card" onclick="abrirOferta('+JSON.stringify(p).replace(/"/g,'&quot;')+')" style="cursor:pointer;">'
+      +'<div class="prod-photo">'+foto+'</div>'
+      +'<div class="prod-body">'
+      +'<div class="prod-name">'+p.nombre+'</div>'
+      +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
+      +'<div class="prod-tag">🏪 '+p._comercioNombre+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+
+var _feedInfinitoOffset = 0;
+var _feedInfinitoTodos = [];
+var _feedInfinitoLoading = false;
+
+function renderFeedInfinito(reset){
+  if(reset){
+    _feedInfinitoOffset = 0;
+    _feedInfinitoTodos = [];
+    (state.comercios||[]).forEach(function(c){
+      if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
+        (c.productos||[]).forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
+      }
+    });
+    var grid = document.getElementById('feedGridInfinito');
+    if(grid) grid.innerHTML = '';
+  }
+  var grid = document.getElementById('feedGridInfinito');
+  var loader = document.getElementById('feedGridInfinitoLoader');
+  if(!grid) return;
+  var lote = _feedInfinitoTodos.slice(_feedInfinitoOffset, _feedInfinitoOffset+10);
+  _feedInfinitoOffset += 10;
+  if(!lote.length && _feedInfinitoOffset===10){
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ic">🛒</div><div class="t">Pronto vas a ver productos acá</div></div>';
+    return;
+  }
+  grid.innerHTML += lote.map(function(p){
+    var foto = p.img
+      ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">'
+      : '<span style="font-size:28px;">🛍️</span>';
+    return '<div class="prod-card" onclick="abrirOferta('+JSON.stringify(p).replace(/"/g,'&quot;')+')" style="cursor:pointer;">'
+      +'<div class="prod-photo">'+foto+'</div>'
+      +'<div class="prod-body">'
+      +'<div class="prod-name">'+p.nombre+'</div>'
+      +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
+      +'<div class="prod-tag">🏪 '+p._comercioNombre+'</div>'
+      +'</div></div>';
+  }).join('');
+  if(loader) loader.style.display = (_feedInfinitoOffset < _feedInfinitoTodos.length) ? 'block' : 'none';
+}
+
+// Scroll infinito
+window.addEventListener('scroll', function(){
+  if(tabActiva!=='home' || _feedInfinitoLoading) return;
+  if(_feedInfinitoOffset >= _feedInfinitoTodos.length) return;
+  var loader = document.getElementById('feedGridInfinitoLoader');
+  if(!loader) return;
+  var rect = loader.getBoundingClientRect();
+  if(rect.top < window.innerHeight + 200){
+    _feedInfinitoLoading = true;
+    setTimeout(function(){ renderFeedInfinito(false); _feedInfinitoLoading=false; }, 300);
+  }
+});
+
+function renderLocalesComida(){
+  var cont = document.getElementById('feedLocalesComida');
+  if(!cont) return;
+  var rubroComida = ['Gastronomía','Comida','Rotisería','Pizzería','Hamburguesas','Panadería','Heladería','Delivery'];
+  var localesComida = (state.comercios||[]).filter(function(c){
+    if(ciudadSeleccionada && c.ciudad!==ciudadSeleccionada) return false;
+    return rubroComida.some(function(r){ return (c.rubro||'').toLowerCase().includes(r.toLowerCase()); });
+  });
+  if(!localesComida.length){
+    cont.style.display='none'; return;
+  }
+  cont.style.display='flex';
+  cont.innerHTML = localesComida.map(function(c){
+    return '<div class="feed-prod-card" onclick="verProductosDeLocal(\''+c.id+'\')" style="flex:0 0 120px;width:120px;">'
+      +'<div class="prod-photo" style="height:80px;background:#FFF3E0;">'
+      +(c.img?'<img src="'+c.img+'" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:28px;">🏪</span>')
+      +'</div>'
+      +'<div class="prod-body" style="padding:8px 9px 10px;">'
+      +'<div class="prod-name" style="font-size:11.5px;">'+c.nombre+'</div>'
+      +'<div class="prod-tag">'+( c.rubro||'')+'</div>'
+      +'</div></div>';
+  }).join('');
 }
 
 /* ================= GUÍA / ÚTIL ================= */
@@ -5808,7 +6089,7 @@ function renderLocales(){
 renderCiudadDropdown();
 renderExploraCiudad();
 renderFeed();
-showScreen('feed');
+showScreen('bienvenida');
 initFeedBannerSlider();
 manejarCodigoDesdeURL();
 
