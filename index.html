@@ -464,13 +464,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .explora-banner .eb-title{font-size:15px; font-weight:800; color:#CC4400; margin-bottom:2px;}
 .explora-banner .eb-sub{font-size:12px; color:#885500;}
 /* Comidas cerca tuyo grid */
-.adheridos-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px;}
-.adherido-item{display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; padding:12px 8px; border-radius:16px; background:white; border:0.5px solid var(--line); box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:transform .1s ease;}
-.adherido-item:active{transform:scale(0.95);}
-.adherido-logo{width:58px; height:58px; border-radius:14px; object-fit:cover; background:var(--cream); display:flex; align-items:center; justify-content:center; font-size:26px; overflow:hidden; flex-shrink:0;}
-.adherido-logo img{width:100%; height:100%; object-fit:cover; border-radius:14px;}
-.adherido-nombre{font-size:11px; font-weight:700; color:#1A1A1A; text-align:center; line-height:1.25; word-break:break-word;}
-.adherido-rubro{font-size:10px; color:var(--muted); text-align:center;}
+.adheridos-grid{display:flex; gap:16px; overflow-x:auto; padding-bottom:6px; margin-bottom:18px; scrollbar-width:none;}
+.adheridos-grid::-webkit-scrollbar{display:none;}
+.adherido-item{display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; flex-shrink:0; width:64px; background:none; border:none; padding:0; transition:transform .1s ease;}
+.adherido-item:active{transform:scale(0.93);}
+.adherido-logo{width:56px; height:56px; border-radius:50%; object-fit:cover; background:var(--cream); border:1px solid var(--line); box-shadow:0 2px 8px rgba(0,0,0,0.07); display:flex; align-items:center; justify-content:center; font-size:22px; overflow:hidden; flex-shrink:0;}
+.adherido-logo img{width:100%; height:100%; object-fit:cover; border-radius:50%;}
+.adherido-nombre{font-size:10.5px; font-weight:700; color:#1A1A1A; text-align:center; line-height:1.2; word-break:break-word;}
+.adherido-rubro{display:none;}
 .comidas-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px;}
 .comida-item{display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;}
 .comida-foto{width:100%; aspect-ratio:1; border-radius:14px; background:#f0f0f0; overflow:hidden; position:relative;}
@@ -492,19 +493,22 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .explora-ciudad{margin-bottom:20px;}
 .explora-row{display:flex; gap:14px; overflow-x:auto; padding-bottom:4px;}
 .explora-row::-webkit-scrollbar{display:none;}
-.explora-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
+.explora-grid{display:flex; gap:16px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;}
+.explora-grid::-webkit-scrollbar{display:none;}
 .explora-item{
-  display:flex; flex-direction:column; align-items:center; gap:8px;
-  padding:14px 10px; border-radius:18px; background:white; border:0.5px solid var(--line);
-  cursor:pointer; transition:transform .1s ease; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  flex-shrink:0; width:64px;
+  cursor:pointer; transition:transform .1s ease; background:none; border:none; padding:0;
 }
-.explora-item:active{transform:scale(0.95);}
+.explora-item:active{transform:scale(0.93);}
 .explora-ic{
-  width:100%; display:flex; align-items:center; justify-content:center;
+  width:56px; height:56px; border-radius:50%; background:white;
+  border:1px solid var(--line); box-shadow:0 2px 8px rgba(0,0,0,0.07);
+  display:flex; align-items:center; justify-content:center;
 }
-.explora-ic img{width:38px; height:38px; object-fit:contain;}
-.explora-ic-emoji{font-size:28px; width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;}
-.explora-label{font-size:11.5px; font-weight:700; color:#1A1A1A; line-height:1.25; text-align:center;}
+.explora-ic img{width:30px; height:30px; object-fit:contain;}
+.explora-ic-emoji{font-size:24px;}
+.explora-label{font-size:10.5px; font-weight:700; color:#1A1A1A; line-height:1.2; text-align:center; word-break:break-word;}
 
 .destacados-row{display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:22px;}
 .destacados-row::-webkit-scrollbar{display:none;}
