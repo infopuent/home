@@ -1036,19 +1036,19 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <img id="ofLightboxImg" src="" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px;" alt="Foto del producto">
     </div>
 
-    <div class="card" style="text-align:center;">
+    <div class="card" style="text-align:left;">
       <h1 class="page-title" id="ofNombre" style="margin-bottom:4px;">Producto</h1>
-      <div class="prod-price" style="font-size:20px; margin-bottom:6px;" id="ofPrecio">$0</div>
-      <div id="ofStockInfo" style="margin-bottom:12px;"></div>
+      <div class="prod-price" style="font-size:22px; margin-bottom:8px;" id="ofPrecio">$0</div>
+      <div id="ofStockInfo" style="margin-bottom:14px;"></div>
 
       <!-- Bloque local: visible solo para registrados -->
-      <div id="ofLocalBloque" class="card" style="background:var(--cream); text-align:left; margin-bottom:16px;">
-        <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:4px;">📍 Retirás en</div>
-        <div class="page-sub" id="ofComercio" style="font-weight:700; color:var(--navy); margin-bottom:2px; font-size:15px;">Comercio</div>
-        <div class="page-sub" id="ofDireccion" style="margin-bottom:0;">Dirección</div>
+      <div id="ofLocalBloque" style="background:var(--cream); border-radius:14px; padding:12px 14px; margin-bottom:14px;">
+        <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px;">📍 Retirás en</div>
+        <div id="ofComercio" style="font-weight:700; color:var(--navy); font-size:15px; margin-bottom:1px;">Comercio</div>
+        <div id="ofDireccion" style="font-size:13px; color:var(--muted);">Dirección</div>
       </div>
       <!-- Bloque para NO registrados -->
-      <div id="ofBloqueNoRegistrado" class="hidden" style="margin-bottom:16px;">
+      <div id="ofBloqueNoRegistrado" class="hidden" style="margin-bottom:14px;">
         <div style="background:#F3F0E8;border-radius:16px;padding:16px;text-align:center;">
           <div style="font-size:28px;margin-bottom:8px;">🔒</div>
           <div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:6px;">Registrate para ver el local y reservar</div>
@@ -1060,7 +1060,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
       </div>
 
-      <div id="ofVendedorBanner" class="hidden card" style="background:#fff4d6; text-align:left; margin-bottom:16px;">
+      <div id="ofVendedorBanner" class="hidden" style="background:#fff4d6; border-radius:14px; padding:12px 14px; margin-bottom:14px;">
         <div style="font-size:13px; font-weight:700; color:#8a5a00; margin-bottom:8px;" id="ofVendedorComision">💰 Comisión: 0%</div>
         <button class="btn btn-primary btn-sm" style="width:100%" id="ofVendedorBtn" onclick="agregarProductoAMiCatalogo(ofertaAbierta)">➕ Sumar a mi catálogo</button>
       </div>
@@ -1076,18 +1076,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button id="ofBtnRetiro" style="display:none;"></button>
       <button id="ofBtnEnvio" style="display:none;"></button>
 
-      <!-- Aviso post-reserva: aparece después de reservar -->
-      <div id="ofEnvioAviso" style="display:flex;background:#F0F4FA;border-radius:12px;padding:11px 14px;margin-bottom:12px;align-items:center;gap:10px;">
-        <span style="font-size:18px;">🛵</span>
-        <div style="font-size:12px;color:var(--navy);line-height:1.6;">
-          <strong style="font-size:13px;">🆕 Envío a domicilio PuenT</strong><br>
-          Concretá tu compra en el local y coordiná el envío directo con nuestro repartidor desde tu carrito. <span style="color:var(--muted);">El comercio no interviene en el envío.</span>
-        </div>
-      </div>
-
       <div id="ofAntes">
-        <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;" id="ofTextoReserva">Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.</p>
-        <button class="btn btn-primary" id="ofBtnReservar" onclick="reservarProducto()">🛒 Reservar</button>
+        <p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;" id="ofTextoReserva">Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.</p>
+        <button class="btn btn-primary" id="ofBtnReservar" style="width:100%;" onclick="reservarProducto()">🛒 Reservar</button>
         <div id="ofYaReservado" class="hidden" style="margin-top:10px;">
           <div style="background:#E3F3EA;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:20px;">✅</span>
@@ -5903,20 +5894,20 @@ function abrirOferta(prodId){
       } else if(estado==='agotada'){
         html = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">🚫 Agotado — ya se reservó todo</div>`;
       } else {
-        html = `<p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">⚡ Quedan ${stockDisponible(p)} disponibles hasta las ${p.horaHasta}hs.</p>
-          <button class="btn btn-primary" onclick="reservarProducto()">🛒 Reservar</button>`;
+        html = `<p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;">⚡ Quedan ${stockDisponible(p)} disponibles hasta las ${p.horaHasta}hs.</p>
+          <button class="btn btn-primary" style="width:100%;" onclick="reservarProducto()">🛒 Reservar</button>`;
       }
       ofAntes.innerHTML = html;
       ofAntes.classList.remove('hidden');
       document.getElementById('ofDespues').classList.add('hidden');
     } else if(p.stock !== null && p.stock !== undefined && p.stock <= 0){
-      ofAntes.innerHTML = `<div style="text-align:center; padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">😔 Este producto ya no tiene stock disponible</div>`;
+      ofAntes.innerHTML = `<div style="padding:16px 0; color:#e05a5a; font-weight:700; font-size:14px;">😔 Este producto ya no tiene stock disponible</div>`;
       ofAntes.classList.remove('hidden');
       document.getElementById('ofDespues').classList.add('hidden');
     } else {
       ofAntes.innerHTML = `
-        <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Reservá el producto. Generás el QR cuando llegues al local.</p>
-        <button class="btn btn-primary" onclick="reservarProducto()">🛒 Reservar</button>`;
+        <p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;">Reservá el producto. Generás el QR cuando llegues al local.</p>
+        <button class="btn btn-primary" style="width:100%;" onclick="reservarProducto()">🛒 Reservar</button>`;
       ofAntes.classList.remove('hidden');
       document.getElementById('ofDespues').classList.add('hidden');
     }
