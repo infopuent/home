@@ -3418,14 +3418,13 @@ function renderVendedorCatalogo(){
     return `
       <div class="prod-card">
         <div class="prod-photo">${foto}</div>
-        <div class="prod-body">
-          <div class="prod-name">${p.nombre}</div>
+        <div class="prod-body" style="flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;">
+          <div style="font-size:11.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</div>
           <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-          <div class="prod-tag">${com ? com.nombre : '—'}</div>
-          <div class="prod-comm">Comisión: $${comMonto.toLocaleString('es-AR')} (${p.comision}%)</div>
-          <div style="display:flex;gap:6px;margin-top:8px;">
-            <button class="share-btn" style="flex:1;" onclick="compartirProducto('${p.id}')">📤 Compartir</button>
-            <button class="share-btn" style="flex:1;background:var(--navy);color:white;" onclick="abrirReservaParaCliente('${p.id}')">🔖 Reservar</button>
+          <div class="prod-comm" style="margin-top:2px;">Comisión: $${comMonto.toLocaleString('es-AR')} (${p.comision}%)</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:7px;">
+            <button class="share-btn" style="margin-top:0;width:100%;" onclick="compartirProducto('${p.id}')">📤 Compartir</button>
+            <button class="share-btn" style="margin-top:0;width:100%;background:var(--navy);color:white;" onclick="abrirReservaParaCliente('${p.id}')">🔖 Reservar</button>
           </div>
         </div>
       </div>`;
@@ -3983,13 +3982,13 @@ function abrirComercioParaElegir(comercioId){
       return `
         <div class="prod-card">
           <div class="prod-photo">${foto}</div>
-          <div class="prod-body">
-            <div class="prod-name">${p.nombre}</div>
+          <div class="prod-body" style="flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;">
+            <div style="font-size:11.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</div>
             <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-            <div class="prod-comm">Comisión ${p.comision}%</div>
+            <div class="prod-comm" style="margin-top:2px;">Comisión ${p.comision}%</div>
             ${yaEsta
-              ? `<button class="share-btn" disabled style="opacity:.55; cursor:default;">✅ Ya está en tu catálogo</button>`
-              : `<button class="share-btn" onclick="agregarProductoAMiCatalogo('${p.id}')">➕ Sumar a mi catálogo</button>`
+              ? `<button class="share-btn" disabled style="margin-top:7px;width:100%;opacity:.55;cursor:default;">✅ Ya está en tu catálogo</button>`
+              : `<button class="share-btn" style="margin-top:7px;width:100%;" onclick="agregarProductoAMiCatalogo('${p.id}')">➕ Sumar a mi catálogo</button>`
             }
           </div>
         </div>`;
