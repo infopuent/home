@@ -38,7 +38,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .topbar{
   position:sticky; top:0; z-index:20;
   background:#ffffff;
-  padding:10px 16px 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:8px 12px 8px; display:flex; flex-direction:column; gap:0;
   box-shadow:0 2px 12px rgba(0,0,0,0.08);
 }
 .brand{font-weight:800; font-size:18px; color:var(--navy);}
@@ -630,19 +630,34 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 <div id="app">
 
   <div class="topbar" id="topbar">
-    <div id="topbarUserStrip" class="hidden" style="width:100%;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:4px;">
+    <div id="topbarUserStrip" class="hidden" style="width:100%;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(0,0,0,0.07);margin-bottom:4px;">
       <span id="topbarRoleBadge" style="font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:100px;background:rgba(255,255,255,0.25);color:white;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0;"></span>
       <span id="topbarUserName" style="font-size:13px;font-weight:700;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
       <button onclick="abrirPerfil()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;font-size:11.5px;font-weight:700;color:white;flex-shrink:0;padding:5px 10px;border-radius:100px;cursor:pointer;">Ver perfil →</button>
     </div>
-    <div class="brand-logo-wrap" onclick="irInicio()">
-      <img class="brand-logo" src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente">
+    <!-- Fila unica: logo + buscador + ciudad -->
+    <div style="width:100%;display:flex;align-items:center;gap:8px;">
+      <div class="brand-logo-wrap" onclick="irInicio()" style="flex-shrink:0;">
+        <img class="brand-logo" src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente">
+      </div>
+      <div id="buscadorFeedBox" style="flex:1;min-width:0;display:flex;align-items:center;gap:5px;background:#f2f2f2;border-radius:100px;padding:7px 12px;">
+        <span style="font-size:12px;opacity:.5;flex-shrink:0;">🔎</span>
+        <input id="buscadorTop" placeholder="Buscar..." oninput="onBuscadorInput(this.value)" style="border:none;outline:none;background:transparent;font-size:12.5px;width:100%;color:var(--ink);min-width:0;font-family:inherit;">
+      </div>
+      <div class="filter-dd ciudad-dd" id="ciudadDd" style="flex-shrink:0;">
+        <button type="button" class="topbar-city-btn" onclick="toggleFilterDd(event, 'ciudadDdPanel')" style="white-space:nowrap;font-size:10.5px;padding:6px 10px;">📍 <span id="ciudadDdLabel">La Paz</span> <span class="filter-dd-chev">&#9662;</span></button>
+        <div class="filter-dd-panel hidden" id="ciudadDdPanel"></div>
+      </div>
     </div>
-    <div class="filter-dd ciudad-dd topbar-ciudad" id="ciudadDd">
-      <button type="button" class="topbar-city-btn" onclick="toggleFilterDd(event, 'ciudadDdPanel')">📍 <span id="ciudadDdLabel">La Paz, Entre Ríos</span> <span class="filter-dd-chev">▾</span></button>
-      <div class="filter-dd-panel hidden" id="ciudadDdPanel"></div>
-    </div>
+  </div>
 
+  <!-- SOLAPAS FIJAS debajo del topbar, visibles en el feed -->
+  <div class="feed-solapas hidden" id="feedSolapas" style="position:sticky;top:0;z-index:19;">
+    <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">&#127968; Home</button>
+    <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">&#128293; Ofertas</button>
+    <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">&#127978; Locales</button>
+    <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">&#128203; Guia</button>
+    <button class="feed-solapa" id="tabMas" onclick="setFeedTab('mas')">&#8226; &#8226; &#8226;</button>
   </div>
 
   <!-- ============ SCREEN: BIENVENIDA LANDING ============ -->
@@ -737,23 +752,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   <!-- ============ SCREEN: FEED PUBLICO (INICIAL) ============ -->
   <div class="screen hidden" id="screen-feed" style="padding:0 0 20px;">
-
-    <!-- ===== SOLAPAS DE NAVEGACIÓN ===== -->
-    <div class="feed-solapas" id="feedSolapas">
-      <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">🏠 Home</button>
-      <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">🔥 Ofertas</button>
-      <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">🏪 Locales</button>
-      <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">📋 Guía</button>
-      <button class="feed-solapa" id="tabMas" onclick="setFeedTab('mas')">• • •</button>
-    </div>
-
-    <!-- ===== BARRA DE BÚSQUEDA ===== -->
-    <div style="padding:10px 16px 4px;">
-      <div class="topbar-search" id="buscadorFeedBox" style="padding:11px 16px; box-shadow:0 2px 10px rgba(0,0,0,0.09);">
-        <span class="topbar-search-ic">🔎</span>
-        <input id="buscadorTop" placeholder="Buscar productos, comercios…" oninput="onBuscadorInput(this.value)">
-      </div>
-    </div>
 
     <!-- ================================================================
          TAB: HOME
@@ -2488,9 +2486,19 @@ function showScreen(name){
   if(el) el.classList.remove('hidden');
   window.scrollTo(0,0);
   updateBottomNav(name);
-  // Ocultar topbar en la pantalla de bienvenida (tiene su propio hero)
+  // Ocultar topbar en bienvenida (tiene su propio hero)
   var topbar = document.getElementById('topbar');
   if(topbar) topbar.style.display = (name === 'bienvenida') ? 'none' : '';
+  // Mostrar solapas solo en el feed
+  var solapas = document.getElementById('feedSolapas');
+  if(solapas){
+    var enFeed = (name === 'feed');
+    solapas.classList.toggle('hidden', !enFeed);
+    // Ajustar top sticky: justo debajo del topbar
+    if(enFeed && topbar){
+      solapas.style.top = topbar.offsetHeight + 'px';
+    }
+  }
 }
 function goHome(){
   state.role = 'guest';
@@ -5149,7 +5157,7 @@ const CIUDADES_ENTRE_RIOS = [
 let ciudadSeleccionada = 'La Paz';
 
 function renderCiudadDropdown(){
-  document.getElementById('ciudadDdLabel').textContent = ciudadSeleccionada + ', Entre Ríos';
+  document.getElementById('ciudadDdLabel').textContent = ciudadSeleccionada;
   document.getElementById('ciudadDdPanel').innerHTML =
     `<div style="padding:8px 10px 4px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;">Elegí tu ciudad</div>` +
     CIUDADES_ENTRE_RIOS.map(c=>`<button type="button" class="filter-dd-opt ${c===ciudadSeleccionada?'active':''}" onclick="setCiudad('${c}')">${c}</button>`).join('');
