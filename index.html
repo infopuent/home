@@ -7692,20 +7692,6 @@ function reservarProducto(){
   toast(`✅ ${unidades > 1 ? unidades + 'x ' : ''}${p.nombre} en tu carrito`);
 }
 
-  // UI: mostrar confirmación
-  const btnReservar = document.getElementById('ofBtnReservar');
-  const yaReservado = document.getElementById('ofYaReservado');
-  if(btnReservar) btnReservar.classList.add('hidden');
-  if(yaReservado) yaReservado.classList.remove('hidden');
-
-  // Mostrar aviso de envío post-reserva
-  var _avisoEnvio = document.getElementById('ofEnvioAviso');
-  if(_avisoEnvio) _avisoEnvio.style.display = 'flex';
-
-  updateBottomNav('oferta');
-  toast('¡Reservado! Lo encontrás en tu carrito 🛒');
-}
-
 function abrirCarrito(){
   renderCarrito();
   showScreen('cl-carrito');
