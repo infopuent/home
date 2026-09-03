@@ -1694,8 +1694,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="field">
         <label>Rubro / filtro con el que aparece</label>
-        <select id="cnpRubro"></select>
+        <select id="cnpRubro" onchange="renderAtributosRubro()"></select>
       </div>
+      <!-- Campos dinámicos según el rubro -->
+      <div id="cnpAtributosRubro"></div>
     </div>
     <div class="card" style="background:var(--cream);">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🚚 Envío a domicilio</div>
@@ -3826,8 +3828,8 @@ function etiquetaOferta(p){
 function irNuevoProductoComercio(){
   const c = state.currentUser;
   showScreen('c-nuevo-producto');
-  const sel = document.getElementById('cnpRubro');
-  if(sel && c.rubro){ sel.value = c.rubro; }
+  fillRubroSelect('cnpRubro', c.rubro || '');
+  renderAtributosRubro();
 }
 function irNuevoProductoComercioSeguro(){
   const c = state.currentUser;
@@ -3878,8 +3880,9 @@ function abrirEditarProducto(prodId){
   document.getElementById('cnpHoraHasta').value = p.horaHasta || '';
   document.getElementById('cnpFechaInicio').value = p.fechaInicio || '';
   onTipoOfertaChange();
-  const sel = document.getElementById('cnpRubro');
-  if(p.rubro) sel.value = p.rubro;
+  fillRubroSelect('cnpRubro', p.rubro);
+  renderAtributosRubro();
+  if(p.atributos) cargarAtributosEnForm(p.atributos);
   fotosCargadas['cnp'] = p.img;
   document.getElementById('cnpFotoBox').innerHTML = `<img src="${p.img}" alt="Foto del producto">`;
   document.getElementById('cnpFotoEstado').textContent = '✅ Foto actual — tocá la imagen para cambiarla';
@@ -3916,6 +3919,379 @@ function cnpOnEnvioChange(){
     nota.style.display = 'block';
     nota.innerHTML = '❌ Este producto no tiene envío aunque el comercio lo ofrezca en otros productos.';
   }
+}
+
+/* =====================================================================
+   ATRIBUTOS DINÁMICOS POR RUBRO
+   Fuente única: ATRIBUTOS_POR_RUBRO
+   Cada entrada define los campos extra que aparecen en el formulario
+   de carga de producto cuando el rubro coincide.
+   ===================================================================== */
+const ATRIBUTOS_POR_RUBRO = {
+
+  // ── INDUMENTARIA Y CALZADO ──────────────────────────────────────────
+  'Indumentaria y calzado': [
+    { id:'genero',    label:'Género',           type:'select', opts:['Unisex','Mujer','Hombre','Niña','Niño','Bebé'] },
+    { id:'talles',    label:'Talles disponibles (texto libre)', type:'text', placeholder:'Ej: S, M, L, XL — o 38 al 44' },
+    { id:'colores',   label:'Colores disponibles', type:'text', placeholder:'Ej: Rojo, Negro, Blanco' },
+    { id:'material',  label:'Material / tela',   type:'text', placeholder:'Ej: Algodón 100%, Poliéster' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Nike, Adidas, Sin marca' },
+  ],
+
+  // ── JOYERÍA Y ACCESORIOS ────────────────────────────────────────────
+  'Joyería y accesorios': [
+    { id:'material',  label:'Material',          type:'text', placeholder:'Ej: Plata 925, Acero quirúrgico, Oro 18k' },
+    { id:'colores',   label:'Colores / terminación', type:'text', placeholder:'Ej: Plateado, Dorado' },
+    { id:'medida',    label:'Medida / talle',    type:'text', placeholder:'Ej: Talle 15, ajustable' },
+  ],
+
+  // ── ÓPTICAS ─────────────────────────────────────────────────────────
+  'Ópticas': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Armazón','Lentes de sol','Lentes de contacto','Solución para lentes','Accesorio'] },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Ray-Ban, Oakley' },
+    { id:'montura',   label:'Tipo de montura',   type:'select', opts:['Cuadrada','Redonda','Aviador','Cat-eye','Sin montura','Otra'] },
+    { id:'graduacion',label:'Con graduación',    type:'select', opts:['Sin graduar','Con graduación (a consultar)'] },
+  ],
+
+  // ── HOGAR Y DECORACIÓN ──────────────────────────────────────────────
+  'Hogar y decoración': [
+    { id:'material',  label:'Material',          type:'text', placeholder:'Ej: Madera, Metal, Plástico' },
+    { id:'medidas',   label:'Medidas',           type:'text', placeholder:'Ej: 40 × 60 cm, 1.20 m de alto' },
+    { id:'colores',   label:'Color / terminación', type:'text', placeholder:'Ej: Blanco, Natural, Nogal' },
+    { id:'marca',     label:'Marca / procedencia', type:'text', placeholder:'Ej: Importado, Artesanal' },
+  ],
+
+  // ── MUEBLES Y COLCHONES ─────────────────────────────────────────────
+  'Muebles y colchones': [
+    { id:'material',  label:'Material',          type:'text', placeholder:'Ej: Madera maciza, MDF, Metal' },
+    { id:'medidas',   label:'Medidas',           type:'text', placeholder:'Ej: 2 plazas 140×190 cm' },
+    { id:'colores',   label:'Color / tapizado',  type:'text', placeholder:'Ej: Gris, Beige' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Sealy, Simmons, Sin marca' },
+    { id:'garantia',  label:'Garantía',          type:'text', placeholder:'Ej: 12 meses, Sin garantía' },
+  ],
+
+  // ── FERRETERÍA Y CONSTRUCCIÓN ───────────────────────────────────────
+  'Ferretería y construcción': [
+    { id:'medida',    label:'Medida / especificación', type:'text', placeholder:'Ej: 1/2 pulgada, 6 mm, 10×50 cm' },
+    { id:'material',  label:'Material',          type:'text', placeholder:'Ej: Acero inoxidable, PVC, Aluminio' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Stanley, Tramontina, Sin marca' },
+    { id:'cantidad',  label:'Contenido / pack',  type:'text', placeholder:'Ej: Caja x 100 unidades, unidad' },
+  ],
+
+  // ── ELECTRICIDAD Y PLOMERÍA ─────────────────────────────────────────
+  'Electricidad y plomería': [
+    { id:'medida',    label:'Medida / especificación', type:'text', placeholder:'Ej: 3/4 pulgada, 220V 10A' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Bticino, Veto' },
+    { id:'cantidad',  label:'Contenido / pack',  type:'text', placeholder:'Ej: Pack x 10, unidad' },
+  ],
+
+  // ── JARDÍN Y VIVEROS ────────────────────────────────────────────────
+  'Jardín y viveros': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Planta interior','Planta exterior','Árbol / arbusto','Suculenta / cactus','Hierba aromática','Semillas','Maceta / macetero','Tierra / sustrato','Fertilizante','Herramienta de jardín'] },
+    { id:'tamano',    label:'Tamaño / presentación', type:'text', placeholder:'Ej: Maceta N°14, bolsa 5 kg' },
+    { id:'cuidados',  label:'Cuidados básicos', type:'text', placeholder:'Ej: Sol directo, riego 2x semana' },
+  ],
+
+  // ── REPUESTOS Y AUTOMOTOR ───────────────────────────────────────────
+  'Repuestos y automotor': [
+    { id:'marcaVehiculo', label:'Marca del vehículo', type:'text', placeholder:'Ej: Ford, Chevrolet, Toyota' },
+    { id:'modeloVehiculo',label:'Modelo / versión',   type:'text', placeholder:'Ej: Gol Trend, Ranger 4x4' },
+    { id:'anioVehiculo',  label:'Año / rango de años',type:'text', placeholder:'Ej: 2010-2018, universal' },
+    { id:'nroParte',      label:'Número de parte / OEM', type:'text', placeholder:'Ej: 1234567, genérico' },
+    { id:'marca',         label:'Marca del repuesto', type:'text', placeholder:'Ej: Original, Beru, Sin marca' },
+    { id:'estado',        label:'Estado',             type:'select', opts:['Nuevo','Reacondicionado','Usado'] },
+  ],
+
+  // ── AGENCIAS DE AUTOS ───────────────────────────────────────────────
+  'Agencias de autos': [
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Toyota, Ford, Volkswagen' },
+    { id:'modelo',    label:'Modelo',            type:'text', placeholder:'Ej: Hilux SRV, Amarok V6' },
+    { id:'anio',      label:'Año',               type:'text', placeholder:'Ej: 2021' },
+    { id:'km',        label:'Kilometraje',       type:'text', placeholder:'Ej: 45.000 km, 0 km' },
+    { id:'color',     label:'Color',             type:'text', placeholder:'Ej: Blanco perlado' },
+    { id:'combustible',label:'Combustible',      type:'select', opts:['Nafta','Diesel','GNC','Híbrido','Eléctrico'] },
+    { id:'transmision',label:'Transmisión',      type:'select', opts:['Manual','Automática','CVT'] },
+  ],
+
+  // ── AGENCIAS DE MOTOS ───────────────────────────────────────────────
+  'Agencias de motos': [
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Honda, Yamaha, Zanella' },
+    { id:'modelo',    label:'Modelo',            type:'text', placeholder:'Ej: Wave 110, FZ 2.5' },
+    { id:'anio',      label:'Año',               type:'text', placeholder:'Ej: 2023' },
+    { id:'cilindrada',label:'Cilindrada',        type:'text', placeholder:'Ej: 110 cc, 250 cc' },
+    { id:'km',        label:'Kilometraje',       type:'text', placeholder:'Ej: 12.000 km, 0 km' },
+    { id:'color',     label:'Color',             type:'text', placeholder:'Ej: Rojo / Negro' },
+  ],
+
+  // ── BICICLETERÍAS ───────────────────────────────────────────────────
+  'Bicicleterías': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Mountain bike','Ruta','Ciudad / paseo','BMX','Eléctrica','Infantil','Accesorio','Repuesto'] },
+    { id:'rodado',    label:'Rodado',            type:'text', placeholder:'Ej: Rodado 29, 26, 20' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Trek, Giant, Sin marca' },
+    { id:'material',  label:'Material del cuadro', type:'text', placeholder:'Ej: Aluminio, Acero, Carbono' },
+    { id:'velocidades',label:'Velocidades',      type:'text', placeholder:'Ej: 21, 1 velocidad (fixed)' },
+  ],
+
+  // ── AGRO E INSUMOS RURALES ──────────────────────────────────────────
+  'Agro e insumos rurales': [
+    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Semilla','Agroquímico','Fertilizante','Herbicida','Fungicida','Insecticida','Herramienta agrícola','Ropa de trabajo','Alimento animal','Otro'] },
+    { id:'principioActivo', label:'Principio activo / composición', type:'text', placeholder:'Ej: Glifosato 48%, NPK 15-15-15' },
+    { id:'presentacion',label:'Presentación / envase', type:'text', placeholder:'Ej: Bidón 20 L, bolsa 50 kg' },
+    { id:'cultivo',   label:'Indicado para',    type:'text', placeholder:'Ej: Soja, Maíz, Gramíneas, Ganado bovino' },
+    { id:'marca',     label:'Marca',            type:'text', placeholder:'Ej: Monsanto, YPF Agro' },
+  ],
+
+  // ── VETERINARIA Y GANADERÍA ─────────────────────────────────────────
+  'Veterinaria y ganadería': [
+    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Medicamento','Vacuna','Antiparasitario','Alimento','Accesorio','Higiene','Otro'] },
+    { id:'especie',   label:'Especie / animal',  type:'text', placeholder:'Ej: Bovino, Equino, Canino, Felino' },
+    { id:'principioActivo', label:'Principio activo', type:'text', placeholder:'Ej: Ivermectina, opcional' },
+    { id:'presentacion',label:'Presentación',   type:'text', placeholder:'Ej: Frasco 500 ml, blister x10' },
+    { id:'receta',    label:'Requiere receta veterinaria', type:'select', opts:['No','Sí — con receta'] },
+    { id:'marca',     label:'Laboratorio / marca', type:'text', placeholder:'Ej: MSD Animal Health' },
+  ],
+
+  // ── MASCOTAS ────────────────────────────────────────────────────────
+  'Mascotas': [
+    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Alimento seco','Alimento húmedo','Premio / snack','Accesorio','Ropa','Higiene y cuidado','Medicamento','Juguete','Otro'] },
+    { id:'especie',   label:'Para qué mascota',  type:'text', placeholder:'Ej: Perro, Gato, Ave, Roedor' },
+    { id:'edad',      label:'Etapa de vida',     type:'select', opts:['Cachorro / cría','Adulto','Senior / mayor','Todas las edades'] },
+    { id:'peso',      label:'Peso / presentación', type:'text', placeholder:'Ej: Bolsa 15 kg, unidad' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Royal Canin, Purina' },
+  ],
+
+  // ── TRANSPORTE Y VIAJES ─────────────────────────────────────────────
+  'Transporte y viajes': [
+    { id:'tipo',      label:'Tipo de servicio',  type:'select', opts:['Pasaje de colectivo','Excursión','Traslado','Paquete turístico','Alquiler de vehículo','Otro'] },
+    { id:'origen',    label:'Origen',            type:'text', placeholder:'Ej: La Paz, Entre Ríos' },
+    { id:'destino',   label:'Destino',           type:'text', placeholder:'Ej: Buenos Aires, Paraná' },
+    { id:'frecuencia',label:'Frecuencia / fecha', type:'text', placeholder:'Ej: Lunes y viernes 7hs, a convenir' },
+    { id:'incluye',   label:'Incluye',           type:'text', placeholder:'Ej: Equipaje, seguro, desayuno' },
+  ],
+
+  // ── ALOJAMIENTO Y TURISMO ────────────────────────────────────────────
+  'Alojamiento y turismo': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Habitación','Cabaña','Departamento','Camping','Suite','Casa completa'] },
+    { id:'capacidad', label:'Capacidad (personas)', type:'text', placeholder:'Ej: 2 personas, hasta 6' },
+    { id:'servicios', label:'Servicios incluidos', type:'text', placeholder:'Ej: WiFi, piscina, desayuno, A/A' },
+    { id:'regimen',   label:'Régimen',           type:'select', opts:['Solo alojamiento','Con desayuno','Media pensión','Pensión completa'] },
+    { id:'cancelacion',label:'Cancelación',      type:'select', opts:['Flexible','Moderada','Estricta','No reembolsable'] },
+  ],
+
+  // ── GASTRONOMÍA ─────────────────────────────────────────────────────
+  'Gastronomía (restaurantes y parrillas)': [
+    { id:'tipoPlatoPrincipal', label:'Tipo de plato', type:'select', opts:['Entrada','Plato principal','Postre','Menú del día','Combo / promo','Para compartir','Bebida','Otro'] },
+    { id:'porciones', label:'Tamaño / porciones', type:'text', placeholder:'Ej: Individual, para 2, 1 kg' },
+    { id:'ingredientes',label:'Ingredientes principales', type:'text', placeholder:'Ej: Pollo, limón, papas fritas' },
+    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+    { id:'aptoVegetariano',label:'Apto vegetariano', type:'select', opts:['No','Sí','Vegano'] },
+    { id:'alergenos', label:'Alérgenos / avisos', type:'text', placeholder:'Ej: Contiene gluten, maní, lácteos' },
+  ],
+
+  // ── CAFETERÍAS Y CONFITERÍAS ─────────────────────────────────────────
+  'Cafeterías y confiterías': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Café / infusión','Desayuno / merienda','Torta / pastel','Facturas','Sandwich','Tostado','Bebida fría','Combo','Otro'] },
+    { id:'porciones', label:'Tamaño / cantidad', type:'text', placeholder:'Ej: 1 unidad, docena, 300 ml' },
+    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+    { id:'sinTacc',   label:'Sin TACC',          type:'select', opts:['No','Sí'] },
+  ],
+
+  // ── PANADERÍAS Y PASTELERÍAS ─────────────────────────────────────────
+  'Panaderías y pastelerías': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Pan','Facturas','Torta','Tarta','Galletas','Alfajores','Medialunas','Otro'] },
+    { id:'peso',      label:'Peso / cantidad',   type:'text', placeholder:'Ej: 1 kg, docena, unidad' },
+    { id:'sinTacc',   label:'Sin TACC / apto celíaco', type:'select', opts:['No','Sí'] },
+    { id:'ingredientes',label:'Ingredientes destacados', type:'text', placeholder:'Ej: Integral, con semillas, relleno de dulce de leche' },
+  ],
+
+  // ── PIZZERÍAS Y COMIDA RÁPIDA ────────────────────────────────────────
+  'Pizzerías y comida rápida': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Pizza','Empanada','Hamburguesa','Hot dog','Lomito','Sándwich','Papas fritas','Combo','Otro'] },
+    { id:'tamano',    label:'Tamaño',            type:'select', opts:['Individual','Pequeño','Mediano','Grande','Familiar','A elección'] },
+    { id:'ingredientes',label:'Ingredientes / sabor', type:'text', placeholder:'Ej: Mozzarella, jamón y morrones' },
+    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+    { id:'aptoVegetariano',label:'Vegetariano / vegano', type:'select', opts:['No','Sí','Vegano'] },
+  ],
+
+  // ── ALIMENTOS Y BEBIDAS ──────────────────────────────────────────────
+  'Alimentos y bebidas': [
+    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Almacén seco','Lácteos','Carnes y fiambres','Frutas y verduras','Bebidas','Conservas','Congelados','Condimentos','Otro'] },
+    { id:'peso',      label:'Peso / volumen / cantidad', type:'text', placeholder:'Ej: 1 kg, 500 ml, pack x6' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: La Serenísima, genérico' },
+    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+  ],
+
+  // ── DIETÉTICAS Y NATURISTAS ──────────────────────────────────────────
+  'Dietéticas y naturistas': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Suplemento','Proteína','Hierba / té','Aceite esencial','Alimento natural','Cosmética natural','Otro'] },
+    { id:'peso',      label:'Peso / presentación', type:'text', placeholder:'Ej: 500 g, 60 cápsulas' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Now Foods, Solgar' },
+    { id:'sinTacc',   label:'Sin TACC',          type:'select', opts:['No','Sí'] },
+    { id:'vegano',    label:'Vegano / vegetariano', type:'select', opts:['No','Vegetariano','Vegano'] },
+  ],
+
+  // ── SALUD Y FARMACIA ─────────────────────────────────────────────────
+  'Salud y farmacia': [
+    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Medicamento','Vitaminas y suplementos','Ortopedia','Higiene personal','Cosmética','Primeros auxilios','Cuidado del bebé','Otro'] },
+    { id:'laboratorio',label:'Laboratorio / marca', type:'text', placeholder:'Ej: Bayer, Pfizer, genérico' },
+    { id:'presentacion',label:'Presentación',   type:'text', placeholder:'Ej: Comp. x30, frasco 120 ml, crema 50 g' },
+    { id:'receta',    label:'Requiere receta médica', type:'select', opts:['No','Sí — receta simple','Sí — receta archivada','Venta bajo receta'] },
+    { id:'principioActivo',label:'Principio activo (opcional)', type:'text', placeholder:'Ej: Ibuprofeno 400 mg' },
+  ],
+
+  // ── TECNOLOGÍA ───────────────────────────────────────────────────────
+  'Tecnología': [
+    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Celular / smartphone','Tablet','Notebook / PC','Accesorio','Audio','Fotografía','Electrodoméstico','Consola / videojuego','Componente / repuesto','Otro'] },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Samsung, Apple, LG' },
+    { id:'modelo',    label:'Modelo',            type:'text', placeholder:'Ej: Galaxy A55, iPhone 14' },
+    { id:'capacidad', label:'Capacidad / especificación', type:'text', placeholder:'Ej: 128 GB, 8 GB RAM, 4K' },
+    { id:'color',     label:'Color',             type:'text', placeholder:'Ej: Negro, Blanco, Azul' },
+    { id:'garantia',  label:'Garantía',          type:'text', placeholder:'Ej: 12 meses oficial, sin garantía' },
+    { id:'estado',    label:'Estado',            type:'select', opts:['Nuevo','Reacondicionado / seminuevo','Usado'] },
+  ],
+
+  // ── LIBRERÍA Y PAPELERÍA ─────────────────────────────────────────────
+  'Librería y papelería': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Útiles escolares','Arte y dibujo','Libros','Agendas / cuadernos','Papelería de oficina','Impresión','Juegos educativos','Otro'] },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Faber-Castell, Staedtler' },
+    { id:'cantidad',  label:'Cantidad / pack',   type:'text', placeholder:'Ej: Caja x12, por unidad, resma x500' },
+  ],
+
+  // ── JUGUETERÍA Y COTILLÓN ────────────────────────────────────────────
+  'Juguetería y cotillón': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Juguete','Juego de mesa','Muñeca / figura','Vehículo de juguete','Cotillón / fiesta','Disfraz','Decoración de evento','Otro'] },
+    { id:'edadRecomendada',label:'Edad recomendada', type:'text', placeholder:'Ej: +3 años, +8 años, todas las edades' },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: Lego, Hasbro, Sin marca' },
+    { id:'material',  label:'Material',          type:'text', placeholder:'Ej: Plástico, Madera, Tela' },
+  ],
+
+  // ── DEPORTES Y AIRE LIBRE ────────────────────────────────────────────
+  'Deportes y aire libre': [
+    { id:'deporte',   label:'Deporte / actividad', type:'text', placeholder:'Ej: Fútbol, Natación, Trekking, Pesca' },
+    { id:'talle',     label:'Talle / medida',     type:'text', placeholder:'Ej: S/M/L, Talle 40, 29 pulgadas' },
+    { id:'marca',     label:'Marca',              type:'text', placeholder:'Ej: Adidas, Nike, Sin marca' },
+    { id:'material',  label:'Material',           type:'text', placeholder:'Ej: Nylon, Aluminio, Neopreno' },
+    { id:'color',     label:'Color',              type:'text', placeholder:'Ej: Azul / Negro' },
+  ],
+
+  // ── GIMNASIOS Y FITNESS ──────────────────────────────────────────────
+  'Gimnasios y fitness': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Membresía mensual','Clase suelta','Pack de clases','Equipo / implemento','Indumentaria deportiva','Suplemento','Otro'] },
+    { id:'disciplina',label:'Disciplina',        type:'text', placeholder:'Ej: Funcional, Yoga, Musculación, Pilates' },
+    { id:'duracion',  label:'Duración / frecuencia', type:'text', placeholder:'Ej: 1 mes, 60 min por clase, 3 veces/semana' },
+  ],
+
+  // ── INMOBILIARIAS ────────────────────────────────────────────────────
+  'Inmobiliarias': [
+    { id:'operacion', label:'Operación',         type:'select', opts:['Venta','Alquiler','Alquiler temporario','Permuta'] },
+    { id:'tipo',      label:'Tipo de propiedad', type:'select', opts:['Casa','Departamento','Local comercial','Terreno','Campo','Galpón / depósito','Oficina','Cochera','Otro'] },
+    { id:'superficie',label:'Superficie',        type:'text', placeholder:'Ej: 80 m² cubiertos, 300 m² total' },
+    { id:'ambientes', label:'Ambientes / habitaciones', type:'text', placeholder:'Ej: 3 ambientes, 2 dormitorios' },
+    { id:'barrio',    label:'Barrio / zona',     type:'text', placeholder:'Ej: Centro, Zona norte' },
+    { id:'extras',    label:'Características destacadas', type:'text', placeholder:'Ej: Cochera, piscina, parrilla, calefacción' },
+  ],
+
+  // ── SEGUROS Y FINANCIERO ─────────────────────────────────────────────
+  'Seguros y financiero': [
+    { id:'tipo',      label:'Tipo',              type:'select', opts:['Seguro de auto','Seguro de hogar','Seguro de vida','Seguro de moto','Seguro de comercio','Préstamo personal','Otro'] },
+    { id:'cobertura', label:'Cobertura / plan',  type:'text', placeholder:'Ej: Responsabilidad civil, todo riesgo' },
+    { id:'compania',  label:'Compañía',          type:'text', placeholder:'Ej: Zurich, San Cristóbal, HSBC' },
+  ],
+
+  // ── SERVICIOS PROFESIONALES ──────────────────────────────────────────
+  'Servicios profesionales': [
+    { id:'tipo',      label:'Tipo de servicio',  type:'select', opts:['Contaduría / impuestos','Asesoría legal / escribanía','Arquitectura / ingeniería','Diseño gráfico','Marketing digital','Traducción','Psicología','Kinesiología','Otro'] },
+    { id:'modalidad', label:'Modalidad',         type:'select', opts:['Presencial','Virtual / online','A domicilio','A convenir'] },
+    { id:'duracion',  label:'Duración / alcance', type:'text', placeholder:'Ej: 1 hora de consulta, pack 5 sesiones' },
+  ],
+
+  // ── PELUQUERÍAS Y BARBERÍAS ──────────────────────────────────────────
+  'Peluquerías y barberías': [
+    { id:'servicio',  label:'Servicio',          type:'select', opts:['Corte de cabello','Coloración','Mechas / rayitos','Alisado / queratina','Peinado / brushing','Barba','Depilación','Manicura / pedicura','Otro'] },
+    { id:'duracion',  label:'Duración estimada', type:'text', placeholder:'Ej: 30 min, 1.5 hs' },
+    { id:'genero',    label:'Para',              type:'select', opts:['Mujer','Hombre','Unisex','Niños'] },
+  ],
+
+  // ── BELLEZA Y CUIDADO PERSONAL ───────────────────────────────────────
+  'Belleza y cuidado personal': [
+    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Maquillaje','Skincare / cuidado de piel','Cabello','Perfume / fragancia','Uñas','Higiene personal','Otro'] },
+    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: L\'Oréal, Maybelline, Natura' },
+    { id:'volumen',   label:'Volumen / peso',    type:'text', placeholder:'Ej: 50 ml, 200 g' },
+    { id:'tipoPiel',  label:'Tipo de piel / uso', type:'text', placeholder:'Ej: Piel seca, piel mixta, todo tipo' },
+  ],
+
+  // ── COSTURA Y ARREGLOS ───────────────────────────────────────────────
+  'Costura y arreglos': [
+    { id:'servicio',  label:'Tipo de servicio',  type:'select', opts:['Arreglo de ropa','Confección a medida','Bordado','Tejido','Tapicería','Otro'] },
+    { id:'tiempo',    label:'Tiempo de entrega estimado', type:'text', placeholder:'Ej: 3 días hábiles, a convenir' },
+    { id:'tela',      label:'Material / tela (si aplica)', type:'text', placeholder:'Ej: Algodón, jean, polyester' },
+  ],
+
+  // ── SERVICIOS DEL HOGAR ──────────────────────────────────────────────
+  'Servicios del hogar': [
+    { id:'servicio',  label:'Tipo de servicio',  type:'select', opts:['Limpieza','Pintura','Mudanza','Reparaciones generales','Gasista','Electricista','Plomero','Jardinería','Fumigación','Otro'] },
+    { id:'modalidad', label:'Modalidad',         type:'select', opts:['A domicilio','Por hora','Por trabajo','Presupuesto sin cargo'] },
+    { id:'zona',      label:'Zona de cobertura', type:'text', placeholder:'Ej: La Paz y alrededores, radio 30 km' },
+  ],
+
+  // ── SERVICIOS VARIOS ─────────────────────────────────────────────────
+  'Servicios varios': [
+    { id:'descripcionServicio', label:'¿Qué servicio es?', type:'text', placeholder:'Ej: Reparación de celulares, clases de inglés' },
+    { id:'modalidad', label:'Modalidad',         type:'select', opts:['Presencial','A domicilio','Virtual','A convenir'] },
+    { id:'duracion',  label:'Duración / alcance', type:'text', placeholder:'Ej: por hora, por sesión, a convenir' },
+  ],
+
+};
+
+/* Renderiza los campos extra en el formulario de carga de producto */
+function renderAtributosRubro(){
+  const rubro  = document.getElementById('cnpRubro')?.value || '';
+  const cont   = document.getElementById('cnpAtributosRubro');
+  if(!cont) return;
+
+  const campos = ATRIBUTOS_POR_RUBRO[rubro];
+  if(!campos || campos.length === 0){
+    cont.innerHTML = '';
+    return;
+  }
+
+  cont.innerHTML = `
+    <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">
+      📋 Detalles específicos — ${rubro}
+    </div>
+    ${campos.map(f => `
+      <div class="field">
+        <label>${f.label}</label>
+        ${f.type === 'select'
+          ? `<select id="atr_${f.id}" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;width:100%;background:#fff;">
+               <option value="">— Elegir —</option>
+               ${f.opts.map(o => `<option value="${o}">${o}</option>`).join('')}
+             </select>`
+          : `<input id="atr_${f.id}" type="text" placeholder="${f.placeholder||''}">`
+        }
+      </div>`).join('')}`;
+}
+
+/* Lee los atributos cargados en el formulario y los devuelve como objeto */
+function leerAtributos(){
+  const rubro  = document.getElementById('cnpRubro')?.value || '';
+  const campos = ATRIBUTOS_POR_RUBRO[rubro];
+  if(!campos) return {};
+  const resultado = {};
+  campos.forEach(f => {
+    const el = document.getElementById('atr_' + f.id);
+    if(el && el.value.trim()) resultado[f.id] = el.value.trim();
+  });
+  return resultado;
+}
+
+/* Carga los atributos guardados en un producto al formulario de edición */
+function cargarAtributosEnForm(atributos){
+  if(!atributos) return;
+  Object.entries(atributos).forEach(([id, val]) => {
+    const el = document.getElementById('atr_' + id);
+    if(el) el.value = val;
+  });
 }
 
 function crearProductoComercio(){
@@ -3958,10 +4334,12 @@ function crearProductoComercio(){
   const envioPolitica = cnpEnvioVal;
   const caja = null;
 
+  const atributos = leerAtributos();
+
   if(productoEditandoId){
     const p = state.productos.find(x=>x.id===productoEditandoId);
     if(!p){ toast('No se encontró el producto'); return; }
-    Object.assign(p, {nombre, precio, comision, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja});
+    Object.assign(p, {nombre, precio, comision, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos});
     guardarProductoEnFirestore(p, c.uid);
     toast('Cambios guardados ✅');
     productoEditandoId = null;
@@ -3971,7 +4349,7 @@ function crearProductoComercio(){
     return;
   }
 
-  const p = {id: nextId('p'), comercioId:c.id, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja};
+  const p = {id: nextId('p'), comercioId:c.id, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos};
   state.productos.push(p);
   guardarProductoEnFirestore(p, c.uid);
   toast('Producto publicado en tu ficha y en el feed de La Paz ✅');
@@ -6268,6 +6646,14 @@ function renderOfertaTabs(p, c){
   if(p.tipoOferta) filas.push(['Tipo de oferta', TIPOS_OFERTA[p.tipoOferta]?.label || p.tipoOferta]);
   if(p.descuento) filas.push(['Descuento', p.descuento + '%']);
   if(p.envio==='si' || p.envioPolitica) filas.push(['Envío', p.envioPolitica || 'Con envío a domicilio disponible']);
+  // Atributos específicos del rubro
+  if(p.atributos && Object.keys(p.atributos).length > 0){
+    const campos = ATRIBUTOS_POR_RUBRO[p.rubro] || [];
+    const labelMap = Object.fromEntries(campos.map(f => [f.id, f.label]));
+    Object.entries(p.atributos).forEach(([id, val]) => {
+      filas.push([labelMap[id] || id, val]);
+    });
+  }
   document.getElementById('ofTabDetalleContenido').innerHTML = filas.length
     ? filas.map(f=>`<div style="display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line);"><span style="color:var(--muted); font-weight:600;">${f[0]}</span><span style="font-weight:700; text-align:right;">${f[1]}</span></div>`).join('')
     : '<p style="color:var(--muted);">Este producto todavía no tiene más detalles cargados.</p>';
