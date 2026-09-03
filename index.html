@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>PuenT</title>
@@ -656,7 +658,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">&#127968; Home</button>
     <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">&#128293; Ofertas</button>
     <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">&#127978; Locales</button>
-    <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">&#128203; Guia</button>
+    <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">🗺️ Mapa</button>
     <button class="feed-solapa" id="tabMas" onclick="setFeedTab('mas')">&#8226; &#8226; &#8226;</button>
   </div>
 
@@ -858,23 +860,34 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <!-- ================================================================
          TAB: GUÍA ÚTIL
     ================================================================ -->
-    <div id="feedUtilView" class="hidden" style="padding:0 16px; margin-top:12px;">
-      <div class="turno-card" id="turnoCard"></div>
-      <div class="section-title-row" style="margin-top:18px;">
-        <div class="section-title">📞 Teléfonos útiles</div>
+    <div id="feedUtilView" class="hidden" style="padding:0;">
+
+      <!-- Header del mapa -->
+      <div style="padding:14px 16px 10px;">
+        <div class="section-title">🗺️ Locales en el mapa</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:2px;">Tocá un pin para ver el local</div>
       </div>
-      <div class="telefonos-grid" id="telefonosGrid"></div>
-      <div class="section-title-row" style="margin-top:18px;">
-        <div class="section-title">🏥 Salud</div>
-        <span class="ver-todo" onclick="verMasRubro('Salud')">Ver todo</span>
+
+      <!-- Filtro por rubro encima del mapa -->
+      <div style="padding:0 16px 10px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;">
+        <div id="mapaRubroChips" style="display:inline-flex;gap:7px;">
+          <button class="chip active" id="mapaChipTodos" onclick="setMapaRubroFiltro('Todos')">Todos</button>
+        </div>
       </div>
-      <div id="guiaSaludList"></div>
-      <div class="section-title-row" style="margin-top:18px;">
-        <div class="section-title">🔧 Mecánicos</div>
-        <span class="ver-todo" onclick="verMasRubro('Mecánica del Automotor')">Ver todo</span>
+
+      <!-- Mapa -->
+      <div id="mapaCityFull" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e8e0d8;"></div>
+
+      <!-- Leyenda -->
+      <div style="display:flex;gap:16px;padding:10px 16px;background:white;border-top:1px solid var(--line);">
+        <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);">
+          <div style="width:12px;height:12px;border-radius:50%;background:#5C7355;flex-shrink:0;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>Plan activo
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);">
+          <div style="width:12px;height:12px;border-radius:50%;background:#9E9E9E;flex-shrink:0;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>Sin plan / gracia
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:var(--muted);">© OpenStreetMap</div>
       </div>
-      <div id="guiaMecanicosList"></div>
-      <p style="text-align:center; font-size:11.5px; color:var(--muted); margin-top:16px;">¿Tenés un comercio de salud o mecánica y querés aparecer acá? Sumate como local en PuenT.</p>
     </div>
 
     <!-- ================================================================
@@ -5740,6 +5753,7 @@ function setCiudad(c){
   renderFeed();
   renderFeedVendedores();
   renderLocales();
+  renderMarcadoresMap();
   toast('📍 Mostrando ' + c + ', Entre Ríos');
 }
 
@@ -6026,7 +6040,7 @@ function setFeedTab(tab){
   window.scrollTo(0,0);
   if(tab==='ofertas'){ renderFeed(); }
   if(tab==='locales'){ renderLocales(); }
-  if(tab==='util'){ renderGuiaUtil(); }
+  if(tab==='util'){ setTimeout(iniciarMapaCity, 80); }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ renderHomeTab(); }
 }
@@ -7161,6 +7175,294 @@ function adminDesactivarBanner(comercioId){
   toast('Banner desactivado');
   renderAdminPlanDetalle(c);
 }
+
+/* =====================================================================
+   MAPA DE LA CIUDAD — Leaflet + OpenStreetMap (tab Mapa)
+   ===================================================================== */
+let mapaCityInstance   = null;
+let mapaMarkersLayer   = null;
+let mapaRubroFiltro    = 'Todos';
+
+const CIUDAD_CENTRO = { lat: -30.7432, lng: -59.6443 };
+const CIUDAD_ZOOM   = 14;
+
+function iniciarMapaCity(){
+  const el = document.getElementById('mapaCityFull');
+  if(!el || typeof L === 'undefined') return;
+
+  if(mapaCityInstance){
+    mapaCityInstance.invalidateSize();
+    renderMarcadoresMap();
+    renderMapaRubroChips();
+    return;
+  }
+
+  mapaCityInstance = L.map('mapaCityFull', {
+    center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
+    zoom: CIUDAD_ZOOM,
+    zoomControl: true,
+    attributionControl: false,
+    scrollWheelZoom: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(mapaCityInstance);
+
+  mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
+
+  setTimeout(() => {
+    mapaCityInstance.invalidateSize();
+    renderMarcadoresMap();
+    renderMapaRubroChips();
+  }, 120);
+}
+
+function iconoPin(activo){
+  const color  = activo ? '#5C7355' : '#9E9E9E';
+  const sombra = activo ? 'rgba(92,115,85,0.35)' : 'rgba(0,0,0,0.15)';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${sombra}"/></filter>
+    <path d="M14 0C7.4 0 2 5.4 2 12c0 8 12 24 12 24S26 20 26 12C26 5.4 20.6 0 14 0z" fill="${color}" filter="url(#s)"/>
+    <circle cx="14" cy="12" r="5" fill="white" opacity=".9"/>
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    iconSize:   [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor:[0, -40],
+    className:  ''
+  });
+}
+
+function setMapaRubroFiltro(rubro){
+  mapaRubroFiltro = rubro;
+  renderMapaRubroChips();
+  renderMarcadoresMap();
+}
+
+function renderMapaRubroChips(){
+  const wrap = document.getElementById('mapaRubroChips');
+  if(!wrap) return;
+  const rubrosPresentes = ['Todos', ...new Set(
+    state.comercios
+      .filter(c => c.lat && c.lng)
+      .map(c => c.rubro)
+      .filter(Boolean)
+  )];
+  wrap.innerHTML = rubrosPresentes.map(r => `
+    <button class="chip${r === mapaRubroFiltro ? ' active' : ''}"
+      onclick="setMapaRubroFiltro('${r}')">${r}</button>
+  `).join('');
+}
+
+function renderMarcadoresMap(){
+  if(!mapaCityInstance || !mapaMarkersLayer) return;
+  mapaMarkersLayer.clearLayers();
+
+  let comerciosVisibles = state.comercios.filter(c => {
+    if(!c.lat || !c.lng) return false;
+    if(c.ciudad && c.ciudad !== ciudadSeleccionada) return false;
+    if(mapaRubroFiltro !== 'Todos' && c.rubro !== mapaRubroFiltro) return false;
+    return true;
+  });
+
+  if(comerciosVisibles.length === 0) return;
+
+  comerciosVisibles.forEach(c => {
+    const dias   = planDiasRestantes(c);
+    const activo = c.plan && c.planVence && dias !== null && dias >= 0 && (c.pagos?.length > 0);
+    const icono  = iconoPin(activo);
+
+    const horarioTexto = c.horario || (c.turnos ? textoTurnos(c.turnos) : 'Consultar horario');
+    const diasTexto    = c.dias?.length ? c.dias.join(' · ') : '';
+
+    const popupHtml = `
+      <div style="font-family:'Manrope',sans-serif;min-width:190px;max-width:230px;">
+        ${c.img ? `<img src="${c.img}" style="width:100%;height:70px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : ''}
+        <div style="font-weight:800;font-size:14px;color:#1a2340;margin-bottom:2px;line-height:1.2;">${c.nombre}</div>
+        <div style="font-size:11.5px;color:#7a7a8a;margin-bottom:5px;">${c.rubro||''}${activo ? ' · <span style="color:#5C7355;font-weight:700;">✅ Activo</span>' : ''}</div>
+        ${horarioTexto ? `<div style="font-size:11px;color:#555;margin-bottom:2px;">🕐 ${horarioTexto}</div>` : ''}
+        ${diasTexto    ? `<div style="font-size:11px;color:#555;margin-bottom:6px;">📅 ${diasTexto}</div>` : ''}
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button onclick="verLocalDesdeMap('${c.id}')"
+            style="flex:1;padding:8px;background:#5C7355;color:white;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;">
+            Ver local →
+          </button>
+          <button onclick="comoLlegar('${c.id}')"
+            style="padding:8px 10px;background:#f0f0f0;border:none;border-radius:9px;font-size:13px;cursor:pointer;">
+            📍
+          </button>
+        </div>
+      </div>`;
+
+    L.marker([c.lat, c.lng], { icon: icono })
+      .bindPopup(popupHtml, { maxWidth: 240, closeButton: false, className: 'puent-popup' })
+      .addTo(mapaMarkersLayer);
+  });
+
+  // Ajustar vista
+  try {
+    if(comerciosVisibles.length === 1){
+      mapaCityInstance.setView([comerciosVisibles[0].lat, comerciosVisibles[0].lng], CIUDAD_ZOOM);
+    } else {
+      const bounds = L.latLngBounds(comerciosVisibles.map(c => [c.lat, c.lng]));
+      mapaCityInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+    }
+  } catch(e){}
+}
+
+function verLocalDesdeMap(comercioId){
+  if(mapaCityInstance) mapaCityInstance.closePopup();
+  verProductosDeLocal(comercioId);
+}
+
+// Estilos popup Leaflet
+(function(){
+  const st = document.createElement('style');
+  st.textContent = `
+    .puent-popup .leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:0;}
+    .puent-popup .leaflet-popup-content{margin:12px 12px 10px;}
+    .puent-popup .leaflet-popup-tip-container{display:none;}
+  `;
+  document.head.appendChild(st);
+})();
+
+function iniciarMapaCity(){
+  const el = document.getElementById('mapaCity');
+  if(!el || typeof L === 'undefined') return;
+
+  // Si ya existe, solo refrescamos los marcadores
+  if(mapaCityInstance){
+    renderMarcadoresMap();
+    return;
+  }
+
+  mapaCityInstance = L.map('mapaCity', {
+    center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
+    zoom: CIUDAD_ZOOM,
+    zoomControl: true,
+    attributionControl: false,
+    scrollWheelZoom: false   // en mobile el scroll es el de la página
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(mapaCityInstance);
+
+  // Atribución pequeña y discreta
+  L.control.attribution({ prefix: false, position: 'bottomright' })
+    .addAttribution('<span style="font-size:9px;opacity:.5;">© OSM</span>')
+    .addTo(mapaCityInstance);
+
+  mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
+
+  // Fix: Leaflet necesita que el mapa esté visible para calcular el tamaño
+  setTimeout(() => {
+    mapaCityInstance.invalidateSize();
+    renderMarcadoresMap();
+  }, 120);
+}
+
+function iconoPin(activo){
+  const color  = activo ? '#5C7355' : '#9E9E9E';
+  const sombra = activo ? 'rgba(92,115,85,0.35)' : 'rgba(0,0,0,0.15)';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${sombra}"/></filter>
+    <path d="M14 0C7.4 0 2 5.4 2 12c0 8 12 24 12 24S26 20 26 12C26 5.4 20.6 0 14 0z" fill="${color}" filter="url(#s)"/>
+    <circle cx="14" cy="12" r="5" fill="white" opacity=".9"/>
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    iconSize:   [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor:[0, -38],
+    className:  ''
+  });
+}
+
+function renderMarcadoresMap(){
+  if(!mapaCityInstance || !mapaMarkersLayer) return;
+  mapaMarkersLayer.clearLayers();
+
+  const comerciosVisibles = state.comercios.filter(c => {
+    if(!c.lat || !c.lng) return false;
+    if(c.ciudad && c.ciudad !== ciudadSeleccionada) return false;
+    return true;
+  });
+
+  if(comerciosVisibles.length === 0) return;
+
+  comerciosVisibles.forEach(c => {
+    const dias  = planDiasRestantes(c);
+    const activo = c.plan && c.planVence && dias !== null && dias >= 0 && (c.pagos?.length > 0);
+    const icono  = iconoPin(activo);
+
+    const horarioTexto = c.horario || (c.turnos
+      ? textoTurnos(c.turnos)
+      : 'Consultar horario');
+
+    const diasTexto = c.dias?.length
+      ? c.dias.join(' · ')
+      : 'Lun – Vie';
+
+    const popupHtml = `
+      <div style="font-family:'Manrope',sans-serif;min-width:190px;max-width:230px;">
+        <div style="font-weight:800;font-size:14px;color:#1a2340;margin-bottom:2px;line-height:1.2;">${c.nombre}</div>
+        <div style="font-size:11.5px;color:#7a7a8a;margin-bottom:6px;">${c.rubro || ''}${activo ? ' · <span style="color:#5C7355;font-weight:700;">✅ Activo</span>' : ''}</div>
+        ${c.horario || c.turnos ? `<div style="font-size:11px;color:#555;margin-bottom:2px;">🕐 ${horarioTexto}</div>` : ''}
+        ${c.dias?.length ? `<div style="font-size:11px;color:#555;margin-bottom:6px;">📅 ${diasTexto}</div>` : ''}
+        <button onclick="verLocalDesdeMap('${c.id}')"
+          style="width:100%;padding:8px;background:#5C7355;color:white;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;margin-top:4px;">
+          Ver local →
+        </button>
+      </div>`;
+
+    const marker = L.marker([c.lat, c.lng], { icon: icono })
+      .bindPopup(popupHtml, {
+        maxWidth: 240,
+        closeButton: false,
+        className:   'puent-popup'
+      });
+
+    marker.addTo(mapaMarkersLayer);
+  });
+
+  // Ajustar vista para que entren todos los pines
+  if(comerciosVisibles.length === 1){
+    mapaCityInstance.setView([comerciosVisibles[0].lat, comerciosVisibles[0].lng], CIUDAD_ZOOM);
+  } else {
+    try {
+      const bounds = L.latLngBounds(comerciosVisibles.map(c => [c.lat, c.lng]));
+      mapaCityInstance.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+    } catch(e){}
+  }
+}
+
+function verLocalDesdeMap(comercioId){
+  if(mapaCityInstance) mapaCityInstance.closePopup();
+  verProductosDeLocal(comercioId);
+}
+
+// Estilos del popup de Leaflet personalizados
+(function(){
+  const st = document.createElement('style');
+  st.textContent = `
+    .puent-popup .leaflet-popup-content-wrapper {
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      padding: 0;
+    }
+    .puent-popup .leaflet-popup-content {
+      margin: 14px 14px 12px;
+    }
+    .puent-popup .leaflet-popup-tip-container {
+      display: none;
+    }
+  `;
+  document.head.appendChild(st);
+})();
 
 /* ================= INIT ================= */
 // Poblar todos los selects de rubro desde la fuente única
