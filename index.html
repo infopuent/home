@@ -1077,7 +1077,17 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button id="ofBtnEnvio" style="display:none;"></button>
 
       <div id="ofAntes">
-        <p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;" id="ofTextoReserva">Reservá el producto. Cuando llegues al local, generás el QR desde tu carrito y lo presentás.</p>
+        <!-- Selector de unidades -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+          <span style="font-size:13px; font-weight:700; color:var(--ink);">Unidades:</span>
+          <div style="display:flex; align-items:center; gap:0; border:1.5px solid var(--line); border-radius:10px; overflow:hidden;">
+            <button onclick="cambiarUnidades(-1)" style="width:36px;height:36px;background:var(--cream);border:none;font-size:18px;cursor:pointer;font-weight:700;color:var(--navy);">−</button>
+            <span id="ofUnidades" style="width:36px;text-align:center;font-size:15px;font-weight:800;color:var(--navy);">1</span>
+            <button onclick="cambiarUnidades(1)" style="width:36px;height:36px;background:var(--cream);border:none;font-size:18px;cursor:pointer;font-weight:700;color:var(--navy);">+</button>
+          </div>
+          <span id="ofPrecioTotal" style="font-size:14px; font-weight:800; color:#FF6600;"></span>
+        </div>
+        <p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;" id="ofTextoReserva">Reservá el producto. Generás el QR cuando llegues al local.</p>
         <button class="btn btn-primary" id="ofBtnReservar" style="width:100%;" onclick="reservarProducto()">🛒 Reservar</button>
         <div id="ofYaReservado" class="hidden" style="margin-top:10px;">
           <div style="background:#E3F3EA;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
@@ -1905,9 +1915,66 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-cl-carrito">
     <div class="link-back" onclick="showScreen('feed')">← Seguir comprando</div>
     <div class="kicker">Mi carrito</div>
-    <div class="page-title" style="margin-bottom:4px;">Mis reservas</div>
-    <p class="page-sub" style="margin-bottom:16px;">Llegá al local y generá el QR para retirar tus productos.</p>
+    <div class="page-title" style="margin-bottom:4px;">Tu pedido</div>
+    <p class="page-sub" style="margin-bottom:16px;">Revisá tus productos y elegí cómo querés recibirlos.</p>
     <div id="carritoContenido"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:4px;" onclick="abrirMisPedidos()">📋 Ver mis pedidos anteriores</button>
+  </div>
+
+  <!-- ============ SCREEN: MIS PEDIDOS ============ -->
+  <div class="screen hidden" id="screen-mis-pedidos">
+    <div class="link-back" onclick="showScreen('cl-carrito')">← Volver al carrito</div>
+    <div class="kicker">Historial</div>
+    <div class="page-title" style="margin-bottom:16px;">Mis pedidos</div>
+    <div id="misPedidosContenido"></div>
+  </div>
+
+  <!-- ============ MODAL: FINALIZAR PEDIDO ============ -->
+  <div id="modalFinalizarPedido" onclick="if(event.target===this)fpCerrarModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:flex-end;justify-content:center;">
+    <div style="background:white;border-radius:24px 24px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="font-size:17px;font-weight:800;color:var(--navy);">Finalizar pedido</div>
+        <button onclick="fpCerrarModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">✕</button>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Pedido a</div>
+      <div id="fpComercioNombre" style="font-size:16px;font-weight:800;color:var(--navy);margin-bottom:14px;"></div>
+      <div style="background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+        <div id="fpResumenItems" style="font-size:13px;color:var(--ink);line-height:1.8;white-space:pre-line;margin-bottom:8px;"></div>
+        <div style="border-top:1px solid var(--line);padding-top:8px;display:flex;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:700;">Subtotal</span>
+          <span id="fpTotal" style="font-size:14px;font-weight:800;color:var(--navy);"></span>
+        </div>
+      </div>
+
+      <!-- Dos botones principales -->
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;">¿Cómo querés recibir tu pedido?</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <button class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="fpEnviarWhatsApp('presencial')">
+          <span style="font-size:20px;">🏪</span>
+          <div style="text-align:left;">
+            <div style="font-weight:800;">Retiro presencial</div>
+            <div style="font-size:11px;opacity:.8;">Reservás y retirás en el local</div>
+          </div>
+        </button>
+        <button onclick="fpMostrarEnvio()" style="width:100%;padding:14px;border-radius:14px;border:2px solid var(--navy);background:white;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:inherit;">
+          <span style="font-size:20px;">🛵</span>
+          <div style="text-align:left;">
+            <div style="font-size:14px;font-weight:800;color:var(--navy);">Con envío a domicilio</div>
+            <div style="font-size:11px;color:var(--muted);">+ <span id="fpEnvioExtra"></span> · solo en la ciudad</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Formulario de envío (se muestra al tocar el botón) -->
+      <div id="fpEnvioForm" style="display:none;background:#F3F8FF;border-radius:14px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px;">📍 Tu dirección de entrega</div>
+        <input id="fpDireccion" type="text" placeholder="Ej: San Martín 450 — solo dentro de La Paz" style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:white;box-sizing:border-box;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">⚠️ El envío es únicamente dentro de la ciudad seleccionada. Total con envío: <strong id="fpTotalConEnvio"></strong></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="fpEnviarWhatsApp('envio')">
+          🛵 Confirmar y enviar pedido
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ============ SCREEN: QR DEL CARRITO ============ -->
@@ -2145,7 +2212,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </select>
       </div>
       <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text"></div>
-      <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel"></div>
+      <div class="two-col">
+        <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel"></div>
+        <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editAdWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:8px;">📲 Obligatorio — los clientes envían pedidos al WhatsApp del comercio.</div>
       <div class="field"><label>Email</label><input id="editAdEmail" type="email"></div>
       <div class="field"><label>Instagram</label><input id="editAdInstagram" type="text"></div>
       <div class="field"><label>Sitio web</label><input id="editAdWeb" type="text"></div>
@@ -3204,9 +3275,10 @@ function goRegister(role){
           </div>
         </div>
         <div class="two-col">
-          <div class="field"><label>Teléfono del local</label><input id="rTelefono" type="tel" placeholder="Fijo o WhatsApp"></div>
-          <div class="field"><label>Teléfono alternativo</label><input id="rTelefonoAlt" type="tel" placeholder="Opcional"></div>
+          <div class="field"><label>Teléfono del local</label><input id="rTelefono" type="tel" placeholder="Fijo o celular"></div>
+          <div class="field"><label>WhatsApp del local <span style="color:#e05a5a;">*</span></label><input id="rWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456" required></div>
         </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:8px;">📲 El WhatsApp es obligatorio — los clientes envían sus pedidos directamente ahí.</div>
         <div class="field"><label>Correo electrónico</label><input id="rEmail" type="email" placeholder="local@ejemplo.com"></div>
         <div class="field">
           <label>Turno mañana</label>
@@ -3279,20 +3351,22 @@ function submitRegister(){
     const ciudad = document.getElementById('rCiudad').value.trim() || 'La Paz';
     const rubro = document.getElementById('rRubro').value;
     const telefono = document.getElementById('rTelefono').value.trim();
-    const telefonoAlt = document.getElementById('rTelefonoAlt').value.trim();
+    const whatsapp = document.getElementById('rWhatsapp').value.trim().replace(/\D/g,'');
+    const telefonoAlt = '';
     const email = document.getElementById('rEmail').value.trim();
     const turnos = leerTurnosForm('r');
     const horario = textoTurnos(turnos);
     const tyc = document.getElementById('rTyc').checked;
 
-    if(!razonSocial || !direccion || !telefono || !email){
-      toast('Completá todos los datos obligatorios del local'); return;
+    if(!razonSocial || !direccion || !whatsapp || !email){
+      toast('Completá todos los datos obligatorios, incluyendo el WhatsApp'); return;
     }
+    if(whatsapp.length < 8){ toast('El número de WhatsApp parece incompleto'); return; }
     const nombreOcupado = state.comercios.some(c => (c.nombre||'').toLowerCase() === nombre.toLowerCase());
     if(nombreOcupado){ toast('Ya existe un comercio registrado con ese nombre, elegí otro'); return; }
     if(!tyc){ toast('Necesitás aceptar los Términos y Condiciones'); return; }
 
-    const c = {id: nextId('c'), nombre, razonSocial, cuit, direccion, ciudad, rubro, telefono, telefonoAlt, email, horario, turnos, adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng, img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30)};
+    const c = {id: nextId('c'), nombre, razonSocial, cuit, direccion, ciudad, rubro, telefono, whatsapp, email, horario, turnos, adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng, img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30)};
     c.qrPersonal = 'CQR-' + c.id.split('-')[1].padStart(4,'0');
     state.comercios.push(c);
     state.currentUser = c; state.role='comercio';
@@ -5591,6 +5665,7 @@ let ofertaAbierta = null;
 // ============ ENVÍO A DOMICILIO ============
 let modoEntregaActual = 'retiro';
 const COSTO_CAJA = {chica:3000, mediana:4500, grande:7000};
+const COSTO_ENVIO = 5900; // Costo fijo de envío a domicilio PuenT (en pesos)
 
 function elegirModoEntrega(modo){
   modoEntregaActual = modo;
@@ -6490,6 +6565,7 @@ function adminAbrirEditar(docId){
   document.getElementById('editAdNombre').value = c.nombre||'';
   document.getElementById('editAdDireccion').value = c.direccion||'';
   document.getElementById('editAdTelefono').value = c.telefono||'';
+  document.getElementById('editAdWhatsapp').value = c.whatsapp||'';
   document.getElementById('editAdEmail').value = c.email||'';
   document.getElementById('editAdInstagram').value = c.instagram||'';
   document.getElementById('editAdWeb').value = c.web||'';
@@ -6517,6 +6593,7 @@ async function adminGuardarEdicionComercio(){
     rubro:      document.getElementById('editAdRubro').value,
     direccion:  document.getElementById('editAdDireccion').value.trim(),
     telefono:   document.getElementById('editAdTelefono').value.trim(),
+    whatsapp:   document.getElementById('editAdWhatsapp').value.trim().replace(/\D/g,''),
     email:      document.getElementById('editAdEmail').value.trim(),
     instagram:  document.getElementById('editAdInstagram').value.trim(),
     web:        document.getElementById('editAdWeb').value.trim(),
@@ -7533,19 +7610,27 @@ function ofToggleEnvio(){
   if(det) det.style.display = activo ? 'block' : 'none';
 }
 
+// Selector de unidades en la ficha del producto
+function cambiarUnidades(delta){
+  const el = document.getElementById('ofUnidades');
+  const p = state.productos.find(x=>x.id===ofertaAbierta);
+  if(!el || !p) return;
+  let val = parseInt(el.textContent) + delta;
+  const maxStock = (p.stock !== null && p.stock !== undefined) ? p.stock : 99;
+  val = Math.max(1, Math.min(val, maxStock));
+  el.textContent = val;
+  const totalEl = document.getElementById('ofPrecioTotal');
+  if(totalEl) totalEl.textContent = val > 1 ? ('Total: $' + (p.precio * val).toLocaleString('es-AR')) : '';
+}
+
 function reservarProducto(){
-  // Buscar en state.productos (cargados por cargarDatosPublicosDeFirestore)
   var p = state.productos.find(function(x){ return x.id===ofertaAbierta; });
 
-  // Si Firebase aun no termino de cargar, reintentar en 1.5s
   if(!p && ofertaAbierta){
     if(!window._reservarReintentando){
       window._reservarReintentando = true;
       toast('⏳ Cargando producto...');
-      setTimeout(function(){
-        window._reservarReintentando = false;
-        reservarProducto();
-      }, 1500);
+      setTimeout(function(){ window._reservarReintentando = false; reservarProducto(); }, 1500);
     } else {
       window._reservarReintentando = false;
       toast('No se pudo cargar el producto. Revisá tu conexión.');
@@ -7553,22 +7638,7 @@ function reservarProducto(){
     return;
   }
   window._reservarReintentando = false;
-
   if(!p){ toast('Producto no encontrado'); return; }
-
-  // Si el cliente eligió envío a domicilio
-  var _checkBox = document.getElementById('ofEnvioCheckBox');
-  if(_checkBox && _checkBox.dataset.activo === '1'){
-    const direccion = (document.getElementById('ofEnvioDireccion')?.value||'').trim();
-    const franja = document.getElementById('ofEnvioFranja')?.value || 'tarde';
-    if(!direccion){ toast('📍 Ingresá tu dirección de entrega'); return; }
-    const pedido = crearPedidoEnvio(ofertaAbierta, direccion, franja);
-    if(pedido){
-      toast('🛵 ¡Pedido de envío creado! Un repartidor PuenT te va a contactar.');
-      showScreen('feed');
-    }
-    return;
-  }
 
   // Verificar stock
   if(p.tipoOferta==='h24'){
@@ -7578,24 +7648,49 @@ function reservarProducto(){
     toast('Sin stock disponible 😔'); return;
   }
 
-  // Verificar si ya está en el carrito
-  if(carrito[p.comercioId]?.items.some(i=>i.prodId===p.id)){
-    toast('Ya lo tenés reservado en tu carrito 🛒');
+  // Leer unidades seleccionadas
+  const unidadesEl = document.getElementById('ofUnidades');
+  const unidades = unidadesEl ? parseInt(unidadesEl.textContent) || 1 : 1;
+
+  // Verificar si es vendedor → flujo QR (sin cambios)
+  if(state.role === 'vendedor'){
+    const c = state.comercios.find(x=>x.id===p.comercioId);
+    if(!carrito[p.comercioId]){
+      carrito[p.comercioId] = { comercioNombre: c?.nombre||'Local', comercioId: p.comercioId, items:[] };
+    }
+    for(let i=0; i<unidades; i++){
+      carrito[p.comercioId].items.push({ prodId: p.id, nombre: p.nombre, precio: p.precio, img: p.img||null });
+    }
+    if(p.stock !== null && p.stock !== undefined){ p.stock = Math.max(0, p.stock - unidades); }
+    guardarProductoEnFirestore(p, state.currentUser?.uid);
+    toast(`🛒 ${unidades > 1 ? unidades + 'x ' : ''}${p.nombre} agregado al carrito`);
     document.getElementById('ofBtnReservar')?.classList.add('hidden');
     document.getElementById('ofYaReservado')?.classList.remove('hidden');
     return;
   }
 
+  // Flujo CLIENTE → agregar al carrito y abrir modal de finalización
   const c = state.comercios.find(x=>x.id===p.comercioId);
   if(!carrito[p.comercioId]){
     carrito[p.comercioId] = { comercioNombre: c?.nombre||'Local', comercioId: p.comercioId, items:[] };
   }
-  carrito[p.comercioId].items.push({
-    prodId: p.id, nombre: p.nombre, precio: p.precio, img: p.img||null
-  });
+  // Buscar si ya está y sumar unidades, o agregar nuevo
+  const existente = carrito[p.comercioId].items.find(i=>i.prodId===p.id);
+  if(existente){
+    existente.cantidad = (existente.cantidad||1) + unidades;
+    existente.precioTotal = existente.precio * existente.cantidad;
+  } else {
+    carrito[p.comercioId].items.push({ prodId: p.id, nombre: p.nombre, precio: p.precio, cantidad: unidades, precioTotal: p.precio * unidades, img: p.img||null });
+  }
 
-  // Descontar stock
-  if(p.stock !== null && p.stock !== undefined){ p.stock = Math.max(0, p.stock - 1); }
+  // Descontar stock inmediatamente
+  if(p.stock !== null && p.stock !== undefined){ p.stock = Math.max(0, p.stock - unidades); }
+  guardarProductoEnFirestore(p, p.ownerUid || state.currentUser?.uid);
+
+  document.getElementById('ofBtnReservar')?.classList.add('hidden');
+  document.getElementById('ofYaReservado')?.classList.remove('hidden');
+  toast(`✅ ${unidades > 1 ? unidades + 'x ' : ''}${p.nombre} en tu carrito`);
+}
 
   // UI: mostrar confirmación
   const btnReservar = document.getElementById('ofBtnReservar');
@@ -7619,44 +7714,40 @@ function abrirCarrito(){
 
 function renderCarrito(){
   const el = document.getElementById('carritoContenido');
+  const esVendedor = state.role === 'vendedor';
   const comercios = Object.values(carrito).filter(c=>c.items.length>0);
 
   if(!comercios.length){
     el.innerHTML = `<div class="empty">
       <div class="ic">🛒</div>
       <div class="t">Tu carrito está vacío</div>
-      <div class="s">Buscá productos y reservalos para retirarlos en el local.</div>
+      <div class="s">Buscá productos y agregarlos para hacer tu pedido.</div>
       <button class="btn btn-primary" style="margin-top:14px;" onclick="irInicio()">Explorar productos</button>
     </div>`;
     return;
   }
 
-  // Tarjeta de envío: aparece siempre que haya items en el carrito
-  // El cliente puede solicitarlo; el repartidor lo coordina una vez que el comercio confirme
-  const ventasConfirmadas = comercios; // usamos los grupos del carrito directamente
-  const hayConfirmadas = comercios.length > 0;
-
   const gruposHtml = comercios.map(grupo=>{
-    const total = grupo.items.reduce((s,i)=>s+i.precio,0);
-    // Ver si algún item de este grupo tiene venta confirmada
-    const tieneConfirmada = grupo.items.some(item=>
-      (state.ventas||[]).some(v=> v.productoId===item.prodId && (v.estado==='confirmada'||v.estado==='confirmado'))
-    );
-    const estadoPill = tieneConfirmada
-      ? '<span style="font-size:10px;background:#EAF5EA;color:#2F7A55;padding:3px 9px;border-radius:100px;font-weight:800;">✅ Confirmado</span>'
-      : '<span style="font-size:10px;background:#F0F4FA;color:#555;padding:3px 9px;border-radius:100px;font-weight:700;">🕒 Pendiente</span>';
-
+    const total = grupo.items.reduce((s,i)=>s+(i.precioTotal||i.precio),0);
     const itemsHtml = grupo.items.map(item=>`
       <div class="list-row" style="align-items:center;">
         <div class="av" style="background:var(--cream);border-radius:10px;overflow:hidden;flex-shrink:0;">
           ${item.img ? `<img src="${item.img}" style="width:100%;height:100%;object-fit:cover;">` : '📦'}
         </div>
         <div class="main">
-          <div class="t">${item.nombre}</div>
-          <div class="s" style="color:var(--navy);font-weight:700;">$${item.precio.toLocaleString('es-AR')}</div>
+          <div class="t">${item.cantidad > 1 ? item.cantidad+'× ' : ''}${item.nombre}</div>
+          <div class="s" style="color:var(--navy);font-weight:700;">$${(item.precioTotal||item.precio).toLocaleString('es-AR')}</div>
         </div>
         <button onclick="quitarDelCarrito('${grupo.comercioId}','${item.prodId}')" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px;">✕</button>
       </div>`).join('');
+
+    const accionHtml = esVendedor
+      ? `<button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="generarQRCarrito('${grupo.comercioId}')">
+           📲 Generar QR · ${grupo.comercioNombre}
+         </button>`
+      : `<button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="abrirFinalizarPedido('${grupo.comercioId}')">
+           Finalizar pedido →
+         </button>`;
 
     return `<div class="card" style="margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -7664,69 +7755,148 @@ function renderCarrito(){
           <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Local</div>
           <div style="font-size:15px;font-weight:800;color:var(--navy);">${grupo.comercioNombre}</div>
         </div>
-        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-          ${estadoPill}
-          <div style="font-size:15px;font-weight:800;color:var(--navy);">$${total.toLocaleString('es-AR')}</div>
-        </div>
+        <div style="font-size:17px;font-weight:800;color:var(--navy);">$${total.toLocaleString('es-AR')}</div>
       </div>
       ${itemsHtml}
-      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="generarQRCarrito('${grupo.comercioId}')">
-        📲 Generar QR · ${grupo.comercioNombre}
-      </button>
+      ${accionHtml}
     </div>`;
   }).join('');
 
-  // Tarjeta de envío — solo si hay al menos una venta confirmada
-  const envioCardHtml = hayConfirmadas ? `
-    <div style="background:#FFF3E8;border:1.5px solid var(--navy);border-radius:14px;overflow:hidden;margin-bottom:16px;">
-      <div style="padding:14px 16px 12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-          <div style="display:flex;align-items:center;gap:9px;">
-            <span style="font-size:20px;">🛵</span>
-            <div>
-              <div style="font-size:13px;font-weight:800;color:var(--navy);">Envío a domicilio</div>
-              <div style="font-size:11px;color:var(--muted);">Repartidores PuenT · dentro de La Paz</div>
-            </div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:15px;font-weight:800;color:var(--navy);">$5.899</div>
-            <div style="font-size:9px;background:var(--navy);color:white;padding:2px 7px;border-radius:100px;font-weight:800;">PROMO 🎉</div>
-          </div>
-        </div>
-        <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
-          Reservaste en más de un local? Pedí que te lleven todo a casa.<br>Un repartidor pasa por cada local. Abonás al recibirlo.
-        </div>
-        <!-- Checkbox -->
-        <div id="carritoEnvioCheckWrap" style="display:flex;align-items:center;gap:10px;background:white;border-radius:10px;padding:11px 13px;cursor:pointer;border:1.5px solid var(--line);" onclick="carritoToggleEnvio()">
-          <div id="carritoEnvioCheckBox" style="width:20px;height:20px;border-radius:6px;border:2px solid var(--navy);background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--ink);">Quiero envío a domicilio</div>
-            <div style="font-size:11px;color:var(--muted);">+ $5.899 por viaje · lo abonás al recibir</div>
-          </div>
-        </div>
-      </div>
-      <!-- Formulario de dirección -->
-      <div id="carritoEnvioForm" style="display:none;border-top:1px solid #FFE0C8;padding:12px 16px;background:#FFF8F3;">
-        <div class="field" style="margin-bottom:8px;">
-          <label style="font-size:12px;font-weight:700;">📍 Dirección de entrega</label>
-          <input id="carritoEnvioDireccion" placeholder="Ej: San Martín 450, La Paz" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:white;">
-        </div>
-        <div class="field" style="margin-bottom:10px;">
-          <label style="font-size:12px;font-weight:700;">⏰ ¿Cuándo lo necesitás?</label>
-          <select id="carritoEnvioFranja" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:white;">
-            <option value="manana">🌅 Mañana (9 a 12hs)</option>
-            <option value="tarde">☀️ Tarde (14 a 18hs)</option>
-            <option value="noche">🌙 Noche (18 a 21hs)</option>
-          </select>
-        </div>
-        <div style="font-size:11px;color:var(--muted);background:white;border-radius:8px;padding:8px 10px;line-height:1.5;margin-bottom:10px;">
-          Se genera un pedido de envío por cada comercio (${comercios.length} pedido${comercios.length!==1?'s':''}). El repartidor retira en el local y te lo lleva.
-        </div>
-        <button class="btn btn-primary" style="width:100%;" onclick="carritoConfirmarEnvio()">🛵 Confirmar envío a domicilio</button>
-      </div>
-    </div>` : '';
+  el.innerHTML = gruposHtml;
+}
 
-  el.innerHTML = envioCardHtml + gruposHtml;
+// ===== FINALIZAR PEDIDO (flujo cliente → WhatsApp) =====
+let _pedidoGrupoId = null;
+
+function abrirFinalizarPedido(comercioId){
+  _pedidoGrupoId = comercioId;
+  const grupo = carrito[comercioId];
+  const c = state.comercios.find(x=>x.id===comercioId);
+  if(!grupo || !c){ toast('Error al procesar el pedido'); return; }
+
+  const total = grupo.items.reduce((s,i)=>s+(i.precioTotal||i.precio),0);
+  const itemsResumen = grupo.items.map(i=>`${i.cantidad>1?i.cantidad+'× ':''}${i.nombre} — $${(i.precioTotal||i.precio).toLocaleString('es-AR')}`).join('\n• ');
+
+  // Mostrar modal
+  const modal = document.getElementById('modalFinalizarPedido');
+  document.getElementById('fpComercioNombre').textContent = c.nombre;
+  document.getElementById('fpResumenItems').textContent = '• ' + itemsResumen;
+  document.getElementById('fpTotal').textContent = '$' + total.toLocaleString('es-AR');
+  document.getElementById('fpEnvioExtra').textContent = '$' + COSTO_ENVIO.toLocaleString('es-AR');
+  document.getElementById('fpTotalConEnvio').textContent = '$' + (total + COSTO_ENVIO).toLocaleString('es-AR');
+  document.getElementById('fpEnvioForm').style.display = 'none';
+  document.getElementById('fpDireccion').value = '';
+  modal.style.display = 'flex';
+}
+
+function fpCerrarModal(){
+  document.getElementById('modalFinalizarPedido').style.display = 'none';
+  _pedidoGrupoId = null;
+}
+
+function fpMostrarEnvio(){
+  document.getElementById('fpEnvioForm').style.display = 'block';
+}
+
+function fpEnviarWhatsApp(tipo){
+  const grupo = carrito[_pedidoGrupoId];
+  const c = state.comercios.find(x=>x.id===_pedidoGrupoId);
+  if(!grupo || !c){ toast('Error'); return; }
+
+  const whatsapp = (c.whatsapp||'').replace(/\D/g,'');
+  if(!whatsapp){ toast('⚠️ Este comercio todavía no tiene WhatsApp cargado. Contactalo por otra vía.'); return; }
+
+  const total = grupo.items.reduce((s,i)=>s+(i.precioTotal||i.precio),0);
+  const itemsLineas = grupo.items.map(i=>`  • ${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}: $${(i.precioTotal||i.precio).toLocaleString('es-AR')}`).join('\n');
+  const nombreUsuario = state.currentUser?.nombre || 'Un cliente PuenT';
+
+  let msg = '';
+  if(tipo === 'presencial'){
+    msg = `¡Hola ${c.nombre}! 👋\n\nSoy *${nombreUsuario}* y quiero reservar desde PuenT:\n\n${itemsLineas}\n\n*Total: $${total.toLocaleString('es-AR')}*\n\n✅ Paso a retirar al local. ¡Gracias!`;
+  } else {
+    const dir = document.getElementById('fpDireccion').value.trim();
+    if(!dir){ toast('📍 Ingresá tu dirección de entrega'); return; }
+    const totalConEnvio = total + COSTO_ENVIO;
+    msg = `¡Hola ${c.nombre}! 👋\n\nSoy *${nombreUsuario}* y quiero pedir envío a domicilio desde PuenT:\n\n${itemsLineas}\n\n🛵 *Envío:* $${COSTO_ENVIO.toLocaleString('es-AR')}\n*Total: $${totalConEnvio.toLocaleString('es-AR')}*\n\n📍 *Dirección de entrega:* ${dir}\n\n¡Gracias!`;
+  }
+
+  // Guardar en Mis Pedidos
+  const pedido = {
+    id: 'PED-' + Date.now(),
+    comercioId: c.id,
+    comercioNombre: c.nombre,
+    items: grupo.items,
+    total: tipo === 'presencial' ? total : total + COSTO_ENVIO,
+    tipo,
+    direccion: tipo === 'envio' ? document.getElementById('fpDireccion').value.trim() : null,
+    estado: 'enviado',
+    fecha: new Date().toISOString(),
+    usuarioId: state.currentUser?.id || null,
+  };
+  if(!state.misPedidos) state.misPedidos = [];
+  state.misPedidos.unshift(pedido);
+  guardarMisPedidosFirestore();
+
+  // Vaciar items del grupo del carrito
+  delete carrito[_pedidoGrupoId];
+
+  // Abrir WhatsApp
+  const url = `https://wa.me/54${whatsapp}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+
+  fpCerrarModal();
+  renderCarrito();
+  toast('✅ Pedido enviado al comercio por WhatsApp');
+}
+
+async function abrirMisPedidos(){
+  await cargarMisPedidos();
+  renderMisPedidos();
+  showScreen('mis-pedidos');
+}
+
+function renderMisPedidos(){
+  const el = document.getElementById('misPedidosContenido');
+  const pedidos = state.misPedidos || [];
+  if(!pedidos.length){
+    el.innerHTML = `<div class="empty"><div class="ic">📋</div><div class="t">Todavía no hiciste pedidos</div><div class="s">Cuando hagas tu primer pedido, va a aparecer acá.</div></div>`;
+    return;
+  }
+  const ESTADOS = { enviado:'🕒 Enviado', confirmado:'✅ Confirmado', en_camino:'🛵 En camino', entregado:'✔️ Entregado' };
+  el.innerHTML = pedidos.map(p=>{
+    const fecha = new Date(p.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const estadoLabel = ESTADOS[p.estado] || p.estado;
+    const tipoLabel = p.tipo === 'envio' ? '🛵 Con envío' : '🏪 Presencial';
+    const itemsHtml = (p.items||[]).map(i=>`<div style="font-size:12.5px;color:var(--muted);">${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}</div>`).join('');
+    return `<div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--navy);">${p.comercioNombre}</div>
+          <div style="font-size:11px;color:var(--muted);">${fecha} · ${tipoLabel}</div>
+        </div>
+        <span style="font-size:11px;font-weight:700;background:#F0F4FA;color:var(--navy);padding:3px 10px;border-radius:100px;white-space:nowrap;">${estadoLabel}</span>
+      </div>
+      ${itemsHtml}
+      <div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;">
+        <span style="font-size:13px;font-weight:700;">Total</span>
+        <span style="font-size:14px;font-weight:800;color:var(--navy);">$${p.total.toLocaleString('es-AR')}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function guardarMisPedidosFirestore(){
+  if(!firebaseListo || !state.currentUser?.uid) return;
+  db.collection('pedidos').doc(state.currentUser.uid).set({ pedidos: state.misPedidos })
+    .catch(e=>console.error('Error guardando pedidos:', e));
+}
+
+async function cargarMisPedidos(){
+  if(!firebaseListo || !state.currentUser?.uid) return;
+  try{
+    const doc = await db.collection('pedidos').doc(state.currentUser.uid).get();
+    if(doc.exists) state.misPedidos = doc.data().pedidos || [];
+  } catch(e){ console.error('Error cargando pedidos:', e); }
 }
 
 function carritoToggleEnvio(){
