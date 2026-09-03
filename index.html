@@ -1609,6 +1609,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-mint" style="grid-column:1/-1;" onclick="renderCOperaciones();showScreen('c-operaciones')"><i class="ti ti-list-check ic" aria-hidden="true"></i>Operaciones y comisiones</button>
       <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="renderCPedidosEnvio();showScreen('c-pedidos-envio')"><i class="ti ti-truck ic" aria-hidden="true"></i>Pedidos de envío 🚚</button>
     </div>
+    <div id="cPlanBox" style="margin-bottom:12px;"></div>
     <div id="cAlertasBox" style="margin-bottom:10px;"></div>
     <p class="page-sub">Cuando un cliente te presente un código, escribilo acá para confirmar la entrega.</p>
     <div class="card">
@@ -2012,6 +2013,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
       <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
       <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="adminCargarRepartidores();showScreen('admin-repartidores')"><i class="ti ti-bike ic"></i>Repartidores 🛵</button>
+      <button class="btn-tile btn-tile-gold" style="grid-column:1/-1;" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
     </div>
   </div>
 
@@ -2063,6 +2065,26 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
     <div id="adminVentasContador" style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;"></div>
     <div id="adminVentasList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN PLANES ============ -->
+  <div class="screen hidden" id="screen-admin-planes">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">💳 Planes y pagos</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('todos')" style="flex:1;">Todos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('vencidos')" style="flex:1;">🔴 Vencidos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('por_vencer')" style="flex:1;">⚠️ Por vencer</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('activos')" style="flex:1;">✅ Activos</button>
+    </div>
+    <div id="adminPlanesList"></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN PLAN DETALLE ============ -->
+  <div class="screen hidden" id="screen-admin-plan-detalle">
+    <div class="link-back" onclick="showScreen('admin-planes')">← Planes</div>
+    <div class="page-title" id="adminPlanNombre">Plan del comercio</div>
+    <div id="adminPlanContenido"></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN DETALLE OPERACION ============ -->
@@ -3131,6 +3153,33 @@ function logoutFirebase(){
 /* ================= REGISTRO ================= */
 let pendingRole = null;
 let registroLatLng = null;
+function togglePlanUI(tipo){
+  const fijoLabel = document.getElementById('rPlanFijoLabel');
+  const comLabel  = document.getElementById('rPlanComLabel');
+  const fijoOpts  = document.getElementById('rPlanFijoOpts');
+  const comOpts   = document.getElementById('rPlanComOpts');
+  if(!fijoLabel) return;
+  const olive = 'var(--olive,#5C7355)';
+  const line  = 'var(--line)';
+  if(tipo === 'fijo'){
+    fijoLabel.style.borderColor = olive;
+    fijoLabel.style.background  = 'rgba(92,115,85,0.07)';
+    comLabel.style.borderColor  = line;
+    comLabel.style.background   = '';
+    fijoOpts.style.display = '';
+    comOpts.style.display  = 'none';
+    document.querySelector('input[name="rPlanTipo"][value="fijo"]').checked = true;
+  } else {
+    comLabel.style.borderColor  = olive;
+    comLabel.style.background   = 'rgba(92,115,85,0.07)';
+    fijoLabel.style.borderColor = line;
+    fijoLabel.style.background  = '';
+    comOpts.style.display  = '';
+    fijoOpts.style.display = 'none';
+    document.querySelector('input[name="rPlanTipo"][value="comision"]').checked = true;
+  }
+}
+
 function marcarUbicacion(){
   const estado = document.getElementById('ubicacionEstado');
   if(!navigator.geolocation){ estado.textContent = 'Tu navegador no soporta geolocalización, usamos la dirección como respaldo.'; return; }
@@ -3277,6 +3326,73 @@ function goRegister(role){
           <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="qr" style="width:auto;"> 📷 QR / MODO</label>
         </div>
 
+        <!-- PLAN -->
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">🏷️ Plan de suscripción</div>
+        <div style="background:var(--cream,#FBF7EF);border-radius:13px;padding:13px 14px;margin-bottom:6px;font-size:12.5px;color:var(--muted);line-height:1.5;">
+          Tus primeros <strong>15 días son gratis</strong>. Después elegís cómo seguir. Podés cambiar de plan en cualquier momento hablando con nosotros.
+        </div>
+
+        <!-- Selector tipo de plan -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <label id="rPlanFijoLabel" onclick="togglePlanUI('fijo')" style="cursor:pointer;border:2px solid var(--olive,#5C7355);border-radius:12px;padding:12px 10px;display:flex;flex-direction:column;gap:3px;background:rgba(92,115,85,0.07);">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="radio" name="rPlanTipo" value="fijo" checked style="width:auto;accent-color:var(--olive,#5C7355);">
+              <span style="font-weight:800;font-size:13px;">Pago fijo</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted);margin-left:20px;">Monto fijo por mes, sin importar cuánto vendés.</div>
+          </label>
+          <label id="rPlanComLabel" onclick="togglePlanUI('comision')" style="cursor:pointer;border:2px solid var(--line);border-radius:12px;padding:12px 10px;display:flex;flex-direction:column;gap:3px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="radio" name="rPlanTipo" value="comision" style="width:auto;accent-color:var(--olive,#5C7355);">
+              <span style="font-weight:800;font-size:13px;">Por comisión</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted);margin-left:20px;">Pagás un % de lo vendido por mes. Si no vendés, no pagás.</div>
+          </label>
+        </div>
+
+        <!-- Opciones plan fijo -->
+        <div id="rPlanFijoOpts" style="margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:7px;">Elegí tu monto mensual:</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 13px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;">
+              <input type="radio" name="rPlanFijoMonto" value="20000" checked style="width:auto;accent-color:var(--olive,#5C7355);"> $20.000 / mes
+              <span style="margin-left:auto;font-size:11px;font-weight:500;color:var(--muted);">Acceso completo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Opciones plan comisión -->
+        <div id="rPlanComOpts" style="display:none;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:7px;">Elegí tu porcentaje de comisión:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            ${[['3','Ideal para arrancar'],['5','El más elegido'],['7','Mayor alcance'],['10','Máxima exposición']].map(([v,desc],i)=>`
+            <label style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="radio" name="rPlanComPct" value="${v}" ${i===1?'checked':''} style="width:auto;accent-color:var(--olive,#5C7355);">
+                <span style="font-weight:800;font-size:14px;">${v}%</span>
+              </div>
+              <span style="font-size:10.5px;color:var(--muted);margin-left:20px;">${desc}</span>
+            </label>`).join('')}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;">
+            💡 La comisión se calcula sobre las ventas que registrás en PuenT cada mes. El admin te envía el resumen y acordás el pago.
+          </div>
+        </div>
+
+        <!-- Beneficios incluidos -->
+        <div style="background:white;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:8px;">✅ Incluido en cualquier plan:</div>
+          <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);">
+            <div>🏪 Catálogo propio con productos ilimitados</div>
+            <div>🏠 Tus productos en el Home y el buscador</div>
+            <div>📍 Ficha del local con mapa y horarios</div>
+            <div>📷 QR personal del comercio</div>
+            <div>🌪️ Ofertas Tornado para liquidar stock</div>
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:6px;">🔶 Add-on extra (se contrata aparte):</div>
+          <div style="font-size:12px;color:var(--muted);">📣 Banner publicitario en el Home (precio a convenir)</div>
+        </div>
+
         <div class="field" style="display:flex;align-items:flex-start;gap:10px;">
           <input type="checkbox" id="rTyc" style="width:auto;margin-top:3px;">
           <label style="font-weight:500;font-size:12.5px;color:var(--muted);" for="rTyc">Acepto los Términos y Condiciones y el tratamiento de mis datos.</label>
@@ -3345,6 +3461,17 @@ function submitRegister(){
     const dias = [...document.querySelectorAll('input[name="rDias"]:checked')].map(c=>c.value);
     const metodosPago = [...document.querySelectorAll('input[name="rPagos"]:checked')].map(c=>c.value);
     const tyc = document.getElementById('rTyc').checked;
+    // Plan elegido
+    const planTipo = document.querySelector('input[name="rPlanTipo"]:checked')?.value || 'fijo';
+    const planMonto = planTipo === 'fijo'
+      ? parseInt(document.querySelector('input[name="rPlanFijoMonto"]:checked')?.value || '20000')
+      : null;
+    const planComPct = planTipo === 'comision'
+      ? parseInt(document.querySelector('input[name="rPlanComPct"]:checked')?.value || '5')
+      : null;
+    // Fecha de vencimiento del período de gracia (15 días)
+    const gracia = new Date(); gracia.setDate(gracia.getDate() + 15);
+    const planVence = gracia.toISOString().slice(0,10);
 
     if(!razonSocial || !direccion || !whatsapp || !email){
       toast('Completá todos los datos obligatorios, incluyendo el WhatsApp'); return;
@@ -3354,7 +3481,11 @@ function submitRegister(){
     if(nombreOcupado){ toast('Ya existe un comercio registrado con ese nombre, elegí otro'); return; }
     if(!tyc){ toast('Necesitás aceptar los Términos y Condiciones'); return; }
 
-    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng, img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30)};
+    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago,
+      plan: planTipo, planMonto, planComPct, planVence, planActivo: true,
+      bannerActivo: false, bannerVence: null, pagos: [],
+      adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng,
+      img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30)};
     c.qrPersonal = 'CQR-' + c.id.split('-')[1].padStart(4,'0');
     state.comercios.push(c);
     state.currentUser = c; state.role='comercio';
@@ -4650,8 +4781,78 @@ function guardarPerfilEnFirestore(coleccion, data){
     .catch(e=>console.error('No se pudo actualizar el perfil en Firestore:', e));
 }
 
+function planDiasRestantes(c){
+  if(!c.planVence) return null;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const vence = new Date(c.planVence);
+  return Math.ceil((vence - hoy) / 86400000);
+}
+
+function renderCPlanBox(){
+  const box = document.getElementById('cPlanBox');
+  if(!box) return;
+  const c = state.currentUser;
+  if(!c) return;
+  const dias = planDiasRestantes(c);
+  const activo = c.planActivo !== false;
+  const esGracia = !c.pagos?.length;
+
+  let colorBg, colorBorde, badge, diasTexto, subtexto;
+
+  if(!activo || dias < 0){
+    colorBg = '#fff5f5'; colorBorde = '#e05a5a';
+    badge = '🔴 Plan vencido';
+    diasTexto = 'Tu plan venció — tus productos no se muestran en el feed público.';
+    subtexto = 'Contactá a PuenT para renovar.';
+  } else if(dias <= 5){
+    colorBg = '#fffbea'; colorBorde = '#C99A3E';
+    badge = `⚠️ Vence en ${dias} día${dias===1?'':'s'}`;
+    diasTexto = 'Renová pronto para no perder visibilidad.';
+    subtexto = 'Contactá a PuenT para renovar.';
+  } else if(esGracia){
+    colorBg = '#f0f7ee'; colorBorde = 'var(--olive,#5C7355)';
+    badge = `🎁 Período de gracia — ${dias} días restantes`;
+    diasTexto = 'Estás en prueba gratuita. ¡Aprovechá para cargar tus productos!';
+    subtexto = c.plan === 'fijo'
+      ? `Tu plan elegido: Fijo $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
+      : `Tu plan elegido: Comisión ${c.planComPct||5}% sobre ventas`;
+  } else {
+    colorBg = '#f0f7ee'; colorBorde = 'var(--olive,#5C7355)';
+    badge = `✅ Plan activo — ${dias} días restantes`;
+    diasTexto = c.plan === 'fijo'
+      ? `Plan Fijo: $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
+      : `Plan Comisión: ${c.planComPct||5}% sobre ventas`;
+    const ultimo = c.pagos?.slice(-1)[0];
+    subtexto = ultimo ? `Último pago: ${ultimo.fecha} — $${parseInt(ultimo.monto).toLocaleString('es-AR')}` : '';
+  }
+
+  // Banner activo?
+  let bannerHtml = '';
+  if(c.bannerActivo && c.bannerVence){
+    const db = planDiasRestantes({planVence: c.bannerVence});
+    bannerHtml = `<div style="margin-top:8px;padding:7px 10px;background:rgba(201,154,62,0.12);border-radius:8px;font-size:11.5px;font-weight:700;color:var(--gold,#C99A3E);">📣 Banner activo — vence en ${db} día${db===1?'':'s'}</div>`;
+  }
+
+  box.innerHTML = `
+    <div style="background:${colorBg};border:1.5px solid ${colorBorde};border-radius:13px;padding:13px 14px;">
+      <div style="font-weight:800;font-size:13px;color:var(--ink);margin-bottom:3px;">${badge}</div>
+      <div style="font-size:12.5px;color:var(--ink);margin-bottom:2px;">${diasTexto}</div>
+      ${subtexto ? `<div style="font-size:11.5px;color:var(--muted);">${subtexto}</div>` : ''}
+      ${bannerHtml}
+      <button onclick="contactarPuenT()" style="margin-top:10px;background:none;border:1.5px solid ${colorBorde};border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;width:100%;">
+        💬 Contactar a PuenT para renovar o cambiar plan
+      </button>
+    </div>`;
+}
+
+function contactarPuenT(){
+  const wa = '5493437000000'; // reemplazar con el WA real de admin PuenT
+  window.open(`https://wa.me/${wa}?text=Hola%2C%20soy%20${encodeURIComponent(state.currentUser?.nombre||'un comercio')}%20y%20quiero%20renovar%20o%20cambiar%20mi%20plan%20en%20PuenT.`, '_blank');
+}
+
 function renderComercioPanel(){
   renderPublicidadBox();
+  renderCPlanBox();
   renderProductosPropios();
   renderPedidosProducto();
   renderCAlertasComercio();
@@ -5339,7 +5540,13 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
   if(origenTipo==='comercio'){
     universo = state.productos.filter(p=>p.origen==='comercio' || !p.origen).filter(p=>{
       const c = state.comercios.find(x=>x.id===p.comercioId);
-      return c && c.ciudad===ciudadSeleccionada;
+      if(!c || c.ciudad!==ciudadSeleccionada) return false;
+      // Ocultar si el plan venció (solo si el comercio ya eligió plan — los sin plan son demos/admin)
+      if(c.plan && c.planVence){
+        const dias = planDiasRestantes(c);
+        if(dias !== null && dias < 0) return false;
+      }
+      return true;
     });
   } else {
     // Pestaña "Vendedores": cada selección de catalogoVendedor es una oferta distinta
@@ -6323,6 +6530,252 @@ function renderLocales(){
         </div>
       </div>`;
   }).join('');
+}
+
+/* ================= ADMIN: PLANES Y PAGOS ================= */
+
+let adminPlanesFiltro = 'todos';
+
+function adminCargarPlanes(){
+  adminPlanesFiltro = 'todos';
+  renderAdminPlanes();
+}
+
+function adminFiltrarPlanes(filtro){
+  adminPlanesFiltro = filtro;
+  renderAdminPlanes();
+}
+
+function renderAdminPlanes(){
+  const list = document.getElementById('adminPlanesList');
+  if(!list) return;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+  let comercios = state.comercios.filter(c => c.plan); // solo los que tienen plan cargado
+
+  if(adminPlanesFiltro === 'vencidos'){
+    comercios = comercios.filter(c => {
+      const d = planDiasRestantes(c);
+      return d !== null && d < 0;
+    });
+  } else if(adminPlanesFiltro === 'por_vencer'){
+    comercios = comercios.filter(c => {
+      const d = planDiasRestantes(c);
+      return d !== null && d >= 0 && d <= 7;
+    });
+  } else if(adminPlanesFiltro === 'activos'){
+    comercios = comercios.filter(c => {
+      const d = planDiasRestantes(c);
+      return d !== null && d > 7;
+    });
+  }
+
+  if(comercios.length === 0){
+    list.innerHTML = `<div class="empty"><div class="ic">💳</div><div class="t">No hay comercios con ese estado</div></div>`;
+    return;
+  }
+
+  list.innerHTML = comercios.map(c => {
+    const dias = planDiasRestantes(c);
+    const esGracia = !c.pagos?.length;
+    let estadoBadge, estadoColor;
+    if(dias === null || dias < 0){
+      estadoBadge = '🔴 Vencido'; estadoColor = '#e05a5a';
+    } else if(dias <= 7){
+      estadoBadge = `⚠️ ${dias}d`; estadoColor = '#C99A3E';
+    } else if(esGracia){
+      estadoBadge = `🎁 Gracia ${dias}d`; estadoColor = '#5C7355';
+    } else {
+      estadoBadge = `✅ ${dias}d`; estadoColor = '#5C7355';
+    }
+    const planLabel = c.plan === 'fijo'
+      ? `Fijo $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
+      : `Comisión ${c.planComPct||5}%`;
+    const bannerBadge = c.bannerActivo ? ' 📣' : '';
+    return `
+      <div class="list-row" onclick="abrirAdminPlan('${c.id}')" style="cursor:pointer;">
+        <div class="av" style="background:${estadoColor};color:white;font-size:11px;font-weight:800;width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;">${c.pagos?.length||0}<br><span style="font-size:9px;">pagos</span></div>
+        <div class="main">
+          <div class="t">${c.nombre}${bannerBadge}</div>
+          <div class="s">${planLabel} · ${estadoBadge}</div>
+          <div class="s">Vence: ${c.planVence||'—'}</div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:${estadoColor};flex-shrink:0;">→</div>
+      </div>`;
+  }).join('');
+}
+
+function abrirAdminPlan(comercioId){
+  const c = state.comercios.find(x => x.id === comercioId);
+  if(!c) return;
+  document.getElementById('adminPlanNombre').textContent = c.nombre;
+  renderAdminPlanDetalle(c);
+  showScreen('admin-plan-detalle');
+}
+
+function renderAdminPlanDetalle(c){
+  const cont = document.getElementById('adminPlanContenido');
+  if(!cont) return;
+  const dias = planDiasRestantes(c);
+  const esGracia = !c.pagos?.length;
+
+  const planLabel = c.plan === 'fijo'
+    ? `Fijo — $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
+    : `Comisión — ${c.planComPct||5}% sobre ventas`;
+
+  const historial = (c.pagos||[]).length === 0
+    ? `<div style="color:var(--muted);font-size:13px;padding:12px 0;">Sin pagos registrados aún.</div>`
+    : (c.pagos||[]).slice().reverse().map(p => `
+        <div class="list-row">
+          <div class="av" style="background:var(--green)">💰</div>
+          <div class="main">
+            <div class="t">$${parseInt(p.monto).toLocaleString('es-AR')}</div>
+            <div class="s">${p.fecha} · ${p.tipo||'—'}${p.nota ? ' · ' + p.nota : ''}</div>
+          </div>
+        </div>`).join('');
+
+  const bannerSection = `
+    <div class="divider"></div>
+    <div class="page-sub" style="font-weight:700;color:var(--navy);margin-bottom:10px;">📣 Banner publicitario</div>
+    <div class="card" style="margin-bottom:0;">
+      ${c.bannerActivo
+        ? `<div style="font-size:13px;font-weight:700;color:#5C7355;margin-bottom:8px;">✅ Activo — vence ${c.bannerVence||'—'}</div>`
+        : `<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Sin banner activo</div>`}
+      <div class="two-col" style="margin-bottom:10px;">
+        <div class="field"><label>Monto cobrado</label><input id="apBannerMonto" type="number" placeholder="Ej: 8000"></div>
+        <div class="field"><label>Vence</label><input id="apBannerVence" type="date"></div>
+      </div>
+      <div class="field"><label>Nota</label><input id="apBannerNota" placeholder="Opcional"></div>
+      <div class="btn-block-row">
+        <button class="btn btn-primary" onclick="adminActivarBanner('${c.id}')">Activar banner</button>
+        ${c.bannerActivo ? `<button class="btn btn-ghost" onclick="adminDesactivarBanner('${c.id}')">Desactivar</button>` : ''}
+      </div>
+    </div>`;
+
+  cont.innerHTML = `
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Estado del plan</div>
+      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;">${planLabel}</div>
+      <div style="font-size:13px;color:var(--muted);">Vence: ${c.planVence||'—'} ${dias !== null ? `(${dias >= 0 ? dias+'d restantes' : 'VENCIDO'})` : ''}</div>
+      ${esGracia ? `<div style="font-size:12px;color:#5C7355;font-weight:700;margin-top:4px;">🎁 En período de gracia</div>` : ''}
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Registrar pago y renovar</div>
+      <div class="field"><label>Monto cobrado ($)</label><input id="apMonto" type="number" placeholder="Ej: 20000"></div>
+      <div class="two-col">
+        <div class="field"><label>Método</label>
+          <select id="apMetodo" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
+            <option value="transferencia">🏦 Transferencia</option>
+            <option value="efectivo">💵 Efectivo</option>
+            <option value="mercadopago">📲 MercadoPago</option>
+          </select>
+        </div>
+        <div class="field"><label>Nueva fecha venc.</label><input id="apVence" type="date"></div>
+      </div>
+      <div class="field"><label>Nota (opcional)</label><input id="apNota" placeholder="Ej: Mes de octubre"></div>
+      <button class="btn btn-primary" onclick="adminRegistrarPago('${c.id}')">✅ Registrar pago</button>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Cambiar plan</div>
+      <div class="two-col" style="margin-bottom:8px;">
+        <div class="field"><label>Tipo</label>
+          <select id="apTipoPlan" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;" onchange="toggleAdminPlanOpts()">
+            <option value="fijo" ${c.plan==='fijo'?'selected':''}>Fijo mensual</option>
+            <option value="comision" ${c.plan==='comision'?'selected':''}>Por comisión</option>
+          </select>
+        </div>
+        <div class="field" id="apMontoFijoField" style="${c.plan!=='fijo'?'display:none':''}">
+          <label>Monto fijo</label>
+          <select id="apMontoFijo" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
+            <option value="20000" ${c.planMonto===20000?'selected':''}>$20.000/mes</option>
+          </select>
+        </div>
+        <div class="field" id="apComPctField" style="${c.plan!=='comision'?'display:none':''}">
+          <label>% comisión</label>
+          <select id="apComPct" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
+            <option value="3" ${c.planComPct===3?'selected':''}>3%</option>
+            <option value="5" ${c.planComPct===5?'selected':''}>5%</option>
+            <option value="7" ${c.planComPct===7?'selected':''}>7%</option>
+            <option value="10" ${c.planComPct===10?'selected':''}>10%</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-ghost" onclick="adminGuardarCambioPlan('${c.id}')">Guardar cambio de plan</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="page-sub" style="font-weight:700;color:var(--navy);margin-bottom:10px;">Historial de pagos</div>
+    ${historial}
+    ${bannerSection}`;
+
+  // Poner fecha default de vencimiento (hoy + 30 días)
+  const d30 = new Date(); d30.setDate(d30.getDate()+30);
+  const d30str = d30.toISOString().slice(0,10);
+  const apv = document.getElementById('apVence');
+  if(apv) apv.value = d30str;
+  const abv = document.getElementById('apBannerVence');
+  if(abv) abv.value = d30str;
+}
+
+function toggleAdminPlanOpts(){
+  const tipo = document.getElementById('apTipoPlan').value;
+  document.getElementById('apMontoFijoField').style.display = tipo==='fijo' ? '' : 'none';
+  document.getElementById('apComPctField').style.display = tipo==='comision' ? '' : 'none';
+}
+
+function adminRegistrarPago(comercioId){
+  const c = state.comercios.find(x => x.id === comercioId);
+  if(!c) return;
+  const monto = document.getElementById('apMonto').value.trim();
+  const metodo = document.getElementById('apMetodo').value;
+  const vence = document.getElementById('apVence').value;
+  const nota = document.getElementById('apNota').value.trim();
+  if(!monto || !vence){ toast('Completá el monto y la fecha de vencimiento'); return; }
+  if(!c.pagos) c.pagos = [];
+  const hoy = new Date().toISOString().slice(0,10);
+  c.pagos.push({ fecha: hoy, monto: parseInt(monto), tipo: metodo, nota, vence });
+  c.planVence = vence;
+  c.planActivo = true;
+  toast(`✅ Pago de $${parseInt(monto).toLocaleString('es-AR')} registrado. Plan renovado hasta ${vence}.`);
+  renderAdminPlanDetalle(c);
+  renderAdminPlanes();
+}
+
+function adminGuardarCambioPlan(comercioId){
+  const c = state.comercios.find(x => x.id === comercioId);
+  if(!c) return;
+  c.plan = document.getElementById('apTipoPlan').value;
+  c.planMonto = c.plan === 'fijo' ? parseInt(document.getElementById('apMontoFijo').value) : null;
+  c.planComPct = c.plan === 'comision' ? parseInt(document.getElementById('apComPct').value) : null;
+  toast('Plan actualizado');
+  renderAdminPlanDetalle(c);
+}
+
+function adminActivarBanner(comercioId){
+  const c = state.comercios.find(x => x.id === comercioId);
+  if(!c) return;
+  const monto = document.getElementById('apBannerMonto').value.trim();
+  const vence = document.getElementById('apBannerVence').value;
+  const nota = document.getElementById('apBannerNota').value.trim();
+  if(!vence){ toast('Ingresá la fecha de vencimiento del banner'); return; }
+  if(!c.pagos) c.pagos = [];
+  const hoy = new Date().toISOString().slice(0,10);
+  if(monto) c.pagos.push({ fecha: hoy, monto: parseInt(monto), tipo: 'banner', nota: nota||'Banner publicitario' });
+  c.bannerActivo = true;
+  c.bannerVence = vence;
+  toast('📣 Banner activado hasta ' + vence);
+  renderAdminPlanDetalle(c);
+}
+
+function adminDesactivarBanner(comercioId){
+  const c = state.comercios.find(x => x.id === comercioId);
+  if(!c) return;
+  c.bannerActivo = false;
+  c.bannerVence = null;
+  toast('Banner desactivado');
+  renderAdminPlanDetalle(c);
 }
 
 /* ================= INIT ================= */
