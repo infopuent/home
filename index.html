@@ -1697,19 +1697,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="field">
         <label>Rubro / filtro con el que aparece</label>
-        <select id="cnpRubro">
-          <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
-          <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
-          <option>Agencias de autos</option><option>Agencias de motos</option>
-          <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
-          <option>Transporte y viajes</option><option>Peluquerías</option>
-          <option>Inmobiliarias</option>
-          <option>Deportes y aire libre</option><option>Alimentos y bebidas</option>
-          <option>Alojamiento y turismo</option><option>Tecnología</option>
-          <option>Belleza y cuidado personal</option><option>Salud y farmacia</option>
-          <option>Librería y papelería</option><option>Mascotas</option>
-          <option>Servicios varios</option><option>Otros / varios</option>
-        </select>
+        <select id="cnpRubro"></select>
       </div>
     </div>
     <div class="card" style="background:var(--cream);">
@@ -1780,19 +1768,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="two-col">
         <div class="field"><label>Ciudad</label><input id="editCCiudad" placeholder="Ej: La Paz"></div>
         <div class="field"><label>Rubro</label>
-          <select id="editCRubro">
-            <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
-            <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
-            <option>Agencias de autos</option><option>Agencias de motos</option>
-            <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
-            <option>Transporte y viajes</option><option>Peluquerías</option>
-            <option>Inmobiliarias</option>
-            <option>Deportes y aire libre</option><option>Alimentos y bebidas</option>
-            <option>Alojamiento y turismo</option><option>Tecnología</option>
-            <option>Belleza y cuidado personal</option><option>Salud y farmacia</option>
-            <option>Librería y papelería</option><option>Mascotas</option>
-            <option>Servicios varios</option><option>Otros / varios</option>
-          </select>
+          <select id="editCRubro"></select>
         </div>
       </div>
       <div class="two-col">
@@ -2196,18 +2172,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </select>
       </div>
       <div class="field"><label>Rubro</label>
-        <select id="editAdRubro">
-          <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
-          <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
-          <option>Agencias de autos</option><option>Agencias de motos</option>
-          <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
-          <option>Transporte y viajes</option><option>Peluquerías</option>
-          <option>Inmobiliarias</option><option>Deportes y aire libre</option>
-          <option>Alimentos y bebidas</option><option>Alojamiento y turismo</option>
-          <option>Tecnología</option><option>Belleza y cuidado personal</option>
-          <option>Salud y farmacia</option><option>Librería y papelería</option>
-          <option>Mascotas</option><option>Servicios varios</option><option>Otros / varios</option>
-        </select>
+        <select id="editAdRubro"></select>
       </div>
       <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text"></div>
       <div class="two-col">
@@ -2287,18 +2252,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           </select>
         </div>
         <div class="field"><label>Rubro</label>
-          <select id="adRubro">
-            <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
-            <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
-            <option>Agencias de autos</option><option>Agencias de motos</option>
-            <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
-            <option>Transporte y viajes</option><option>Peluquerías</option>
-            <option>Inmobiliarias</option><option>Deportes y aire libre</option>
-            <option>Alimentos y bebidas</option><option>Alojamiento y turismo</option>
-            <option>Tecnología</option><option>Belleza y cuidado personal</option>
-            <option>Salud y farmacia</option><option>Librería y papelería</option>
-            <option>Mascotas</option><option>Servicios varios</option><option>Otros / varios</option>
-          </select>
+          <select id="adRubro"></select>
         </div>
       </div>
       <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
@@ -3232,16 +3186,15 @@ function goRegister(role){
   } else if(role==='comercio'){
     kick.textContent='Registro de comercio';
     title.textContent='Datos del comercio';
-    sub.textContent='Vos facturás como siempre. Necesitamos estos datos para identificarte y que los vendedores y clientes confíen en el local.';
+    sub.textContent='Vos facturás como siempre. Completá los datos del local para que tus clientes y vendedores confíen en vos.';
     fields.innerHTML = `
       <div class="card">
+
         <div class="field">
           <label>Logo o foto del comercio</label>
           <div class="logo-upload-row">
             <div class="logo-upload" id="rLogoFotoBox">
-              <div id="rLogoFotoPreview" class="logo-upload-empty">
-                <div class="ic">📷</div>
-              </div>
+              <div id="rLogoFotoPreview" class="logo-upload-empty"><div class="ic">📷</div></div>
             </div>
             <div class="logo-upload-info">
               <div class="t">Subí el logo o una foto del local</div>
@@ -3251,43 +3204,54 @@ function goRegister(role){
               </div>
               <input type="file" id="rLogoFotoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this, 'rLogo')">
               <input type="file" id="rLogoFotoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this, 'rLogo')">
-              <div class="foto-upload-estado" id="rLogoFotoEstado" style="margin-bottom:0;">Se va a usar como presentación en tu ficha y en los productos que subas. Opcional, pero recomendado.</div>
+              <div class="foto-upload-estado" id="rLogoFotoEstado" style="margin-bottom:0;">Opcional, pero recomendado — aparece en tu ficha y en los productos.</div>
             </div>
           </div>
         </div>
-        <div class="field"><label>Nombre del comercio (único)</label><input id="rNombre" placeholder="Ej: Ferretería Don Aldo"></div>
+
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:4px 0 10px;">📋 Identificación</div>
+        <div class="field"><label>Nombre del comercio <span style="color:#e05a5a;">*</span></label><input id="rNombre" placeholder="Ej: Ferretería Don Aldo"></div>
+        <div class="field"><label>Descripción breve</label><textarea id="rDescripcion" rows="2" placeholder="Contá brevemente qué ofrecés, tu especialidad o lo que te diferencia." style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;font-size:13.5px;resize:none;font-family:inherit;"></textarea></div>
         <div class="field"><label>Razón social / Titular</label><input id="rRazonSocial" placeholder="Nombre del titular o razón social"></div>
-        <div class="field"><label>CUIT</label><input id="rCuit" inputmode="numeric" placeholder="Sin guiones"></div>
-        <div class="field"><label>Dirección del local</label><input id="rDireccion" placeholder="Calle, número y ciudad"></div>
+        <div class="field"><label>CUIT</label><input id="rCuit" inputmode="numeric" placeholder="Sin guiones — Ej: 20123456789"></div>
+
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">📍 Ubicación</div>
+        <div class="field"><label>Dirección del local <span style="color:#e05a5a;">*</span></label><input id="rDireccion" placeholder="Calle, número y ciudad"></div>
         <div class="field">
           <label>Ubicación exacta (para "Cómo llegar")</label>
           <button type="button" class="btn btn-ghost btn-sm" onclick="marcarUbicacion()" style="margin-bottom:2px;">📍 Usar mi ubicación actual</button>
-          <div id="ubicacionEstado" style="font-size:12px; color:var(--muted); margin-top:6px;">Todavía no marcaste la ubicación — igual podés registrarte, se usa la dirección como respaldo.</div>
+          <div id="ubicacionEstado" style="font-size:12px;color:var(--muted);margin-top:6px;">Todavía no marcaste la ubicación — igual podés registrarte.</div>
         </div>
         <div class="two-col">
           <div class="field"><label>Ciudad</label><input id="rCiudad" placeholder="Ej: La Paz" value="La Paz"></div>
-          <div class="field"><label>Rubro</label>
-            <select id="rRubro">
-              <option>Indumentaria y calzado</option><option>Hogar y decoración</option>
-          <option>Ferretería y construcción</option><option>Repuestos y automotor</option>
-          <option>Agencias de autos</option><option>Agencias de motos</option>
-          <option>Agro e insumos rurales</option><option>Veterinaria y ganadería</option>
-          <option>Transporte y viajes</option><option>Peluquerías</option>
-          <option>Inmobiliarias</option>
-          <option>Deportes y aire libre</option><option>Alimentos y bebidas</option>
-          <option>Alojamiento y turismo</option><option>Tecnología</option>
-          <option>Belleza y cuidado personal</option><option>Salud y farmacia</option>
-          <option>Librería y papelería</option><option>Mascotas</option>
-          <option>Servicios varios</option><option>Otros / varios</option>
-            </select>
-          </div>
+          <div class="field"><label>Rubro <span style="color:#e05a5a;">*</span></label><select id="rRubro"></select></div>
         </div>
+
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">📞 Contacto</div>
         <div class="two-col">
           <div class="field"><label>Teléfono del local</label><input id="rTelefono" type="tel" placeholder="Fijo o celular"></div>
-          <div class="field"><label>WhatsApp del local <span style="color:#e05a5a;">*</span></label><input id="rWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456" required></div>
+          <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="rWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:8px;">📲 El WhatsApp es obligatorio — los clientes envían sus pedidos directamente ahí.</div>
-        <div class="field"><label>Correo electrónico</label><input id="rEmail" type="email" placeholder="local@ejemplo.com"></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:10px;">📲 El WhatsApp es obligatorio — los clientes envían sus pedidos ahí.</div>
+        <div class="field"><label>Correo electrónico <span style="color:#e05a5a;">*</span></label><input id="rEmail" type="email" placeholder="local@ejemplo.com"></div>
+        <div class="two-col">
+          <div class="field"><label>Instagram</label><input id="rInstagram" type="text" placeholder="@milocal"></div>
+          <div class="field"><label>Facebook</label><input id="rFacebook" type="text" placeholder="facebook.com/milocal"></div>
+        </div>
+
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">🕐 Horarios</div>
+        <div class="field">
+          <label>Días de atención</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Lun" style="width:auto;" checked> Lun</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Mar" style="width:auto;" checked> Mar</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Mié" style="width:auto;" checked> Mié</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Jue" style="width:auto;" checked> Jue</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Vie" style="width:auto;" checked> Vie</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Sáb" style="width:auto;"> Sáb</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Dom" style="width:auto;"> Dom</label>
+          </div>
+        </div>
         <div class="field">
           <label>Turno mañana</label>
           <div class="two-col">
@@ -3296,17 +3260,29 @@ function goRegister(role){
           </div>
         </div>
         <div class="field">
-          <label>Turno tarde <span style="font-weight:400; color:var(--muted);">(dejalo vacío si trabajás corrido o no abrís a la tarde)</span></label>
+          <label>Turno tarde <span style="font-weight:400;color:var(--muted);">(vacío si trabajás corrido o no abrís a la tarde)</span></label>
           <div class="two-col">
             <input id="rTurnoTarDesde" type="time" value="17:00">
             <input id="rTurnoTarHasta" type="time" value="21:00">
           </div>
         </div>
-        <div class="field" style="display:flex; align-items:flex-start; gap:10px;">
-          <input type="checkbox" id="rTyc" style="width:auto; margin-top:3px;">
-          <label style="font-weight:500; font-size:12.5px; color:var(--muted);" for="rTyc">Acepto los Términos y Condiciones y el tratamiento de mis datos.</label>
+
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">💳 Métodos de pago</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="efectivo" style="width:auto;" checked> 💵 Efectivo</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="transferencia" style="width:auto;" checked> 🏦 Transferencia</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="debito" style="width:auto;"> 💳 Débito</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="credito" style="width:auto;"> 💳 Crédito</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="mercadopago" style="width:auto;"> 📲 MercadoPago</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="qr" style="width:auto;"> 📷 QR / MODO</label>
+        </div>
+
+        <div class="field" style="display:flex;align-items:flex-start;gap:10px;">
+          <input type="checkbox" id="rTyc" style="width:auto;margin-top:3px;">
+          <label style="font-weight:500;font-size:12.5px;color:var(--muted);" for="rTyc">Acepto los Términos y Condiciones y el tratamiento de mis datos.</label>
         </div>
       </div>`;
+    fillRubroSelect('rRubro');
   } else {
     kick.textContent='Registro de cliente';
     title.textContent='Un dato rápido';
@@ -3355,15 +3331,19 @@ function submitRegister(){
   if(pendingRole==='comercio'){
     const razonSocial = document.getElementById('rRazonSocial').value.trim();
     const cuit = document.getElementById('rCuit').value.trim();
+    const descripcion = document.getElementById('rDescripcion').value.trim();
     const direccion = document.getElementById('rDireccion').value.trim();
     const ciudad = document.getElementById('rCiudad').value.trim() || 'La Paz';
     const rubro = document.getElementById('rRubro').value;
     const telefono = document.getElementById('rTelefono').value.trim();
     const whatsapp = document.getElementById('rWhatsapp').value.trim().replace(/\D/g,'');
-    const telefonoAlt = '';
     const email = document.getElementById('rEmail').value.trim();
+    const instagram = document.getElementById('rInstagram').value.trim();
+    const facebook = document.getElementById('rFacebook').value.trim();
     const turnos = leerTurnosForm('r');
     const horario = textoTurnos(turnos);
+    const dias = [...document.querySelectorAll('input[name="rDias"]:checked')].map(c=>c.value);
+    const metodosPago = [...document.querySelectorAll('input[name="rPagos"]:checked')].map(c=>c.value);
     const tyc = document.getElementById('rTyc').checked;
 
     if(!razonSocial || !direccion || !whatsapp || !email){
@@ -3374,7 +3354,7 @@ function submitRegister(){
     if(nombreOcupado){ toast('Ya existe un comercio registrado con ese nombre, elegí otro'); return; }
     if(!tyc){ toast('Necesitás aceptar los Términos y Condiciones'); return; }
 
-    const c = {id: nextId('c'), nombre, razonSocial, cuit, direccion, ciudad, rubro, telefono, whatsapp, email, horario, turnos, adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng, img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30)};
+    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng, img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30)};
     c.qrPersonal = 'CQR-' + c.id.split('-')[1].padStart(4,'0');
     state.comercios.push(c);
     state.currentUser = c; state.role='comercio';
@@ -4598,7 +4578,7 @@ function abrirEditarComercio(){
   document.getElementById('editCNombre').value = c.nombre || '';
   document.getElementById('editCDireccion').value = c.direccion || '';
   document.getElementById('editCCiudad').value = c.ciudad || 'La Paz';
-  document.getElementById('editCRubro').value = c.rubro || 'Otros / varios';
+  fillRubroSelect('editCRubro', c.rubro || 'Otros / varios');
   document.getElementById('editCTelefono').value = c.telefono || '';
   document.getElementById('editCTelefonoAlt').value = c.telefonoAlt || '';
   document.getElementById('editCEmail').value = c.email || '';
@@ -5188,29 +5168,87 @@ function setCiudad(c){
 
 /* ================= EXPLORÁ TU CIUDAD / DESTACADOS / CERCA TUYO ================= */
 const FLUENT_BASE = 'https://cdn.jsdelivr.net/gh/shuding/fluentui-emoji-unicode/assets/';
-const ICONOS_RUBRO = {
-  'Indumentaria y calzado':   '1f455_3d.png',
-  'Hogar y decoración':       '1f3e0_3d.png',
-  'Ferretería y construcción':'1f527_3d.png',
-  'Repuestos y automotor':    '1f697_3d.png',
-  'Agencias de autos':        '1f699_3d.png',
-  'Agencias de motos':        '1f3cd_3d.png',
-  'Agro e insumos rurales':   '1f69c_3d.png',
-  'Veterinaria y ganadería':  '1f404_3d.png',
-  'Transporte y viajes':      '1f68c_3d.png',
-  'Peluquerías':              '2702_3d.png',
-  'Inmobiliarias':            '1f3e1_3d.png',
-  'Deportes y aire libre':    '26bd_3d.png',
-  'Alimentos y bebidas':      '1f35e_3d.png',
-  'Alojamiento y turismo':    '1f3e8_3d.png',
-  'Tecnología':               '1f4f1_3d.png',
-  'Belleza y cuidado personal':'1f485_3d.png',
-  'Salud y farmacia':         '1f48a_3d.png',
-  'Librería y papelería':     '1f4da_3d.png',
-  'Mascotas':                 '1f43e_3d.png',
-  'Servicios varios':         '1f9f0_3d.png',
-  'Otros / varios':           '2728_3d.png'
-};
+
+/* ─── FUENTE ÚNICA DE RUBROS ─────────────────────────────────────────────────
+   Cada entrada: [nombre, archivo-emoji-fluent]
+   Para agregar un rubro nuevo: solo tocás acá. Los selects y los iconos
+   se generan automáticamente desde esta lista.
+   ─────────────────────────────────────────────────────────────────────────── */
+const RUBROS_LIST = [
+  // Gastronomía
+  ['Gastronomía (restaurantes y parrillas)', '1f969_3d.png'],
+  ['Cafeterías y confiterías',               '2615_3d.png'],
+  ['Panaderías y pastelerías',               '1f956_3d.png'],
+  ['Pizzerías y comida rápida',              '1f355_3d.png'],
+  // Almacén / alimentos
+  ['Alimentos y bebidas',                    '1f35e_3d.png'],
+  ['Dietéticas y naturistas',                '1f33f_3d.png'],
+  // Moda y cuidado personal
+  ['Indumentaria y calzado',                 '1f455_3d.png'],
+  ['Joyería y accesorios',                   '1f48d_3d.png'],
+  ['Ópticas',                                '1f453_3d.png'],
+  ['Peluquerías y barberías',                '2702_3d.png'],
+  ['Belleza y cuidado personal',             '1f485_3d.png'],
+  // Hogar y construcción
+  ['Hogar y decoración',                     '1f3e0_3d.png'],
+  ['Muebles y colchones',                    '1f6cb_3d.png'],
+  ['Ferretería y construcción',              '1f527_3d.png'],
+  ['Electricidad y plomería',                '1f4a1_3d.png'],
+  ['Jardín y viveros',                       '1f33b_3d.png'],
+  // Vehículos
+  ['Repuestos y automotor',                  '1f697_3d.png'],
+  ['Agencias de autos',                      '1f699_3d.png'],
+  ['Agencias de motos',                      '1f3cd_3d.png'],
+  ['Bicicleterías',                          '1f6b2_3d.png'],
+  // Agro y animales
+  ['Agro e insumos rurales',                 '1f69c_3d.png'],
+  ['Veterinaria y ganadería',                '1f404_3d.png'],
+  ['Mascotas',                               '1f43e_3d.png'],
+  // Salud
+  ['Salud y farmacia',                       '1f48a_3d.png'],
+  ['Ópticas',                                '1f453_3d.png'],
+  // Tecnología y medios
+  ['Tecnología',                             '1f4f1_3d.png'],
+  ['Librería y papelería',                   '1f4da_3d.png'],
+  ['Juguetería y cotillón',                  '1f9f8_3d.png'],
+  // Deportes y ocio
+  ['Deportes y aire libre',                  '26bd_3d.png'],
+  ['Gimnasios y fitness',                    '1f3cb_3d.png'],
+  // Servicios
+  ['Inmobiliarias',                          '1f3e1_3d.png'],
+  ['Alojamiento y turismo',                  '1f3e8_3d.png'],
+  ['Transporte y viajes',                    '1f68c_3d.png'],
+  ['Seguros y financiero',                   '1f4b3_3d.png'],
+  ['Servicios profesionales',                '1f4bc_3d.png'],
+  ['Costura y arreglos',                     '1f9f5_3d.png'],
+  ['Servicios del hogar',                    '1f9f9_3d.png'],
+  ['Servicios varios',                       '1f9f0_3d.png'],
+  ['Otros / varios',                         '2728_3d.png'],
+];
+
+// Eliminar duplicados (Ópticas aparece dos veces por organización)
+const _rubrosVistos = new Set();
+const RUBROS_UNICOS = RUBROS_LIST.filter(([nombre]) => {
+  if(_rubrosVistos.has(nombre)) return false;
+  _rubrosVistos.add(nombre); return true;
+});
+
+// Objeto de iconos (compatible con el código existente)
+const ICONOS_RUBRO = Object.fromEntries(RUBROS_UNICOS);
+
+// Genera los <option> de un select desde la lista central
+function buildRubroOptions(valorSeleccionado){
+  return RUBROS_UNICOS.map(([nombre]) =>
+    `<option${nombre === valorSeleccionado ? ' selected' : ''}>${nombre}</option>`
+  ).join('');
+}
+
+// Rellena un <select> existente con los rubros
+function fillRubroSelect(selectId, valorActual){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML = buildRubroOptions(valorActual || '');
+}
 function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
 function renderExploraCiudad(){
   const el = document.getElementById('exploraRow');
@@ -6288,6 +6326,9 @@ function renderLocales(){
 }
 
 /* ================= INIT ================= */
+// Poblar todos los selects de rubro desde la fuente única
+['cnpRubro','editCRubro','editAdRubro','adRubro','rRubro'].forEach(id => fillRubroSelect(id));
+
 renderCiudadDropdown();
 renderExploraCiudad();
 renderFeed();
@@ -6582,8 +6623,7 @@ function adminAbrirEditar(docId){
   const selCiudad = document.getElementById('editAdCiudad');
   for(let opt of selCiudad.options) if(opt.value===c.ciudad) opt.selected=true;
   // Rubro select
-  const selRubro = document.getElementById('editAdRubro');
-  for(let opt of selRubro.options) if(opt.value===c.rubro) opt.selected=true;
+  fillRubroSelect('editAdRubro', c.rubro);
   // Fecha de publicidad
   if(c.publicidadVence){
     document.getElementById('editAdPublicidadVence').value = c.publicidadVence.slice(0,10);
