@@ -6379,95 +6379,145 @@ function abrirPanelRepartidor(){
 function renderPanelRepartidor(){
   const lista = document.getElementById('repartidorPedidosList');
   if(!lista) return;
-  const franjas = {manana:'🌅 Mañana (9-12)', tarde:'☀️ Tarde (14-18)', noche:'🌙 Noche (18-21)'};
-  const estadoLabel = {pendiente:'🆕 Disponible',asignado:'📦 Tomado',en_camino:'🚴 En camino',entregado:'✅ Entregado'};
 
-  // Cargar desde Firestore si hay conexión
-  function _renderRepartidorLista(pedidos){
-    const activos = pedidos.filter(p=> p.estado!=='entregado');
-    if(!activos.length){
-      lista.innerHTML='<div class="empty"><div class="ic">🛵</div><div class="t">No hay pedidos activos</div><div class="s">Cuando un cliente pida envío, aparece acá.</div></div>';
-      return;
+  const repId = state.currentUser?.uid || state.currentUser?.id;
+  const estadoLabel = {
+    pendiente: {txt:'🆕 Disponible', bg:'#e8f4fd', col:'#1a6b9a'},
+    asignado:  {txt:'📦 Para retirar', bg:'#f0e8f8', col:'#5a1a9a'},
+    en_camino: {txt:'🚴 En camino', bg:'#fff0e0', col:'#a05a00'},
+    entregado: {txt:'✔️ Entregado', bg:'#f0f0f0', col:'#555'},
+  };
+
+  function _renderLista(pedidos){
+    // Mis pedidos: los asignados a mi ID + los disponibles sin asignar
+    const disponibles = pedidos.filter(p=>p.estado==='pendiente');
+    const miosActivos = pedidos.filter(p=>
+      (p.estado==='asignado'||p.estado==='en_camino') && p.repartidorId===repId
+    );
+    const miosEntregados = pedidos.filter(p=>p.estado==='entregado' && p.repartidorId===repId);
+
+    // Liquidaciones pendientes
+    const porCobrar = miosEntregados.filter(p=>!p.liquidado);
+    const cobrados  = miosEntregados.filter(p=>p.liquidado);
+    const totalPendiente = porCobrar.reduce((s,p)=>s+(p.costoEnvio||0),0);
+
+    let html = '';
+
+    // Resumen financiero
+    if(miosEntregados.length){
+      html += `
+        <div style="background:linear-gradient(135deg,#5C7355,#7a9b6a);border-radius:14px;padding:14px 16px;margin-bottom:14px;color:white;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;opacity:.8;margin-bottom:4px;">💰 Mis viajes</div>
+          <div style="display:flex;gap:16px;">
+            <div><div style="font-size:20px;font-weight:800;">$${totalPendiente.toLocaleString('es-AR')}</div><div style="font-size:11px;opacity:.8;">Por cobrar (${porCobrar.length} viaje${porCobrar.length===1?'':'s'})</div></div>
+            <div style="border-left:1px solid rgba(255,255,255,0.3);padding-left:16px;"><div style="font-size:20px;font-weight:800;">${miosEntregados.length}</div><div style="font-size:11px;opacity:.8;">Total entregados</div></div>
+          </div>
+        </div>`;
     }
-    // Agrupar: disponibles primero, luego mis asignados
-    const disponibles = activos.filter(p=>p.estado==='pendiente');
-    const mios = activos.filter(p=>p.estado==='asignado'||p.estado==='en_camino');
 
-    var html = '';
+    // Mis pedidos activos
+    if(miosActivos.length){
+      html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">📦 Mis pedidos activos (${miosActivos.length})</div>`;
+      html += miosActivos.map(p=>{
+        const est = estadoLabel[p.estado];
+        return `
+          <div class="card" style="margin-bottom:10px;border-left:4px solid ${est.col};">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-size:13px;font-weight:800;">${p.productoNombre||'Pedido'}</div>
+              <span style="font-size:10.5px;font-weight:700;background:${est.bg};color:${est.col};padding:3px 9px;border-radius:100px;">${est.txt}</span>
+            </div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:4px;">🏪 Retirá en: ${p.comercioNombre}</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 Entregá en: <strong>${p.direccion}</strong></div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">👤 ${p.clienteNombre}${p.clienteTel?` · <a href="tel:${p.clienteTel}" style="color:var(--navy);font-weight:700;">📞 ${p.clienteTel}</a>`:''}</div>
+            <div style="font-size:12.5px;font-weight:700;color:#1a6b3a;background:#eaf5ea;border-radius:8px;padding:8px 10px;margin-bottom:10px;">
+              ${p.comercioCubreEnvio?'✅ Envío cubierto por el comercio':'💵 Cobrá $'+(p.costoEnvio||0).toLocaleString('es-AR')+' al cliente al entregar'}
+            </div>
+            <div style="display:flex;gap:8px;">
+              ${p.estado==='asignado'?`<button class="btn btn-primary btn-sm" style="flex:1;" onclick="repartidorCambiarEstado('${p.id}','en_camino')">🚴 Salí a entregar</button>`:''}
+              ${p.estado==='en_camino'?`<button class="btn btn-primary btn-sm" style="flex:1;" onclick="repartidorCambiarEstado('${p.id}','entregado')">✔️ Marcar entregado</button>`:''}
+              ${p.comercioTel?`<a href="tel:${p.comercioTel}" class="btn btn-ghost btn-sm">📞 Comercio</a>`:''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Disponibles para tomar
     if(disponibles.length){
-      html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">🆕 Disponibles para tomar ('+disponibles.length+')</div>';
+      html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">🆕 Disponibles para tomar (${disponibles.length})</div>`;
       html += disponibles.map(p=>`
         <div class="card" style="margin-bottom:10px;border:1.5px solid var(--navy);">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-            <div style="font-size:13px;font-weight:700;">${p.productoNombre}</div>
-            <span style="font-size:10px;background:var(--navy);color:white;padding:3px 9px;border-radius:100px;font-weight:700;">🆕 Libre</span>
-          </div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">🏪 Retirá en: <strong>${p.comercioNombre}</strong></div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 Entregá en: <strong>${p.direccion}</strong></div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${franjas[p.franja]||p.franja}</div>
-          <div style="font-size:12px;font-weight:700;color:#1a6b3a;background:#EAF5EA;border-radius:8px;padding:8px 10px;margin-bottom:10px;">
-            ${p.comercioCubreEnvio ? '✅ Envío cubierto por el comercio — no cobrás al cliente' : '💵 Cobrá el envío al cliente en mano al entregar'}
+          <div style="font-size:13px;font-weight:800;margin-bottom:4px;">${p.productoNombre||'Pedido'}</div>
+          <div style="font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:4px;">🏪 ${p.comercioNombre}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 Entregar en: <strong>${p.direccion}</strong></div>
+          <div style="font-size:12px;font-weight:700;color:#1a6b3a;background:#eaf5ea;border-radius:8px;padding:7px 10px;margin:8px 0;">
+            ${p.comercioCubreEnvio?'✅ Envío cubierto por el comercio':'💵 Cobrás $'+(p.costoEnvio||0).toLocaleString('es-AR')+' al entregar'}
           </div>
           <button class="btn btn-primary" style="width:100%;" onclick="repartidorTomarPedido('${p.id}')">🛵 Tomar este pedido</button>
         </div>`).join('');
     }
-    if(mios.length){
-      html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">📦 Mis pedidos activos</div>';
-      html += mios.map(p=>`
-        <div class="card" style="margin-bottom:10px;">
-          <div style="font-size:13px;font-weight:700;margin-bottom:4px;">${p.productoNombre}</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">🏪 <strong>${p.comercioNombre}</strong></div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 <strong>${p.direccion}</strong> · ${franjas[p.franja]||p.franja}</div>
-          ${p.clienteTel ? `<a href="tel:${p.clienteTel}" style="display:inline-block;margin:6px 0;font-size:12px;color:var(--navy);font-weight:700;">📞 Llamar al cliente</a><br>` : ''}
-          <div style="display:flex;gap:8px;margin-top:8px;">
-            ${p.estado==='asignado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','en_camino')">🚴 Salí a entregar</button>`:''}
-            ${p.estado==='en_camino'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','entregado')">✅ Marcar entregado</button>`:''}
-          </div>
-        </div>`).join('');
+
+    // Historial
+    if(miosEntregados.length){
+      html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">📋 Historial de viajes</div>`;
+      // Por cobrar
+      if(porCobrar.length){
+        html += `<div style="font-size:11.5px;font-weight:700;color:#a05a00;margin-bottom:6px;">⏳ Pendientes de cobro</div>`;
+        html += porCobrar.map(p=>`
+          <div class="list-row" style="margin-bottom:6px;">
+            <div class="av" style="background:#fff0e0;">💵</div>
+            <div class="main">
+              <div class="t">${p.comercioNombre}</div>
+              <div class="s">📍 ${p.direccion}</div>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:var(--navy);">$${(p.costoEnvio||0).toLocaleString('es-AR')}</div>
+          </div>`).join('');
+      }
+      // Ya cobrados
+      if(cobrados.length){
+        html += `<div style="font-size:11.5px;font-weight:700;color:#1a6b3a;margin:10px 0 6px;">✔️ Liquidados</div>`;
+        html += cobrados.map(p=>`
+          <div class="list-row" style="margin-bottom:6px;opacity:.7;">
+            <div class="av" style="background:#eaf5ea;">✓</div>
+            <div class="main">
+              <div class="t">${p.comercioNombre}</div>
+              <div class="s">${p.fechaLiquidacion?new Date(p.fechaLiquidacion).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):'—'}</div>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:#1a6b3a;">$${(p.costoEnvio||0).toLocaleString('es-AR')}</div>
+          </div>`).join('');
+      }
     }
+
+    if(!miosActivos.length && !disponibles.length && !miosEntregados.length){
+      html = `<div class="empty"><div class="ic">🛵</div><div class="t">No hay pedidos activos</div><div class="s">Cuando un comercio asigne un pedido, aparece acá.</div></div>`;
+    }
+
     lista.innerHTML = html;
   }
 
-  // Cargar de Firestore si hay conexión, sino de state local
+  // Cargar de Firestore si hay conexión
   if(firebaseListo && db){
-    db.collection('pedidosEnvio').where('estado','in',['pendiente','asignado','en_camino'])
+    db.collection('pedidosEnvio')
+      .where('estado','in',['pendiente','asignado','en_camino','entregado'])
       .get().then(snap=>{
         const pedidos = snap.docs.map(d=>({...d.data(), id:d.id}));
         if(!state.pedidosEnvio) state.pedidosEnvio=[];
         pedidos.forEach(p=>{ if(!state.pedidosEnvio.find(x=>x.id===p.id)) state.pedidosEnvio.push(p); });
-        _renderRepartidorLista(pedidos);
-      }).catch(()=>_renderRepartidorLista(state.pedidosEnvio||[]));
+        _renderLista(pedidos);
+      }).catch(()=>_renderLista(state.pedidosEnvio||[]));
   } else {
-    _renderRepartidorLista(state.pedidosEnvio||[]);
+    _renderLista(state.pedidosEnvio||[]);
   }
 }
 
-function repartidorTomarPedido(pedidoId){
-  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
-  if(!p){ toast('Pedido no encontrado'); return; }
-  if(p.estado !== 'pendiente'){ toast('Este pedido ya fue tomado'); renderPanelRepartidor(); return; }
-  p.estado = 'asignado';
-  p.repartidorId = state.currentUser?.uid||state.currentUser?.id||'rep';
-  p.repartidorNombre = state.currentUser?.nombre||'Repartidor';
-  if(firebaseListo && db){
-    db.collection('pedidosEnvio').doc(pedidoId).update({
-      estado:'asignado',
-      repartidorId: p.repartidorId,
-      repartidorNombre: p.repartidorNombre
-    }).catch(e=>console.error(e));
-  }
-  toast('🛵 ¡Pedido tomado! Retirá el producto en el comercio.');
-  renderPanelRepartidor();
-}
-
-function cambiarEstadoPedido(pedidoId, nuevoEstado){
+function repartidorCambiarEstado(pedidoId, nuevoEstado){
   const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
   if(!p) return;
   p.estado = nuevoEstado;
   if(firebaseListo && db) db.collection('pedidosEnvio').doc(pedidoId).update({estado:nuevoEstado}).catch(e=>console.error(e));
-  toast(nuevoEstado==='en_camino'?'📲 El cliente fue notificado que saliste':'✅ Pedido marcado como entregado');
+  const msgs = { en_camino:'🚴 ¡A entregar! El comercio sabe que ya saliste.', entregado:'✔️ ¡Pedido entregado! El viaje quedó registrado.' };
+  toast(msgs[nuevoEstado]||'Estado actualizado');
+  sincronizarEstadoPedidoCliente(pedidoId, nuevoEstado);
   renderPanelRepartidor();
-  if(nuevoEstado==='entregado') renderCPedidosEnvio();
 }
 
 function comercioToggleCubreEnvio(pedidoId, el){
@@ -6493,53 +6543,172 @@ function renderCPedidosEnvio(){
   if(!lista) return;
   const c = state.currentUser;
   const pedidos = (state.pedidosEnvio||[]).filter(p=>p.comercioId===c?.id);
+
   if(!pedidos.length){
     lista.innerHTML=`<div class="empty"><div class="ic">📦</div><div class="t">Todavía no recibiste pedidos de envío</div></div>`;
     return;
   }
-  const franjas={manana:'🌅 Mañana (9-12)',tarde:'☀️ Tarde (14-18)',noche:'🌙 Noche (18-21)'};
-  const estados={pendiente:'🆕 Nuevo',confirmado:'💬 Pago en trámite',pagado:'✅ Pago confirmado',asignado:'📦 Repartidor asignado',en_camino:'🚴 En camino',entregado:'✅ Entregado'};
-  lista.innerHTML = pedidos.map(p=>`
-    <div class="card" style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-        <div style="font-size:13px;font-weight:700;">${p.productoNombre}</div>
-        <span style="font-size:11px;font-weight:700;background:var(--cream);padding:3px 10px;border-radius:100px;">${estados[p.estado]||p.estado}</span>
+
+  const estadoLabel = {
+    pendiente:  {txt:'🆕 Nuevo',        bg:'#e8f4fd',col:'#1a6b9a'},
+    confirmado: {txt:'💬 Pago en trámite',bg:'#fff8e6',col:'#7a5a00'},
+    pagado:     {txt:'✅ Pago confirmado',bg:'#eaf5ea',col:'#1a6b3a'},
+    asignado:   {txt:'📦 Repartidor asignado',bg:'#f0e8f8',col:'#5a1a9a'},
+    en_camino:  {txt:'🚴 En camino',     bg:'#fff0e0',col:'#a05a00'},
+    entregado:  {txt:'✔️ Entregado',     bg:'#f0f0f0',col:'#555'},
+  };
+
+  // Cargar repartidores disponibles para el selector
+  const reps = (_adminReps||[]).filter(r=>r.estado==='activo');
+
+  const activos   = pedidos.filter(p=>p.estado!=='entregado');
+  const entregados = pedidos.filter(p=>p.estado==='entregado');
+
+  function cardPedido(p){
+    const est = estadoLabel[p.estado] || {txt:p.estado,bg:'#eee',col:'#333'};
+    const puedeConfirmar  = p.estado==='pendiente';
+    const puedePagoConf   = p.estado==='confirmado';
+    const puedeAsignar    = p.estado==='pagado';
+    const puedeEnCamino   = p.estado==='asignado';
+    const puedeEntregado  = p.estado==='en_camino' || p.estado==='asignado';
+
+    const selectorRep = puedeAsignar && reps.length ? `
+      <div class="field" style="margin-bottom:8px;">
+        <label style="font-size:11.5px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px;">Elegir repartidor</label>
+        <select id="repSel-${p.id}" style="width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;">
+          <option value="">— Seleccioná un repartidor —</option>
+          ${reps.map(r=>`<option value="${r._docId}" data-nombre="${r.nombre}" data-tel="${r.telefono||''}">${r.vehiculo==='bici'?'🚴':r.vehiculo==='auto'?'🚗':'🛵'} ${r.nombre}</option>`).join('')}
+        </select>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">👤 ${p.clienteNombre}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 ${p.direccion}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">${franjas[p.franja]||p.franja}</div>
-      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;">
-        💰 Producto: $${p.productoPrecio?.toLocaleString('es-AR')||'—'}
-        ${p.costoEnvio>0 ? ` · 🚚 Envío: $${p.costoEnvio.toLocaleString('es-AR')} (cobra el repartidor)` : ' · 🚚 Envío gratis'}
-      </div>
-      <div style="background:#fff8e6;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#7a5a00;">
-        💬 El pago del producto se arregla con el cliente por fuera de la app. Confirmá cuando recibas la transferencia.
-      </div>
-      <!-- Opción de cubrir el envío como cortesía -->
-      <div style="display:flex;align-items:center;gap:10px;background:#FFF8EC;border-radius:10px;padding:10px 12px;margin-bottom:10px;cursor:pointer;" onclick="comercioToggleCubreEnvio('${p.id}',this)">
-        <div id="chkCubre-${p.id}" style="width:20px;height:20px;border-radius:6px;border:2px solid var(--navy);background:${p.comercioCubreEnvio?'var(--navy)':'white'};flex-shrink:0;display:flex;align-items:center;justify-content:center;">
-          ${p.comercioCubreEnvio?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>':''}
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" style="flex:1;" onclick="comercioAsignarRepartidor('${p.id}')">📦 Asignar repartidor</button>
+        <button class="btn btn-ghost btn-sm" onclick="comercioContactarRepWhatsApp('${p.id}')">📲 WS repartidor</button>
+      </div>` : (puedeAsignar ? `<div style="font-size:12px;color:var(--muted);background:#fafafa;border-radius:8px;padding:8px;">No hay repartidores activos. <a href="#" onclick="showScreen('admin-repartidores');return false;" style="color:var(--navy);">Agregá uno desde el admin.</a></div>` : '');
+
+    const liquidadoBadge = p.liquidado
+      ? `<div style="font-size:11px;font-weight:700;color:#1a6b3a;background:#eaf5ea;padding:4px 10px;border-radius:100px;display:inline-block;margin-bottom:6px;">💰 Viaje liquidado</div>`
+      : (p.estado==='entregado' ? `<button class="btn btn-ghost btn-sm" onclick="comercioLiquidarViaje('${p.id}')">💰 Marcar viaje liquidado</button>` : '');
+
+    return `
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div style="font-size:13.5px;font-weight:800;color:var(--ink);">${p.productoNombre||p.clienteNombre}</div>
+            <div style="font-size:11.5px;color:var(--muted);">👤 ${p.clienteNombre}${p.clienteTel?` · 📞 ${p.clienteTel}`:''}</div>
+          </div>
+          <span style="font-size:10.5px;font-weight:700;background:${est.bg};color:${est.col};padding:3px 10px;border-radius:100px;white-space:nowrap;flex-shrink:0;">${est.txt}</span>
         </div>
-        <div>
-          <div style="font-size:12.5px;font-weight:700;color:var(--navy);">🎁 Cubrir el envío como cortesía</div>
-          <div style="font-size:11px;color:var(--muted);">Se te cobrará junto a la comisión de venta</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">📍 ${p.direccion}</div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--navy);margin:6px 0;">
+          💰 Producto: $${(p.productoPrecio||p.total||0).toLocaleString('es-AR')}
+          · 🚚 Envío: $${(p.costoEnvio||0).toLocaleString('es-AR')}
         </div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        ${p.estado==='pendiente'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','confirmado')">📩 Confirmar pedido</button>`:''}
-        ${p.estado==='confirmado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','pagado')">✅ Confirmar recepción</button>`:''}
-        ${p.estado==='pagado'?`<button class="btn btn-primary btn-sm" style="flex:1" onclick="cambiarEstadoPedido('${p.id}','asignado')">🛵 Pedir repartidor</button>`:''}
-      </div>
-    </div>`).join('');
+        ${p.repartidorNombre ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">🛵 Repartidor: <strong>${p.repartidorNombre}</strong></div>` : ''}
+        ${liquidadoBadge}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+          ${puedeConfirmar ? `<button class="btn btn-primary btn-sm" style="flex:1;" onclick="cambiarEstadoPedidoComercio('${p.id}','confirmado')">📩 Confirmar pedido</button>` : ''}
+          ${puedePagoConf  ? `<button class="btn btn-primary btn-sm" style="flex:1;" onclick="cambiarEstadoPedidoComercio('${p.id}','pagado')">✅ Confirmar pago recibido</button>` : ''}
+          ${puedeEnCamino  ? `<button class="btn btn-primary btn-sm" style="flex:1;" onclick="cambiarEstadoPedidoComercio('${p.id}','en_camino')">🚴 Marcar en camino</button>` : ''}
+          ${puedeEntregado ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="cambiarEstadoPedidoComercio('${p.id}','entregado')">✔️ Entregado</button>` : ''}
+          ${p.clienteTel   ? `<a href="tel:${p.clienteTel}" class="btn btn-ghost btn-sm">📞</a>` : ''}
+        </div>
+        ${selectorRep}
+      </div>`;
+  }
+
+  let html = '';
+  if(activos.length){
+    html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">📦 Pedidos activos (${activos.length})</div>`;
+    html += activos.map(cardPedido).join('');
+  }
+  if(entregados.length){
+    html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 8px;">✔️ Entregados (${entregados.length})</div>`;
+    html += entregados.map(cardPedido).join('');
+  }
+  lista.innerHTML = html;
 }
 
-function asignarRepartidor(pedidoId){
+function comercioAsignarRepartidor(pedidoId){
+  const sel = document.getElementById('repSel-'+pedidoId);
+  if(!sel || !sel.value){ toast('Elegí un repartidor primero'); return; }
+  const opt = sel.options[sel.selectedIndex];
+  const repNombre = opt.dataset.nombre;
+  const repTel    = opt.dataset.tel;
   const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
   if(!p) return;
   p.estado = 'asignado';
-  if(firebaseListo && db) db.collection('pedidosEnvio').doc(pedidoId).update({estado:'asignado'}).catch(e=>console.error(e));
-  toast('🚚 Repartidor convocado — el pedido aparece en su panel');
+  p.repartidorId = sel.value;
+  p.repartidorNombre = repNombre;
+  p.repartidorTel = repTel;
+  if(firebaseListo && db){
+    db.collection('pedidosEnvio').doc(pedidoId).update({
+      estado:'asignado', repartidorId:sel.value,
+      repartidorNombre:repNombre, repartidorTel:repTel
+    }).catch(e=>console.error(e));
+  }
+  toast(`🛵 ${repNombre} asignado al pedido`);
+  // Ofrecer contactar al repartidor por WhatsApp
+  if(repTel){
+    const c = state.currentUser;
+    const msg = `¡Hola ${repNombre}! 👋 Tenés un pedido asignado en *${c?.nombre||'el comercio'}*:\n\n📦 Producto: ${p.productoNombre||'—'}\n📍 Entregar en: ${p.direccion}\n👤 Cliente: ${p.clienteNombre}${p.clienteTel?' ('+p.clienteTel+')':''}\n🚚 Envío: $${(p.costoEnvio||0).toLocaleString('es-AR')}\n\nCuando puedas pasá a retirar. ¡Gracias!`;
+    setTimeout(()=>{
+      if(confirm(`¿Avisarle a ${repNombre} por WhatsApp?`)){
+        window.open(`https://wa.me/54${repTel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
+      }
+    }, 300);
+  }
   renderCPedidosEnvio();
+}
+
+function comercioContactarRepWhatsApp(pedidoId){
+  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
+  const sel = document.getElementById('repSel-'+pedidoId);
+  if(!sel || !sel.value){ toast('Elegí un repartidor primero'); return; }
+  const opt = sel.options[sel.selectedIndex];
+  const repTel = opt.dataset.tel;
+  if(!repTel){ toast('Este repartidor no tiene teléfono cargado'); return; }
+  const c = state.currentUser;
+  const msg = `¡Hola ${opt.dataset.nombre}! Tenemos un pedido para vos en *${c?.nombre||'el comercio'}*.\n📍 Destino: ${p?.direccion||'—'}\n👤 Cliente: ${p?.clienteNombre||'—'}\n\n¿Podés venir a retirar?`;
+  window.open(`https://wa.me/54${repTel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function comercioLiquidarViaje(pedidoId){
+  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
+  if(!p) return;
+  p.liquidado = true;
+  p.fechaLiquidacion = new Date().toISOString();
+  if(firebaseListo && db){
+    db.collection('pedidosEnvio').doc(pedidoId).update({
+      liquidado:true, fechaLiquidacion:p.fechaLiquidacion
+    }).catch(e=>console.error(e));
+  }
+  toast('💰 Viaje marcado como liquidado');
+  renderCPedidosEnvio();
+}
+
+function cambiarEstadoPedidoComercio(pedidoId, nuevoEstado){
+  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
+  if(!p) return;
+  p.estado = nuevoEstado;
+  if(firebaseListo && db) db.collection('pedidosEnvio').doc(pedidoId).update({estado:nuevoEstado}).catch(e=>console.error(e));
+  // Notificar al cliente si hay cambio importante
+  const mensajes = {
+    confirmado: '📩 Pedido confirmado',
+    pagado:     '✅ Pago confirmado — coordinando repartidor',
+    en_camino:  '🚴 El repartidor ya salió con tu pedido',
+    entregado:  '✔️ Pedido marcado como entregado'
+  };
+  toast(mensajes[nuevoEstado] || 'Estado actualizado');
+  renderCPedidosEnvio();
+  // Actualizar también en state.misPedidos si el cliente es el mismo
+  sincronizarEstadoPedidoCliente(pedidoId, nuevoEstado);
+}
+
+function sincronizarEstadoPedidoCliente(pedidoId, nuevoEstado){
+  // Busca el pedido en state.misPedidos (puede ser del cliente logueado)
+  if(!state.misPedidos) return;
+  const mp = state.misPedidos.find(p=>p.pedidoEnvioId===pedidoId);
+  if(mp){ mp.estado=nuevoEstado; guardarMisPedidosFirestore(); }
 }
 
 function abrirOferta(prodId){
@@ -9048,7 +9217,14 @@ function fpEnviarWhatsApp(tipo){
     msg = `¡Hola *${c.nombre}*! 👋\n\nSoy *${nombreUsuario}* y quiero pedir *envío a domicilio* desde *PuenT* 🛒\n\n*Productos:*\n${itemsLineas}\n\n🛵 *Envío:* $${COSTO_ENVIO.toLocaleString('es-AR')}\n💰 *Total: $${totalConEnvio.toLocaleString('es-AR')}*\n\n📍 *Dirección de entrega:* ${dir}\n${telLinea}\n📅 ${fecha} a las ${hora}\n\n¡Gracias!`;
   }
 
-  // Guardar en Mis Pedidos
+  // Crear pedido de envío en Firestore y guardar en Mis Pedidos
+  let pedidoEnvioId = null;
+  if(tipo === 'envio'){
+    const dir = document.getElementById('fpDireccion').value.trim();
+    const pedidoEnvio = crearPedidoEnvio(grupo.items[0]?.prodId, c, dir, null, COSTO_ENVIO);
+    if(pedidoEnvio) pedidoEnvioId = pedidoEnvio.id;
+  }
+
   const pedido = {
     id: 'PED-' + Date.now(),
     comercioId: c.id,
@@ -9060,6 +9236,7 @@ function fpEnviarWhatsApp(tipo){
     estado: 'enviado',
     fecha: new Date().toISOString(),
     usuarioId: state.currentUser?.id || null,
+    pedidoEnvioId,
   };
   if(!state.misPedidos) state.misPedidos = [];
   state.misPedidos.unshift(pedido);
@@ -9090,27 +9267,112 @@ function renderMisPedidos(){
     el.innerHTML = `<div class="empty"><div class="ic">📋</div><div class="t">Todavía no hiciste pedidos</div><div class="s">Cuando hagas tu primer pedido, va a aparecer acá.</div></div>`;
     return;
   }
-  const ESTADOS = { enviado:'🕒 Enviado', confirmado:'✅ Confirmado', en_camino:'🛵 En camino', entregado:'✔️ Entregado' };
-  el.innerHTML = pedidos.map(p=>{
-    const fecha = new Date(p.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const estadoLabel = ESTADOS[p.estado] || p.estado;
-    const tipoLabel = p.tipo === 'envio' ? '🛵 Con envío' : '🏪 Presencial';
-    const itemsHtml = (p.items||[]).map(i=>`<div style="font-size:12.5px;color:var(--muted);">${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}</div>`).join('');
-    return `<div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div>
-          <div style="font-size:14px;font-weight:800;color:var(--navy);">${p.comercioNombre}</div>
-          <div style="font-size:11px;color:var(--muted);">${fecha} · ${tipoLabel}</div>
+
+  const PASOS_ENVIO = [
+    {key:'enviado',    ic:'📤', txt:'Pedido enviado'},
+    {key:'confirmado', ic:'✅', txt:'Confirmado'},
+    {key:'pagado',     ic:'💰', txt:'Pago recibido'},
+    {key:'asignado',   ic:'🛵', txt:'Repartidor asignado'},
+    {key:'en_camino',  ic:'🚴', txt:'En camino'},
+    {key:'entregado',  ic:'🏠', txt:'Entregado'},
+  ];
+  const PASOS_PRESENCIAL = [
+    {key:'enviado',    ic:'📤', txt:'Pedido enviado'},
+    {key:'confirmado', ic:'✅', txt:'Confirmado'},
+    {key:'pagado',     ic:'💰', txt:'Listo para retirar'},
+    {key:'entregado',  ic:'🏠', txt:'Retirado'},
+  ];
+
+  function barraProgreso(estado, tipo){
+    const pasos = tipo==='envio' ? PASOS_ENVIO : PASOS_PRESENCIAL;
+    const idx = pasos.findIndex(p=>p.key===estado);
+    const actual = idx === -1 ? 0 : idx;
+    return `
+      <div style="margin:12px 0 4px;overflow-x:auto;scrollbar-width:none;">
+        <div style="display:flex;align-items:flex-start;gap:0;min-width:${pasos.length*72}px;">
+          ${pasos.map((p,i)=>{
+            const hecho = i <= actual;
+            const esActual = i === actual;
+            return `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;position:relative;">
+                ${i < pasos.length-1 ? `<div style="position:absolute;top:16px;left:50%;width:100%;height:3px;background:${i<actual?'#5C7355':'#e0e0e0'};z-index:0;"></div>` : ''}
+                <div style="width:32px;height:32px;border-radius:50%;background:${hecho?'#5C7355':'#e0e0e0'};display:flex;align-items:center;justify-content:center;font-size:13px;position:relative;z-index:1;box-shadow:${esActual?'0 0 0 3px rgba(92,115,85,0.3)':'none'};">${hecho?p.ic:'·'}</div>
+                <div style="font-size:9.5px;font-weight:${esActual?800:600};color:${hecho?'#5C7355':'#aaa'};text-align:center;margin-top:4px;line-height:1.2;max-width:64px;">${p.txt}</div>
+              </div>`;
+          }).join('')}
         </div>
-        <span style="font-size:11px;font-weight:700;background:#F0F4FA;color:var(--navy);padding:3px 10px;border-radius:100px;white-space:nowrap;">${estadoLabel}</span>
-      </div>
-      ${itemsHtml}
-      <div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;">
-        <span style="font-size:13px;font-weight:700;">Total</span>
-        <span style="font-size:14px;font-weight:800;color:var(--navy);">$${p.total.toLocaleString('es-AR')}</span>
-      </div>
-    </div>`;
+      </div>`;
+  }
+
+  el.innerHTML = pedidos.slice().reverse().map(p=>{
+    const fecha = new Date(p.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const tipoLabel = p.tipo==='envio' ? '🛵 Con envío' : '🏪 Retiro en local';
+    const itemsHtml = (p.items||[]).map(i=>`
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:2px 0;">
+        <span>${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}</span>
+        <span style="font-weight:600;">$${(i.precioTotal||i.precio||0).toLocaleString('es-AR')}</span>
+      </div>`).join('');
+    const estado = p.estado || 'enviado';
+    const repartidor = p.repartidorNombre ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">🛵 Repartidor: <strong>${p.repartidorNombre}</strong></div>` : '';
+    const direccion = p.direccion ? `<div style="font-size:12px;color:var(--muted);">📍 ${p.direccion}</div>` : '';
+    const esEntregado = estado === 'entregado';
+
+    return `
+      <div class="card" style="margin-bottom:14px;${esEntregado?'opacity:.8':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div>
+            <div style="font-size:14px;font-weight:800;color:var(--navy);">${p.comercioNombre}</div>
+            <div style="font-size:11px;color:var(--muted);">${fecha} · ${tipoLabel}</div>
+          </div>
+          ${esEntregado?`<span style="font-size:10.5px;font-weight:700;background:#eaf5ea;color:#1a6b3a;padding:3px 10px;border-radius:100px;">✔️ Entregado</span>`:''}
+        </div>
+        ${barraProgreso(estado, p.tipo)}
+        <div style="border-top:1px solid var(--line);margin-top:10px;padding-top:8px;">
+          ${itemsHtml}
+        </div>
+        ${direccion}${repartidor}
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:8px;padding-top:8px;">
+          <span style="font-size:12.5px;font-weight:700;">Total</span>
+          <span style="font-size:15px;font-weight:800;color:var(--navy);">$${(p.total||0).toLocaleString('es-AR')}</span>
+        </div>
+        ${!esEntregado ? `
+          <button onclick="confirmarEntregaCliente('${p.pedidoEnvioId||''}')" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;">
+            ✔️ Ya recibí mi pedido
+          </button>` : ''}
+      </div>`;
   }).join('');
+}
+
+function confirmarEntregaCliente(pedidoEnvioId){
+  if(!pedidoEnvioId) return;
+  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoEnvioId);
+  if(p){ p.estado='entregado'; if(firebaseListo&&db) db.collection('pedidosEnvio').doc(pedidoEnvioId).update({estado:'entregado'}).catch(()=>{}); }
+  const mp = (state.misPedidos||[]).find(x=>x.pedidoEnvioId===pedidoEnvioId);
+  if(mp){ mp.estado='entregado'; guardarMisPedidosFirestore(); }
+  toast('✔️ ¡Gracias! Confirmaste la recepción de tu pedido.');
+  renderMisPedidos();
+}
+
+function repartidorTomarPedido(pedidoId){
+  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoId);
+  if(!p){ toast('Pedido no encontrado'); return; }
+  if(p.estado !== 'pendiente'){ toast('Este pedido ya fue tomado'); renderPanelRepartidor(); return; }
+  const repId     = state.currentUser?.uid || state.currentUser?.id || 'rep';
+  const repNombre = state.currentUser?.nombre || 'Repartidor';
+  const repTel    = state.currentUser?.telefono || '';
+  p.estado = 'asignado';
+  p.repartidorId     = repId;
+  p.repartidorNombre = repNombre;
+  p.repartidorTel    = repTel;
+  if(firebaseListo && db){
+    db.collection('pedidosEnvio').doc(pedidoId).update({
+      estado:'asignado', repartidorId:repId,
+      repartidorNombre:repNombre, repartidorTel:repTel
+    }).catch(e=>console.error(e));
+  }
+  toast('🛵 ¡Pedido tomado! Retirá el producto en el comercio.');
+  sincronizarEstadoPedidoCliente(pedidoId, 'asignado');
+  renderPanelRepartidor();
 }
 
 function guardarMisPedidosFirestore(){
