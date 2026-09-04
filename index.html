@@ -6040,7 +6040,12 @@ function setFeedTab(tab){
   window.scrollTo(0,0);
   if(tab==='ofertas'){ renderFeed(); }
   if(tab==='locales'){ renderLocales(); }
-  if(tab==='util'){ setTimeout(iniciarMapaCity, 80); }
+  if(tab==='util'){
+    // Primero aseguramos que el div ya sea visible antes de iniciar Leaflet
+    var utilView = document.getElementById('feedUtilView');
+    if(utilView) utilView.classList.remove('hidden');
+    setTimeout(iniciarMapaCity, 150);
+  }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ renderHomeTab(); }
 }
@@ -7191,9 +7196,12 @@ function iniciarMapaCity(){
   if(!el || typeof L === 'undefined') return;
 
   if(mapaCityInstance){
-    mapaCityInstance.invalidateSize();
-    renderMarcadoresMap();
-    renderMapaRubroChips();
+    // Ya existe — solo refrescar tamaño y marcadores
+    setTimeout(() => {
+      mapaCityInstance.invalidateSize();
+      renderMarcadoresMap();
+      renderMapaRubroChips();
+    }, 100);
     return;
   }
 
