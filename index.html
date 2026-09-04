@@ -2212,6 +2212,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <select id="editAdRubro"></select>
       </div>
       <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text"></div>
+      <div class="field">
+        <label>Ubicación en el mapa (lat, lng)</label>
+        <div style="display:flex;gap:8px;">
+          <input id="editAdLat" type="text" inputmode="decimal" placeholder="Latitud" style="flex:1;">
+          <input id="editAdLng" type="text" inputmode="decimal" placeholder="Longitud" style="flex:1;">
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="adminBuscarCoordenadasPorDireccion()">📍 Buscar por dirección</button>
+        <div id="editAdCoordsEstado" style="font-size:11.5px;color:var(--muted);margin-top:6px;"></div>
+      </div>
       <div class="two-col">
         <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel"></div>
         <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editAdWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
@@ -7476,17 +7485,17 @@ function iniciarMapaCity(){ mostrarMapa(); }
 
 function iconoPin(activo){
   const color  = activo ? '#5C7355' : '#9E9E9E';
-  const sombra = activo ? 'rgba(92,115,85,0.35)' : 'rgba(0,0,0,0.15)';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${sombra}"/></filter>
-    <path d="M14 0C7.4 0 2 5.4 2 12c0 8 12 24 12 24S26 20 26 12C26 5.4 20.6 0 14 0z" fill="${color}" filter="url(#s)"/>
-    <circle cx="14" cy="12" r="5" fill="white" opacity=".9"/>
+  const sombra = activo ? 'rgba(92,115,85,0.35)' : 'rgba(0,0,0,0.25)';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
+    <filter id="s"><feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="${sombra}"/></filter>
+    <circle cx="13" cy="13" r="10" fill="${color}" stroke="white" stroke-width="3" filter="url(#s)"/>
+    <circle cx="13" cy="13" r="3.5" fill="white" opacity=".95"/>
   </svg>`;
   return L.divIcon({
     html: svg,
-    iconSize:   [28, 36],
-    iconAnchor: [14, 36],
-    popupAnchor:[0, -40],
+    iconSize:   [26, 26],
+    iconAnchor: [13, 13],
+    popupAnchor:[0, -16],
     className:  ''
   });
 }
@@ -7960,6 +7969,9 @@ function adminAbrirEditar(docId){
   document.getElementById('editAdWeb').value = c.web||'';
   document.getElementById('editAdDescripcion').value = c.descripcion||'';
   document.getElementById('editAdHorario').value = c.horario||'';
+  document.getElementById('editAdLat').value = c.lat||'';
+  document.getElementById('editAdLng').value = c.lng||'';
+  document.getElementById('editAdCoordsEstado').textContent = (c.lat && c.lng) ? '' : '⚠️ Este comercio todavía no tiene ubicación exacta en el mapa.';
   // Ciudad select
   const selCiudad = document.getElementById('editAdCiudad');
   for(let opt of selCiudad.options) if(opt.value===c.ciudad) opt.selected=true;
@@ -7970,6 +7982,22 @@ function adminAbrirEditar(docId){
     document.getElementById('editAdPublicidadVence').value = c.publicidadVence.slice(0,10);
   }
   showScreen('admin-editar-comercio');
+}
+
+async function adminBuscarCoordenadasPorDireccion(){
+  const direccion = document.getElementById('editAdDireccion').value.trim();
+  const ciudad = document.getElementById('editAdCiudad').value;
+  const estado = document.getElementById('editAdCoordsEstado');
+  if(!direccion){ toast('Ingresá la dirección primero'); return; }
+  estado.textContent = '🔎 Buscando "'+direccion+', '+ciudad+'"…';
+  const coords = await geocodearDireccion(direccion, ciudad);
+  if(coords){
+    document.getElementById('editAdLat').value = coords.lat.toFixed(6);
+    document.getElementById('editAdLng').value = coords.lng.toFixed(6);
+    estado.textContent = '✅ Encontrado: ' + coords.lat.toFixed(5) + ', ' + coords.lng.toFixed(5) + ' — revisá que sea correcto y guardá.';
+  } else {
+    estado.textContent = '❌ No se encontró esa dirección. Cargá lat/lng manualmente (podés obtenerlas tocando el lugar en Google Maps).';
+  }
 }
 
 async function adminGuardarEdicionComercio(){
@@ -7988,6 +8016,12 @@ async function adminGuardarEdicionComercio(){
     descripcion:document.getElementById('editAdDescripcion').value.trim(),
     horario:    document.getElementById('editAdHorario').value.trim(),
   };
+  const latVal = parseFloat(document.getElementById('editAdLat').value.replace(',', '.'));
+  const lngVal = parseFloat(document.getElementById('editAdLng').value.replace(',', '.'));
+  if(!isNaN(latVal) && !isNaN(lngVal)){
+    cambios.lat = latVal;
+    cambios.lng = lngVal;
+  }
   const fechaVence = document.getElementById('editAdPublicidadVence').value;
   if(fechaVence){
     cambios.publicidadVence = new Date(fechaVence).toISOString();
