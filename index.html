@@ -7373,48 +7373,70 @@ const CIUDAD_ZOOM   = 14;
 function mostrarMapa(){
   const mapa = document.getElementById('mapaCityFull');
   const slot = document.getElementById('mapaCitySlot');
-  if(!mapa || typeof L === 'undefined'){
-    console.log('[Mapa] Error: mapa=', !!mapa, 'L=', typeof L);
-    return;
-  }
+  if(!mapa){ console.log('[Mapa] div mapaCityFull no encontrado'); return; }
+  if(typeof L === 'undefined'){ console.log('[Mapa] Leaflet no cargó'); return; }
 
+  // Inicializar Leaflet una sola vez — el div está en el body fuera de display:none
   if(!mapaCityInstance){
-    console.log('[Mapa] Creando instancia Leaflet...');
+    // Dar dimensiones temporales para que Leaflet pueda inicializar
+    mapa.style.position = 'fixed';
+    mapa.style.top    = '0px';
+    mapa.style.left   = '0px';
+    mapa.style.width  = '100vw';
+    mapa.style.height = '50vh';
+    mapa.style.zIndex = '1';
+
     mapaCityInstance = L.map('mapaCityFull', {
       center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
       zoom: CIUDAD_ZOOM,
       zoomControl: true,
-      attributionControl: false,
+      attributionControl: true,
       scrollWheelZoom: false
     });
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19
-    }).addTo(mapaCityInstance);
+
+    // Intentar Esri primero, con fallback a OSM si falla
+    var tileEsri = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom:19, attribution:'Tiles © Esri' }
+    ).addTo(mapaCityInstance);
+
+    // Fallback: si los tiles de Esri no cargan en 5s, cambiar a OSM
+    setTimeout(()=>{
+      if(document.querySelector('#mapaCityFull .leaflet-tile-loaded')) return; // ya cargó
+      tileEsri.remove();
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19, attribution:'© OpenStreetMap'
+      }).addTo(mapaCityInstance);
+    }, 5000);
+
     mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
-    console.log('[Mapa] Leaflet creado, tamaño inicial:', mapaCityInstance.getSize());
+    console.log('[Mapa] Leaflet iniciado');
   }
 
-  function posicionarSobreSlot(){
-    if(!slot){ console.log('[Mapa] Sin slot'); return; }
+  // Posicionar sobre el slot — reintentar hasta que el slot tenga dimensiones
+  function posicionar(intentos){
+    if(!slot) return;
     const rect = slot.getBoundingClientRect();
-    console.log('[Mapa] Slot rect:', JSON.stringify({top:rect.top,left:rect.left,w:rect.width,h:rect.height}));
-    if(rect.width === 0 || rect.height === 0){
-      setTimeout(posicionarSobreSlot, 150);
-      return;
+    console.log(`[Mapa] slot rect (intento ${intentos}):`, rect.width, rect.height, rect.top);
+    if(rect.width > 0 && rect.height > 0){
+      mapa.style.position = 'fixed';
+      mapa.style.top    = rect.top    + 'px';
+      mapa.style.left   = rect.left   + 'px';
+      mapa.style.width  = rect.width  + 'px';
+      mapa.style.height = rect.height + 'px';
+      mapa.style.zIndex = '10';
+      mapaCityInstance.invalidateSize();
+      renderMarcadoresMap();
+      renderMapaRubroChips();
+      console.log('[Mapa] Posicionado OK, tamaño:', mapaCityInstance.getSize());
+    } else if(intentos < 20){
+      setTimeout(()=> posicionar(intentos+1), 100);
+    } else {
+      console.log('[Mapa] No se pudo posicionar — slot sin dimensiones tras 2s');
     }
-    mapa.style.position = 'fixed';
-    mapa.style.top    = rect.top    + 'px';
-    mapa.style.left   = rect.left   + 'px';
-    mapa.style.width  = rect.width  + 'px';
-    mapa.style.height = rect.height + 'px';
-    mapa.style.zIndex = '10';
-    mapaCityInstance.invalidateSize();
-    console.log('[Mapa] Posicionado, nuevo tamaño:', mapaCityInstance.getSize());
-    renderMarcadoresMap();
-    renderMapaRubroChips();
   }
 
-  requestAnimationFrame(()=> requestAnimationFrame(posicionarSobreSlot));
+  setTimeout(()=> posicionar(0), 50);
 }
 
 function ocultarMapa(){
@@ -7535,123 +7557,6 @@ function verLocalDesdeMap(comercioId){
   `;
   document.head.appendChild(st);
 })();
-
-function iniciarMapaCity(){
-  const el = document.getElementById('mapaCity');
-  if(!el || typeof L === 'undefined') return;
-
-  // Si ya existe, solo refrescamos los marcadores
-  if(mapaCityInstance){
-    renderMarcadoresMap();
-    return;
-  }
-
-  mapaCityInstance = L.map('mapaCity', {
-    center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
-    zoom: CIUDAD_ZOOM,
-    zoomControl: true,
-    attributionControl: false,
-    scrollWheelZoom: false   // en mobile el scroll es el de la página
-  });
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(mapaCityInstance);
-
-  // Atribución pequeña y discreta
-  L.control.attribution({ prefix: false, position: 'bottomright' })
-    .addAttribution('<span style="font-size:9px;opacity:.5;">© OSM</span>')
-    .addTo(mapaCityInstance);
-
-  mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
-
-  // Fix: Leaflet necesita que el mapa esté visible para calcular el tamaño
-  setTimeout(() => {
-    mapaCityInstance.invalidateSize();
-    renderMarcadoresMap();
-  }, 120);
-}
-
-function iconoPin(activo){
-  const color  = activo ? '#5C7355' : '#9E9E9E';
-  const sombra = activo ? 'rgba(92,115,85,0.35)' : 'rgba(0,0,0,0.15)';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${sombra}"/></filter>
-    <path d="M14 0C7.4 0 2 5.4 2 12c0 8 12 24 12 24S26 20 26 12C26 5.4 20.6 0 14 0z" fill="${color}" filter="url(#s)"/>
-    <circle cx="14" cy="12" r="5" fill="white" opacity=".9"/>
-  </svg>`;
-  return L.divIcon({
-    html: svg,
-    iconSize:   [28, 36],
-    iconAnchor: [14, 36],
-    popupAnchor:[0, -38],
-    className:  ''
-  });
-}
-
-function renderMarcadoresMap(){
-  if(!mapaCityInstance || !mapaMarkersLayer) return;
-  mapaMarkersLayer.clearLayers();
-
-  const comerciosVisibles = state.comercios.filter(c => {
-    if(!c.lat || !c.lng) return false;
-    if(c.ciudad && c.ciudad !== ciudadSeleccionada) return false;
-    return true;
-  });
-
-  if(comerciosVisibles.length === 0) return;
-
-  comerciosVisibles.forEach(c => {
-    const dias  = planDiasRestantes(c);
-    const activo = c.plan && c.planVence && dias !== null && dias >= 0 && (c.pagos?.length > 0);
-    const icono  = iconoPin(activo);
-
-    const horarioTexto = c.horario || (c.turnos
-      ? textoTurnos(c.turnos)
-      : 'Consultar horario');
-
-    const diasTexto = c.dias?.length
-      ? c.dias.join(' · ')
-      : 'Lun – Vie';
-
-    const popupHtml = `
-      <div style="font-family:'Manrope',sans-serif;min-width:190px;max-width:230px;">
-        <div style="font-weight:800;font-size:14px;color:#1a2340;margin-bottom:2px;line-height:1.2;">${c.nombre}</div>
-        <div style="font-size:11.5px;color:#7a7a8a;margin-bottom:6px;">${c.rubro || ''}${activo ? ' · <span style="color:#5C7355;font-weight:700;">✅ Activo</span>' : ''}</div>
-        ${c.horario || c.turnos ? `<div style="font-size:11px;color:#555;margin-bottom:2px;">🕐 ${horarioTexto}</div>` : ''}
-        ${c.dias?.length ? `<div style="font-size:11px;color:#555;margin-bottom:6px;">📅 ${diasTexto}</div>` : ''}
-        <button onclick="verLocalDesdeMap('${c.id}')"
-          style="width:100%;padding:8px;background:#5C7355;color:white;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;margin-top:4px;">
-          Ver local →
-        </button>
-      </div>`;
-
-    const marker = L.marker([c.lat, c.lng], { icon: icono })
-      .bindPopup(popupHtml, {
-        maxWidth: 240,
-        closeButton: false,
-        className:   'puent-popup'
-      });
-
-    marker.addTo(mapaMarkersLayer);
-  });
-
-  // Ajustar vista para que entren todos los pines
-  if(comerciosVisibles.length === 1){
-    mapaCityInstance.setView([comerciosVisibles[0].lat, comerciosVisibles[0].lng], CIUDAD_ZOOM);
-  } else {
-    try {
-      const bounds = L.latLngBounds(comerciosVisibles.map(c => [c.lat, c.lng]));
-      mapaCityInstance.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
-    } catch(e){}
-  }
-}
-
-function verLocalDesdeMap(comercioId){
-  if(mapaCityInstance) mapaCityInstance.closePopup();
-  verProductosDeLocal(comercioId);
-}
 
 // Estilos del popup de Leaflet personalizados
 (function(){
