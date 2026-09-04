@@ -9006,29 +9006,46 @@ function fpCerrarModal(){
 }
 
 function fpMostrarEnvio(){
-  document.getElementById('fpEnvioForm').style.display = 'block';
+  const form = document.getElementById('fpEnvioForm');
+  form.style.display = 'block';
+  setTimeout(()=> form.scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
+  document.getElementById('fpDireccion').focus();
 }
 
 function fpEnviarWhatsApp(tipo){
   const grupo = carrito[_pedidoGrupoId];
   const c = state.comercios.find(x=>x.id===_pedidoGrupoId);
-  if(!grupo || !c){ toast('Error'); return; }
+  if(!grupo || !c){ toast('Error al procesar el pedido'); return; }
 
-  const whatsapp = (c.whatsapp||'').replace(/\D/g,'');
-  if(!whatsapp){ toast('⚠️ Este comercio todavía no tiene WhatsApp cargado. Contactalo por otra vía.'); return; }
+  // Buscar WhatsApp — puede estar en whatsapp o telefono
+  const whatsapp = (c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  if(!whatsapp){
+    // Sin WhatsApp: mostrar info de contacto alternativa
+    const modal = document.getElementById('modalFinalizarPedido');
+    const extra = document.createElement('div');
+    extra.style.cssText = 'background:#fff3cd;border:1.5px solid #C99A3E;border-radius:12px;padding:12px 14px;margin-top:10px;font-size:13px;color:#5a4000;';
+    extra.innerHTML = `⚠️ <strong>${c.nombre}</strong> todavía no tiene WhatsApp cargado.<br>Contactalos por: ${c.email||c.telefono||'consultar en el local'}`;
+    modal.querySelector('div').appendChild(extra);
+    setTimeout(()=>extra.remove(), 5000);
+    return;
+  }
 
   const total = grupo.items.reduce((s,i)=>s+(i.precioTotal||i.precio),0);
   const itemsLineas = grupo.items.map(i=>`  • ${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}: $${(i.precioTotal||i.precio).toLocaleString('es-AR')}`).join('\n');
   const nombreUsuario = state.currentUser?.nombre || 'Un cliente PuenT';
+  const telUsuario    = state.currentUser?.telefono || state.currentUser?.whatsapp || null;
+  const telLinea      = telUsuario ? `📱 *Mi contacto:* ${telUsuario}\n` : '';
+  const fecha         = new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  const hora          = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
 
   let msg = '';
   if(tipo === 'presencial'){
-    msg = `¡Hola ${c.nombre}! 👋\n\nSoy *${nombreUsuario}* y quiero reservar desde PuenT:\n\n${itemsLineas}\n\n*Total: $${total.toLocaleString('es-AR')}*\n\n✅ Paso a retirar al local. ¡Gracias!`;
+    msg = `¡Hola *${c.nombre}*! 👋\n\nSoy *${nombreUsuario}* y quiero hacer una reserva desde *PuenT* 🛒\n\n*Productos:*\n${itemsLineas}\n\n💰 *Total: $${total.toLocaleString('es-AR')}*\n\n${telLinea}🏪 *Modalidad:* Retiro en el local\n📅 ${fecha} a las ${hora}\n\n¡Quedamos en contacto!`;
   } else {
     const dir = document.getElementById('fpDireccion').value.trim();
     if(!dir){ toast('📍 Ingresá tu dirección de entrega'); return; }
     const totalConEnvio = total + COSTO_ENVIO;
-    msg = `¡Hola ${c.nombre}! 👋\n\nSoy *${nombreUsuario}* y quiero pedir envío a domicilio desde PuenT:\n\n${itemsLineas}\n\n🛵 *Envío:* $${COSTO_ENVIO.toLocaleString('es-AR')}\n*Total: $${totalConEnvio.toLocaleString('es-AR')}*\n\n📍 *Dirección de entrega:* ${dir}\n\n¡Gracias!`;
+    msg = `¡Hola *${c.nombre}*! 👋\n\nSoy *${nombreUsuario}* y quiero pedir *envío a domicilio* desde *PuenT* 🛒\n\n*Productos:*\n${itemsLineas}\n\n🛵 *Envío:* $${COSTO_ENVIO.toLocaleString('es-AR')}\n💰 *Total: $${totalConEnvio.toLocaleString('es-AR')}*\n\n📍 *Dirección de entrega:* ${dir}\n${telLinea}\n📅 ${fecha} a las ${hora}\n\n¡Gracias!`;
   }
 
   // Guardar en Mis Pedidos
