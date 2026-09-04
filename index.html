@@ -875,9 +875,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
       </div>
 
-      <!-- Placeholder donde se mueve el mapa al activar el tab -->
-      <div id="mapaCitySlot" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e8e0d8;position:relative;">
-        <div id="mapaCityFull" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>
+      <!-- Placeholder visible que marca el espacio del mapa -->
+      <div id="mapaCitySlot" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e0dbd4;display:flex;align-items:center;justify-content:center;">
+        <div style="text-align:center;color:#999;font-size:13px;">Cargando mapa…</div>
       </div>
 
       <!-- Leyenda -->
@@ -892,8 +892,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
 
-    <!-- El mapa vive aquí siempre (nunca oculto con display:none) -->
-    <div id="mapaCityFull" style="position:fixed;top:-9999px;left:-9999px;width:100vw;height:calc(100vh - 195px);min-height:320px;background:#e8e0d8;z-index:0;"></div>
+
 
     <!-- ================================================================
          TAB: MÁS
@@ -7204,10 +7203,14 @@ const CIUDAD_ZOOM   = 14;
 
 function mostrarMapa(){
   const mapa = document.getElementById('mapaCityFull');
-  if(!mapa || typeof L === 'undefined') return;
+  const slot = document.getElementById('mapaCitySlot');
+  if(!mapa || typeof L === 'undefined'){
+    console.log('[Mapa] Error: mapa=', !!mapa, 'L=', typeof L);
+    return;
+  }
 
   if(!mapaCityInstance){
-    console.log('[Mapa] Inicializando Leaflet en:', document.getElementById('mapaCityFull'));
+    console.log('[Mapa] Creando instancia Leaflet...');
     mapaCityInstance = L.map('mapaCityFull', {
       center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
       zoom: CIUDAD_ZOOM,
@@ -7216,27 +7219,43 @@ function mostrarMapa(){
       scrollWheelZoom: false
     });
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19,
-      attribution: 'Tiles © Esri'
+      maxZoom: 19
     }).addTo(mapaCityInstance);
     mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
-    console.log('[Mapa] Leaflet creado OK, tamaño:', mapaCityInstance.getSize());
+    console.log('[Mapa] Leaflet creado, tamaño inicial:', mapaCityInstance.getSize());
   }
 
-  // Doble invalidateSize con delays distintos para asegurar que el DOM ya pintó
-  setTimeout(() => { mapaCityInstance.invalidateSize(); }, 50);
-  setTimeout(() => {
+  function posicionarSobreSlot(){
+    if(!slot){ console.log('[Mapa] Sin slot'); return; }
+    const rect = slot.getBoundingClientRect();
+    console.log('[Mapa] Slot rect:', JSON.stringify({top:rect.top,left:rect.left,w:rect.width,h:rect.height}));
+    if(rect.width === 0 || rect.height === 0){
+      setTimeout(posicionarSobreSlot, 150);
+      return;
+    }
+    mapa.style.position = 'fixed';
+    mapa.style.top    = rect.top    + 'px';
+    mapa.style.left   = rect.left   + 'px';
+    mapa.style.width  = rect.width  + 'px';
+    mapa.style.height = rect.height + 'px';
+    mapa.style.zIndex = '10';
     mapaCityInstance.invalidateSize();
+    console.log('[Mapa] Posicionado, nuevo tamaño:', mapaCityInstance.getSize());
     renderMarcadoresMap();
     renderMapaRubroChips();
-  }, 300);
+  }
+
+  requestAnimationFrame(()=> requestAnimationFrame(posicionarSobreSlot));
 }
 
-function ocultarMapa(){ /* nada que hacer con este enfoque */ }
-
-function iniciarMapaCity(){
-  mostrarMapa();
+function ocultarMapa(){
+  const mapa = document.getElementById('mapaCityFull');
+  if(!mapa) return;
+  mapa.style.top    = '-9999px';
+  mapa.style.zIndex = '1';
 }
+
+function iniciarMapaCity(){ mostrarMapa(); }
 
 function iconoPin(activo){
   const color  = activo ? '#5C7355' : '#9E9E9E';
@@ -10267,5 +10286,7 @@ function cCancelarVentaPendiente(ventaId){
 // FIN CARRITO
 // =============================================
 </script>
+<!-- Mapa Leaflet — siempre en el DOM, nunca dentro de display:none -->
+<div id="mapaCityFull" style="position:fixed;top:-9999px;left:0;width:100%;height:50vh;z-index:1;background:#e0dbd4;"></div>
 </body>
 </html>
