@@ -876,7 +876,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
 
       <!-- Placeholder donde se mueve el mapa al activar el tab -->
-      <div id="mapaCitySlot" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e8e0d8;"></div>
+      <div id="mapaCitySlot" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e8e0d8;position:relative;">
+        <div id="mapaCityFull" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>
+      </div>
 
       <!-- Leyenda -->
       <div style="display:flex;gap:16px;padding:10px 16px;background:white;border-top:1px solid var(--line);">
@@ -6047,7 +6049,12 @@ function setFeedTab(tab){
   if(tab==='ofertas'){ renderFeed(); }
   if(tab==='locales'){ renderLocales(); }
   if(tab==='util'){
-    setTimeout(iniciarMapaCity, 80);
+    // Esperar dos frames para que el DOM pinte el div con dimensiones reales
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        iniciarMapaCity();
+      });
+    });
   }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ renderHomeTab(); }
@@ -7196,21 +7203,10 @@ const CIUDAD_CENTRO = { lat: -30.7432, lng: -59.6443 };
 const CIUDAD_ZOOM   = 14;
 
 function mostrarMapa(){
-  const slot = document.getElementById('mapaCitySlot');
   const mapa = document.getElementById('mapaCityFull');
-  if(!slot || !mapa) return;
-
-  // Posicionar el mapa sobre el slot
-  const rect = slot.getBoundingClientRect();
-  mapa.style.position = 'fixed';
-  mapa.style.top      = rect.top  + 'px';
-  mapa.style.left     = rect.left + 'px';
-  mapa.style.width    = rect.width  + 'px';
-  mapa.style.height   = rect.height + 'px';
-  mapa.style.zIndex   = '5';
+  if(!mapa || typeof L === 'undefined') return;
 
   if(!mapaCityInstance){
-    // Primera vez — inicializar Leaflet
     mapaCityInstance = L.map('mapaCityFull', {
       center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
       zoom: CIUDAD_ZOOM,
@@ -7224,20 +7220,16 @@ function mostrarMapa(){
     mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
   }
 
+  // Doble invalidateSize con delays distintos para asegurar que el DOM ya pintó
+  setTimeout(() => { mapaCityInstance.invalidateSize(); }, 50);
   setTimeout(() => {
     mapaCityInstance.invalidateSize();
     renderMarcadoresMap();
     renderMapaRubroChips();
-  }, 100);
+  }, 300);
 }
 
-function ocultarMapa(){
-  const mapa = document.getElementById('mapaCityFull');
-  if(!mapa) return;
-  mapa.style.top  = '-9999px';
-  mapa.style.left = '-9999px';
-  mapa.style.zIndex = '0';
-}
+function ocultarMapa(){ /* nada que hacer con este enfoque */ }
 
 function iniciarMapaCity(){
   mostrarMapa();
