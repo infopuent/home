@@ -2501,9 +2501,26 @@ function toggleFavorito(prodId, btn){
     toast('❤️ Guardado en Favoritos');
   }
   _guardarFavoritos();
+  _sincronizarFavoritosEnFirestore();
   if(document.getElementById('screen-cl-favoritos') && !document.getElementById('screen-cl-favoritos').classList.contains('hidden')){
     renderClFavoritos();
   }
+}
+// Si hay una sesión de cliente logueada (tiene uid de Firebase), guarda
+// la lista de favoritos también en su documento de Firestore.
+function _sincronizarFavoritosEnFirestore(){
+  const uid = state.currentUser?.uid;
+  if(typeof firebaseListo !== 'undefined' && firebaseListo && uid && state.role === 'cliente'){
+    db.collection('clientes').doc(uid).set({ favoritos }, { merge:true }).catch(()=>{});
+  }
+}
+// Se llama al iniciar sesión: mezcla lo que ya tenía guardado en Firestore
+// con lo que tenía en este dispositivo, para no perder nada.
+function sincronizarFavoritosAlLogin(clienteData){
+  const remotos = Array.isArray(clienteData?.favoritos) ? clienteData.favoritos : [];
+  favoritos = Array.from(new Set([...favoritos, ...remotos]));
+  _guardarFavoritos();
+  _sincronizarFavoritosEnFirestore();
 }
 function renderClFavoritos(){
   const grid = document.getElementById('clFavoritosGrid');
@@ -3117,6 +3134,7 @@ function entrarConDatosGuardados(rol, data){
     if(idx>=0) state.clientes[idx] = data; else state.clientes.push(data);
     state.currentUser = data; state.role='cliente';
     setRoleChip('🙋 Cliente', false);
+    sincronizarFavoritosAlLogin(data);
     renderClienteBuscador();
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
     showScreen('cl-buscador'); updateBottomNav('cl-buscador'); updateTopbarUser();
