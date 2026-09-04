@@ -4605,10 +4605,14 @@ function confirmarReservaParaCliente(){
   const codigo = genCodigo();
   const comMonto = Math.round(p.precio * p.comision / 100);
 
+  const com = state.comercios.find(x=>x.id===p.comercioId);
   const venta = {
     id: nextId('t'), codigo,
     vendedorId: state.currentUser?.id || state.currentUser?.uid,
-    productoId: p.id, comercioId: p.comercioId,
+    vendedorUid: state.currentUser?.uid || null,
+    productoId: p.id,
+    comercioId: p.comercioId,
+    comercioUid: com?.uid || null,
     clienteNombre, clienteTel, estado:'pendiente',
     comisionMonto: comMonto, fechaReserva: new Date().toISOString(),
     origen: 'conector'
@@ -6814,7 +6818,8 @@ function quieroEstaOferta(){
     || (firebaseAuth && firebaseAuth.currentUser && firebaseAuth.currentUser.uid)
     || null;
   const venta = {
-    id: nextId('t'), codigo, vendedorId:null, productoId:p.id, comercioId:c.id,
+    id: nextId('t'), codigo, vendedorId:null, vendedorUid:null,
+    productoId:p.id, comercioId:c.id, comercioUid: c.uid || null,
     clienteNombre, ownerUid: ownerUid, estado:'pendiente', comisionMonto:0, origen:'oferta',
     vencePickup: vencePickup ? vencePickup.toISOString() : null,
     fecha: new Date().toISOString()
@@ -9196,8 +9201,10 @@ function generarQRCarrito(comercioId){
   grupo.items.forEach(item=>{
     const p = state.productos.find(x=>x.id===item.prodId);
     if(!p) return;
+    const com = state.comercios.find(x=>x.id===comercioId);
     const venta = {
-      id: nextId('t'), codigo, vendedorId:null, productoId:p.id, comercioId,
+      id: nextId('t'), codigo, vendedorId:null, vendedorUid:null,
+      productoId:p.id, comercioId, comercioUid: com?.uid || null,
       clienteNombre, estado:'pendiente', comisionMonto:0, origen:'carrito',
       precioUnidad: p.precio, fechaReserva: new Date().toISOString()
     };
