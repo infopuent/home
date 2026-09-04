@@ -7512,9 +7512,72 @@ function renderMapaRubroChips(){
   `).join('');
 }
 
+/* ---- Geocodificación automática para comercios sin lat/lng ----
+   Si un comercio tiene "dirección" cargada pero no coordenadas (por ej.
+   porque se cargó desde el panel admin y no por GPS al registrarse),
+   la convertimos a lat/lng con OpenStreetMap Nominatim y la guardamos,
+   para que el pin aparezca en el mapa. */
+let geocodeCache = (function(){
+  try{ return JSON.parse(localStorage.getItem('puente_geocode_cache') || '{}'); }
+  catch(e){ return {}; }
+})();
+function _guardarGeocodeCache(){
+  try{ localStorage.setItem('puente_geocode_cache', JSON.stringify(geocodeCache)); }catch(e){}
+}
+
+async function geocodearDireccion(direccion, ciudad){
+  const key = (direccion + '|' + (ciudad||'')).toLowerCase().trim();
+  if(key in geocodeCache) return geocodeCache[key]; // ya la buscamos antes (puede ser null si no se encontró)
+  try{
+    const q = encodeURIComponent(direccion + ', ' + (ciudad||'La Paz') + ', Entre Ríos, Argentina');
+    const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`);
+    const data = await resp.json();
+    const resultado = (data && data[0]) ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
+    geocodeCache[key] = resultado;
+    _guardarGeocodeCache();
+    return resultado;
+  }catch(e){
+    console.log('[Mapa] No se pudo geocodificar "'+direccion+'":', e);
+    return null;
+  }
+}
+
+let _geocodeEnCurso = false;
+async function geocodearComerciosPendientes(){
+  if(_geocodeEnCurso) return;
+  const pendientes = state.comercios.filter(c =>
+    (!c.lat || !c.lng) && c.direccion && c.direccion !== '—' &&
+    (!c.ciudad || c.ciudad === ciudadSeleccionada)
+  );
+  if(!pendientes.length) return;
+
+  _geocodeEnCurso = true;
+  let huboCambios = false;
+  for(const c of pendientes){
+    const coords = await geocodearDireccion(c.direccion, c.ciudad);
+    if(coords){
+      c.lat = coords.lat;
+      c.lng = coords.lng;
+      huboCambios = true;
+      if(typeof firebaseListo !== 'undefined' && firebaseListo && c.id){
+        db.collection('comercios').doc(c.id).set({ lat: coords.lat, lng: coords.lng }, { merge:true }).catch(()=>{});
+      }
+    }
+    await new Promise(r => setTimeout(r, 1100)); // respetar límite de 1 req/seg de Nominatim
+  }
+  _geocodeEnCurso = false;
+  if(huboCambios){
+    renderMapaRubroChips();
+    renderMarcadoresMap();
+  }
+}
+
 function renderMarcadoresMap(){
   if(!mapaCityInstance || !mapaMarkersLayer) return;
   mapaMarkersLayer.clearLayers();
+
+  // Intentar completar coordenadas de comercios que solo tienen la dirección cargada
+  geocodearComerciosPendientes();
 
   let comerciosVisibles = state.comercios.filter(c => {
     if(!c.lat || !c.lng) return false;
