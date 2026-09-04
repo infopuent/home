@@ -834,11 +834,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <!-- ================================================================
          TAB: OFERTAS
     ================================================================ -->
-    <div id="feedOfertasView" class="hidden" style="padding:0 16px;overflow-x:hidden;">
-      <div class="feed-toolbar-row" style="margin-top:12px;">
-        <div class="chiprow" id="feedChips"></div>
+    <div id="feedOfertasView" class="hidden" style="padding:0;overflow-x:hidden;">
+      <div class="feed-toolbar-row" style="margin-top:12px;padding:0 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
+        <div class="chiprow" id="feedChips" style="flex-wrap:nowrap;white-space:nowrap;"></div>
       </div>
-      <div id="feedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;overflow:hidden;min-width:0;"></div>
+      <div id="feedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;overflow:hidden;min-width:0;padding:0 16px;"></div>
     </div>
 
     <!-- ================================================================
