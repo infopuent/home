@@ -7207,6 +7207,7 @@ function mostrarMapa(){
   if(!mapa || typeof L === 'undefined') return;
 
   if(!mapaCityInstance){
+    console.log('[Mapa] Inicializando Leaflet en:', document.getElementById('mapaCityFull'));
     mapaCityInstance = L.map('mapaCityFull', {
       center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
       zoom: CIUDAD_ZOOM,
@@ -7214,11 +7215,12 @@ function mostrarMapa(){
       attributionControl: false,
       scrollWheelZoom: false
     });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles © Esri'
     }).addTo(mapaCityInstance);
     mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
+    console.log('[Mapa] Leaflet creado OK, tamaño:', mapaCityInstance.getSize());
   }
 
   // Doble invalidateSize con delays distintos para asegurar que el DOM ya pintó
