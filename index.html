@@ -4605,7 +4605,6 @@ function confirmarReservaParaCliente(){
   const codigo = genCodigo();
   const comMonto = Math.round(p.precio * p.comision / 100);
 
-  const com = state.comercios.find(x=>x.id===p.comercioId);
   const venta = {
     id: nextId('t'), codigo,
     vendedorId: state.currentUser?.id || state.currentUser?.uid,
