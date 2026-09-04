@@ -834,11 +834,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <!-- ================================================================
          TAB: OFERTAS
     ================================================================ -->
-    <div id="feedOfertasView" class="hidden" style="padding:0 16px;">
+    <div id="feedOfertasView" class="hidden" style="padding:0 16px;overflow-x:hidden;">
       <div class="feed-toolbar-row" style="margin-top:12px;">
         <div class="chiprow" id="feedChips"></div>
       </div>
-      <div id="feedGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px;"></div>
+      <div id="feedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;overflow:hidden;min-width:0;"></div>
     </div>
 
     <!-- ================================================================
@@ -871,12 +871,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <!-- Filtro por rubro encima del mapa -->
       <div style="padding:0 16px 10px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;">
         <div id="mapaRubroChips" style="display:inline-flex;gap:7px;">
-          <button class="chip active" id="mapaChipTodos" onclick="setMapaRubroFiltro('Todos')">Todos</button>
+          <button class="chip active" onclick="setMapaRubroFiltro('Todos')">Todos</button>
         </div>
       </div>
 
-      <!-- Mapa -->
-      <div id="mapaCityFull" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e8e0d8;"></div>
+      <!-- Placeholder donde se mueve el mapa al activar el tab -->
+      <div id="mapaCitySlot" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e8e0d8;"></div>
 
       <!-- Leyenda -->
       <div style="display:flex;gap:16px;padding:10px 16px;background:white;border-top:1px solid var(--line);">
@@ -889,6 +889,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="margin-left:auto;font-size:11px;color:var(--muted);">© OpenStreetMap</div>
       </div>
     </div>
+
+    <!-- El mapa vive aquí siempre (nunca oculto con display:none) -->
+    <div id="mapaCityFull" style="position:fixed;top:-9999px;left:-9999px;width:100vw;height:calc(100vh - 195px);min-height:320px;background:#e8e0d8;z-index:0;"></div>
 
     <!-- ================================================================
          TAB: MÁS
@@ -2473,7 +2476,7 @@ function showScreen(name){
   if(el) el.classList.remove('hidden');
   window.scrollTo(0,0);
   updateBottomNav(name);
-  // Ocultar topbar en bienvenida (tiene su propio hero)
+  // Ocultar topbar en bienvenida
   var topbar = document.getElementById('topbar');
   if(topbar) topbar.style.display = (name === 'bienvenida') ? 'none' : '';
   // Mostrar solapas solo en el feed
@@ -2481,11 +2484,10 @@ function showScreen(name){
   if(solapas){
     var enFeed = (name === 'feed');
     solapas.classList.toggle('hidden', !enFeed);
-    // Ajustar top sticky: justo debajo del topbar
-    if(enFeed && topbar){
-      solapas.style.top = topbar.offsetHeight + 'px';
-    }
+    if(enFeed && topbar) solapas.style.top = topbar.offsetHeight + 'px';
   }
+  // Ocultar mapa si salimos del feed
+  if(name !== 'feed') ocultarMapa();
 }
 function goHome(){
   state.role = 'guest';
@@ -5992,13 +5994,13 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
         : `<button class="share-btn" onclick="event.stopPropagation(); agregarProductoAMiCatalogo('${p.id}')">➕ Sumar a mi catálogo</button>`;
     }
     return `
-      <div class="feed-prod-card" onclick="${click}">
+      <div class="feed-prod-card" onclick="${click}" style="overflow:hidden;min-width:0;">
         <div class="prod-photo">${foto}${badge ? `<span class="oferta-badge">${badge}</span>` : ''}${envioBadge}</div>
-        <div class="prod-body">
-          <div class="prod-name">${p.nombre}</div>
+        <div class="prod-body" style="flex-direction:column;align-items:stretch;justify-content:flex-start;gap:3px;min-width:0;">
+          <div class="prod-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</div>
           <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
           ${comisionBadge}
-          <div class="feed-vendor"><span class="dot"></span>${etiqueta}</div>
+          <div class="feed-vendor" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span class="dot"></span>${etiqueta}</div>
           ${botonVendedor}
         </div>
       </div>`;
@@ -6041,13 +6043,11 @@ function setFeedTab(tab){
     if(el) el.classList.toggle('hidden', t!==tab);
   });
   window.scrollTo(0,0);
+  if(tab !== 'util') ocultarMapa();
   if(tab==='ofertas'){ renderFeed(); }
   if(tab==='locales'){ renderLocales(); }
   if(tab==='util'){
-    // Primero aseguramos que el div ya sea visible antes de iniciar Leaflet
-    var utilView = document.getElementById('feedUtilView');
-    if(utilView) utilView.classList.remove('hidden');
-    setTimeout(iniciarMapaCity, 150);
+    setTimeout(iniciarMapaCity, 80);
   }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ renderHomeTab(); }
@@ -7195,39 +7195,52 @@ let mapaRubroFiltro    = 'Todos';
 const CIUDAD_CENTRO = { lat: -30.7432, lng: -59.6443 };
 const CIUDAD_ZOOM   = 14;
 
-function iniciarMapaCity(){
-  const el = document.getElementById('mapaCityFull');
-  if(!el || typeof L === 'undefined') return;
+function mostrarMapa(){
+  const slot = document.getElementById('mapaCitySlot');
+  const mapa = document.getElementById('mapaCityFull');
+  if(!slot || !mapa) return;
 
-  if(mapaCityInstance){
-    // Ya existe — solo refrescar tamaño y marcadores
-    setTimeout(() => {
-      mapaCityInstance.invalidateSize();
-      renderMarcadoresMap();
-      renderMapaRubroChips();
-    }, 100);
-    return;
+  // Posicionar el mapa sobre el slot
+  const rect = slot.getBoundingClientRect();
+  mapa.style.position = 'fixed';
+  mapa.style.top      = rect.top  + 'px';
+  mapa.style.left     = rect.left + 'px';
+  mapa.style.width    = rect.width  + 'px';
+  mapa.style.height   = rect.height + 'px';
+  mapa.style.zIndex   = '5';
+
+  if(!mapaCityInstance){
+    // Primera vez — inicializar Leaflet
+    mapaCityInstance = L.map('mapaCityFull', {
+      center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
+      zoom: CIUDAD_ZOOM,
+      zoomControl: true,
+      attributionControl: false,
+      scrollWheelZoom: false
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(mapaCityInstance);
+    mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
   }
-
-  mapaCityInstance = L.map('mapaCityFull', {
-    center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
-    zoom: CIUDAD_ZOOM,
-    zoomControl: true,
-    attributionControl: false,
-    scrollWheelZoom: false
-  });
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(mapaCityInstance);
-
-  mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
 
   setTimeout(() => {
     mapaCityInstance.invalidateSize();
     renderMarcadoresMap();
     renderMapaRubroChips();
-  }, 120);
+  }, 100);
+}
+
+function ocultarMapa(){
+  const mapa = document.getElementById('mapaCityFull');
+  if(!mapa) return;
+  mapa.style.top  = '-9999px';
+  mapa.style.left = '-9999px';
+  mapa.style.zIndex = '0';
+}
+
+function iniciarMapaCity(){
+  mostrarMapa();
 }
 
 function iconoPin(activo){
