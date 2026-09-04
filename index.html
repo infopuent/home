@@ -875,8 +875,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
       </div>
 
-      <!-- Placeholder visible que marca el espacio del mapa -->
-      <div id="mapaCitySlot" style="height:calc(100vh - 195px);min-height:320px;width:100%;background:#e0dbd4;display:flex;align-items:center;justify-content:center;">
+      <!-- Placeholder visible que marca el espacio del mapa (más chico, con marco) -->
+      <div id="mapaCitySlot" style="height:300px;width:calc(100% - 32px);margin:0 16px 4px;border-radius:16px;border:1.5px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,0.06);overflow:hidden;background:#e0dbd4;display:flex;align-items:center;justify-content:center;">
         <div style="text-align:center;color:#999;font-size:13px;">Cargando mapa…</div>
       </div>
 
@@ -7425,6 +7425,10 @@ function mostrarMapa(){
       mapa.style.width  = rect.width  + 'px';
       mapa.style.height = rect.height + 'px';
       mapa.style.zIndex = '10';
+      mapa.style.borderRadius = '16px';
+      mapa.style.overflow = 'hidden';
+      mapa.style.border = '1.5px solid var(--line)';
+      mapa.style.boxShadow = '0 2px 10px rgba(0,0,0,0.06)';
       mapaCityInstance.invalidateSize();
       renderMarcadoresMap();
       renderMapaRubroChips();
@@ -7445,6 +7449,28 @@ function ocultarMapa(){
   mapa.style.top    = '-9999px';
   mapa.style.zIndex = '1';
 }
+
+// Reposicionar el mapa al hacer scroll (es un div fixed que "sigue" al slot)
+let _mapaScrollTicking = false;
+function _reposicionarMapaEnScroll(){
+  if(tabActiva !== 'util') return; // solo si la pestaña del mapa está activa
+  const mapa = document.getElementById('mapaCityFull');
+  const slot = document.getElementById('mapaCitySlot');
+  if(!mapa || !slot || !mapaCityInstance) return;
+  const rect = slot.getBoundingClientRect();
+  if(rect.width > 0 && rect.height > 0){
+    mapa.style.top  = rect.top  + 'px';
+    mapa.style.left = rect.left + 'px';
+  }
+}
+window.addEventListener('scroll', function(){
+  if(_mapaScrollTicking) return;
+  _mapaScrollTicking = true;
+  requestAnimationFrame(function(){
+    _reposicionarMapaEnScroll();
+    _mapaScrollTicking = false;
+  });
+}, { passive:true });
 
 function iniciarMapaCity(){ mostrarMapa(); }
 
