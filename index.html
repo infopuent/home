@@ -1900,6 +1900,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div id="clVendedoresList"></div>
   </div>
 
+  <!-- ============ CLIENTE: FAVORITOS ============ -->
+  <div class="screen hidden" id="screen-cl-favoritos">
+    <button class="cerrar-sesion-btn" onclick="confirmarCierreSesion()">👤 Cerrar sesión</button>
+    <div class="kicker">Tus productos</div>
+    <h1 class="page-title">❤️ Favoritos</h1>
+    <p class="page-sub">Los productos que guardaste para comprar más adelante.</p>
+    <div class="prod-grid" id="clFavoritosGrid"></div>
+  </div>
+
   <!-- ============ CLIENTE: CATALOGO DE VENDEDOR ============ -->
   <!-- ============ SCREEN: CARRITO DEL CLIENTE ============ -->
   <div class="screen hidden" id="screen-cl-carrito">
@@ -2472,6 +2481,51 @@ const emojiByRubro = {
 function diasAtras(n){ const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString(); }
 
 
+/* ================= FAVORITOS (❤️) ================= */
+let favoritos = (function(){
+  try{ return JSON.parse(localStorage.getItem('puente_favoritos') || '[]'); }
+  catch(e){ return []; }
+})();
+function _guardarFavoritos(){
+  try{ localStorage.setItem('puente_favoritos', JSON.stringify(favoritos)); }catch(e){}
+}
+function esFavorito(prodId){ return favoritos.includes(prodId); }
+function toggleFavorito(prodId, btn){
+  const idx = favoritos.indexOf(prodId);
+  if(idx >= 0){
+    favoritos.splice(idx, 1);
+    if(btn){ btn.classList.remove('liked'); btn.textContent = '🤍'; }
+  } else {
+    favoritos.push(prodId);
+    if(btn){ btn.classList.add('liked'); btn.textContent = '❤️'; }
+    toast('❤️ Guardado en Favoritos');
+  }
+  _guardarFavoritos();
+  if(document.getElementById('screen-cl-favoritos') && !document.getElementById('screen-cl-favoritos').classList.contains('hidden')){
+    renderClFavoritos();
+  }
+}
+function renderClFavoritos(){
+  const grid = document.getElementById('clFavoritosGrid');
+  if(!grid) return;
+  const prods = favoritos.map(id => state.productos.find(p => p.id === id)).filter(Boolean);
+  if(!prods.length){
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ic">🤍</div><div class="t">Todavía no marcaste favoritos</div><div class="s">Tocá el corazón en cualquier producto para guardarlo acá.</div></div>';
+    return;
+  }
+  grid.innerHTML = prods.map(p => {
+    const foto = p.img ? `<img src="${p.img}" alt="${p.nombre}">` : (p.foto || '🛍️');
+    return `
+      <div class="prod-card" onclick="abrirOferta('${p.id}')" style="cursor:pointer;">
+        <div class="prod-photo">${foto}</div>
+        <div class="prod-body">
+          <div class="prod-price">$${Number(p.precio||0).toLocaleString('es-AR')}</div>
+          <button class="prod-like liked" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">❤️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 /* ================= HELPERS ================= */
 function toast(msg){
   const t = document.getElementById('toast');
@@ -2760,7 +2814,7 @@ const navByRole = {
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
     {key:'tornado-ofertas',ic:'ti-bolt',            label:'Ofertas', action:"renderTornadoOfertas();showScreen('tornado-ofertas')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:"abrirCarrito()"},
-    {key:'cl-buscador', ic:'ti-search',          label:'Buscar',  action:"showScreen('cl-buscador')"},
+    {key:'cl-favoritos',ic:'ti-heart',          label:'Favoritos',action:"renderClFavoritos();showScreen('cl-favoritos')"},
     {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
   ],
   admin:[
@@ -3839,7 +3893,7 @@ function renderTornadoOfertas(){
         <div class="prod-photo" style="position:relative;">${foto}${chip}</div>
         <div class="prod-body">
           <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-          <button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle('liked'); this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
+          <button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button>
         </div>
       </div>`;
   }).join('') + `</div>`;
@@ -5684,7 +5738,7 @@ function abrirCatalogoVendedor(vendedorId){
       <div class="prod-photo">${p.img ? `<img src="${p.img}" alt="${p.nombre}">` : p.foto}</div>
       <div class="prod-body">
         <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-        <button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle('liked'); this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
+        <button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button>
       </div>
     </div>`).join('');
   showScreen('cl-catalogo');
@@ -6101,7 +6155,7 @@ function renderFeedEncantar(){
       +'<div class="prod-photo">'+foto+'</div>'
       +'<div class="prod-body">'
       +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
-      +'<button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle(\'liked\'); this.textContent=this.classList.contains(\'liked\')?\'❤️\':\'🤍\'">🤍</button>'
+      +'<button class="prod-like'+(esFavorito(p.id)?' liked':'')+'" onclick="event.stopPropagation(); toggleFavorito(\''+p.id+'\', this)">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div></div>';
   }).join('');
 }
@@ -6140,7 +6194,7 @@ function renderFeedInfinito(reset){
       +'<div class="prod-photo">'+foto+'</div>'
       +'<div class="prod-body">'
       +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
-      +'<button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle(\'liked\'); this.textContent=this.classList.contains(\'liked\')?\'❤️\':\'🤍\'">🤍</button>'
+      +'<button class="prod-like'+(esFavorito(p.id)?' liked':'')+'" onclick="event.stopPropagation(); toggleFavorito(\''+p.id+'\', this)">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div></div>';
   }).join('');
   if(loader) loader.style.display = (_feedInfinitoOffset < _feedInfinitoTodos.length) ? 'block' : 'none';
@@ -7062,7 +7116,7 @@ function verProductosDeLocal(comercioId){
           <div class="prod-photo">${foto}${badge ? `<span class="oferta-badge">${badge}</span>` : ''}</div>
           <div class="prod-body">
             <div class="prod-price">$${p.precio.toLocaleString('es-AR')}</div>
-            <button class="prod-like" onclick="event.stopPropagation(); this.classList.toggle('liked'); this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
+            <button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button>
           </div>
         </div>`;
     }).join('');
