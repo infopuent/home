@@ -2139,7 +2139,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-admin-usuarios">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
     <div class="page-title">Usuarios</div>
-    <input class="feed-search-inline" type="text" placeholder="🔍 Buscar por nombre o email…" oninput="adminBuscarUsuario(this.value)" style="width:100%;margin-bottom:14px;">
+    <input class="feed-search-inline" type="text" placeholder="🔍 Buscar por nombre o email…" oninput="adminBuscarUsuario(this.value)" style="width:100%;margin-bottom:10px;">
+    <div style="display:flex;gap:7px;margin-bottom:14px;">
+      <button class="chip active" id="chipUsFiltroTodos" onclick="adminFiltrarUsuariosPorTelefono('todos')">Todos</button>
+      <button class="chip" id="chipUsFiltroSinTel" onclick="adminFiltrarUsuariosPorTelefono('sin-telefono')">📵 Sin WhatsApp</button>
+    </div>
     <div id="adminUsuariosList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
   </div>
 
@@ -9059,13 +9063,39 @@ async function adminCargarUsuarios(){
       ...vs.docs.map(d=>({...d.data(), _rol:'vendedor', _docId:d.id})),
       ...cls.docs.map(d=>({...d.data(), _rol:'cliente', _docId:d.id}))
     ];
-    adminRenderUsuarios(_adminUsuarios);
+    adminAplicarFiltrosUsuarios();
   }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
 }
 
 function adminBuscarUsuario(q){
-  const filtrados = _adminUsuarios.filter(u=>(u.nombre+' '+u.email).toLowerCase().includes(q.toLowerCase()));
-  adminRenderUsuarios(filtrados);
+  _adminUsuariosBusqueda = q;
+  adminAplicarFiltrosUsuarios();
+}
+
+let _adminUsuariosBusqueda = '';
+let _adminUsuariosFiltroTel = 'todos';
+
+function adminFiltrarUsuariosPorTelefono(modo){
+  _adminUsuariosFiltroTel = modo;
+  document.getElementById('chipUsFiltroTodos').classList.toggle('active', modo==='todos');
+  document.getElementById('chipUsFiltroSinTel').classList.toggle('active', modo==='sin-telefono');
+  adminAplicarFiltrosUsuarios();
+}
+
+function _tieneWhatsappValido(u){
+  return (u.telefono||'').replace(/\D/g,'').length >= 8;
+}
+
+function adminAplicarFiltrosUsuarios(){
+  let lista = _adminUsuarios;
+  if(_adminUsuariosBusqueda){
+    const q = _adminUsuariosBusqueda.toLowerCase();
+    lista = lista.filter(u=>(u.nombre+' '+u.email).toLowerCase().includes(q));
+  }
+  if(_adminUsuariosFiltroTel === 'sin-telefono'){
+    lista = lista.filter(u => !_tieneWhatsappValido(u));
+  }
+  adminRenderUsuarios(lista);
 }
 
 function adminRenderUsuarios(lista){
@@ -9073,15 +9103,21 @@ function adminRenderUsuarios(lista){
   if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
   const ic = {comercio:'🏬', vendedor:'🛍️', cliente:'🙋'};
   const bg = {comercio:'var(--green)', vendedor:'var(--blue)', cliente:'var(--muted)'};
-  el.innerHTML = lista.map(u=>`
+  el.innerHTML = lista.map(u=>{
+    const tieneTel = _tieneWhatsappValido(u);
+    const badgeTel = tieneTel
+      ? `<span title="WhatsApp cargado" style="font-size:14px;">📱</span>`
+      : `<span title="Sin WhatsApp cargado" style="font-size:11px;font-weight:800;color:#c23b3b;background:#fdeaea;padding:3px 7px;border-radius:100px;white-space:nowrap;">📵 Sin WhatsApp</span>`;
+    return `
     <div class="list-row">
       <div class="av" style="background:${bg[u._rol]||'#ccc'};">${ic[u._rol]||'👤'}</div>
       <div class="main">
-        <div class="t">${u.nombre||'Sin nombre'}</div>
+        <div class="t" style="display:flex;align-items:center;gap:7px;">${u.nombre||'Sin nombre'} ${badgeTel}</div>
         <div class="s">${u.email||'—'} · ${u._rol}</div>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="adminEliminarUsuario('${u._docId}','${u._rol}','${(u.nombre||'').replace(/'/g,'')}')" style="padding:6px 10px;">🗑️</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function adminEliminarUsuario(docId, rol, nombre){
