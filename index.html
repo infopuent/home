@@ -1354,6 +1354,23 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <button class="btn btn-primary" onclick="guardarEdicionVendedor()">Guardar cambios</button>
   </div>
 
+  <!-- ============ CLIENTE: EDITAR MIS DATOS ============ -->
+  <div class="screen hidden" id="screen-editar-cliente">
+    <div class="link-back" onclick="showScreen('perfil')">← Volver a mi perfil</div>
+    <div class="kicker">Mi cuenta</div>
+    <h1 class="page-title">Editar mi información</h1>
+    <p class="page-sub">Completá o corregí tus datos de contacto.</p>
+    <div class="card">
+      <div class="field"><label>Nombre completo</label><input id="editClNombre" placeholder="Tu nombre"></div>
+      <div class="field"><label>Teléfono / WhatsApp</label><input id="editClTelefono" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
+      <div class="field"><label>Email</label><input id="editClEmail" type="email" placeholder="tu@email.com"></div>
+      <div class="field"><label>Ciudad</label><input id="editClCiudad" placeholder="Ej: La Paz"></div>
+      <div class="field"><label>Dirección (para envíos)</label><input id="editClDireccion" placeholder="Calle y número"></div>
+    </div>
+    <button class="btn btn-primary" onclick="guardarEdicionCliente()">Guardar cambios</button>
+  </div>
+
+
   <!-- ============ CONECTORT: AGREGAR PRODUCTOS (elegir comercio) ============ -->
   <div class="screen hidden" id="screen-v-elegir-comercio">
     <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al catálogo</div>
@@ -5248,6 +5265,31 @@ function guardarEdicionVendedor(){
   toast('Datos actualizados ✅');
   renderVendedorCatalogo();
   showScreen('v-catalogo');
+}
+
+function abrirEditarCliente(){
+  const cl = state.currentUser;
+  document.getElementById('editClNombre').value = cl.nombre || '';
+  document.getElementById('editClTelefono').value = cl.telefono || '';
+  document.getElementById('editClEmail').value = cl.email || '';
+  document.getElementById('editClCiudad').value = cl.ciudad || 'La Paz';
+  document.getElementById('editClDireccion').value = cl.direccion || '';
+  showScreen('editar-cliente');
+}
+
+function guardarEdicionCliente(){
+  const cl = state.currentUser;
+  cl.nombre = document.getElementById('editClNombre').value.trim() || cl.nombre;
+  cl.telefono = document.getElementById('editClTelefono').value.trim();
+  cl.email = document.getElementById('editClEmail').value.trim();
+  cl.ciudad = document.getElementById('editClCiudad').value.trim() || 'La Paz';
+  cl.direccion = document.getElementById('editClDireccion').value.trim();
+
+  const idx = state.clientes.findIndex(x => x.id === cl.id || x.uid === cl.uid);
+  if(idx >= 0) state.clientes[idx] = cl;
+  guardarPerfilEnFirestore('clientes', cl);
+  toast('Datos actualizados ✅');
+  abrirPerfil();
 }
 
 // Guarda el perfil actualizado en Firestore, solo si es una cuenta real de Google (tiene uid).
@@ -9730,18 +9772,27 @@ function abrirPerfil(){
     </div>` : '';
 
   let campos = '';
-  let editBtn = '';
+  let editAction = '';
   if(state.role === 'vendedor'){
     campos = fila('Nombre', u.nombre) + fila('Usuario', u.usuario ? '@'+u.usuario : null) + fila('Teléfono', u.telefono) + fila('Ciudad', u.ciudad) + fila('Zona', u.zona) + fila('Alta', u.fechaAlta ? new Date(u.fechaAlta).toLocaleDateString('es-AR') : null);
-    editBtn = `<button class="btn btn-ghost" style="margin-top:10px;" onclick="abrirEditarVendedor()">✏️ Editar información</button>`;
+    editAction = 'abrirEditarVendedor()';
   } else if(state.role === 'comercio'){
     campos = fila('Nombre', u.nombre) + fila('Dirección', u.direccion) + fila('Ciudad', u.ciudad) + fila('Rubro', u.rubro) + fila('Teléfono', u.telefono) + fila('Horario', u.horario) + fila('Rating', u.rating ? '⭐ '+u.rating : null);
-    editBtn = `<button class="btn btn-ghost" style="margin-top:10px;" onclick="abrirEditarComercio()">✏️ Editar información</button>`;
+    editAction = 'abrirEditarComercio()';
   } else if(state.role === 'cliente'){
-    campos = fila('Nombre', u.nombre) + fila('Teléfono', u.telefono) + fila('Ciudad', u.ciudad);
+    campos = fila('Nombre', u.nombre) + fila('Teléfono', u.telefono) + fila('Email', u.email) + fila('Dirección', u.direccion) + fila('Ciudad', u.ciudad);
+    editAction = 'abrirEditarCliente()';
   } else if(state.role === 'admin'){
     campos = fila('Nombre', u.nombre) + fila('Email', u.email);
   }
+
+  // Recuadros de acciones — arriba de todo, para no tener que scrollear
+  // hasta el final para editar datos o cerrar sesión.
+  const accionesHtml = `
+    <div class="btn-grid" style="margin-bottom:20px;">
+      ${editAction ? `<button class="btn-tile btn-tile-sage" onclick="${editAction}"><span class="ic">✏️</span>Editar información</button>` : ''}
+      <button class="btn-tile btn-tile-rose" style="${editAction ? '' : 'grid-column:1/-1;'}" onclick="confirmarCierreSesion()"><span class="ic">🚪</span>Cerrar sesión</button>
+    </div>`;
 
   // Historial de QR
   const historial = cargarHistorialQR();
@@ -9766,7 +9817,7 @@ function abrirPerfil(){
         </div>`}).join('');
 
   el.innerHTML = `
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
       <div style="width:56px;height:56px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:22px;color:white;flex-shrink:0;">
         ${ state.role==='vendedor'?'🛍️': state.role==='comercio'?'🏬': state.role==='cliente'?'🙋':'🛡️' }
       </div>
@@ -9775,16 +9826,14 @@ function abrirPerfil(){
         <div style="font-size:20px;font-weight:700;color:var(--navy);">${u.nombre || u.email || '—'}</div>
       </div>
     </div>
+    ${accionesHtml}
     <div class="card" style="padding:4px 16px;">${campos}</div>
-    ${editBtn}
 
     <div style="margin-top:22px;margin-bottom:10px;">
       <div class="section-title">📋 Mis compras y QR generados</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tocá cualquier fila para volver a ver el QR.</div>
     </div>
-    ${historialHtml}
-
-    <button class="btn btn-ghost" style="margin-top:18px;color:#c23b3b;border-color:#f0d0d0;" onclick="confirmarCierreSesion()">🚪 Cerrar sesión</button>`;
+    ${historialHtml}`;
 
   showScreen('perfil');
   updateBottomNav('cl-perfil');
