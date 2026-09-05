@@ -1215,7 +1215,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="hidden" id="registroManualBox">
       <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:14px;">Este registro es manual (con verificación de teléfono) y es una cuenta aparte de la de Google.</div>
       <div class="role-select-grid" style="margin-top:0;">
-        <button class="role-btn" onclick="goRegister('vendedor')">
+        <button class="role-btn" disabled style="opacity:.5;cursor:not-allowed;position:relative;">
+          <span style="position:absolute;top:6px;right:6px;background:#1A1A1A;color:white;font-size:8.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:100px;">Próximamente</span>
           <div class="ic" style="background:var(--green)">🔗</div>
           <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
         </button>
@@ -1239,7 +1240,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <p class="page-sub">Elegí tu perfil. Recién ahí te vamos a pedir que confirmes con tu cuenta de Google.</p>
 
     <div class="role-select-grid" style="margin-top:0;">
-      <button class="role-btn" onclick="elegirRolParaRegistro('vendedor')">
+      <button class="role-btn" disabled style="opacity:.5;cursor:not-allowed;position:relative;">
+        <span style="position:absolute;top:6px;right:6px;background:#1A1A1A;color:white;font-size:8.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:100px;">Próximamente</span>
         <div class="ic" style="background:var(--green)">🔗</div>
         <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
       </button>
@@ -1261,7 +1263,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <p class="page-sub">Elegí con qué perfil querés registrarte.</p>
 
     <div class="role-select-grid" style="margin-top:0;">
-      <button class="role-btn" onclick="elegirRolGoogle('vendedor')">
+      <button class="role-btn" disabled style="opacity:.5;cursor:not-allowed;position:relative;">
+        <span style="position:absolute;top:6px;right:6px;background:#1A1A1A;color:white;font-size:8.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:100px;">Próximamente</span>
         <div class="ic" style="background:var(--green)">🛍️</div>
         <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
       </button>
@@ -3476,7 +3479,7 @@ function goRegister(role){
         <!-- PLAN -->
         <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">🏷️ Plan de suscripción</div>
         <div style="background:var(--cream,#FBF7EF);border-radius:13px;padding:13px 14px;margin-bottom:6px;font-size:12.5px;color:var(--muted);line-height:1.5;">
-          Tus primeros <strong>15 días son gratis</strong>. Después elegís cómo seguir. Podés cambiar de plan en cualquier momento hablando con nosotros.
+          Tus primeros <strong>20 días son gratis, con todo activo</strong>. Después elegís cómo seguir. Podés cambiar de plan en cualquier momento hablando con nosotros.
         </div>
 
         <!-- Selector tipo de plan -->
@@ -3618,8 +3621,8 @@ function submitRegister(){
     const planComPct = planTipo === 'comision'
       ? parseInt(document.querySelector('input[name="rPlanComPct"]:checked')?.value || '5')
       : null;
-    // Fecha de vencimiento del período de gracia (15 días)
-    const gracia = new Date(); gracia.setDate(gracia.getDate() + 15);
+    // Fecha de vencimiento del período de gracia (20 días)
+    const gracia = new Date(); gracia.setDate(gracia.getDate() + 20);
     const planVence = gracia.toISOString().slice(0,10);
 
     if(!razonSocial || !direccion || !whatsapp || !email){
@@ -6120,11 +6123,9 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
     universo = state.productos.filter(p=>p.origen==='comercio' || !p.origen).filter(p=>{
       const c = state.comercios.find(x=>x.id===p.comercioId);
       if(!c || !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
-      // Ocultar si el plan venció (solo si el comercio ya eligió plan — los sin plan son demos/admin)
-      if(c.plan && c.planVence){
-        const dias = planDiasRestantes(c);
-        if(dias !== null && dias < 0) return false;
-      }
+      // Vencer el plan NO oculta nada automáticamente. Las restricciones (qué se
+      // apaga) las define Bruno a mano desde el admin, por comercio (c.restricciones).
+      if(c.restricciones?.ocultarFeed) return false;
       return true;
     });
   } else {
@@ -7942,6 +7943,12 @@ function adminRenderComercios(lista){
     const badgeBg = c.aprobado ? '#E3F3EA' : '#FBF1DC';
     const badgeColor = c.aprobado ? '#2F7A55' : '#93732A';
     const badgeLabel = c.aprobado ? 'Activo' : 'Pendiente';
+    // Gracia vencida: tiene plan cargado pero nunca pagó y ya pasaron los días de gracia
+    const diasPlan = c.plan ? planDiasRestantes(c) : null;
+    const graciaVencida = c.plan && !c.pagos?.length && diasPlan !== null && diasPlan < 0;
+    const badgeGracia = graciaVencida
+      ? `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#FDE8E8;color:#C23B3B;">⏰ Gracia vencida</span>`
+      : '';
     const btnAprobar = !c.aprobado
       ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarComercio('${docId}')">✅ Aprobar</button>`
       : '';
@@ -7956,6 +7963,7 @@ function adminRenderComercios(lista){
         </div>
         <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${badgeBg};color:${badgeColor};">${badgeLabel}</span>
       </div>
+      ${graciaVencida ? `<div style="width:100%;">${badgeGracia}</div>` : ''}
       <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerComercio('${docId}')">👁️ Ver</button>
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${docId}')">✏️ Editar</button>
@@ -7964,6 +7972,24 @@ function adminRenderComercios(lista){
       </div>
     </div>`;
   }).join('');
+}
+
+/* ---- Restricciones manuales post-gracia ---- */
+async function adminGuardarRestriccion(docId, campo, valor){
+  try{
+    await db.collection('comercios').doc(docId).update({ [`restricciones.${campo}`]: valor });
+    const c = _adminComercios.find(x=>(x._docId||x.id)===docId) || state.comercios.find(x=>x.id===docId);
+    if(c){ c.restricciones = c.restricciones || {}; c.restricciones[campo] = valor; }
+    toast(valor ? 'Restricción activada' : 'Restricción quitada');
+  }catch(e){ console.error(e); toast('Error al guardar'); }
+}
+
+function adminContactarComercioWA(docId){
+  const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+  if(!c || !c.telefono){ toast('Este comercio no tiene teléfono cargado'); return; }
+  const tel = c.telefono.replace(/\D/g,'');
+  const msg = `Hola ${c.nombre||''}! Te escribo de PuenT — vimos que se te venció el período de gracia. ¿Charlamos para ver si seguís con nosotros en plan mensual o por comisión?`;
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 /* ---- Ver detalle de un comercio (movimientos, valoraciones) ---- */
@@ -7986,6 +8012,8 @@ async function adminVerComercio(docId){
     ? `<img src="${c.img}" style="width:56px;height:56px;border-radius:14px;object-fit:cover;flex-shrink:0;">`
     : `<div style="width:56px;height:56px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏬</div>`;
   const fila = (l, v) => v ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--line);font-size:13px;"><span style="color:var(--muted);font-weight:700;">${l}</span><span>${v}</span></div>` : '';
+  const diasPlanDetalle = c.plan ? planDiasRestantes(c) : null;
+  const graciaVencidaDetalle = c.plan && !c.pagos?.length && diasPlanDetalle !== null && diasPlanDetalle < 0;
 
   let ventasHtml = '<p style="color:var(--muted);font-size:12px;">Sin ventas registradas.</p>';
   let valoracionesHtml = '<p style="color:var(--muted);font-size:12px;">Sin valoraciones registradas.</p>';
@@ -8053,6 +8081,32 @@ async function adminVerComercio(docId){
       ${fila('Web', c.web)}
       ${fila('Horario', c.horario)}
       ${fila('Alta', c.fechaAlta ? new Date(c.fechaAlta).toLocaleDateString('es-AR') : null)}
+    </div>
+
+    <!-- ══ RESTRICCIONES MANUALES (post-gracia) ══ -->
+    <div class="section-title" style="margin-bottom:8px;">🔒 Restricciones manuales</div>
+    <div class="card" style="margin-bottom:16px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5;">
+        Al vencer la gracia el comercio NO se bloquea solo — vos decidís acá qué le apagás caso por caso, hasta que firme un plan mensual o por comisión.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="restr_ocultarFeed_${docId}" ${c.restricciones?.ocultarFeed ? 'checked' : ''} style="width:auto;" onchange="adminGuardarRestriccion('${docId}','ocultarFeed',this.checked)">
+          Ocultar sus productos del feed (Ofertas/Home) — sigue apareciendo en Locales
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="restr_ocultarDestacado_${docId}" ${c.restricciones?.ocultarDestacado ? 'checked' : ''} style="width:auto;" onchange="adminGuardarRestriccion('${docId}','ocultarDestacado',this.checked)">
+          Sacarlo de "Comercios destacados" / Cerca tuyo
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="restr_ocultarOfertas_${docId}" ${c.restricciones?.ocultarOfertas ? 'checked' : ''} style="width:auto;" onchange="adminGuardarRestriccion('${docId}','ocultarOfertas',this.checked)">
+          Bloquear ofertas relámpago nuevas
+        </label>
+      </div>
+      ${graciaVencidaDetalle ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;font-weight:700;color:#C23B3B;">⏰ Gracia vencida hace ${Math.abs(diasPlanDetalle)} día${Math.abs(diasPlanDetalle)===1?'':'s'} — todavía sin plan pago.</div>` : ''}
+      <button onclick="adminContactarComercioWA('${docId}')" style="margin-top:10px;background:none;border:1.5px solid var(--olive,#5C7355);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;width:100%;">
+        💬 Escribirle por WhatsApp para pasarlo a plan mensual
+      </button>
     </div>
 
     <!-- ══ FOTOS DEL COMERCIO ══ -->
