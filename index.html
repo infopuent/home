@@ -4776,7 +4776,7 @@ function enviarPedidoProducto(){
 }
 
 /* ================= CONECTORT: SUMAR COMERCIO VIA ADMIN ================= */
-const ADMIN_WSP = '5493434000000'; // ← reemplazar con el número real del admin
+const ADMIN_WSP = '5493437430240'; // WA real del admin PuenT
 
 function contactarAdminSumarComercio(){
   showScreen('v-nuevo-comercio');
@@ -4995,7 +4995,7 @@ function reabrirReserva(idx){
 // Cuando tengas la cuenta de EmailJS armada, esta es la única función que hay
 // que reemplazar por el envío real (emailjs.send(serviceId, templateId, params)).
 // Los 3 destinatarios y el contenido del mail ya quedan armados acá.
-const ADMIN_EMAIL = 'admin@elpuente.com.ar'; // reemplazar por tu mail real de admin
+const ADMIN_EMAIL = 'infopuent@gmail.com'; // mail real de admin
 
 async function compartirProducto(prodId){
   const p = state.productos.find(x=>x.id===prodId);
@@ -5494,7 +5494,7 @@ function renderCPlanBox(){
 }
 
 function contactarPuenT(){
-  const wa = '5493437000000'; // reemplazar con el WA real de admin PuenT
+  const wa = '5493437430240'; // WA real de admin PuenT
   window.open(`https://wa.me/${wa}?text=Hola%2C%20soy%20${encodeURIComponent(state.currentUser?.nombre||'un comercio')}%20y%20quiero%20renovar%20o%20cambiar%20mi%20plan%20en%20PuenT.`, '_blank');
 }
 
