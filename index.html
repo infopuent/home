@@ -2058,6 +2058,73 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
       <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="adminCargarRepartidores();showScreen('admin-repartidores')"><i class="ti ti-bike ic"></i>Repartidores 🛵</button>
       <button class="btn-tile btn-tile-gold" style="grid-column:1/-1;" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
+      <button class="btn-tile btn-tile-navy" style="grid-column:1/-1;" onclick="abrirPlanesPublico()"><i class="ti ti-share ic"></i>📋 Planes (para compartir)</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: PLANES (público, para compartir por link/WhatsApp) ============ -->
+  <div class="screen hidden" id="screen-planes-publico">
+    <div class="link-back" onclick="showScreen(state.role==='admin' ? 'admin-panel' : 'home')">← Volver</div>
+    <div class="kicker">PuenT para tu comercio</div>
+    <h1 class="page-title">Elegí cómo sumarte</h1>
+    <p class="page-sub">Así funcionan los planes para comercios en PuenT.</p>
+
+    <!-- Plan Gracia -->
+    <div class="card" style="border:1.5px solid var(--olive,#5C7355);margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:20px;">🎁</span>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">20 días de gracia</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">Empezás gratis, con todo activo, sin poner nada.</div>
+      <div style="font-size:12.5px;color:var(--ink);line-height:1.7;">
+        ✅ Catálogo propio con productos ilimitados<br>
+        ✅ Tus productos en el Home y el buscador<br>
+        ✅ Ficha del local con mapa y horarios<br>
+        ✅ QR personal del comercio<br>
+        ✅ Ofertas relámpago para liquidar stock
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted);">Al terminar la gracia elegís uno de los dos planes de abajo. Si no elegís, no se te bloquea nada de golpe — seguís visible mientras lo charlamos.</div>
+    </div>
+
+    <!-- Plan Fijo -->
+    <div class="card" style="border:1.5px solid var(--line);margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:20px;">💳</span>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">Pago fijo — $20.000/mes</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">Monto fijo por mes, sin importar cuánto vendés.</div>
+      <div style="font-size:12.5px;color:var(--ink);line-height:1.7;">
+        ✅ Catálogo propio con productos ilimitados<br>
+        ✅ Tus productos en el Home y el buscador<br>
+        ✅ Ficha del local con mapa y horarios<br>
+        ✅ QR personal del comercio<br>
+        ✅ Ofertas relámpago para liquidar stock
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--muted);">🔶 Add-on extra: banner publicitario en el Home (precio a convenir)</div>
+    </div>
+
+    <!-- Plan Comisión -->
+    <div class="card" style="border:1.5px solid var(--line);margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:20px;">📊</span>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">Por comisión — 3% a 10%</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">Pagás un % de lo que vendés a través de PuenT. Si no vendés, no pagás nada.</div>
+      <div style="font-size:12.5px;color:var(--ink);line-height:1.7;">
+        ✅ Catálogo propio con productos ilimitados<br>
+        ✅ Tus productos en el Home y el buscador<br>
+        ✅ Ficha del local con mapa y horarios<br>
+        ✅ QR personal del comercio<br>
+        ✅ Ofertas relámpago para liquidar stock
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--muted);">💡 Es publicidad real: pagás solo cuando te compran. 3%, 5%, 7% o 10%, a elección.</div>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;" onclick="showScreen('bienvenida-comercio')">🏬 Quiero sumar mi comercio</button>
+
+    <div id="planesPublicoCompartir" style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="compartirPlanesPublico('link')">🔗 Copiar link</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="compartirPlanesPublico('whatsapp')">💬 Compartir por WhatsApp</button>
     </div>
   </div>
 
@@ -7867,9 +7934,30 @@ manejarCodigoDesdeURL();
 function manejarCodigoDesdeURL(){
   const params = new URLSearchParams(location.search);
   const codigo = params.get('codigo');
-  if(!codigo) return;
-  history.replaceState({}, '', location.pathname);
-  window._codigoPendienteDesdeURL = codigo.toUpperCase();
+  if(codigo){
+    history.replaceState({}, '', location.pathname);
+    window._codigoPendienteDesdeURL = codigo.toUpperCase();
+  }
+  // Link público de planes compartido por WhatsApp: ?planes=1
+  if(params.get('planes')==='1'){
+    document.getElementById('planesPublicoCompartir').style.display = 'none';
+    showScreen('planes-publico');
+  }
+}
+
+/* ---- Pantalla pública de planes (compartir) ---- */
+function abrirPlanesPublico(){
+  document.getElementById('planesPublicoCompartir').style.display = 'flex';
+  showScreen('planes-publico');
+}
+function compartirPlanesPublico(via){
+  const url = location.origin + location.pathname + '?planes=1';
+  if(via==='link'){
+    navigator.clipboard?.writeText(url).then(()=>toast('Link copiado ✓')).catch(()=>toast(url));
+  } else {
+    const msg = `Te comparto los planes de PuenT para sumar tu comercio 👇\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  }
 }
 
 function procesarCodigoPendienteDesdeURL(){
@@ -7943,12 +8031,21 @@ function adminRenderComercios(lista){
     const badgeBg = c.aprobado ? '#E3F3EA' : '#FBF1DC';
     const badgeColor = c.aprobado ? '#2F7A55' : '#93732A';
     const badgeLabel = c.aprobado ? 'Activo' : 'Pendiente';
-    // Gracia vencida: tiene plan cargado pero nunca pagó y ya pasaron los días de gracia
+    // Semáforo de plan (mismo criterio que "Planes y pagos")
     const diasPlan = c.plan ? planDiasRestantes(c) : null;
-    const graciaVencida = c.plan && !c.pagos?.length && diasPlan !== null && diasPlan < 0;
-    const badgeGracia = graciaVencida
-      ? `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#FDE8E8;color:#C23B3B;">⏰ Gracia vencida</span>`
-      : '';
+    const esGraciaPlan = c.plan && !c.pagos?.length;
+    let planBadge;
+    if(!c.plan){
+      planBadge = `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#EFEFEF;color:#888;">— Sin plan</span>`;
+    } else if(diasPlan === null || diasPlan < 0){
+      planBadge = `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#FDE8E8;color:#C23B3B;">🔴 Plan vencido</span>`;
+    } else if(diasPlan <= 7){
+      planBadge = `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#FFF6DE;color:#93732A;">⚠️ Vence en ${diasPlan}d</span>`;
+    } else if(esGraciaPlan){
+      planBadge = `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#F0F7EE;color:#5C7355;">🎁 Gracia ${diasPlan}d</span>`;
+    } else {
+      planBadge = `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#F0F7EE;color:#5C7355;">✅ Al día ${diasPlan}d</span>`;
+    }
     const btnAprobar = !c.aprobado
       ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarComercio('${docId}')">✅ Aprobar</button>`
       : '';
@@ -7963,7 +8060,7 @@ function adminRenderComercios(lista){
         </div>
         <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${badgeBg};color:${badgeColor};">${badgeLabel}</span>
       </div>
-      ${graciaVencida ? `<div style="width:100%;">${badgeGracia}</div>` : ''}
+      <div style="width:100%;">${planBadge}</div>
       <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerComercio('${docId}')">👁️ Ver</button>
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAbrirEditar('${docId}')">✏️ Editar</button>
