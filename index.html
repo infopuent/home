@@ -2565,6 +2565,17 @@ function renderClFavoritos(){
 }
 
 /* ================= HELPERS ================= */
+// Compara nombres de ciudad ignorando mayúsculas, acentos y espacios de más,
+// para que un comercio no desaparezca del feed por una diferencia de tipeo
+// (ej: "la paz" vs "La Paz " vs "La Paz").
+function _normCiudad(s){
+  return (s||'').toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+function mismaCiudad(a, b){
+  if(!a || !b) return false;
+  return _normCiudad(a) === _normCiudad(b);
+}
+
 function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -6041,7 +6052,7 @@ function estrellas(rating){
   return `⭐ ${rating.toFixed(1)}`;
 }
 function renderDestacadosYCerca(){
-  const todos = state.comercios.filter(c=>c.ciudad===ciudadSeleccionada);
+  const todos = state.comercios.filter(c=>mismaCiudad(c.ciudad, ciudadSeleccionada));
   const destacados = todos.filter(c=>publicidadActiva(c));
   const base = (destacados.length ? destacados : todos).slice().sort((a,b)=>(b.rating||0)-(a.rating||0)).slice(0,8);
 
@@ -6108,7 +6119,7 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
   if(origenTipo==='comercio'){
     universo = state.productos.filter(p=>p.origen==='comercio' || !p.origen).filter(p=>{
       const c = state.comercios.find(x=>x.id===p.comercioId);
-      if(!c || c.ciudad!==ciudadSeleccionada) return false;
+      if(!c || !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
       // Ocultar si el plan venció (solo si el comercio ya eligió plan — los sin plan son demos/admin)
       if(c.plan && c.planVence){
         const dias = planDiasRestantes(c);
@@ -6181,7 +6192,7 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
 }
 function v_ciudadOk(vendedorId){
   const v = state.vendedores.find(x=>x.id===vendedorId);
-  return v && v.ciudad===ciudadSeleccionada;
+  return v && mismaCiudad(v.ciudad, ciudadSeleccionada);
 }
 
 function renderFeed(){
@@ -6244,7 +6255,7 @@ function renderFeedEncantar(){
   if(!grid) return;
   var prods = [];
   (state.comercios||[]).forEach(function(c){
-    if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
+    if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
       (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
         .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
     }
@@ -6278,7 +6289,7 @@ function renderFeedInfinito(reset){
     _feedInfinitoOffset = 0;
     _feedInfinitoTodos = [];
     (state.comercios||[]).forEach(function(c){
-      if(!ciudadSeleccionada || c.ciudad===ciudadSeleccionada){
+      if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
         (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
           .forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
       }
@@ -6327,7 +6338,7 @@ function renderLocalesComida(){
   if(!cont) return;
   var rubroComida = ['Gastronomía','Comida','Rotisería','Pizzería','Hamburguesas','Panadería','Heladería','Delivery'];
   var localesComida = (state.comercios||[]).filter(function(c){
-    if(ciudadSeleccionada && c.ciudad!==ciudadSeleccionada) return false;
+    if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
     return rubroComida.some(function(r){ return (c.rubro||'').toLowerCase().includes(r.toLowerCase()); });
   });
   if(!localesComida.length){
@@ -6371,7 +6382,7 @@ function farmaciaDeTurnoHoy(){
 function renderAdheridosGrid(){
   const grid = document.getElementById('adheridosGrid');
   if(!grid) return;
-  const comercios = (state.comercios||[]).filter(c=> !ciudadSeleccionada || c.ciudad===ciudadSeleccionada);
+  const comercios = (state.comercios||[]).filter(c=> !ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada));
   if(!comercios.length){
     grid.innerHTML = '';
     return;
@@ -6407,7 +6418,7 @@ function abrirLocales(){
 }
 
 function renderLocalesEnScreen(){
-  const todos = state.comercios.filter(c=> !ciudadSeleccionada || c.ciudad===ciudadSeleccionada);
+  const todos = state.comercios.filter(c=> !ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada));
   const grid = document.getElementById('localesGridScreen');
   if(!grid) return;
   if(!todos.length){
@@ -6467,7 +6478,7 @@ function renderGuiaUtil(){
 
 function renderGuiaMini(containerId, rubro, icono){
   const cont = document.getElementById(containerId);
-  const items = state.comercios.filter(c=>c.ciudad===ciudadSeleccionada && c.rubro===rubro).slice(0,3);
+  const items = state.comercios.filter(c=>mismaCiudad(c.ciudad, ciudadSeleccionada) && c.rubro===rubro).slice(0,3);
   if(items.length===0){
     cont.innerHTML = `<div class="empty" style="padding:16px;"><div class="ic">${icono}</div><div class="t">Todavía no hay locales de este rubro cargados en ${ciudadSeleccionada}</div></div>`;
     return;
@@ -7719,7 +7730,7 @@ async function geocodearComerciosPendientes(){
   if(_geocodeEnCurso) return;
   const pendientes = state.comercios.filter(c =>
     (!c.lat || !c.lng) && c.direccion && c.direccion !== '—' &&
-    (!c.ciudad || c.ciudad === ciudadSeleccionada)
+    (!c.ciudad || mismaCiudad(c.ciudad, ciudadSeleccionada))
   );
   if(!pendientes.length) return;
 
@@ -7753,7 +7764,7 @@ function renderMarcadoresMap(){
 
   let comerciosVisibles = state.comercios.filter(c => {
     if(!c.lat || !c.lng) return false;
-    if(c.ciudad && c.ciudad !== ciudadSeleccionada) return false;
+    if(c.ciudad && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
     if(mapaRubroFiltro !== 'Todos' && c.rubro !== mapaRubroFiltro) return false;
     return true;
   });
