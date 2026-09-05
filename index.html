@@ -665,16 +665,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ SCREEN: BIENVENIDA LANDING ============ -->
   <div class="screen" id="screen-bienvenida" style="padding:0; overflow:hidden;">
 
-    <!-- Hero gradiente -->
-    <div style="background:linear-gradient(160deg,#FF6600 0%,#FF9500 55%,#FFB300 100%); padding:18px 24px 20px; text-align:center; color:white; position:relative; overflow:hidden;">
-      <!-- Círculos decorativos -->
-      <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none;"></div>
-      <div style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
-
+    <!-- Hero fondo blanco -->
+    <div style="background:#FFFFFF; padding:28px 24px 20px; text-align:center; position:relative; overflow:hidden; border-bottom:1px solid #F0F0F0;">
       <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png"
-           alt="PuenT" style="height:96px; width:auto; margin-bottom:6px; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.2)); position:relative; z-index:1;">
+           alt="PuenT" style="height:150px; width:auto; margin-bottom:4px; position:relative; z-index:1;">
 
-      <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85;position:relative;z-index:1;">El mercado local de tu ciudad</div>
+      <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#B36B00;position:relative;z-index:1;">El mercado local de tu ciudad</div>
     </div>
 
     <!-- Scroll de cards -->
@@ -685,16 +681,16 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="background:linear-gradient(135deg,#FFF3E8,#FFE8D0); padding:18px 18px 14px; display:flex; align-items:center; gap:14px;">
           <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#FF6600,#FF9500);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(255,102,0,0.35);">🛍️</div>
           <div>
-            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#CC4400;margin-bottom:3px;">Para compradores</div>
-            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:17px;font-weight:700;color:#1A1A1A;line-height:1.2;">Todo tu comercio local, en un lugar</div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#CC4400;margin-bottom:3px;">Para clientes</div>
+            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:18px;font-weight:700;color:#1A1A1A;line-height:1.2;">Descubrí tu ciudad</div>
           </div>
         </div>
         <div style="padding:14px 18px 18px;">
-          <p style="font-size:13.5px;color:#555;line-height:1.6;margin-bottom:16px;">
-            Explorá catálogos de los comercios de La Paz, contactalos directo y comprá fácil al mejor precio de la ciudad. Sin rodeos, sin sorpresas.
+          <p style="font-size:15px;color:#555;line-height:1.6;margin-bottom:16px;">
+            Comercios, productos y ofertas cerca tuyo.
           </p>
-          <button onclick="showScreen('feed')" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FF6600,#FF9500);color:white;font-weight:800;font-size:14.5px;cursor:pointer;box-shadow:0 4px 14px rgba(255,102,0,0.38);transition:transform .1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
-            🔍 Quiero comprar
+          <button onclick="showScreen('feed')" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FF6600,#FF9500);color:white;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 4px 14px rgba(255,102,0,0.38);transition:transform .1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
+            🛍️ Quiero chusmear
           </button>
         </div>
       </div>
@@ -704,16 +700,19 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="background:linear-gradient(135deg,#FFF8E8,#FFEED0); padding:18px 18px 14px; display:flex; align-items:center; gap:14px;">
           <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#FF8C00,#FFB300);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(255,140,0,0.35);">🏬</div>
           <div>
-            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#B36B00;margin-bottom:3px;">Para comercios</div>
-            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:17px;font-weight:700;color:#1A1A1A;line-height:1.2;">Potenciá tu negocio local</div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#B36B00;margin-bottom:3px;">Tengo un comercio</div>
+            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:18px;font-weight:700;color:#1A1A1A;line-height:1.2;">Tu local, en el celular</div>
           </div>
         </div>
         <div style="padding:14px 18px 18px;">
-          <p style="font-size:13.5px;color:#555;line-height:1.6;margin-bottom:16px;">
-            ¿Tenés local en La Paz, Entre Ríos? Publicá tu catálogo y empezá a sumar clientes. Creá una vidriera online con todo tu catálogo para que nuevos clientes te descubran, se contacten con vos y vayan directo a tu local — con la tecnología de un código QR.
+          <p style="font-size:15px;color:#555;line-height:1.6;margin-bottom:6px;">
+            Creá tu vidriera online y potenciá tu negocio.
           </p>
-          <button onclick="showScreen('bienvenida-comercio')" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FF8C00,#FFB300);color:white;font-weight:800;font-size:14.5px;cursor:pointer;box-shadow:0 4px 14px rgba(255,140,0,0.38);transition:transform .1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
-            🏬 Tengo local en La Paz, Entre Ríos
+          <p style="font-size:12px;color:#999;font-weight:700;margin-bottom:16px;">
+            🔔 Próximamente: Conectores para tu local
+          </p>
+          <button onclick="showScreen('bienvenida-comercio')" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FF8C00,#FFB300);color:white;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 4px 14px rgba(255,140,0,0.38);transition:transform .1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
+            🏬 Tengo local en esta ciudad
           </button>
         </div>
       </div>
@@ -724,15 +723,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="background:linear-gradient(135deg,#F5F5F5,#EFEFEF); padding:18px 18px 14px; display:flex; align-items:center; gap:14px;">
           <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#666,#999);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.15);">🔗</div>
           <div>
-            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#777;margin-bottom:3px;">Para independientes</div>
-            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:17px;font-weight:700;color:#1A1A1A;line-height:1.2;">ConectorT</div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#777;margin-bottom:3px;">Quiero ser</div>
+            <div style="font-family:'Bai Jamjuree',sans-serif;font-size:18px;font-weight:700;color:#1A1A1A;line-height:1.2;">ConectorT</div>
           </div>
         </div>
         <div style="padding:14px 18px 18px;">
-          <p style="font-size:13.5px;color:#666;line-height:1.6;margin-bottom:16px;">
-            Vendé sin invertir, en tus redes, productos de tu misma ciudad y ganá una comisión arreglada con el mismo comercio. Sumate a la nueva era de venta.
+          <p style="font-size:15px;color:#666;line-height:1.6;margin-bottom:16px;">
+            Vendé productos de otros y ganá una comisión.
           </p>
-          <button disabled style="width:100%;padding:14px;border-radius:14px;border:1.5px solid #DDD;background:#F5F5F5;color:#999;font-weight:800;font-size:14.5px;cursor:not-allowed;">
+          <button disabled style="width:100%;padding:14px;border-radius:14px;border:1.5px solid #DDD;background:#F5F5F5;color:#999;font-weight:800;font-size:15px;cursor:not-allowed;">
             🔔 Avisame cuando esté listo
           </button>
         </div>
