@@ -3139,7 +3139,9 @@ async function manejarUsuarioGoogle(user){
   }
 
   // ── AUTO-CLAIM: buscar comercio creado por admin con el mismo email ──
-  if(user.email && firebaseListo){
+  // Solo aplica si la persona no eligió explícitamente ConectorT o Cliente —
+  // así no le "roba" el rol a alguien que sí quería registrarse como otra cosa.
+  if(user.email && firebaseListo && (!rolPreElegido || rolPreElegido==='comercio')){
     try{
       const snapClaim = await db.collection('comercios').where('email','==',user.email).get();
       const sinUid = snapClaim.docs.find(d=>{ const v=d.data(); return !v.uid; });
