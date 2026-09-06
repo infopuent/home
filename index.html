@@ -1636,6 +1636,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-sage" onclick="showScreen('c-productos'); renderProductosPropios('cProductosPropiosPage');"><i class="ti ti-package ic" aria-hidden="true"></i>Productos</button>
       <button class="btn-tile btn-tile-gold" onclick="mostrarMiQR('comercio')"><i class="ti ti-qrcode ic" aria-hidden="true"></i>Mi código QR</button>
       <button class="btn-tile btn-tile-neutral" onclick="abrirEditarComercio()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
+      <button class="btn-tile btn-tile-coral hidden" id="btnMenuDia" style="grid-column:1/-1;" onclick="abrirMenuDia()"><i class="ti ti-clipboard-list ic" aria-hidden="true"></i>📋 Menú del día</button>
       <button class="btn-tile btn-tile-mint" style="grid-column:1/-1;" onclick="renderCOperaciones();showScreen('c-operaciones')"><i class="ti ti-list-check ic" aria-hidden="true"></i>Operaciones y comisiones</button>
       <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="renderCPedidosEnvio();showScreen('c-pedidos-envio')"><i class="ti ti-truck ic" aria-hidden="true"></i>Pedidos de envío 🚚</button>
     </div>
@@ -1658,6 +1659,41 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="divider"></div>
     <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">Historial de ventas confirmadas</div>
     <div id="cHistorial"></div>
+  </div>
+
+  <!-- ============ COMERCIO: MENÚ DEL DÍA ============ -->
+  <div class="screen hidden" id="screen-c-menu-dia">
+    <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
+    <div class="kicker">Gastronomía</div>
+    <h1 class="page-title">📋 Menú del día</h1>
+    <p class="page-sub">Se publica solo para hoy — mañana tenés que volver a cargarlo (o tocar "Publicar" de nuevo si es el mismo).</p>
+    <div id="cMenuDiaEstado" style="margin-bottom:12px;"></div>
+    <div class="card">
+      <div class="field">
+        <label>Foto del menú (opcional)</label>
+        <div class="logo-upload-row">
+          <div class="logo-upload" id="cMenuFotoBox">
+            <div id="cMenuFotoPreview" class="logo-upload-empty"><div class="ic">📷</div></div>
+          </div>
+          <div class="logo-upload-info">
+            <div class="t">Una foto del menú escrito, o de un plato</div>
+            <div class="btn-block-row" style="margin:4px 0;">
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('cMenuFotoInputCam').click()">📷 Foto</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('cMenuFotoInputGal').click()">🖼️ Galería</button>
+            </div>
+            <input type="file" id="cMenuFotoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this, 'cMenu')">
+            <input type="file" id="cMenuFotoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this, 'cMenu')">
+            <div class="foto-upload-estado" id="cMenuFotoEstado" style="margin-bottom:0;">Opcional — si no cargás nada, se muestra solo el texto.</div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Menú de hoy</label>
+        <textarea id="cMenuTexto" rows="6" placeholder="Ej:&#10;Entrada: Empanadas de carne&#10;Principal: Milanesa con puré&#10;Postre: Flan casero&#10;$8500 el menú completo"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="guardarMenuDia()">Publicar menú de hoy</button>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="borrarMenuDia()">Quitar menú publicado</button>
+    </div>
   </div>
 
   <!-- ============ COMERCIO: TODOS LOS PRODUCTOS PROPIOS ============ -->
@@ -5417,6 +5453,48 @@ function abrirEditarComercio(){
   showScreen('editar-comercio');
 }
 
+function hoyISO(){ return new Date().toISOString().slice(0,10); }
+
+function abrirMenuDia(){
+  const c = state.currentUser;
+  const esHoy = c.menuDelDia && c.menuDelDia.fecha === hoyISO();
+  document.getElementById('cMenuTexto').value = esHoy ? (c.menuDelDia.texto || '') : '';
+  delete fotosCargadas['cMenu'];
+  const fotoBox = document.getElementById('cMenuFotoBox');
+  const fotoEstado = document.getElementById('cMenuFotoEstado');
+  if(esHoy && c.menuDelDia.foto){
+    fotosCargadas['cMenu'] = c.menuDelDia.foto;
+    fotoBox.innerHTML = `<img src="${c.menuDelDia.foto}" alt="Foto del menú">`;
+    fotoEstado.textContent = '✅ Foto cargada';
+  } else {
+    fotoBox.innerHTML = `<div id="cMenuFotoPreview" class="logo-upload-empty"><div class="ic">📷</div></div>`;
+    fotoEstado.textContent = 'Opcional — si no cargás nada, se muestra solo el texto.';
+  }
+  const estado = document.getElementById('cMenuDiaEstado');
+  estado.innerHTML = esHoy
+    ? `<div style="background:#E3F3EA;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#2F7A55;font-weight:700;">✅ Ya tenés un menú publicado hoy — se muestra en "¿Qué se te antoja?"</div>`
+    : `<div style="background:#FFF8E8;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#93732A;font-weight:700;">Todavía no publicaste el menú de hoy.</div>`;
+  showScreen('c-menu-dia');
+}
+
+function guardarMenuDia(){
+  const c = state.currentUser;
+  const texto = document.getElementById('cMenuTexto').value.trim();
+  if(!texto){ toast('Escribí el menú antes de publicar'); return; }
+  c.menuDelDia = { texto, fecha: hoyISO(), foto: fotosCargadas['cMenu'] || null };
+  guardarPerfilEnFirestore('comercios', c);
+  toast('¡Menú del día publicado! 📋');
+  showScreen('c-panel');
+}
+
+function borrarMenuDia(){
+  const c = state.currentUser;
+  c.menuDelDia = null;
+  guardarPerfilEnFirestore('comercios', c);
+  toast('Menú del día quitado');
+  showScreen('c-panel');
+}
+
 function guardarEdicionComercio(){
   const c = state.currentUser;
   c.nombre = document.getElementById('editCNombre').value.trim() || c.nombre;
@@ -5607,6 +5685,12 @@ function renderComercioPanel(){
   renderProductosPropios();
   renderPedidosProducto();
   renderCAlertasComercio();
+  // Mostrar botón de Menú del día solo a comercios gastronómicos
+  const btnMenu = document.getElementById('btnMenuDia');
+  if(btnMenu){
+    const esGastro = typeof RUBROS_GASTRO_TODOS !== 'undefined' && RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+    btnMenu.classList.toggle('hidden', !esGastro);
+  }
   if(state.currentUser?.uid){
     document.getElementById('cMiValoracion').innerHTML = estrellasHtml(...Object.values(promedioDe(state.currentUser.uid)));
   }
@@ -6728,6 +6812,29 @@ function renderGastronomiaGrid(){
   if(!cont) return;
 
   let html = '';
+
+  // ── Menú del día (arriba de todo) ──
+  const hoy = hoyISO();
+  const localesConMenu = (state.comercios||[]).filter(c=>
+    mismaCiudad(c.ciudad, ciudadSeleccionada) && RUBROS_GASTRO_TODOS.includes(c.rubro) &&
+    c.menuDelDia && c.menuDelDia.fecha === hoy && !esComercioFree(c) && !c.restricciones?.ocultarFeed
+  );
+  html += `<div class="card" style="margin-bottom:16px;border:1.5px solid #FFD9A0;background:linear-gradient(135deg,#FFF8EC,#FFF3DD);">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-size:20px;">📋</span>
+      <div style="font-size:15px;font-weight:800;color:var(--ink);">Menú del día</div>
+    </div>`;
+  if(!localesConMenu.length){
+    html += `<div style="font-size:12.5px;color:var(--muted);padding:6px 0;">Todavía nadie publicó su menú de hoy.</div>`;
+  } else {
+    html += localesConMenu.map(c=>`
+      <div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
+        ${c.menuDelDia.foto ? `<img src="${c.menuDelDia.foto}" alt="Menú de ${c.nombre}" style="width:100%;border-radius:10px;margin-bottom:8px;display:block;">` : ''}
+        <div style="font-weight:800;font-size:14px;color:var(--navy);margin-bottom:4px;">${ICONOS_RUBRO_EMOJI_GASTRO(c.rubro)} ${c.nombre}</div>
+        <div style="font-size:12.5px;color:var(--ink);white-space:pre-line;line-height:1.5;">${c.menuDelDia.texto}</div>
+      </div>`).join('');
+  }
+  html += `</div>`;
 
   // Una "ventana" (card) por categoría
   GASTRO_GRUPOS.forEach(g=>{
