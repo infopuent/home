@@ -8738,9 +8738,7 @@ function adminEliminarFotoComercio(docId, campo){
 
 function adminReemplazarFotoComercio(docId, campo, input){
   const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const dataUrl = e.target.result;
+  comprimirImagen(file, LIMITE_FOTO_BYTES).then(async dataUrl => {
     try{
       await db.collection('comercios').doc(docId).update({[campo]: dataUrl});
       const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
@@ -8750,8 +8748,7 @@ function adminReemplazarFotoComercio(docId, campo, input){
       toast('Foto actualizada ✅');
       adminVerComercio(docId);
     }catch(err){ toast('Error al guardar: '+err.message); }
-  };
-  reader.readAsDataURL(file);
+  }).catch(()=>toast('No pudimos procesar esa foto, probá con otra.'));
 }
 
 // ── Lista de productos del comercio ───────────────────────────
@@ -8797,9 +8794,7 @@ function adminVerFotoProducto(firestoreId){
 
 function adminCambiarFotoProducto(firestoreId, comercioId, input){
   const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const dataUrl = e.target.result;
+  comprimirImagen(file, LIMITE_FOTO_BYTES).then(async dataUrl => {
     try{
       await db.collection('productos').doc(firestoreId).update({img: dataUrl});
       const idx = state.productos.findIndex(x=>x.id===firestoreId);
@@ -8808,8 +8803,7 @@ function adminCambiarFotoProducto(firestoreId, comercioId, input){
       adminRenderProductosComercio(comercioId);
       renderFeed();
     }catch(err){ toast('Error: '+err.message); }
-  };
-  reader.readAsDataURL(file);
+  }).catch(()=>toast('No pudimos procesar esa foto, probá con otra.'));
 }
 
 // ── Abrir formulario (nuevo o edición) ───────────────────────
@@ -8828,14 +8822,12 @@ function adminLimpiarFotoProducto(){
 function onAdminFotoProducto(input){
   const file = input.files[0]; if(!file) return;
   document.getElementById('apFotoNombre').textContent = file.name;
-  const reader = new FileReader();
-  reader.onload = e => {
-    _adminFotoProducto = e.target.result;
+  comprimirImagen(file, LIMITE_FOTO_BYTES).then(dataUrl => {
+    _adminFotoProducto = dataUrl;
     const prev = document.getElementById('apFotoPreviewBox');
     const img  = document.getElementById('apFotoPreviewImg');
     if(prev && img){ img.src=_adminFotoProducto; prev.style.display='block'; }
-  };
-  reader.readAsDataURL(file);
+  }).catch(()=>toast('No pudimos procesar esa foto, probá con otra.'));
 }
 
 function adminAbrirFormProducto(docId){
