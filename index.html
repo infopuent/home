@@ -4271,6 +4271,12 @@ const ATR_SALUDABLE = [
   { id:'sinTacc',   label:'Sin TACC',          type:'select', opts:['No','Sí'] },
   { id:'calorias',  label:'Calorías (opcional)', type:'text', placeholder:'Ej: 450 kcal' },
 ];
+const ATR_ALMACEN = [
+  { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Almacén seco','Lácteos','Carnes y fiambres','Frutas y verduras','Bebidas','Golosinas / snacks','Cigarrillos','Conservas','Congelados','Condimentos','Otro'] },
+  { id:'peso',      label:'Peso / volumen / cantidad', type:'text', placeholder:'Ej: 1 kg, 500 ml, pack x6' },
+  { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: La Serenísima, genérico' },
+  { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+];
 
 const ATRIBUTOS_POR_RUBRO = {
 
@@ -4461,13 +4467,14 @@ const ATRIBUTOS_POR_RUBRO = {
   'Vegana': ATR_SALUDABLE,
   'Sin TACC': ATR_SALUDABLE,
 
-  // ── ALIMENTOS Y BEBIDAS ──────────────────────────────────────────────
-  'Alimentos y bebidas': [
-    { id:'tipo',      label:'Tipo de producto',  type:'select', opts:['Almacén seco','Lácteos','Carnes y fiambres','Frutas y verduras','Bebidas','Conservas','Congelados','Condimentos','Otro'] },
-    { id:'peso',      label:'Peso / volumen / cantidad', type:'text', placeholder:'Ej: 1 kg, 500 ml, pack x6' },
-    { id:'marca',     label:'Marca',             type:'text', placeholder:'Ej: La Serenísima, genérico' },
-    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
-  ],
+  // ── ALMACÉN, KIOSCO Y ALIMENTOS ────────────────────────────────────
+  'Kiosco': ATR_ALMACEN,
+  'Almacén': ATR_ALMACEN,
+  'Verdulería y frutería': ATR_ALMACEN,
+  'Carnicería': ATR_ALMACEN,
+  'Pescadería': ATR_ALMACEN,
+  'Fiambrería': ATR_ALMACEN,
+  'Distribuidora de bebidas': ATR_ALMACEN,
 
   // ── DIETÉTICAS Y NATURISTAS ──────────────────────────────────────────
   'Dietéticas y naturistas': [
@@ -6246,7 +6253,13 @@ const RUBROS_LIST = [
   ['Vegana',                                 '1f957_3d.png'],
   ['Sin TACC',                               '1f957_3d.png'],
   // Almacén / alimentos
-  ['Alimentos y bebidas',                    '1f35e_3d.png'],
+  ['Kiosco',                                 '1f36c_3d.png'],
+  ['Almacén',                                '1f35e_3d.png'],
+  ['Verdulería y frutería',                  '1f345_3d.png'],
+  ['Carnicería',                             '1f356_3d.png'],
+  ['Pescadería',                             '1f41f_3d.png'],
+  ['Fiambrería',                             '1f9c0_3d.png'],
+  ['Distribuidora de bebidas',               '1f37a_3d.png'],
   ['Dietéticas y naturistas',                '1f33f_3d.png'],
   // Moda y cuidado personal
   ['Indumentaria y calzado',                 '1f455_3d.png'],
