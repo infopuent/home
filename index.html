@@ -788,28 +788,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="section-title-row">
           <div class="section-title">🍽️ Comidas cerca tuyo</div>
         </div>
-        <div class="comidas-grid" style="margin-bottom:6px;">
-          <div class="comida-item">
-            <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pizza.PNG"></div>
-            <div class="comida-label">Pizza</div>
-            <div class="comida-zona">📍 Centro</div>
-          </div>
-          <div class="comida-item">
-            <div class="comida-foto-emoji" style="background:#FFD180;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/hamburg.PNG"></div>
-            <div class="comida-label">Hamburguesas</div>
-            <div class="comida-zona">📍 Norte</div>
-          </div>
-          <div class="comida-item">
-            <div class="comida-foto-emoji" style="background:#D7CCC8;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/empa.PNG"></div>
-            <div class="comida-label">Empanadas</div>
-            <div class="comida-zona">📍 Centro</div>
-          </div>
-          <div class="comida-item">
-            <div class="comida-foto-emoji" style="background:#FFE0B2;"><img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/comidas/pollo.PNG"></div>
-            <div class="comida-label">Pollo</div>
-            <div class="comida-zona">📍 Sur</div>
-          </div>
-        </div>
+        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner5.png"
+             alt="Gastronomía en tu ciudad" onclick="showScreen('gastronomia');renderGastronomiaGrid()"
+             style="width:100%; height:auto; border-radius:14px; cursor:pointer; margin-bottom:14px; display:block;">
 
         <!-- Locales de comida (scroll horizontal) -->
         <div id="feedLocalesComida" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:18px; scrollbar-width:none; -webkit-overflow-scrolling:touch;"></div>
@@ -2076,6 +2057,18 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-gold" style="grid-column:1/-1;" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
       <button class="btn-tile btn-tile-navy" style="grid-column:1/-1;" onclick="abrirPlanesPublico()"><i class="ti ti-share ic"></i>📋 Planes (para compartir)</button>
     </div>
+  </div>
+
+  <!-- ============ SCREEN: GASTRONOMÍA (por categoría) ============ -->
+  <div class="screen hidden" id="screen-gastronomia">
+    <div class="link-back" onclick="showScreen('feed')">← Volver</div>
+    <div class="kicker">Gastronomía</div>
+    <h1 class="page-title">¿Qué se te antoja?</h1>
+    <div class="filtros-rubro-wrap">
+      <div class="filtros-rubro-chips" id="gastroChips"></div>
+    </div>
+    <div class="explora-grid" style="margin-top:12px;" id="gastroGrid"></div>
+    <div id="gastroVacio" class="hidden" style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0;">Todavía no hay locales cargados en esta categoría.</div>
   </div>
 
   <!-- ============ SCREEN: CONTACTO Y CONSULTAS ============ -->
@@ -4200,6 +4193,43 @@ function cnpOnEnvioChange(){
    Cada entrada define los campos extra que aparecen en el formulario
    de carga de producto cuando el rubro coincide.
    ===================================================================== */
+const ATR_RAPIDO_AL_PASO = [
+  { id:'tipo',      label:'Tipo',              type:'select', opts:['Pizza','Empanada','Hamburguesa','Hot dog','Lomito','Sándwich','Papas fritas','Combo','Otro'] },
+  { id:'tamano',    label:'Tamaño',            type:'select', opts:['Individual','Pequeño','Mediano','Grande','Familiar','A elección'] },
+  { id:'ingredientes',label:'Ingredientes / sabor', type:'text', placeholder:'Ej: Mozzarella, jamón y morrones' },
+  { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+  { id:'aptoVegetariano',label:'Vegetariano / vegano', type:'select', opts:['No','Sí','Vegano'] },
+];
+const ATR_PARA_SENTARSE = [
+  { id:'tipoPlatoPrincipal', label:'Tipo de plato', type:'select', opts:['Entrada','Plato principal','Postre','Menú del día','Combo / promo','Para compartir','Bebida','Otro'] },
+  { id:'porciones', label:'Tamaño / porciones', type:'text', placeholder:'Ej: Individual, para 2, 1 kg' },
+  { id:'ingredientes',label:'Ingredientes principales', type:'text', placeholder:'Ej: Pollo, limón, papas fritas' },
+  { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+  { id:'aptoVegetariano',label:'Apto vegetariano', type:'select', opts:['No','Sí','Vegano'] },
+  { id:'alergenos', label:'Alérgenos / avisos', type:'text', placeholder:'Ej: Contiene gluten, maní, lácteos' },
+];
+const ATR_CAFE_DULCE = [
+  { id:'tipo',      label:'Tipo',              type:'select', opts:['Café / infusión','Desayuno / merienda','Torta / pastel','Facturas','Pan','Sandwich','Tostado','Bebida fría','Combo','Otro'] },
+  { id:'porciones', label:'Tamaño / cantidad', type:'text', placeholder:'Ej: 1 unidad, docena, 300 ml' },
+  { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+  { id:'sinTacc',   label:'Sin TACC',          type:'select', opts:['No','Sí'] },
+  { id:'ingredientes',label:'Ingredientes destacados', type:'text', placeholder:'Ej: Integral, con semillas, relleno de dulce de leche' },
+];
+const ATR_SABORES_MUNDO = [
+  { id:'tipo',      label:'Tipo',              type:'select', opts:['Plato principal','Roll / combo','Entrada','Postre','Bebida','Otro'] },
+  { id:'porciones', label:'Tamaño / porciones', type:'text', placeholder:'Ej: 8 piezas, para 2, individual' },
+  { id:'ingredientes',label:'Ingredientes',    type:'text', placeholder:'Ej: Salmón, queso, palta' },
+  { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
+  { id:'picante',   label:'Nivel de picante',  type:'select', opts:['No picante','Suave','Picante','Muy picante'] },
+];
+const ATR_SALUDABLE = [
+  { id:'tipo',      label:'Tipo',              type:'select', opts:['Vianda diaria','Vianda semanal','Ensalada','Bowl','Jugo/licuado','Otro'] },
+  { id:'porciones', label:'Porciones',         type:'text', placeholder:'Ej: 1 porción, para 2' },
+  { id:'aptoVegetariano',label:'Vegetariano / vegano', type:'select', opts:['No','Sí','Vegano'] },
+  { id:'sinTacc',   label:'Sin TACC',          type:'select', opts:['No','Sí'] },
+  { id:'calorias',  label:'Calorías (opcional)', type:'text', placeholder:'Ej: 450 kcal' },
+];
+
 const ATRIBUTOS_POR_RUBRO = {
 
   // ── INDUMENTARIA Y CALZADO ──────────────────────────────────────────
@@ -4351,40 +4381,43 @@ const ATRIBUTOS_POR_RUBRO = {
     { id:'cancelacion',label:'Cancelación',      type:'select', opts:['Flexible','Moderada','Estricta','No reembolsable'] },
   ],
 
-  // ── GASTRONOMÍA ─────────────────────────────────────────────────────
-  'Gastronomía (restaurantes y parrillas)': [
-    { id:'tipoPlatoPrincipal', label:'Tipo de plato', type:'select', opts:['Entrada','Plato principal','Postre','Menú del día','Combo / promo','Para compartir','Bebida','Otro'] },
-    { id:'porciones', label:'Tamaño / porciones', type:'text', placeholder:'Ej: Individual, para 2, 1 kg' },
-    { id:'ingredientes',label:'Ingredientes principales', type:'text', placeholder:'Ej: Pollo, limón, papas fritas' },
-    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
-    { id:'aptoVegetariano',label:'Apto vegetariano', type:'select', opts:['No','Sí','Vegano'] },
-    { id:'alergenos', label:'Alérgenos / avisos', type:'text', placeholder:'Ej: Contiene gluten, maní, lácteos' },
-  ],
+  // ── GASTRONOMÍA: RÁPIDO Y AL PASO ──────────────────────────────────
+  'Pizzería': ATR_RAPIDO_AL_PASO,
+  'Hamburguesería': ATR_RAPIDO_AL_PASO,
+  'Panchería': ATR_RAPIDO_AL_PASO,
+  'Lomitería': ATR_RAPIDO_AL_PASO,
+  'Empanadas': ATR_RAPIDO_AL_PASO,
+  'Rotisería': ATR_RAPIDO_AL_PASO,
 
-  // ── CAFETERÍAS Y CONFITERÍAS ─────────────────────────────────────────
-  'Cafeterías y confiterías': [
-    { id:'tipo',      label:'Tipo',              type:'select', opts:['Café / infusión','Desayuno / merienda','Torta / pastel','Facturas','Sandwich','Tostado','Bebida fría','Combo','Otro'] },
-    { id:'porciones', label:'Tamaño / cantidad', type:'text', placeholder:'Ej: 1 unidad, docena, 300 ml' },
-    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
-    { id:'sinTacc',   label:'Sin TACC',          type:'select', opts:['No','Sí'] },
-  ],
+  // ── GASTRONOMÍA: PARA SENTARSE A COMER ─────────────────────────────
+  'Restaurante': ATR_PARA_SENTARSE,
+  'Parrilla': ATR_PARA_SENTARSE,
+  'Cantina': ATR_PARA_SENTARSE,
+  'Cocina casera': ATR_PARA_SENTARSE,
+  'Bar y restaurante': ATR_PARA_SENTARSE,
 
-  // ── PANADERÍAS Y PASTELERÍAS ─────────────────────────────────────────
-  'Panaderías y pastelerías': [
-    { id:'tipo',      label:'Tipo',              type:'select', opts:['Pan','Facturas','Torta','Tarta','Galletas','Alfajores','Medialunas','Otro'] },
-    { id:'peso',      label:'Peso / cantidad',   type:'text', placeholder:'Ej: 1 kg, docena, unidad' },
-    { id:'sinTacc',   label:'Sin TACC / apto celíaco', type:'select', opts:['No','Sí'] },
-    { id:'ingredientes',label:'Ingredientes destacados', type:'text', placeholder:'Ej: Integral, con semillas, relleno de dulce de leche' },
-  ],
+  // ── GASTRONOMÍA: CAFÉ Y ALGO DULCE ─────────────────────────────────
+  'Cafetería': ATR_CAFE_DULCE,
+  'Panadería': ATR_CAFE_DULCE,
+  'Pastelería': ATR_CAFE_DULCE,
+  'Heladería': ATR_CAFE_DULCE,
+  'Casa de té': ATR_CAFE_DULCE,
+  'Crepería': ATR_CAFE_DULCE,
 
-  // ── PIZZERÍAS Y COMIDA RÁPIDA ────────────────────────────────────────
-  'Pizzerías y comida rápida': [
-    { id:'tipo',      label:'Tipo',              type:'select', opts:['Pizza','Empanada','Hamburguesa','Hot dog','Lomito','Sándwich','Papas fritas','Combo','Otro'] },
-    { id:'tamano',    label:'Tamaño',            type:'select', opts:['Individual','Pequeño','Mediano','Grande','Familiar','A elección'] },
-    { id:'ingredientes',label:'Ingredientes / sabor', type:'text', placeholder:'Ej: Mozzarella, jamón y morrones' },
-    { id:'aptoCeliaco',label:'Apto celíaco',     type:'select', opts:['No','Sí','Consultar'] },
-    { id:'aptoVegetariano',label:'Vegetariano / vegano', type:'select', opts:['No','Sí','Vegano'] },
-  ],
+  // ── GASTRONOMÍA: SABORES DEL MUNDO ─────────────────────────────────
+  'Sushi': ATR_SABORES_MUNDO,
+  'Comida mexicana': ATR_SABORES_MUNDO,
+  'Comida árabe': ATR_SABORES_MUNDO,
+  'Comida china': ATR_SABORES_MUNDO,
+  'Comida peruana': ATR_SABORES_MUNDO,
+  'Comida italiana': ATR_SABORES_MUNDO,
+
+  // ── GASTRONOMÍA: SALUDABLE ──────────────────────────────────────────
+  'Viandas': ATR_SALUDABLE,
+  'Ensaladas': ATR_SALUDABLE,
+  'Vegetariana': ATR_SALUDABLE,
+  'Vegana': ATR_SALUDABLE,
+  'Sin TACC': ATR_SALUDABLE,
 
   // ── ALIMENTOS Y BEBIDAS ──────────────────────────────────────────────
   'Alimentos y bebidas': [
@@ -6064,11 +6097,39 @@ const FLUENT_BASE = 'https://cdn.jsdelivr.net/gh/shuding/fluentui-emoji-unicode/
    se generan automáticamente desde esta lista.
    ─────────────────────────────────────────────────────────────────────────── */
 const RUBROS_LIST = [
-  // Gastronomía
-  ['Gastronomía (restaurantes y parrillas)', '1f969_3d.png'],
-  ['Cafeterías y confiterías',               '2615_3d.png'],
-  ['Panaderías y pastelerías',               '1f956_3d.png'],
-  ['Pizzerías y comida rápida',              '1f355_3d.png'],
+  // ── Gastronomía: Rápido y al paso ──
+  ['Pizzería',                               '1f355_3d.png'],
+  ['Hamburguesería',                         '1f355_3d.png'],
+  ['Panchería',                              '1f355_3d.png'],
+  ['Lomitería',                              '1f355_3d.png'],
+  ['Empanadas',                              '1f355_3d.png'],
+  ['Rotisería',                              '1f355_3d.png'],
+  // ── Gastronomía: Para sentarse a comer ──
+  ['Restaurante',                            '1f969_3d.png'],
+  ['Parrilla',                               '1f969_3d.png'],
+  ['Cantina',                                '1f969_3d.png'],
+  ['Cocina casera',                          '1f969_3d.png'],
+  ['Bar y restaurante',                      '1f969_3d.png'],
+  // ── Gastronomía: Café y algo dulce ──
+  ['Cafetería',                              '2615_3d.png'],
+  ['Panadería',                              '2615_3d.png'],
+  ['Pastelería',                             '2615_3d.png'],
+  ['Heladería',                              '2615_3d.png'],
+  ['Casa de té',                             '2615_3d.png'],
+  ['Crepería',                               '2615_3d.png'],
+  // ── Gastronomía: Sabores del mundo ──
+  ['Sushi',                                  '1f363_3d.png'],
+  ['Comida mexicana',                        '1f363_3d.png'],
+  ['Comida árabe',                           '1f363_3d.png'],
+  ['Comida china',                           '1f363_3d.png'],
+  ['Comida peruana',                         '1f363_3d.png'],
+  ['Comida italiana',                        '1f363_3d.png'],
+  // ── Gastronomía: Saludable ──
+  ['Viandas',                                '1f957_3d.png'],
+  ['Ensaladas',                              '1f957_3d.png'],
+  ['Vegetariana',                            '1f957_3d.png'],
+  ['Vegana',                                 '1f957_3d.png'],
+  ['Sin TACC',                               '1f957_3d.png'],
   // Almacén / alimentos
   ['Alimentos y bebidas',                    '1f35e_3d.png'],
   ['Dietéticas y naturistas',                '1f33f_3d.png'],
@@ -6443,10 +6504,9 @@ window.addEventListener('scroll', function(){
 function renderLocalesComida(){
   var cont = document.getElementById('feedLocalesComida');
   if(!cont) return;
-  var rubroComida = ['Gastronomía','Comida','Rotisería','Pizzería','Hamburguesas','Panadería','Heladería','Delivery'];
   var localesComida = (state.comercios||[]).filter(function(c){
     if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
-    return rubroComida.some(function(r){ return (c.rubro||'').toLowerCase().includes(r.toLowerCase()); });
+    return RUBROS_GASTRO_TODOS.includes(c.rubro);
   });
   if(!localesComida.length){
     cont.style.display='none'; return;
@@ -6599,6 +6659,53 @@ function renderGuiaMini(containerId, rubro, icono){
       </div>
       <button class="btn btn-ghost btn-sm" onclick="comoLlegar('${c.id}')">📍</button>
     </div>`).join('');
+}
+
+const GASTRO_GRUPOS = [
+  { nombre:'Rápido y al paso',      emoji:'🍕', rubros:['Pizzería','Hamburguesería','Panchería','Lomitería','Empanadas','Rotisería'] },
+  { nombre:'Para sentarse a comer', emoji:'🍽️', rubros:['Restaurante','Parrilla','Cantina','Cocina casera','Bar y restaurante'] },
+  { nombre:'Café y algo dulce',     emoji:'☕', rubros:['Cafetería','Panadería','Pastelería','Heladería','Casa de té','Crepería'] },
+  { nombre:'Sabores del mundo',     emoji:'🌮', rubros:['Sushi','Comida mexicana','Comida árabe','Comida china','Comida peruana','Comida italiana'] },
+  { nombre:'Saludable',             emoji:'🥗', rubros:['Viandas','Ensaladas','Vegetariana','Vegana','Sin TACC'] },
+];
+const RUBROS_GASTRO_TODOS = GASTRO_GRUPOS.flatMap(g=>g.rubros);
+
+let gastroFiltroActivo = 'Todos';
+function setGastroFiltro(nombre){ gastroFiltroActivo = nombre; renderGastronomiaGrid(); }
+
+function renderGastronomiaGrid(){
+  const chipsCont = document.getElementById('gastroChips');
+  if(chipsCont){
+    chipsCont.innerHTML = ['Todos', ...GASTRO_GRUPOS.map(g=>g.nombre)].map(nombre=>{
+      const g = GASTRO_GRUPOS.find(x=>x.nombre===nombre);
+      const label = g ? `${g.emoji} ${g.nombre}` : '🍴 Todos';
+      return `<button class="chip ${nombre===gastroFiltroActivo?'active':''}" onclick="setGastroFiltro('${nombre}')">${label}</button>`;
+    }).join('');
+  }
+  const rubrosFiltro = gastroFiltroActivo==='Todos' ? RUBROS_GASTRO_TODOS : (GASTRO_GRUPOS.find(g=>g.nombre===gastroFiltroActivo)?.rubros || []);
+  const locales = (state.comercios||[]).filter(c=>
+    mismaCiudad(c.ciudad, ciudadSeleccionada) && rubrosFiltro.includes(c.rubro)
+  );
+  const grid = document.getElementById('gastroGrid');
+  const vacio = document.getElementById('gastroVacio');
+  if(!locales.length){
+    grid.innerHTML = '';
+    vacio?.classList.remove('hidden');
+    return;
+  }
+  vacio?.classList.add('hidden');
+  grid.innerHTML = locales.map(c=>`
+    <div class="guia-mini-card" onclick="verProductosDeLocal('${c.id}')" style="cursor:pointer;">
+      <div class="ic-wrap">${ICONOS_RUBRO_EMOJI_GASTRO(c.rubro)}</div>
+      <div class="info">
+        <div class="nombre">${c.nombre}</div>
+        <div class="meta">${c.rubro || ''}${c.direccion ? ' · '+c.direccion : ''}</div>
+      </div>
+    </div>`).join('');
+}
+function ICONOS_RUBRO_EMOJI_GASTRO(rubro){
+  const g = GASTRO_GRUPOS.find(g=>g.rubros.includes(rubro));
+  return g ? g.emoji : '🍴';
 }
 
 function verMasRubro(rubro){
