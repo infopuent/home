@@ -1086,7 +1086,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
       <div id="ofAntes">
         <!-- Selector de unidades -->
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div id="ofUnidadesRow" style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
           <span style="font-size:13px; font-weight:700; color:var(--ink);">Unidades:</span>
           <div style="display:flex; align-items:center; gap:0; border:1.5px solid var(--line); border-radius:10px; overflow:hidden;">
             <button onclick="cambiarUnidades(-1)" style="width:36px;height:36px;background:var(--cream);border:none;font-size:18px;cursor:pointer;font-weight:700;color:var(--navy);">−</button>
@@ -3640,6 +3640,14 @@ function goRegister(role){
           <div style="font-size:12px;color:var(--muted);">📣 Banner publicitario en el Home (precio a convenir)</div>
         </div>
 
+        <!-- ¿Recibe pedidos por la app? -->
+        <div style="background:#FFF8E8;border:1.5px solid #FFE0B0;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <input type="checkbox" id="rSinPedidos" style="width:auto;margin-top:3px;">
+            <label style="font-weight:600;font-size:12.5px;color:var(--ink);" for="rSinPedidos">No quiero recibir pedidos por la app — solo mostrar mi menú/catálogo como vidriera (el cliente consulta directo en el local o por WhatsApp).</label>
+          </div>
+        </div>
+
         <div class="field" style="display:flex;align-items:flex-start;gap:10px;">
           <input type="checkbox" id="rTyc" style="width:auto;margin-top:3px;">
           <label style="font-weight:500;font-size:12.5px;color:var(--muted);" for="rTyc">Acepto los Términos y Condiciones y el tratamiento de mis datos.</label>
@@ -3710,7 +3718,7 @@ function submitRegister(){
     const dias = [...document.querySelectorAll('input[name="rDias"]:checked')].map(c=>c.value);
     const metodosPago = [...document.querySelectorAll('input[name="rPagos"]:checked')].map(c=>c.value);
     const tyc = document.getElementById('rTyc').checked;
-    // Plan elegido
+    const sinPedidos = document.getElementById('rSinPedidos')?.checked || false;
     const planTipo = document.querySelector('input[name="rPlanTipo"]:checked')?.value || 'fijo';
     const planMonto = planTipo === 'fijo'
       ? parseInt(document.querySelector('input[name="rPlanFijoMonto"]:checked')?.value || '20000')
@@ -3730,7 +3738,7 @@ function submitRegister(){
     if(nombreOcupado){ toast('Ya existe un comercio registrado con ese nombre, elegí otro'); return; }
     if(!tyc){ toast('Necesitás aceptar los Términos y Condiciones'); return; }
 
-    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago,
+    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, sinPedidos,
       plan: planTipo, planMonto, planComPct, planVence, planActivo: true,
       bannerActivo: false, bannerVence: null, pagos: [],
       adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng,
@@ -4616,6 +4624,7 @@ function crearProductoComercio(){
   const comision = parseFloat(comisionInput);
   if(isNaN(comision) || comision<0 || comision>100){ toast('La comisión tiene que ser un número entre 0 y 100'); return; }
   if(TIPOS_OFERTA[tipoOferta].descuento && !descuento){ toast('Ingresá el porcentaje de descuento'); return; }
+  if(TIPOS_OFERTA[tipoOferta].hora && requierePlanPago('Las ofertas relámpago')) return;
   const horaInicio = document.getElementById('cnpHoraInicio').value;
   const horaHasta = document.getElementById('cnpHoraHasta').value;
   const fechaInicio = document.getElementById('cnpFechaInicio').value;
@@ -5506,6 +5515,30 @@ function planDiasRestantes(c){
   return Math.ceil((vence - hoy) / 86400000);
 }
 
+// Un comercio queda en "modo Free" automáticamente cuando se le venció la
+// gracia de 20 días y todavía no pagó ningún plan. En ese estado puede seguir
+// armando su perfil/catálogo puertas adentro, pero no se muestra al público
+// (ni en el feed, ni en Locales con datos completos, ni con geolocalización)
+// hasta que pase a Fijo o Comisión.
+function esComercioFree(c){
+  if(!c || !c.plan) return false;
+  if(c.pagos && c.pagos.length) return false;
+  const dias = planDiasRestantes(c);
+  return dias !== null && dias < 0;
+}
+
+// Bloquea una función exclusiva de comercios con plan pago (Fijo/Comisión) si
+// el comercio actual está en modo Free. Devuelve true si quedó bloqueado.
+function requierePlanPago(nombreFuncion){
+  const c = state.currentUser;
+  if(state.role !== 'comercio' || !esComercioFree(c)) return false;
+  toast(`🔒 ${nombreFuncion || 'Esta función'} es para comercios con plan Fijo o Comisión`);
+  if(confirm('Tu comercio está en modo Free (se venció la gracia sin elegir plan). ¿Querés hablar con PuenT para pasar a un plan pago?')){
+    contactarPuenT();
+  }
+  return true;
+}
+
 function renderCPlanBox(){
   const box = document.getElementById('cPlanBox');
   if(!box) return;
@@ -5519,9 +5552,9 @@ function renderCPlanBox(){
 
   if(!activo || dias < 0){
     colorBg = '#fff5f5'; colorBorde = '#e05a5a';
-    badge = '🔴 Plan vencido';
-    diasTexto = 'Tu plan venció — tus productos no se muestran en el feed público.';
-    subtexto = 'Contactá a PuenT para renovar.';
+    badge = '🆓 Modo Free';
+    diasTexto = 'Se venció tu gracia sin elegir plan pago: tu perfil y catálogo siguen guardados, pero solo se muestra tu logo y dirección — sin productos ni ubicación en el mapa hasta que pases a un plan pago.';
+    subtexto = 'Contactá a PuenT para pasar a Fijo o Comisión.';
   } else if(dias <= 5){
     colorBg = '#fffbea'; colorBorde = '#C99A3E';
     badge = `⚠️ Vence en ${dias} día${dias===1?'':'s'}`;
@@ -6288,9 +6321,10 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
     universo = state.productos.filter(p=>p.origen==='comercio' || !p.origen).filter(p=>{
       const c = state.comercios.find(x=>x.id===p.comercioId);
       if(!c || !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
-      // Vencer el plan NO oculta nada automáticamente. Las restricciones (qué se
-      // apaga) las define Bruno a mano desde el admin, por comercio (c.restricciones).
+      // Se oculta del feed público si: (a) Bruno lo restringió a mano, o
+      // (b) el comercio quedó en modo Free (se venció la gracia sin pagar).
       if(c.restricciones?.ocultarFeed) return false;
+      if(esComercioFree(c)) return false;
       return true;
     });
   } else {
@@ -6648,15 +6682,18 @@ function renderGuiaMini(containerId, rubro, icono){
     cont.innerHTML = `<div class="empty" style="padding:16px;"><div class="ic">${icono}</div><div class="t">Todavía no hay locales de este rubro cargados en ${ciudadSeleccionada}</div></div>`;
     return;
   }
-  cont.innerHTML = items.map(c=>`
+  cont.innerHTML = items.map(c=>{
+    const esFree = esComercioFree(c);
+    return `
     <div class="guia-mini-card">
       <div class="ic-wrap">${icono}</div>
       <div class="info">
         <div class="nombre">${c.nombre}</div>
-        <div class="meta">${c.direccion || ''}${c.horario ? ' · '+c.horario : ''}</div>
+        <div class="meta">${esFree ? (c.direccion||'') : `${c.direccion || ''}${c.horario ? ' · '+c.horario : ''}`}</div>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="comoLlegar('${c.id}')">📍</button>
-    </div>`).join('');
+      ${esFree ? '' : `<button class="btn btn-ghost btn-sm" onclick="comoLlegar('${c.id}')">📍</button>`}
+    </div>`;
+  }).join('');
 }
 
 const GASTRO_GRUPOS = [
@@ -7175,6 +7212,32 @@ function abrirOferta(prodId){
     ofAntes.classList.add('hidden'); // Ocultar botón reservar también
   }
 
+  // --- Comercio "vidriera sin pedidos": no genera reserva, solo muestra el menú ---
+  const unidadesRow = document.getElementById('ofUnidadesRow');
+  const textoReserva = document.getElementById('ofTextoReserva');
+  const btnReservar = document.getElementById('ofBtnReservar');
+  if(c && c.sinPedidos){
+    if(unidadesRow) unidadesRow.style.display = 'none';
+    if(textoReserva) textoReserva.textContent = 'Este comercio no recibe pedidos por la app — consultá directo en el local.';
+    if(btnReservar){
+      const tel = (c.whatsapp || c.telefono || '').replace(/\D/g,'');
+      if(tel){
+        btnReservar.textContent = '💬 Consultar por WhatsApp';
+        btnReservar.setAttribute('onclick', `window.open('https://wa.me/${tel}?text=${encodeURIComponent('Hola! Te consulto por '+p.nombre)}','_blank')`);
+      } else {
+        btnReservar.textContent = '📍 Consultá en el local';
+        btnReservar.setAttribute('onclick', `comoLlegar('${c.id}')`);
+      }
+    }
+  } else {
+    if(unidadesRow) unidadesRow.style.display = '';
+    if(textoReserva) textoReserva.textContent = 'Reservá el producto. Generás el QR cuando llegues al local.';
+    if(btnReservar){
+      btnReservar.textContent = '🛒 Reservar';
+      btnReservar.setAttribute('onclick', 'reservarProducto()');
+    }
+  }
+
   const banner = document.getElementById('ofVendedorBanner');
   if(state.role==='vendedor' && p.comision>0){
     const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
@@ -7279,15 +7342,16 @@ function renderOfertaTabs(p, c){
   // --- Info del comercio ---
   if(c){
     const estaRegistrado = !!state.role && state.role !== null;
+    const esFree = esComercioFree(c);
     const prom = c.rating ? Number(c.rating).toFixed(1) : null;
     document.getElementById('ofTabComercioContenido').innerHTML = `
       <div style="font-weight:800; font-size:15px; color:var(--navy); margin-bottom:2px;">${estaRegistrado ? c.nombre : '🔒 Comercio verificado'}</div>
-      <div style="color:var(--muted); margin-bottom:10px;">${c.rubro || ''}${prom ? ' · ⭐ '+prom : ''}</div>
+      <div style="color:var(--muted); margin-bottom:10px;">${c.rubro || ''}${prom && !esFree ? ' · ⭐ '+prom : ''}</div>
       ${estaRegistrado ? `
         <div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Dirección:</span> ${c.direccion || 'La Paz, Entre Ríos'}</div>
-        ${c.horario ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Horario:</span> ${c.horario}</div>` : ''}
-        ${c.telefono ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
-        <button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>
+        ${(c.horario && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Horario:</span> ${c.horario}</div>` : ''}
+        ${(c.telefono && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
+        ${esFree ? '' : `<button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>`}
       ` : `<p style="color:var(--muted);">Registrate para ver la dirección, el horario y cómo llegar a este comercio.</p>`}
     `;
   } else {
@@ -8239,6 +8303,16 @@ function adminRenderComercios(lista){
   }).join('');
 }
 
+/* ---- Vidriera sin pedidos ---- */
+async function adminGuardarSinPedidos(docId, valor){
+  try{
+    await db.collection('comercios').doc(docId).update({ sinPedidos: valor });
+    const c = _adminComercios.find(x=>(x._docId||x.id)===docId) || state.comercios.find(x=>x.id===docId);
+    if(c) c.sinPedidos = valor;
+    toast(valor ? 'Ahora es vidriera sin pedidos' : 'Vuelve a recibir pedidos por la app');
+  }catch(e){ console.error(e); toast('Error al guardar'); }
+}
+
 /* ---- Restricciones manuales post-gracia ---- */
 async function adminGuardarRestriccion(docId, campo, valor){
   try{
@@ -8366,6 +8440,10 @@ async function adminVerComercio(docId){
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;">
           <input type="checkbox" id="restr_ocultarOfertas_${docId}" ${c.restricciones?.ocultarOfertas ? 'checked' : ''} style="width:auto;" onchange="adminGuardarRestriccion('${docId}','ocultarOfertas',this.checked)">
           Bloquear ofertas relámpago nuevas
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;border-top:1px solid var(--line);padding-top:10px;margin-top:2px;">
+          <input type="checkbox" id="sinPedidos_${docId}" ${c.sinPedidos ? 'checked' : ''} style="width:auto;" onchange="adminGuardarSinPedidos('${docId}',this.checked)">
+          🍽️ Vidriera sin pedidos: no recibe pedidos por la app, solo muestra el menú (el cliente consulta por WhatsApp o en el local)
         </label>
       </div>
       ${graciaVencidaDetalle ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;font-weight:700;color:#C23B3B;">⏰ Gracia vencida hace ${Math.abs(diasPlanDetalle)} día${Math.abs(diasPlanDetalle)===1?'':'s'} — todavía sin plan pago.</div>` : ''}
