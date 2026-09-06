@@ -2064,11 +2064,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen('feed')">← Volver</div>
     <div class="kicker">Gastronomía</div>
     <h1 class="page-title">¿Qué se te antoja?</h1>
-    <div class="filtros-rubro-wrap">
-      <div class="filtros-rubro-chips" id="gastroChips"></div>
-    </div>
-    <div class="explora-grid" style="margin-top:12px;" id="gastroGrid"></div>
-    <div id="gastroVacio" class="hidden" style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0;">Todavía no hay locales cargados en esta categoría.</div>
+    <div id="gastroSecciones"></div>
   </div>
 
   <!-- ============ SCREEN: CONTACTO Y CONSULTAS ============ -->
@@ -6673,35 +6669,59 @@ const RUBROS_GASTRO_TODOS = GASTRO_GRUPOS.flatMap(g=>g.rubros);
 let gastroFiltroActivo = 'Todos';
 function setGastroFiltro(nombre){ gastroFiltroActivo = nombre; renderGastronomiaGrid(); }
 
-function renderGastronomiaGrid(){
-  const chipsCont = document.getElementById('gastroChips');
-  if(chipsCont){
-    chipsCont.innerHTML = ['Todos', ...GASTRO_GRUPOS.map(g=>g.nombre)].map(nombre=>{
-      const g = GASTRO_GRUPOS.find(x=>x.nombre===nombre);
-      const label = g ? `${g.emoji} ${g.nombre}` : '🍴 Todos';
-      return `<button class="chip ${nombre===gastroFiltroActivo?'active':''}" onclick="setGastroFiltro('${nombre}')">${label}</button>`;
-    }).join('');
-  }
-  const rubrosFiltro = gastroFiltroActivo==='Todos' ? RUBROS_GASTRO_TODOS : (GASTRO_GRUPOS.find(g=>g.nombre===gastroFiltroActivo)?.rubros || []);
-  const locales = (state.comercios||[]).filter(c=>
-    mismaCiudad(c.ciudad, ciudadSeleccionada) && rubrosFiltro.includes(c.rubro)
+function _gastroLocalesDe(rubros){
+  return (state.comercios||[]).filter(c=>
+    mismaCiudad(c.ciudad, ciudadSeleccionada) && rubros.includes(c.rubro)
   );
-  const grid = document.getElementById('gastroGrid');
-  const vacio = document.getElementById('gastroVacio');
-  if(!locales.length){
-    grid.innerHTML = '';
-    vacio?.classList.remove('hidden');
-    return;
-  }
-  vacio?.classList.add('hidden');
-  grid.innerHTML = locales.map(c=>`
-    <div class="guia-mini-card" onclick="verProductosDeLocal('${c.id}')" style="cursor:pointer;">
+}
+function _gastroTarjetaChica(c){
+  return `<div class="guia-mini-card" onclick="verProductosDeLocal('${c.id}')" style="cursor:pointer;">
       <div class="ic-wrap">${ICONOS_RUBRO_EMOJI_GASTRO(c.rubro)}</div>
       <div class="info">
         <div class="nombre">${c.nombre}</div>
-        <div class="meta">${c.rubro || ''}${c.direccion ? ' · '+c.direccion : ''}</div>
+        <div class="meta">${c.rubro || ''}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+}
+
+function renderGastronomiaGrid(){
+  const cont = document.getElementById('gastroSecciones');
+  if(!cont) return;
+
+  let html = '';
+
+  // Una "ventana" (card) por categoría
+  GASTRO_GRUPOS.forEach(g=>{
+    const locales = _gastroLocalesDe(g.rubros);
+    html += `<div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:20px;">${g.emoji}</span>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">${g.nombre}</div>
+      </div>`;
+    if(!locales.length){
+      html += `<div style="font-size:12.5px;color:var(--muted);padding:6px 0;">Todavía no hay locales cargados en esta categoría.</div>`;
+    } else {
+      html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${locales.map(_gastroTarjetaChica).join('')}</div>`;
+    }
+    html += `</div>`;
+  });
+
+  // "Todos" al final, más chico, grilla 2x5
+  const todos = _gastroLocalesDe(RUBROS_GASTRO_TODOS);
+  html += `<div class="section-title" style="margin:6px 0 8px;">🍴 Todos los locales de gastronomía</div>`;
+  if(!todos.length){
+    html += `<div style="font-size:12.5px;color:var(--muted);padding:6px 0 20px;">Todavía no hay locales gastronómicos cargados.</div>`;
+  } else {
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:20px;">
+      ${todos.map(c=>`
+        <div onclick="verProductosDeLocal('${c.id}')" style="cursor:pointer;background:white;border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">${ICONOS_RUBRO_EMOJI_GASTRO(c.rubro)}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nombre}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  cont.innerHTML = html;
 }
 function ICONOS_RUBRO_EMOJI_GASTRO(rubro){
   const g = GASTRO_GRUPOS.find(g=>g.rubros.includes(rubro));
