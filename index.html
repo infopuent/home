@@ -932,7 +932,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <p style="text-align:center; font-size:14px; font-weight:700; color:var(--ink); margin:18px 0 4px;">Sumate a PuenT.</p>
     <p style="text-align:center; font-size:13px; color:var(--muted); margin:0 0 14px;">Tu comercio tiene algo para mostrar.</p>
 
-    <button class="btn btn-primary" onclick="elegirRolParaRegistro('comercio')">Registrar mi comercio</button>
+    <button class="btn btn-primary" onclick="iniciarWizardComercio()">Registrar mi comercio</button>
     <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Es gratis empezar. Te lleva un par de minutos.</p>
   </div>
 
@@ -1217,7 +1217,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="ic" style="background:var(--green)">🔗</div>
         <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
       </button>
-      <button class="role-btn" onclick="elegirRolParaRegistro('comercio')">
+      <button class="role-btn" onclick="iniciarWizardComercio()">
         <div class="ic" style="background:var(--blue)">🏬</div>
         <div><div class="tt">Comercio</div><div class="ss">Escaneo códigos y gestiono pedidos</div></div>
       </button>
@@ -1248,6 +1248,85 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="ic" style="background:var(--navy)">🙋</div>
         <div><div class="tt">Cliente</div><div class="ss">Busco productos de mi ciudad</div></div>
       </button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: WIZARD REGISTRO COMERCIO ============ -->
+  <div class="screen hidden" id="screen-wizard-comercio" style="padding:0;min-height:100vh;background:#FFFFFF;">
+
+    <!-- Barra de progreso -->
+    <div style="position:sticky;top:0;z-index:10;background:#fff;padding:12px 20px 0;border-bottom:1px solid #F0F0F0;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <button onclick="wizardAtras()" style="background:none;border:none;font-size:13px;font-weight:700;color:#888;cursor:pointer;padding:0;">← Volver</button>
+        <div style="flex:1;height:4px;background:#F0F0F0;border-radius:4px;overflow:hidden;">
+          <div id="wizardProgressBar" style="height:100%;background:linear-gradient(90deg,#FF6600,#FFB300);border-radius:4px;transition:width .3s ease;width:25%;"></div>
+        </div>
+        <span id="wizardStepLabel" style="font-size:11px;font-weight:800;color:#AAA;white-space:nowrap;">1 de 4</span>
+      </div>
+    </div>
+
+    <!-- Contenedor de pasos -->
+    <div style="padding:20px 20px 32px;">
+
+      <!-- PASO 1: Nombre del comercio -->
+      <div id="wizardPaso1">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 1</div>
+        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;">¿Cómo se llama tu comercio?</div>
+        <div style="font-size:13px;color:#888;margin-bottom:20px;">El nombre que tus clientes ya conocen.</div>
+        <input id="wizardNombre" type="text" placeholder="Ej: Rotisería Don Jorge" maxlength="60"
+          style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-weight:600;color:#1A1A1A;outline:none;transition:border-color .2s;"
+          onfocus="this.style.borderColor='#FF6600'" onblur="this.style.borderColor='#EAEAEA'"
+          oninput="document.getElementById('wizardNombreCounter').textContent=this.value.length+'/60'">
+        <div style="text-align:right;font-size:11px;color:#BBB;margin-top:4px;" id="wizardNombreCounter">0/60</div>
+        <button onclick="wizardSiguiente(1)" style="width:100%;margin-top:20px;padding:15px;border-radius:14px;border:none;background:#FF6600;color:white;font-size:15px;font-weight:800;cursor:pointer;">Siguiente →</button>
+      </div>
+
+      <!-- PASO 2: Tipo de negocio -->
+      <div id="wizardPaso2" style="display:none;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 2</div>
+        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;">¿Qué tipo de negocio tenés?</div>
+        <div style="font-size:13px;color:#888;margin-bottom:20px;">Elegí el que mejor te describe.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('gastronomia',this)"
+            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🍽️</div>
+            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Gastronomía</div><div style="font-size:11.5px;color:#888;">Restó, rotisería, panadería, delivery...</div></div>
+          </button>
+          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('productos',this)"
+            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#E8F4FD;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🛍️</div>
+            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Productos</div><div style="font-size:11.5px;color:#888;">Ropa, ferretería, librería, deportes...</div></div>
+          </button>
+          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('servicios',this)"
+            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#F0FBF0;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">✂️</div>
+            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Servicios</div><div style="font-size:11.5px;color:#888;">Peluquería, taller, salud, contador...</div></div>
+          </button>
+          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('mixto',this)"
+            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#F5F0FF;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏪</div>
+            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Mixto</div><div style="font-size:11.5px;color:#888;">Productos y servicios a la vez</div></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 3: Rubro (se renderiza dinámicamente) -->
+      <div id="wizardPaso3" style="display:none;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 3</div>
+        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;">¿Cuál es tu rubro?</div>
+        <div style="font-size:13px;color:#888;margin-bottom:20px;">Elegí el que más se acerca a tu negocio.</div>
+        <div id="wizardRubroOpciones" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+
+      <!-- PASO 4: Preguntas específicas (se renderiza dinámicamente) -->
+      <div id="wizardPaso4" style="display:none;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 4</div>
+        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;" id="wizardPaso4Titulo">Contanos un poco más</div>
+        <div style="font-size:13px;color:#888;margin-bottom:20px;">Esto nos ayuda a darte las herramientas correctas.</div>
+        <div id="wizardPreguntasEspecificas" style="display:flex;flex-direction:column;gap:14px;"></div>
+        <button onclick="wizardFinalizar()" style="width:100%;margin-top:24px;padding:15px;border-radius:14px;border:none;background:#FF6600;color:white;font-size:15px;font-weight:800;cursor:pointer;">Continuar con Google →</button>
+      </div>
+
     </div>
   </div>
 
@@ -3086,6 +3165,188 @@ function mostrarSeleccionDeRol(){
   showScreen('elegir-rol-nuevo');
 }
 
+// ══════════════════════════════════════════════════════
+//  WIZARD DE REGISTRO DE COMERCIO
+// ══════════════════════════════════════════════════════
+let wizardData = {};  // acumula las respuestas del wizard
+let wizardPasoActual = 1;
+
+const RUBROS_POR_TIPO = {
+  gastronomia: ['Restaurante','Rotisería','Panadería / Confitería','Pizzería / Delivery','Dietética','Bar / Cervecería','Heladería','Otro gastronómico'],
+  productos:   ['Ropa y calzado','Deportes','Ferretería','Librería / Bazar','Electrónica','Supermercado / Almacén','Muebles / Deco','Farmacia','Otro producto'],
+  servicios:   ['Peluquería / Estética','Taller mecánico','Salud / Médico','Veterinaria','Contador / Escribano','Inmobiliaria','Gimnasio','Otro servicio'],
+  mixto:       ['Kiosco','Minimercado','Fotocopias / Imprenta','Otro mixto']
+};
+
+const PREGUNTAS_POR_TIPO = {
+  gastronomia: [
+    { id:'menuDelDia',    label:'¿Tenés menú del día?',              opts:['Sí, todos los días','A veces','No'] },
+    { id:'delivery',      label:'¿Hacés delivery?',                  opts:['Sí','No','Próximamente'] },
+    { id:'pedidosPorApp', label:'¿Querés recibir pedidos por PuenT?',opts:['Sí','No por ahora'] },
+  ],
+  productos: [
+    { id:'publicaPrecios',label:'¿Publicás productos con precio?',   opts:['Sí, siempre','A veces','Solo mostrar'] },
+    { id:'envios',        label:'¿Hacés envíos?',                    opts:['Sí','No','A veces'] },
+    { id:'stockVariable', label:'¿Tu stock cambia seguido?',         opts:['Sí, a diario','No mucho'] },
+  ],
+  servicios: [
+    { id:'turnos',        label:'¿Manejás turnos?',                  opts:['Sí','No'] },
+    { id:'soloContacto',  label:'¿Qué querés mostrar en PuenT?',     opts:['Mis servicios y precios','Solo mi contacto y ubicación'] },
+  ],
+  mixto: [
+    { id:'publicaPrecios',label:'¿Publicás productos con precio?',   opts:['Sí','No por ahora'] },
+    { id:'envios',        label:'¿Hacés envíos?',                    opts:['Sí','No','A veces'] },
+  ]
+};
+
+function iniciarWizardComercio(){
+  wizardData = {};
+  wizardPasoActual = 1;
+  // Resetear todos los pasos
+  [1,2,3,4].forEach(n => {
+    const el = document.getElementById('wizardPaso'+n);
+    if(el) el.style.display = n===1 ? 'block' : 'none';
+  });
+  document.getElementById('wizardNombre').value = '';
+  document.getElementById('wizardNombreCounter').textContent = '0/60';
+  wizardActualizarProgreso();
+  showScreen('wizard-comercio');
+}
+
+function wizardActualizarProgreso(){
+  const pct = (wizardPasoActual / 4) * 100;
+  document.getElementById('wizardProgressBar').style.width = pct + '%';
+  document.getElementById('wizardStepLabel').textContent = wizardPasoActual + ' de 4';
+}
+
+function wizardAtras(){
+  if(wizardPasoActual <= 1){
+    showScreen('elegir-rol-nuevo');
+    return;
+  }
+  document.getElementById('wizardPaso'+wizardPasoActual).style.display = 'none';
+  wizardPasoActual--;
+  document.getElementById('wizardPaso'+wizardPasoActual).style.display = 'block';
+  wizardActualizarProgreso();
+  window.scrollTo(0,0);
+}
+
+function wizardSiguiente(pasoActual){
+  if(pasoActual === 1){
+    const nombre = document.getElementById('wizardNombre').value.trim();
+    if(!nombre){ toast('Ingresá el nombre de tu comercio'); return; }
+    wizardData.nombre = nombre;
+    document.getElementById('wizardPaso1').style.display = 'none';
+    document.getElementById('wizardPaso2').style.display = 'block';
+    wizardPasoActual = 2;
+    wizardActualizarProgreso();
+    window.scrollTo(0,0);
+  }
+}
+
+function wizardElegirTipo(tipo, btn){
+  // Highlight visual
+  document.querySelectorAll('.wizard-tipo-btn').forEach(b=>{
+    b.style.borderColor = '#EAEAEA';
+    b.style.background = 'white';
+  });
+  btn.style.borderColor = '#FF6600';
+  btn.style.background = '#FFF8F3';
+
+  wizardData.tipo = tipo;
+
+  // Pequeña pausa para que se vea el highlight
+  setTimeout(()=>{
+    // Renderizar rubros del paso 3
+    const rubros = RUBROS_POR_TIPO[tipo] || [];
+    const cont = document.getElementById('wizardRubroOpciones');
+    cont.innerHTML = rubros.map(r => `
+      <button class="wizard-rubro-btn" onclick="wizardElegirRubro('${r.replace(/'/g,"\\'")}',this)"
+        style="width:100%;padding:13px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;justify-content:space-between;background:white;text-align:left;cursor:pointer;font-size:14px;font-weight:700;color:#1A1A1A;transition:border-color .15s,background .15s;">
+        <span>${r}</span>
+        <span style="color:#DDD;font-size:18px;">›</span>
+      </button>`).join('');
+
+    document.getElementById('wizardPaso2').style.display = 'none';
+    document.getElementById('wizardPaso3').style.display = 'block';
+    wizardPasoActual = 3;
+    wizardActualizarProgreso();
+    window.scrollTo(0,0);
+  }, 180);
+}
+
+function wizardElegirRubro(rubro, btn){
+  document.querySelectorAll('.wizard-rubro-btn').forEach(b=>{
+    b.style.borderColor = '#EAEAEA';
+    b.style.background = 'white';
+  });
+  btn.style.borderColor = '#FF6600';
+  btn.style.background = '#FFF8F3';
+
+  wizardData.rubro = rubro;
+
+  setTimeout(()=>{
+    // Renderizar preguntas específicas del paso 4
+    const tipo = wizardData.tipo;
+    const preguntas = PREGUNTAS_POR_TIPO[tipo] || [];
+    const cont = document.getElementById('wizardPreguntasEspecificas');
+    cont.innerHTML = preguntas.map(p => `
+      <div>
+        <div style="font-size:13.5px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">${p.label}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${p.opts.map(o => `
+            <button class="wizard-opt-btn" data-pregunta="${p.id}" data-valor="${o}"
+              onclick="wizardElegirOpcion('${p.id}','${o.replace(/'/g,"\\'")}',this)"
+              style="padding:9px 14px;border:1.5px solid #EAEAEA;border-radius:100px;background:white;font-size:12.5px;font-weight:700;color:#555;cursor:pointer;transition:all .15s;">
+              ${o}
+            </button>`).join('')}
+        </div>
+      </div>`).join('');
+
+    // Título del paso 4 personalizado por rubro
+    document.getElementById('wizardPaso4Titulo').textContent =
+      tipo === 'gastronomia' ? 'Contanos cómo trabajás' :
+      tipo === 'productos'   ? 'Cómo manejás tus productos' :
+      tipo === 'servicios'   ? 'Cómo ofrecés tus servicios' : 'Un poco más sobre tu negocio';
+
+    document.getElementById('wizardPaso3').style.display = 'none';
+    document.getElementById('wizardPaso4').style.display = 'block';
+    wizardPasoActual = 4;
+    wizardActualizarProgreso();
+    window.scrollTo(0,0);
+  }, 180);
+}
+
+function wizardElegirOpcion(preguntaId, valor, btn){
+  // Solo una selección por pregunta
+  document.querySelectorAll(`.wizard-opt-btn[data-pregunta="${preguntaId}"]`).forEach(b=>{
+    b.style.borderColor = '#EAEAEA';
+    b.style.background = 'white';
+    b.style.color = '#555';
+  });
+  btn.style.borderColor = '#FF6600';
+  btn.style.background = '#FF6600';
+  btn.style.color = 'white';
+  wizardData[preguntaId] = valor;
+}
+
+function wizardFinalizar(){
+  // Verificar que contestó todas las preguntas
+  const preguntas = PREGUNTAS_POR_TIPO[wizardData.tipo] || [];
+  for(const p of preguntas){
+    if(!wizardData[p.id]){
+      toast('Respondé todas las preguntas para continuar');
+      return;
+    }
+  }
+  // Guardar en localStorage para recuperar después del redirect de Google
+  try{ localStorage.setItem('puente_wizardData', JSON.stringify(wizardData)); }catch(e){}
+  // Marcar rol y lanzar login
+  rolPreElegido = 'comercio';
+  try{ localStorage.setItem('puente_rolPreElegido', 'comercio'); }catch(e){}
+  loginConGoogle();
+}
+
 function elegirRolParaRegistro(rol){
   rolPreElegido = rol;
   try{ localStorage.setItem('puente_rolPreElegido', rol); }catch(e){}
@@ -3212,8 +3473,24 @@ function crearCuentaDesdeGoogle(rol, user){
       fechaAlta: new Date().toISOString(), ultimaVenta:null, diasExtra:0};
     data.qrPersonal = 'VQR-' + data.id.split('-')[1].padStart(4,'0');
   } else if(rol==='comercio'){
-    data = {id: nextId('c'), uid:user.uid, nombre, email, ciudad:'La Paz', rubro:'Otros', viaGoogle:true, adheridos:[], img: (foto.startsWith('http') ? foto : null), publicidadActiva:true, publicidadVence:diasAtras(-30)};
+    // Recuperar datos del wizard (en memoria o desde localStorage si hubo redirect)
+    let wd = wizardData && wizardData.nombre ? wizardData : null;
+    if(!wd){
+      try{ const s = localStorage.getItem('puente_wizardData'); if(s) wd = JSON.parse(s); }catch(e){}
+    }
+    try{ localStorage.removeItem('puente_wizardData'); }catch(e){}
+    const nombreComercio = (wd && wd.nombre) ? wd.nombre : nombre;
+    const rubroComercio  = (wd && wd.rubro)  ? wd.rubro  : 'Otros';
+    const tipoComercio   = (wd && wd.tipo)   ? wd.tipo   : null;
+    // Extraer respuestas específicas (todo lo que no sea nombre/rubro/tipo)
+    const extras = {};
+    if(wd){ Object.keys(wd).forEach(k=>{ if(!['nombre','rubro','tipo'].includes(k)) extras[k]=wd[k]; }); }
+    data = {id: nextId('c'), uid:user.uid, nombre:nombreComercio, email, ciudad:'La Paz',
+            rubro:rubroComercio, tipo:tipoComercio, ...extras,
+            viaGoogle:true, adheridos:[], img: (foto.startsWith('http') ? foto : null),
+            publicidadActiva:true, publicidadVence:diasAtras(-30)};
     data.qrPersonal = 'CQR-' + data.id.split('-')[1].padStart(4,'0');
+    wizardData = {}; // limpiar
   } else {
     data = {id: nextId('cl'), uid:user.uid, nombre, email, ciudad:'La Paz', viaGoogle:true};
   }
