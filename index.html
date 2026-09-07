@@ -3162,7 +3162,7 @@ const COL_POR_ROL = {vendedor:'vendedores', comercio:'comercios', cliente:'clien
 // Se llama al tocar Vendedor / Comercio / Cliente en la pantalla de inicio.
 // Guardamos qué rol tocó por si es cuenta nueva, y disparamos el login de Google.
 function mostrarSeleccionDeRol(){
-  showScreen('elegir-rol-nuevo');
+  showScreen('bienvenida');
 }
 
 // ══════════════════════════════════════════════════════
@@ -3221,7 +3221,7 @@ function wizardActualizarProgreso(){
 
 function wizardAtras(){
   if(wizardPasoActual <= 1){
-    showScreen('elegir-rol-nuevo');
+    showScreen('bienvenida');
     return;
   }
   document.getElementById('wizardPaso'+wizardPasoActual).style.display = 'none';
