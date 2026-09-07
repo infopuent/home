@@ -663,65 +663,75 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ SCREEN: BIENVENIDA LANDING ============ -->
-  <div class="screen" id="screen-bienvenida" style="padding:0; overflow:hidden; background:#FFFFFF; min-height:100vh; display:flex; flex-direction:column;">
+  <div class="screen" id="screen-bienvenida" style="padding:0; overflow:hidden; position:relative; min-height:100vh; display:flex; flex-direction:column;">
 
-    <!-- Hero: solo logo -->
-    <div style="background:#FFFFFF; padding:32px 24px 20px; text-align:center; flex-shrink:0;">
-      <div style="height:150px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+    <!-- Fondo fullscreen -->
+    <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner8.png"
+         alt="" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:0;pointer-events:none;">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.38);z-index:1;pointer-events:none;"></div>
+
+    <!-- Contenido -->
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:env(safe-area-inset-top,28px) 20px 32px;">
+
+      <!-- Logo -->
+      <div style="height:130px;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100%;flex-shrink:0;">
         <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png"
-             alt="PuenT" style="height:320px; width:auto; display:block;">
+             alt="PuenT" style="height:280px;width:auto;margin-top:-20px;">
       </div>
-    </div>
 
-    <!-- Pregunta + chips de rol -->
-    <div style="padding:0 16px 24px; display:flex; flex-direction:column; gap:10px; flex:1;">
+      <!-- Espaciador flexible: empuja los chips a ~45% de la pantalla -->
+      <div style="flex:0 0 6vh;"></div>
 
-      <div style="font-size:15px; font-weight:800; color:#1A1A1A; text-align:center; margin-bottom:4px;">¿Cómo usás PuenT?</div>
+      <!-- Chips -->
+      <div style="width:100%;display:flex;flex-direction:column;gap:10px;">
 
-      <!-- Chip 1: Compradores -->
-      <button onclick="showScreen('feed')"
-        style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:transform .1s,border-color .15s;"
-        onmousedown="this.style.transform='scale(0.98)';this.style.borderColor='#FF6600';" onmouseup="this.style.transform='';this.style.borderColor='#EAEAEA';"
-        ontouchstart="this.style.transform='scale(0.98)';this.style.borderColor='#FF6600';" ontouchend="this.style.transform='';this.style.borderColor='#EAEAEA';">
-        <div style="width:44px;height:44px;border-radius:13px;background:#FFF3E8;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🛍️</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Quiero chusmear</div>
-          <div style="font-size:11.5px;font-weight:500;color:#888;">Ofertas, locales y productos</div>
-        </div>
-        <div style="font-size:18px;color:#CCC;flex-shrink:0;">›</div>
-      </button>
+        <div style="font-size:14px;font-weight:800;color:rgba(255,255,255,0.93);text-align:center;margin-bottom:2px;">¿Cómo usás PuenT?</div>
 
-      <!-- Chip 2: Comercios -->
-      <button onclick="showScreen('bienvenida-comercio')"
-        style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:transform .1s,border-color .15s;"
-        onmousedown="this.style.transform='scale(0.98)';this.style.borderColor='#E890A6';" onmouseup="this.style.transform='';this.style.borderColor='#EAEAEA';"
-        ontouchstart="this.style.transform='scale(0.98)';this.style.borderColor='#E890A6';" ontouchend="this.style.transform='';this.style.borderColor='#EAEAEA';">
-        <div style="width:44px;height:44px;border-radius:13px;background:#FCEDF1;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏬</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Tengo un comercio</div>
-          <div style="font-size:11.5px;font-weight:500;color:#888;">Sumar mi local a PuenT</div>
-        </div>
-        <div style="font-size:18px;color:#CCC;flex-shrink:0;">›</div>
-      </button>
-
-      <!-- Chip 3: ConectorT -->
-      <button disabled
-        style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:not-allowed;text-align:left;opacity:.6;">
-        <div style="width:44px;height:44px;border-radius:13px;background:#E8F3FD;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🔗</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Ser ConectorT</div>
-          <div style="font-size:11.5px;font-weight:500;color:#888;">Ganar comisión vendiendo <span style="background:#E3F1FD;color:#2C5F8A;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:100px;letter-spacing:.03em;">Próximamente</span></div>
-        </div>
-        <div style="font-size:18px;color:#DDD;flex-shrink:0;">›</div>
-      </button>
-
-      <!-- Footer -->
-      <div style="text-align:center;padding:10px 0 0;">
-        <button onclick="showScreen('feed')" style="background:none;border:none;font-size:13px;color:#AAA;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">
-          Explorar sin registrarme →
+        <!-- Chip 1 -->
+        <button onclick="showScreen('feed')"
+          style="width:100%;background:rgba(255,255,255,0.14);border:1.5px solid rgba(255,255,255,0.32);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:13px;cursor:pointer;text-align:left;transition:transform .1s,background .15s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);"
+          onmousedown="this.style.transform='scale(0.98)';this.style.background='rgba(255,255,255,0.24)';" onmouseup="this.style.transform='';this.style.background='rgba(255,255,255,0.14)';"
+          ontouchstart="this.style.transform='scale(0.98)';this.style.background='rgba(255,255,255,0.24)';" ontouchend="this.style.transform='';this.style.background='rgba(255,255,255,0.14)';">
+          <div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🛍️</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;">Quiero chusmear</div>
+            <div style="font-size:11.5px;font-weight:500;color:rgba(255,255,255,0.72);">Ofertas, locales y productos</div>
+          </div>
+          <div style="font-size:20px;color:rgba(255,255,255,0.45);flex-shrink:0;">›</div>
         </button>
-      </div>
 
+        <!-- Chip 2 -->
+        <button onclick="showScreen('bienvenida-comercio')"
+          style="width:100%;background:rgba(255,255,255,0.14);border:1.5px solid rgba(255,255,255,0.32);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:13px;cursor:pointer;text-align:left;transition:transform .1s,background .15s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);"
+          onmousedown="this.style.transform='scale(0.98)';this.style.background='rgba(255,255,255,0.24)';" onmouseup="this.style.transform='';this.style.background='rgba(255,255,255,0.14)';"
+          ontouchstart="this.style.transform='scale(0.98)';this.style.background='rgba(255,255,255,0.24)';" ontouchend="this.style.transform='';this.style.background='rgba(255,255,255,0.14)';">
+          <div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏬</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;">Tengo un comercio</div>
+            <div style="font-size:11.5px;font-weight:500;color:rgba(255,255,255,0.72);">Sumar mi local a PuenT</div>
+          </div>
+          <div style="font-size:20px;color:rgba(255,255,255,0.45);flex-shrink:0;">›</div>
+        </button>
+
+        <!-- Chip 3 -->
+        <button disabled
+          style="width:100%;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.18);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:13px;cursor:not-allowed;text-align:left;opacity:.55;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
+          <div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔗</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;">Ser ConectorT <span style="background:rgba(255,255,255,0.25);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;vertical-align:middle;">Próximamente</span></div>
+            <div style="font-size:11.5px;font-weight:500;color:rgba(255,255,255,0.65);">Ganar comisión vendiendo</div>
+          </div>
+          <div style="font-size:20px;color:rgba(255,255,255,0.3);flex-shrink:0;">›</div>
+        </button>
+
+        <!-- Explorar -->
+        <div style="text-align:center;padding-top:6px;">
+          <button onclick="showScreen('feed')" style="background:none;border:none;font-size:13px;color:rgba(255,255,255,0.62);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">
+            Explorar sin registrarme →
+          </button>
+        </div>
+
+      </div>
     </div>
   </div>
 
