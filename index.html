@@ -292,6 +292,40 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .splash-logo-wrap img{width:100%; height:auto; display:block; object-fit:contain;}
 @keyframes splashPop{from{opacity:0; transform:scale(.85) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
 
+/* ---- Chips de categoría estilo Rappi ---- */
+.cat-chip{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  background:none;border:none;cursor:pointer;padding:0;min-width:58px;
+  transition:transform .12s;
+}
+.cat-chip:active{transform:scale(0.93);}
+.cat-chip-icon{
+  width:52px;height:52px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;transition:box-shadow .15s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.10);
+}
+.cat-chip.active .cat-chip-icon{
+  box-shadow:0 4px 16px rgba(0,0,0,0.22);
+  transform:scale(1.08);
+}
+.cat-chip-label{
+  font-size:10.5px;font-weight:700;color:#444;
+  white-space:nowrap;text-align:center;
+}
+.cat-chip.active .cat-chip-label{color:#FF6600;font-weight:800;}
+
+/* ---- Secciones de categoría en el home ---- */
+.feed-cat-seccion{ display:block; }
+.feed-cat-seccion.hidden{ display:none; }
+.feed-cat-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:0 16px 16px;
+  overflow:hidden;
+}
+
 /* ---- Feed público ---- */
 .feed-hero{background:linear-gradient(160deg, #FF6600 0%, #FF9500 60%, #FFB300 100%); border-radius:0 0 28px 28px; margin:-1px -1px 0; color:white; overflow:hidden; box-shadow:0 4px 20px rgba(255,102,0,0.3);}
 .feed-banner-slider{position:relative; width:100%; aspect-ratio:836/380; overflow:hidden;}
@@ -742,15 +776,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div id="adheridosGrid" class="adheridos-grid"></div>
       </div>
 
-      <!-- Te va a encantar — grilla 5x2 de productos -->
-      <div style="padding:0 16px;">
+      <!-- Te va a encantar — sección paga (productos destacados) -->
+      <div style="padding:0 16px;" id="secEncantar">
         <div class="section-title-row">
           <div class="section-title">✨ Te va a encantar</div>
         </div>
         <div id="feedGridEncantar" class="feed-grid-encantar"></div>
       </div>
 
-      <!-- Botón Tornado de Ofertas -->
+      <!-- Tornado de Ofertas -->
       <div style="padding:4px 16px 0;">
         <button class="tornado-ofertas-btn" id="tornadoOfertasBtn" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
           <span class="tornado-badge hidden" id="tornadoOfertasBadge">0</span>
@@ -758,27 +792,172 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </button>
       </div>
 
-      <!-- Comidas cerca tuyo -->
-      <div style="padding:4px 16px 0;">
-        <div class="section-title-row">
-          <div class="section-title">🍽️ Comidas cerca tuyo</div>
+      <!-- Chips de categoría sticky -->
+      <div id="feedCategoriaChips" style="position:sticky;top:0;z-index:18;background:#fff;padding:10px 16px 8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-bottom:1px solid #F0F0EE;">
+        <div style="display:flex;gap:10px;width:max-content;">
+          <button class="cat-chip active" id="catChip-todos" onclick="setFeedCategoria('todos',this)">
+            <div class="cat-chip-icon" style="background:#FF6600;">🏪</div>
+            <div class="cat-chip-label">Todo</div>
+          </button>
+          <button class="cat-chip" id="catChip-comida" onclick="setFeedCategoria('comida',this)">
+            <div class="cat-chip-icon" style="background:#E8522A;">🍽️</div>
+            <div class="cat-chip-label">Comida</div>
+          </button>
+          <button class="cat-chip" id="catChip-indumentaria" onclick="setFeedCategoria('indumentaria',this)">
+            <div class="cat-chip-icon" style="background:#C2185B;">👗</div>
+            <div class="cat-chip-label">Indumentaria</div>
+          </button>
+          <button class="cat-chip" id="catChip-hogar" onclick="setFeedCategoria('hogar',this)">
+            <div class="cat-chip-icon" style="background:#1565C0;">🏠</div>
+            <div class="cat-chip-label">Hogar</div>
+          </button>
+          <button class="cat-chip" id="catChip-salud" onclick="setFeedCategoria('salud',this)">
+            <div class="cat-chip-icon" style="background:#2E7D32;">💊</div>
+            <div class="cat-chip-label">Salud</div>
+          </button>
+          <button class="cat-chip" id="catChip-mascotas" onclick="setFeedCategoria('mascotas',this)">
+            <div class="cat-chip-icon" style="background:#6A1B9A;">🐾</div>
+            <div class="cat-chip-label">Mascotas</div>
+          </button>
+          <button class="cat-chip" id="catChip-repuestos" onclick="setFeedCategoria('repuestos',this)">
+            <div class="cat-chip-icon" style="background:#37474F;">🔧</div>
+            <div class="cat-chip-label">Repuestos</div>
+          </button>
+          <button class="cat-chip" id="catChip-agencia" onclick="setFeedCategoria('agencia',this)">
+            <div class="cat-chip-icon" style="background:#0277BD;">🚗</div>
+            <div class="cat-chip-label">Agencia</div>
+          </button>
+          <button class="cat-chip" id="catChip-tecnologia" onclick="setFeedCategoria('tecnologia',this)">
+            <div class="cat-chip-icon" style="background:#283593;">💻</div>
+            <div class="cat-chip-label">Tecnología</div>
+          </button>
+          <button class="cat-chip" id="catChip-servicios" onclick="setFeedCategoria('servicios',this)">
+            <div class="cat-chip-icon" style="background:#4527A0;">🏢</div>
+            <div class="cat-chip-label">Servicios</div>
+          </button>
+          <button class="cat-chip" id="catChip-almacen" onclick="setFeedCategoria('almacen',this)">
+            <div class="cat-chip-icon" style="background:#558B2F;">🛒</div>
+            <div class="cat-chip-label">Almacén</div>
+          </button>
+          <button class="cat-chip" id="catChip-otros" onclick="setFeedCategoria('otros',this)">
+            <div class="cat-chip-icon" style="background:#795548;">➕</div>
+            <div class="cat-chip-label">Más</div>
+          </button>
         </div>
-        <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/banner5.png"
-             alt="Gastronomía en tu ciudad" onclick="showScreen('gastronomia');renderGastronomiaGrid()"
-             style="width:100%; height:auto; border-radius:14px; cursor:pointer; margin-bottom:14px; display:block;">
-
-        <!-- Locales de comida (scroll horizontal) -->
-        <div id="feedLocalesComida" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:18px; scrollbar-width:none; -webkit-overflow-scrolling:touch;"></div>
       </div>
 
-      <!-- Grilla infinita de todos los productos adheridos -->
-      <div style="padding:0 16px;">
-        <div class="section-title-row">
-          <div class="section-title">🛍️ Todos los productos</div>
-          <span class="ver-todo" onclick="setFeedTab('ofertas')">Ver más →</span>
+      <!-- Secciones por categoría (se muestran/ocultan según haya productos) -->
+      <div id="feedSeccionesCategorias" style="padding-bottom:8px;">
+
+        <div class="feed-cat-seccion" id="secCat-comida">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">🍽️ Comida</div>
+              <span class="ver-todo" onclick="setFeedCategoria('comida',document.getElementById('catChip-comida'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-comida"></div>
         </div>
-        <div id="feedGridInfinito" class="feed-grid-encantar"></div>
-        <div id="feedGridInfinitoLoader" style="text-align:center; padding:16px 0; color:var(--muted); font-size:13px; display:none;">Cargando más...</div>
+
+        <div class="feed-cat-seccion" id="secCat-indumentaria">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">👗 Indumentaria</div>
+              <span class="ver-todo" onclick="setFeedCategoria('indumentaria',document.getElementById('catChip-indumentaria'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-indumentaria"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-hogar">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">🏠 Hogar</div>
+              <span class="ver-todo" onclick="setFeedCategoria('hogar',document.getElementById('catChip-hogar'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-hogar"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-salud">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">💊 Salud</div>
+              <span class="ver-todo" onclick="setFeedCategoria('salud',document.getElementById('catChip-salud'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-salud"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-mascotas">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">🐾 Mascotas</div>
+              <span class="ver-todo" onclick="setFeedCategoria('mascotas',document.getElementById('catChip-mascotas'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-mascotas"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-repuestos">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">🔧 Repuestos</div>
+              <span class="ver-todo" onclick="setFeedCategoria('repuestos',document.getElementById('catChip-repuestos'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-repuestos"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-agencia">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">🚗 Agencia</div>
+              <span class="ver-todo" onclick="setFeedCategoria('agencia',document.getElementById('catChip-agencia'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-agencia"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-tecnologia">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">💻 Tecnología</div>
+              <span class="ver-todo" onclick="setFeedCategoria('tecnologia',document.getElementById('catChip-tecnologia'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-tecnologia"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-servicios">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">🏢 Servicios</div>
+              <span class="ver-todo" onclick="setFeedCategoria('servicios',document.getElementById('catChip-servicios'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-servicios"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-almacen">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">🛒 Almacén</div>
+              <span class="ver-todo" onclick="setFeedCategoria('almacen',document.getElementById('catChip-almacen'))">Ver más →</span>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-almacen"></div>
+        </div>
+
+        <div class="feed-cat-seccion" id="secCat-otros">
+          <div style="padding:14px 16px 6px;">
+            <div class="section-title-row">
+              <div class="section-title">➕ Más</div>
+            </div>
+          </div>
+          <div class="feed-cat-grid" id="gridCat-otros"></div>
+        </div>
+
       </div>
 
       <!-- CTA ingreso (solo si no está logueado) -->
@@ -1818,7 +1997,23 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="field">
         <label>Rubro / filtro con el que aparece</label>
-        <select id="cnpRubro" onchange="renderAtributosRubro()"></select>
+        <select id="cnpRubro" onchange="renderAtributosRubro();autoCategoria()"></select>
+      </div>
+      <div class="field">
+        <label>Categoría en el home</label>
+        <select id="cnpCategoria">
+          <option value="comida">🍽️ Comida</option>
+          <option value="indumentaria">👗 Indumentaria</option>
+          <option value="hogar">🏠 Hogar</option>
+          <option value="salud">💊 Salud</option>
+          <option value="mascotas">🐾 Mascotas</option>
+          <option value="repuestos">🔧 Repuestos</option>
+          <option value="agencia">🚗 Agencia</option>
+          <option value="tecnologia">💻 Tecnología</option>
+          <option value="servicios">🏢 Servicios</option>
+          <option value="almacen">🛒 Almacén</option>
+          <option value="otros">➕ Más</option>
+        </select>
       </div>
       <!-- Campos dinámicos según el rubro -->
       <div id="cnpAtributosRubro"></div>
@@ -3656,6 +3851,8 @@ function entrarConDatosGuardados(rol, data){
 // por eso no lo hacemos de forma síncrona apenas arranca la página).
 function onFirebaseReady(){
   cargarDatosPublicosDeFirestore();
+  // Migrar categorías de productos existentes (solo se ejecuta si hay auth admin)
+  setTimeout(migrarCategorias, 5000);
 
   // En mobile usamos signInWithRedirect — cuando la página vuelve a cargar, el resultado
   // viene acá. Lo procesamos ANTES de escuchar onAuthStateChanged para evitar condición de carrera.
@@ -4924,6 +5121,7 @@ const ATRIBUTOS_POR_RUBRO = {
 /* Renderiza los campos extra en el formulario de carga de producto */
 function renderAtributosRubro(){
   const rubro  = document.getElementById('cnpRubro')?.value || '';
+  const categoria = document.getElementById('cnpCategoria')?.value || categoriaDeRubro(rubro);
   const cont   = document.getElementById('cnpAtributosRubro');
   if(!cont) return;
 
@@ -4979,6 +5177,7 @@ function crearProductoComercio(){
   const precio = parseFloat(document.getElementById('cnpPrecio').value);
   const comisionInput = document.getElementById('cnpComision').value;
   const rubro = document.getElementById('cnpRubro').value;
+  const categoria = document.getElementById('cnpCategoria')?.value || categoriaDeRubro(rubro);
   const tipoOferta = document.getElementById('cnpTipoOferta').value;
   const descuento = parseFloat(document.getElementById('cnpDescuento').value) || null;
   const foto = fotosCargadas['cnp'];
@@ -6817,6 +7016,137 @@ function v_ciudadOk(vendedorId){
   return v && mismaCiudad(v.ciudad, ciudadSeleccionada);
 }
 
+// ══════════════════════════════════════════════════════
+//  CATEGORÍAS DEL HOME
+// ══════════════════════════════════════════════════════
+const RUBRO_A_CATEGORIA = {
+  // Gastronomía
+  'Restaurante':'comida','Rotisería':'comida','Panadería / Confitería':'comida',
+  'Pizzería / Delivery':'comida','Dietética':'comida','Bar / Cervecería':'comida',
+  'Heladería':'comida','Otro gastronómico':'comida',
+  // Indumentaria
+  'Ropa y calzado':'indumentaria','Deportes':'indumentaria',
+  // Hogar
+  'Muebles / Deco':'hogar','Ferretería':'hogar',
+  // Salud
+  'Farmacia':'salud','Salud / Médico':'salud','Óptica':'salud',
+  // Mascotas
+  'Veterinaria':'mascotas','Pet Shop':'mascotas',
+  // Repuestos
+  'Taller mecánico':'repuestos','Autopartes':'repuestos',
+  // Agencia
+  'Agencia de autos':'agencia','Agencia de motos':'agencia','Agencia':'agencia',
+  // Tecnología
+  'Electrónica':'tecnologia','Computación':'tecnologia','Celulares':'tecnologia',
+  // Almacén
+  'Supermercado / Almacén':'almacen','Kiosco':'almacen','Minimercado':'almacen',
+  'Fotocopias / Imprenta':'almacen',
+  // Servicios
+  'Peluquería / Estética':'servicios','Contador / Escribano':'servicios',
+  'Inmobiliaria':'servicios','Gimnasio':'servicios','Veterinaria':'mascotas',
+  'Librería / Bazar':'almacen',
+};
+
+function categoriaDeRubro(rubro){
+  return RUBRO_A_CATEGORIA[rubro] || 'otros';
+}
+
+function categoriaDeTipo(tipo){
+  const m = {gastronomia:'comida',productos:'otros',servicios:'servicios',mixto:'otros'};
+  return m[tipo]||'otros';
+}
+
+// Autocompleta el select de categoría según el rubro elegido
+function autoCategoria(){
+  const rubro = document.getElementById('cnpRubro')?.value || '';
+  const catEl = document.getElementById('cnpCategoria');
+  if(!catEl) return;
+  const cat = categoriaDeRubro(rubro);
+  catEl.value = cat;
+}
+
+let _feedCategoriaActual = 'todos';
+
+const FEED_CATEGORIAS = ['comida','indumentaria','hogar','salud','mascotas','repuestos','agencia','tecnologia','servicios','almacen','otros'];
+
+function setFeedCategoria(cat, btn){
+  _feedCategoriaActual = cat;
+  document.querySelectorAll('.cat-chip').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderSeccionesCategorias();
+  // Scroll a la sección correspondiente
+  if(cat === 'todos'){
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    const sec = document.getElementById('secCat-'+cat);
+    if(sec && !sec.classList.contains('hidden')){
+      setTimeout(()=>{ sec.scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
+    }
+  }
+}
+
+function renderSeccionesCategorias(){
+  const cat = _feedCategoriaActual;
+  // Recopilar todos los productos con su categoría
+  var todosProd = [];
+  (state.comercios||[]).forEach(function(c){
+    if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
+      (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio'||!p.origen); })
+        .forEach(function(p){ todosProd.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro}); });
+    }
+  });
+
+  FEED_CATEGORIAS.forEach(function(c){
+    var sec = document.getElementById('secCat-'+c);
+    var grid = document.getElementById('gridCat-'+c);
+    if(!sec || !grid) return;
+    // Filtrar: si hay categoría seleccionada, solo mostrar esa sección
+    if(cat !== 'todos' && cat !== c){ sec.classList.add('hidden'); return; }
+    // Productos de esta categoría
+    var prods = todosProd.filter(function(p){
+      var pCat = p.categoria || categoriaDeRubro(p._comercioRubro||p.rubro||'');
+      return pCat === c;
+    });
+    if(!prods.length){ sec.classList.add('hidden'); return; }
+    sec.classList.remove('hidden');
+    // Mostrar hasta 4 productos (2x2) en la vista home, aleatorios
+    prods.sort(()=>Math.random()-.5);
+    var muestra = prods.slice(0,4);
+    grid.innerHTML = muestra.map(function(p){
+      var foto = p.img
+        ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">'
+        : '<span style="font-size:28px;">🛍️</span>';
+      var pid = p.id;
+      var liked = esFavorito(pid);
+      return '<div class="prod-card" onclick="abrirOferta(&quot;'+pid+'&quot;)" style="cursor:pointer;">'
+        +'<div class="prod-photo">'+foto+'</div>'
+        +'<div class="prod-body">'
+        +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
+        +'<button class="prod-like'+(liked?' liked':'')+'" onclick="event.stopPropagation();toggleFavorito(&quot;'+pid+'&quot;,this)">'+(liked?'❤️':'🤍')+'</button>'
+        +'</div></div>';
+    }).join('');
+  });
+}
+
+// Migrar productos existentes sin categoría
+async function migrarCategorias(){
+  if(!firebaseListo || !db) return;
+  try{
+    const snap = await db.collection('productos').get();
+    const batch = db.batch();
+    let count = 0;
+    snap.docs.forEach(doc=>{
+      const p = doc.data();
+      if(!p.categoria){
+        const cat = categoriaDeRubro(p.rubro || '');
+        batch.update(doc.ref, {categoria: cat});
+        count++;
+      }
+    });
+    if(count > 0){ await batch.commit(); console.log('Migradas', count, 'categorías'); }
+  }catch(e){ console.warn('migrarCategorias:', e); }
+}
+
 function renderFeed(){
   renderFeedGrid('comercio', 'feedChips', 'feedGrid', feedRubroFiltro, 'setFeedRubro');
   actualizarBadgeTornado();
@@ -6868,8 +7198,7 @@ function renderHomeTab(){
   renderAdheridosGrid();
   renderFeedEncantar();
   actualizarBadgeTornado();
-  renderLocalesComida();
-  renderFeedInfinito(true);
+  renderSeccionesCategorias();
 }
 
 function renderFeedEncantar(){
@@ -6879,9 +7208,16 @@ function renderFeedEncantar(){
   (state.comercios||[]).forEach(function(c){
     if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
       (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
-        .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
+        .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro, _comercioTipo:c.tipo}); });
     }
   });
+  // Filtrar por categoría si hay una seleccionada
+  if(_feedCategoriaActual && _feedCategoriaActual !== 'todos'){
+    prods = prods.filter(function(p){
+      var cat = p.categoria || categoriaDeRubro(p._comercioRubro||p.rubro||'');
+      return cat === _feedCategoriaActual;
+    });
+  }
   // Mezclar y tomar 10 (5x2)
   prods.sort(()=>Math.random()-.5);
   var top10 = prods.slice(0,10);
@@ -6913,9 +7249,16 @@ function renderFeedInfinito(reset){
     (state.comercios||[]).forEach(function(c){
       if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
         (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
-          .forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id}); });
+          .forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro}); });
       }
     });
+    // Filtrar por categoría seleccionada
+    if(_feedCategoriaActual && _feedCategoriaActual !== 'todos'){
+      _feedInfinitoTodos = _feedInfinitoTodos.filter(function(p){
+        var cat = p.categoria || categoriaDeRubro(p._comercioRubro||p.rubro||'');
+        return cat === _feedCategoriaActual;
+      });
+    }
     var grid = document.getElementById('feedGridInfinito');
     if(grid) grid.innerHTML = '';
   }
