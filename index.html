@@ -2885,7 +2885,7 @@ function onRoleChipClick(){
   if(state.role==='vendedor') showScreen('v-catalogo');
   else if(state.role==='comercio') showScreen('c-panel');
   else if(state.role==='cliente') showScreen('cl-buscador');
-  else if(state.role==='admin'){ adminCargarStats(); showScreen('admin-panel'); }
+  else if(state.role==='admin'){ adminCargarStats(); showScreen('admin-panel'); setTimeout(adminIniciarLayout, 80); }
 }
 
 function confirmarCierreSesion(){
@@ -3127,7 +3127,7 @@ const navByRole = {
   ],
   admin:[
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
-    {key:'admin-panel', ic:'ti-shield',          label:'Admin',   action:"showScreen('admin-panel')"},
+    {key:'admin-panel', ic:'ti-shield',          label:'Admin',   action:"showScreen('admin-panel');setTimeout(adminIniciarLayout,80)"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
     {key:'admin-panel', ic:'ti-bell',            label:'Alertas', action:"toast('Sin alertas')"},
     {key:'cl-perfil',   ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
