@@ -2154,9 +2154,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div id="adminDesktopLayout" style="display:none;position:fixed;inset:0;z-index:999;background:#F5F5F3;flex-direction:row;">
       <!-- Sidebar -->
       <div style="width:220px;flex-shrink:0;background:#fff;border-right:1px solid #E8E8E4;display:flex;flex-direction:column;height:100vh;overflow-y:auto;">
-        <div style="padding:20px 18px 16px;border-bottom:1px solid #E8E8E4;">
-          <div style="font-size:18px;font-weight:900;color:#FF6600;letter-spacing:-0.5px;">PuenT 🛡️</div>
-          <div style="font-size:10px;font-weight:700;color:#AAA;margin-top:2px;text-transform:uppercase;letter-spacing:.06em;">Administración</div>
+        <div style="padding:16px 18px 14px;border-bottom:1px solid #E8E8E4;">
+          <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png"
+               alt="PuenT" style="height:60px;width:auto;display:block;margin-bottom:8px;margin-left:-6px;">
+          <button onclick="admVolverAApp()" style="width:100%;padding:6px 10px;border:1px solid #FFD4A8;border-radius:8px;background:#FFF3E8;color:#CC4400;font-size:11.5px;font-weight:800;cursor:pointer;">← Volver a la app</button>
         </div>
         <div style="padding:10px 0;flex:1;">
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">General</div>
@@ -8674,6 +8675,15 @@ function entrarComoAdmin_desktop_init(){
   setTimeout(adminIniciarLayout, 80);
 }
 
+function admVolverAApp(){
+  // Ocultar layout desktop y volver al feed
+  const dsk = document.getElementById('adminDesktopLayout');
+  if(dsk) dsk.style.display = 'none';
+  document.getElementById('adminMobileLayout').style.display = 'block';
+  showScreen('feed');
+  updateBottomNav('feed');
+}
+
 function adminIniciarLayout(){
   const esDesktop = window.innerWidth >= 900;
   document.getElementById('adminMobileLayout').style.display = esDesktop ? 'none' : 'block';
@@ -8841,13 +8851,94 @@ async function admRenderVentasDesktop(){
 }
 
 async function admRenderPlanesDesktop(){
-  await adminCargarPlanes();
-  setTimeout(()=>{const cont=document.getElementById('admDesktopContent');const mob=document.getElementById('adminPlanesList');if(mob)cont.innerHTML=`<div class="adm-section" style="padding:16px;">${mob.innerHTML}</div>`;},400);
+  const cont = document.getElementById('admDesktopContent');
+  try{
+    // Usar state.comercios si ya están cargados, sino buscar en Firestore
+    let comercios = (state.comercios && state.comercios.length) ? state.comercios : [];
+    if(!comercios.length){
+      const snap = await db.collection('comercios').get();
+      comercios = snap.docs.map(d=>({...d.data(), _docId:d.id}));
+    }
+    const conPlan = comercios.filter(c=>c.plan);
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    cont.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="adm-filter-btn active" onclick="admFiltroPlanes('todos',this)">Todos</button>
+        <button class="adm-filter-btn" onclick="admFiltroPlanes('activos',this)">Activos</button>
+        <button class="adm-filter-btn" onclick="admFiltroPlanes('por_vencer',this)">Por vencer</button>
+        <button class="adm-filter-btn" onclick="admFiltroPlanes('vencidos',this)">Vencidos</button>
+      </div>
+      <div class="adm-section" id="admPlanesTabla">
+        <table class="adm-table" id="admTablaPlanesDesktop">
+          <thead><tr><th>Comercio</th><th>Rubro</th><th>Plan</th><th>Vence</th><th>Días restantes</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="admTbodyPlanes">${admRowsPlanes(conPlan)}</tbody>
+        </table>
+      </div>`;
+    window._admPlanesData = conPlan;
+  }catch(e){ cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`; }
+}
+
+window._admPlanesData = [];
+function admFiltroPlanes(filtro, btn){
+  document.querySelectorAll('.adm-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  let lista = window._admPlanesData;
+  if(filtro==='activos')    lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null && d>7; });
+  if(filtro==='por_vencer') lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null && d>=0 && d<=7; });
+  if(filtro==='vencidos')   lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null && d<0; });
+  const el = document.getElementById('admTbodyPlanes');
+  if(el) el.innerHTML = admRowsPlanes(lista);
+}
+
+function admRowsPlanes(lista){
+  if(!lista||!lista.length) return '<tr><td colspan="7" style="color:#AAA;text-align:center;padding:24px;">Sin comercios con plan</td></tr>';
+  return lista.map(c=>{
+    const dias = planDiasRestantes(c);
+    const diasTxt = dias===null?'—':dias<0?`Vencido hace ${Math.abs(dias)}d`:`${dias} días`;
+    const badge = dias===null?'<span class="adm-badge green">Activo</span>':dias<0?'<span class="adm-badge red">Vencido</span>':dias<=7?`<span class="adm-badge orange">Vence en ${dias}d</span>`:'<span class="adm-badge green">Activo</span>';
+    const plan = c.plan==='fijo'?'Fijo $20k':c.plan==='comision'?`Com. ${c.comisionPct||5}%`:c.plan||'Gracia';
+    const vence = c.publicidadVence ? (c.publicidadVence.toDate ? c.publicidadVence.toDate().toLocaleDateString('es-AR') : '—') : '—';
+    const id = c._docId||c.id;
+    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;">
+      <td style="font-weight:700;">${c.nombre||'—'}</td>
+      <td style="color:#888;">${c.rubro||'—'}</td>
+      <td style="color:#888;">${plan}</td>
+      <td style="color:#888;">${vence}</td>
+      <td style="color:#888;">${diasTxt}</td>
+      <td>${badge}</td>
+      <td><button class="adm-btn" onclick="event.stopPropagation();admAbrirComercioDetalle('${id}')">Ver →</button></td>
+    </tr>`;
+  }).join('');
 }
 
 async function admRenderRepartidoresDesktop(){
-  await adminCargarRepartidores();
-  setTimeout(()=>{const cont=document.getElementById('admDesktopContent');const mob=document.getElementById('adminRepartidoresList');if(mob)cont.innerHTML=`<div class="adm-section" style="padding:16px;">${mob.innerHTML}</div>`;},400);
+  const cont = document.getElementById('admDesktopContent');
+  try{
+    const snap = await db.collection('repartidores').orderBy('fechaAlta','desc').get();
+    const lista = snap.docs.map(d=>({...d.data(), _docId:d.id}));
+    const REP_ESTADO = { activo:{label:'Activo',bg:'#E3F3EA',color:'#2F7A55'}, inactivo:{label:'Inactivo',bg:'#F0F0EE',color:'#666'}, suspendido:{label:'Suspendido',bg:'#FDE8E8',color:'#A32020'} };
+    cont.innerHTML = `
+      <div class="adm-section">
+        <table class="adm-table">
+          <thead><tr><th>Nombre</th><th>Teléfono</th><th>Vehículo</th><th>Alta</th><th>Entregas</th><th>Estado</th><th></th></tr></thead>
+          <tbody>${lista.length ? lista.map(r=>{
+            const est = REP_ESTADO[r.estado||'inactivo']||REP_ESTADO.inactivo;
+            const veh = r.vehiculo==='bici'?'🚴 Bici':r.vehiculo==='auto'?'🚗 Auto':r.vehiculo==='pie'?'🚶 A pie':'🛵 Moto';
+            const fecha = r.fechaAlta ? new Date(r.fechaAlta).toLocaleDateString('es-AR') : '—';
+            return `<tr>
+              <td style="font-weight:700;">${r.nombre||'—'}</td>
+              <td style="color:#888;">${r.tel||'—'}</td>
+              <td style="color:#888;">${veh}</td>
+              <td style="color:#888;">${fecha}</td>
+              <td style="color:#888;">${r.totalEntregas||0}</td>
+              <td><span class="adm-badge" style="background:${est.bg};color:${est.color};">${est.label}</span></td>
+              <td><button class="adm-btn" onclick="adminAbrirRepDetalle('${r._docId}')">Ver →</button></td>
+            </tr>`;
+          }).join('') : '<tr><td colspan="7" style="color:#AAA;text-align:center;padding:24px;">Sin repartidores registrados</td></tr>'}
+          </tbody>
+        </table>
+      </div>`;
+  }catch(e){ cont.innerHTML=`<p style="color:red;">Error al cargar: ${e.message}</p>`; }
 }
 
 async function admRenderMensajesDesktop(){
@@ -8864,9 +8955,69 @@ async function admRenderMensajesDesktop(){
 }
 
 function admRenderNuevoComercioDesktop(){
-  const cont=document.getElementById('admDesktopContent');
-  const mob=document.getElementById('screen-admin-nuevo-comercio');
-  if(mob){const cl=mob.cloneNode(true);cl.removeAttribute('id');cl.style.display='block';const bk=cl.querySelector('.link-back');if(bk)bk.remove();cont.innerHTML='';cont.appendChild(cl);}
+  const cont = document.getElementById('admDesktopContent');
+  // En desktop mostramos el formulario original superpuesto al panel desktop
+  // usando un overlay dentro del panel de contenido
+  cont.innerHTML = `
+    <div style="max-width:640px;">
+      <div class="field"><label>Logo o foto del comercio</label>
+        <div class="logo-upload-row">
+          <div class="logo-upload" id="adLogoFotoBox"><div id="adLogoFotoPreview" class="logo-upload-empty"><div class="ic">📷</div></div></div>
+          <div class="logo-upload-info">
+            <div class="t">Logo principal del comercio</div>
+            <div class="btn-block-row" style="margin:4px 0;">
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('adLogoInputCam').click()">📷 Foto</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('adLogoInputGal').click()">🖼️ Galería</button>
+            </div>
+            <input type="file" id="adLogoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this,'adLogo')">
+            <input type="file" id="adLogoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this,'adLogo')">
+            <div class="foto-upload-estado" id="adLogoFotoEstado">Se muestra en la ficha del comercio.</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field"><label>Nombre del comercio</label><input type="text" id="adNombre" placeholder="Ej: Farmacia Central"></div>
+        <div class="field"><label>Ciudad</label>
+          <select id="adCiudad">
+            <option value="La Paz">La Paz</option><option value="Bovril">Bovril</option><option value="Alcaraz">Alcaraz</option>
+            <option value="Hernandarias">Hernandarias</option><option value="Colón">Colón</option><option value="Concordia">Concordia</option>
+            <option value="Paraná">Paraná</option><option value="Gualeguaychú">Gualeguaychú</option><option value="Otra">Otra</option>
+          </select>
+        </div>
+        <div class="field"><label>Rubro</label><select id="adRubro"></select></div>
+        <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
+        <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
+        <div class="field"><label>Teléfono alternativo</label><input type="tel" id="adTelefonoAlt" placeholder="Opcional"></div>
+        <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
+        <div class="field"><label>Instagram</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
+        <div class="field"><label>Facebook</label><input type="text" id="adFacebook" placeholder="facebook.com/comercio"></div>
+        <div class="field"><label>Sitio web</label><input type="text" id="adWeb" placeholder="www.comercio.com.ar"></div>
+      </div>
+      <div class="field"><label>Descripción breve</label><textarea id="adDescripcion" rows="2" placeholder="Qué ofrece el comercio…" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;font-size:14px;"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field"><label>Turno mañana</label><div style="display:flex;gap:8px;"><input type="time" id="adTurnoManDesde" style="flex:1"><input type="time" id="adTurnoManHasta" style="flex:1"></div></div>
+        <div class="field"><label>Turno tarde</label><div style="display:flex;gap:8px;"><input type="time" id="adTurnoTarDesde" style="flex:1"><input type="time" id="adTurnoTarHasta" style="flex:1"></div></div>
+        <div class="field"><label>Días que abre</label><input type="text" id="adDias" placeholder="Ej: Lun a Vie"></div>
+      </div>
+      <div style="margin-top:8px;">
+        <label style="font-size:12px;font-weight:700;color:#888;display:block;margin-bottom:6px;">Plan</label>
+        <div style="display:flex;gap:8px;" id="adPlanBtns">
+          <button type="button" class="adm-filter-btn active" onclick="adSelPlan('gracia',this)">Gracia</button>
+          <button type="button" class="adm-filter-btn" onclick="adSelPlan('fijo',this)">Fijo $20k</button>
+          <button type="button" class="adm-filter-btn" onclick="adSelPlan('comision',this)">Comisión</button>
+        </div>
+        <input type="hidden" id="adPlan" value="gracia">
+      </div>
+      <button class="btn btn-primary" style="margin-top:20px;width:100%;" onclick="adminGuardarNuevoComercio()">💾 Guardar comercio</button>
+    </div>`;
+  // Inicializar el select de rubros
+  if(typeof poblarSelectRubros === 'function') poblarSelectRubros('adRubro');
+}
+
+function adSelPlan(plan, btn){
+  document.getElementById('adPlan').value = plan;
+  document.querySelectorAll('#adPlanBtns .adm-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
 }
 
 async function adminCargarStats(){
