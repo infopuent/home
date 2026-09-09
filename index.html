@@ -294,34 +294,30 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 /* ---- Chips de categoría estilo Rappi ---- */
 .cat-chip{
-  display:flex;flex-direction:column;align-items:center;gap:7px;
-  background:none;border:none;cursor:pointer;padding:0;min-width:76px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:none;border:none;cursor:pointer;padding:0;min-width:119px;
   transition:transform .12s;
 }
 .cat-chip:active{transform:scale(0.93);}
 .cat-chip-icon{
-  width:76px;height:100px;border-radius:18px;
+  width:119px;height:157px;border-radius:22px;
   display:flex;align-items:center;justify-content:center;
-  font-size:30px;transition:box-shadow .15s,transform .15s;
-  box-shadow:0 3px 12px rgba(0,0,0,0.14);
+  font-size:38px;transition:box-shadow .15s,transform .15s;
+  box-shadow:0 3px 14px rgba(0,0,0,0.14);
   overflow:hidden;flex-shrink:0;
 }
 .cat-chip-img{
   background-size:cover;background-position:center;
   position:relative;
 }
-.cat-chip-img::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,0) 50%,rgba(0,0,0,0.28) 100%);
-}
 .cat-chip.active .cat-chip-icon{
   box-shadow:0 5px 20px rgba(0,0,0,0.28);
-  transform:scale(1.07);
+  transform:scale(1.06);
   outline:2.5px solid #FF6600;
   outline-offset:2px;
 }
 .cat-chip-label{
-  font-size:11.5px;font-weight:700;color:#222;
+  font-size:12px;font-weight:700;color:#222;
   white-space:nowrap;text-align:center;
 }
 .cat-chip.active .cat-chip-label{color:#FF6600;font-weight:800;}
@@ -804,8 +800,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
 
       <!-- Chips de categoría sticky -->
-      <div id="feedCategoriaChips" style="position:sticky;top:0;z-index:18;background:transparent;padding:12px 16px 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        <div style="display:flex;gap:10px;width:max-content;">
+      <div id="feedCategoriaChips" style="position:sticky;top:0;z-index:18;background:none;padding:12px 16px 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
+        <div style="display:flex;gap:6px;width:max-content;">
           <button class="cat-chip active" id="catChip-todos" onclick="setFeedCategoria('todos',this)">
             <div class="cat-chip-icon" style="background:#FF6600;">🏪</div>
             <div class="cat-chip-label">Todo</div>
