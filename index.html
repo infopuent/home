@@ -9413,7 +9413,7 @@ async function admAbrirComercioDetalle(id){
     const mob=document.getElementById('screen-admin-comercio-detalle');
     if(mob){
       cont.innerHTML='<button class="adm-btn" style="margin-bottom:14px;" onclick="adminDesktopTab(\'comercios\')">← Volver a Comercios</button>';
-      const cl=mob.cloneNode(true);cl.removeAttribute('id');cl.style.display='block';
+      const cl=mob.cloneNode(true);cl.removeAttribute('id');cl.classList.remove('hidden');cl.style.display='block';
       const bk=cl.querySelector('.link-back');if(bk)bk.remove();
       cont.appendChild(cl);
     }
@@ -9806,7 +9806,13 @@ async function adminVerComercio(docId){
   _adminComercioActual = c;
   const el = document.getElementById('adminComercioDetalleContenido');
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando datos…</p>';
-  showScreen('admin-comercio-detalle');
+  // showScreen() esconde TODAS las pantallas .screen, incluida la que
+  // contiene el panel entero de desktop (screen-admin-panel) — si la
+  // llamamos estando en desktop, se nos tapa el panel por detrás y los
+  // botones de la ficha (ej: "Agregar producto") quedan apuntando a una
+  // copia invisible. En desktop no hace falta mostrar la pantalla mobile,
+  // solo necesitamos su contenido (que se arma acá abajo) para clonarlo.
+  if(window.innerWidth<900) showScreen('admin-comercio-detalle');
 
   // Datos básicos
   const pubVence = c.publicidadVence ? new Date(c.publicidadVence).toLocaleDateString('es-AR') : '—';
