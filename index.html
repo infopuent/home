@@ -347,6 +347,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   background:linear-gradient(90deg, var(--cb-color,#333) 0%, var(--cb-color,#333) 42%, rgba(0,0,0,0) 100%);
   opacity:.92;
 }
+.cat-banner-soloimg::before{ content:none; } /* la foto ya trae ícono+nombre, sin overlay */
 .cat-banner-icon{
   position:relative; z-index:1; margin-left:16px; flex-shrink:0;
   width:42px; height:42px; border-radius:50%; background:#fff;
@@ -7062,11 +7063,14 @@ function renderCatChipsYSecciones(){
   if(!lista) return;
   lista.innerHTML = RUBROS_HOME.map(function(r, idx){
     const color = colorDeRubro(r, idx);
-    const fondoImg = r.imagen ? `background-image:linear-gradient(90deg, ${color}EE 0%, ${color}55 45%, ${color}00 100%), url('${r.imagen}');` : `background-color:${color};`;
+    // Si el rubro tiene foto, se muestra solo la foto (ya trae el ícono y el
+    // nombre dibujados adentro). Si todavía no tiene foto cargada, se muestra
+    // un color de fondo con el ícono/nombre como respaldo, para que no quede vacío.
+    const fondoImg = r.imagen ? `background-image:url('${r.imagen}');` : `background-color:${color};`;
+    const respaldo = r.imagen ? '' : `<div class="cat-banner-icon">${r.icono||'🛍️'}</div><div class="cat-banner-label">${r.nombre}</div>`;
     return `<div class="cat-banner-item" id="catItem-${r.id}">
-        <button class="cat-banner" style="${fondoImg}" onclick="setFeedCategoria('${r.id}',this)">
-          <div class="cat-banner-icon">${r.icono||'🛍️'}</div>
-          <div class="cat-banner-label">${r.nombre}</div>
+        <button class="cat-banner${r.imagen?' cat-banner-soloimg':''}" style="${fondoImg}" onclick="setFeedCategoria('${r.id}',this)">
+          ${respaldo}
           <div class="cat-banner-chevron">▾</div>
         </button>
         <div class="cat-banner-panel" id="secCat-${r.id}">
