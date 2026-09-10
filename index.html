@@ -7028,14 +7028,21 @@ let _feedCategoriaActual = 'todos'; // 'todos' = mostrar todas las secciones
 // Trae los rubros del home desde Firestore (una sola lectura de colección,
 // no una por rubro) y arma los chips + secciones dinámicamente.
 async function cargarRubrosHome(){
+  // Arranca de la lista de los 11 rubros de base (nombre/ícono, sin foto) y le
+  // va pisando encima lo que ya esté guardado en Firestore, rubro por rubro —
+  // así un rubro al que todavía no le subiste la foto sigue apareciendo (para
+  // poder cargarla desde el admin), en vez de desaparecer de la lista.
+  const porId = {};
+  RUBROS_HOME_DEFAULT.forEach(r=>{ porId[r.id] = {...r}; });
   if(firebaseListo && db){
     try{
       const snap = await db.collection('rubrosHome').get();
-      if(!snap.empty){
-        RUBROS_HOME = snap.docs.map(d=>({id:d.id, ...d.data()})).sort((a,b)=>(a.orden||99)-(b.orden||99));
-      }
+      snap.docs.forEach(d=>{
+        porId[d.id] = {...(porId[d.id]||{orden:99}), id:d.id, ...d.data()};
+      });
     }catch(e){ console.error('No se pudieron cargar los rubros del home:', e); }
   }
+  RUBROS_HOME = Object.values(porId).sort((a,b)=>(a.orden||99)-(b.orden||99));
   CAT_IMGS = {};
   RUBROS_HOME.forEach(r=>{ CAT_IMGS[r.id] = r.imagen || ''; });
   FEED_CATEGORIAS = RUBROS_HOME.map(r=>r.id);
