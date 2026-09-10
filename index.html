@@ -7044,50 +7044,51 @@ function v_ciudadOk(vendedorId){
 // ══════════════════════════════════════════════════════
 
 // Fallback: se usa solo si todavía no hay nada cargado en Firestore
-// (primer arranque, antes de correr la carga inicial).
+// (primer arranque, antes de correr la carga inicial). Refleja los 17 rubros
+// actuales de RUBROS_LIST — mismo orden y nombres, con un id/ícono propio
+// para el banner del home de cada uno.
 const RUBROS_HOME_DEFAULT = [
-  {id:'comida',        nombre:'Comida cerca tuyo', icono:'🍽️', orden:1,  imagen:''},
-  {id:'indumentaria',  nombre:'Indumentaria',       icono:'👗', orden:2,  imagen:''},
-  {id:'hogar',         nombre:'Hogar',              icono:'🏠', orden:3,  imagen:''},
-  {id:'salud',         nombre:'Salud',              icono:'💊', orden:4,  imagen:''},
-  {id:'mascotas',      nombre:'Mascotas',           icono:'🐾', orden:5,  imagen:''},
-  {id:'repuestos',     nombre:'Repuestos',          icono:'🔧', orden:6,  imagen:''},
-  {id:'agencia',       nombre:'Agencia',            icono:'🚗', orden:7,  imagen:''},
-  {id:'tecnologia',    nombre:'Tecnología',         icono:'💻', orden:8,  imagen:''},
-  {id:'servicios',     nombre:'Servicios',          icono:'🏢', orden:9,  imagen:''},
-  {id:'almacen',       nombre:'Almacén',            icono:'🛒', orden:10, imagen:''},
-  {id:'otros',         nombre:'Más',                icono:'➕', orden:11, imagen:''},
+  {id:'gastronomia',        nombre:'Gastronomía',              icono:'🍽️', orden:1,  imagen:''},
+  {id:'belleza',            nombre:'Belleza y Estética',       icono:'💅', orden:2,  imagen:''},
+  {id:'hogar',              nombre:'Hogar y Construcción',     icono:'🏠', orden:3,  imagen:''},
+  {id:'almacen',            nombre:'Almacén y Alimentos',      icono:'🛒', orden:4,  imagen:''},
+  {id:'indumentaria',       nombre:'Indumentaria y Calzado',   icono:'👗', orden:5,  imagen:''},
+  {id:'salud',              nombre:'Salud y Farmacia',         icono:'💊', orden:6,  imagen:''},
+  {id:'automotor',          nombre:'Automotor',                icono:'🚗', orden:7,  imagen:''},
+  {id:'agro-mascotas',      nombre:'Agro y Mascotas',          icono:'🐾', orden:8,  imagen:''},
+  {id:'tecnologia',         nombre:'Tecnología',               icono:'💻', orden:9,  imagen:''},
+  {id:'educacion',          nombre:'Educación y Librerías',    icono:'📚', orden:10, imagen:''},
+  {id:'deportes',           nombre:'Deportes y Recreación',    icono:'⚽', orden:11, imagen:''},
+  {id:'inmobiliarias',      nombre:'Inmobiliarias y Turismo',  icono:'🏡', orden:12, imagen:''},
+  {id:'servicios-prof',     nombre:'Servicios Profesionales',  icono:'💼', orden:13, imagen:''},
+  {id:'servicios-varios',   nombre:'Servicios Varios',         icono:'🧰', orden:14, imagen:''},
+  {id:'regalos',            nombre:'Regalos y Detalles',       icono:'🎁', orden:15, imagen:''},
+  {id:'imprenta',           nombre:'Imprenta y Gráfica',       icono:'🖨️', orden:16, imagen:''},
+  {id:'alquiler',           nombre:'Alquiler y Préstamo',      icono:'🔩', orden:17, imagen:''},
 ];
 
-// Mapea el rubro del comercio (texto libre elegido al registrarse) a un id de
-// categoría del home. Si el comercio elige un rubro que no está acá, cae en 'otros'
-// — si eso pasa seguido conviene revisar si corresponde crear un rubro nuevo del home.
+// Mapea el rubro del comercio (uno de los 17 nombres exactos de RUBROS_LIST,
+// elegido al registrarse) al id de su banner en el home. Si el comercio tiene
+// cargado un rubro viejo que ya no está en la lista, cae en 'otros' — si eso
+// pasa seguido conviene revisar el dato en el comercio.
 const RUBRO_A_CATEGORIA = {
-  'Panchería':'comida','Sandwichería':'comida','Hamburguesería':'comida',
-  'Empanadas':'comida','Lomitería':'comida','Sushi':'comida','Minutas':'comida',
-  'Pizzería / Delivery':'comida','Dietética':'comida','Bar / Cervecería':'comida',
-  'Heladería':'comida','Otro gastronómico':'comida',
-  // Indumentaria
-  'Ropa y calzado':'indumentaria','Deportes':'indumentaria',
-  // Hogar
-  'Muebles / Deco':'hogar','Ferretería':'hogar',
-  // Salud
-  'Farmacia':'salud','Salud / Médico':'salud','Óptica':'salud',
-  // Mascotas
-  'Veterinaria':'mascotas','Pet Shop':'mascotas',
-  // Repuestos
-  'Taller mecánico':'repuestos','Autopartes':'repuestos',
-  // Agencia
-  'Agencia de autos':'agencia','Agencia de motos':'agencia','Agencia':'agencia',
-  // Tecnología
-  'Electrónica':'tecnologia','Computación':'tecnologia','Celulares':'tecnologia',
-  // Almacén
-  'Supermercado / Almacén':'almacen','Kiosco':'almacen','Minimercado':'almacen',
-  'Fotocopias / Imprenta':'almacen',
-  // Servicios
-  'Peluquería / Estética':'servicios','Contador / Escribano':'servicios',
-  'Inmobiliaria':'servicios','Gimnasio':'servicios','Veterinaria':'mascotas',
-  'Librería / Bazar':'almacen',
+  'Gastronomía':'gastronomia',
+  'Belleza y Estética':'belleza',
+  'Hogar y Construcción':'hogar',
+  'Almacén y Alimentos':'almacen',
+  'Indumentaria y Calzado':'indumentaria',
+  'Salud y Farmacia':'salud',
+  'Automotor':'automotor',
+  'Agro y Mascotas':'agro-mascotas',
+  'Tecnología':'tecnologia',
+  'Educación y Librerías':'educacion',
+  'Deportes y Recreación':'deportes',
+  'Inmobiliarias y Turismo':'inmobiliarias',
+  'Servicios Profesionales':'servicios-prof',
+  'Servicios Varios':'servicios-varios',
+  'Regalos y Detalles':'regalos',
+  'Imprenta y Gráfica':'imprenta',
+  'Alquiler y Préstamo':'alquiler',
 };
 
 function categoriaDeRubro(rubro){
@@ -7258,11 +7259,45 @@ async function adminCargarRubrosHome(desktop){
   }).join('');
   if(desktop){
     const cont = document.getElementById('admDesktopContent');
-    if(cont) cont.innerHTML = `<div style="max-width:640px;">${html}<div style="font-size:12px;color:var(--muted);margin-top:10px;">Para agregar un rubro nuevo, usá la versión mobile del admin por ahora (Panel admin → 🖼️ Imágenes del home).</div></div>`;
+    if(cont) cont.innerHTML = `<div style="max-width:640px;">${html}
+      <div class="divider" style="margin:18px 0;"></div>
+      ${formAgregarRubroHTML('nrd')}
+    </div>`;
   } else {
     const cont = document.getElementById('rubrosHomeLista');
     if(cont) cont.innerHTML = html;
   }
+}
+
+// Arma el bloque "➕ Agregar rubro nuevo" — se usa tanto en mobile (dentro del
+// screen fijo, prefijo 'nr') como en desktop (inyectado acá, prefijo 'nrd'),
+// para que ambos puedan cargar un rubro sin pisarse los ids de los inputs.
+function formAgregarRubroHTML(prefix){
+  return `<div class="card">
+      <div style="font-weight:800;font-size:14.5px;margin-bottom:10px;">➕ Agregar rubro nuevo</div>
+      <label>Nombre del rubro</label>
+      <input type="text" id="${prefix}Nombre" placeholder="Ej: Librería">
+      <label style="margin-top:10px;">Ícono</label>
+      <select id="${prefix}Icono">
+        <option value="🛍️">🛍️ Genérico</option>
+        <option value="📚">📚 Librería</option>
+        <option value="💇">💇 Peluquería</option>
+        <option value="🏋️">🏋️ Gimnasio</option>
+        <option value="🚌">🚌 Transporte</option>
+        <option value="🏘️">🏘️ Inmobiliaria</option>
+        <option value="🌾">🌾 Agro</option>
+        <option value="🎁">🎁 Regalería</option>
+        <option value="📷">📷 Foto/Imprenta</option>
+        <option value="🍷">🍷 Vinoteca</option>
+      </select>
+      <label style="margin-top:10px;">Foto banner (se comprime sola)</label>
+      <div class="foto-upload" id="${prefix}FotoBox" onclick="document.getElementById('${prefix}FotoInput').click()">
+        <div class="foto-upload-empty"><div class="foto-upload-ic">📷</div><div class="foto-upload-txt">Tocá para elegir foto (banner apaisado)</div></div>
+      </div>
+      <input type="file" id="${prefix}FotoInput" accept="image/*" style="display:none;" onchange="onFotoSeleccionada(this,'${prefix}')">
+      <div class="foto-upload-estado" id="${prefix}FotoEstado"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="guardarRubroNuevo('${prefix}')">Guardar rubro</button>
+    </div>`;
 }
 
 // Sube o baja un rubro un lugar en el orden del home. Reasigna el campo
@@ -7294,10 +7329,14 @@ function onFotoRubroSeleccionada(input, rubroId){
 }
 
 // Alta de un rubro nuevo desde el admin (cuando surge un rubro que no existía).
-function guardarRubroNuevo(){
-  const nombre = (document.getElementById('nrNombre').value||'').trim();
-  const icono = document.getElementById('nrIcono').value;
-  const imagen = fotosCargadas['nr'] || '';
+// prefix: 'nr' desde mobile, 'nrd' desde desktop — cada uno con sus propios
+// inputs, para poder usar la misma función desde los dos lados.
+function guardarRubroNuevo(prefix){
+  prefix = prefix || 'nr';
+  const esDesktop = prefix !== 'nr';
+  const nombre = (document.getElementById(prefix+'Nombre').value||'').trim();
+  const icono = document.getElementById(prefix+'Icono').value;
+  const imagen = fotosCargadas[prefix] || '';
   if(!nombre){ toast('Poné un nombre para el rubro'); return; }
   if(!firebaseListo || !db){ toast('⚠️ Sin conexión a Firestore'); return; }
   const id = nombre.toLowerCase()
@@ -7308,11 +7347,8 @@ function guardarRubroNuevo(){
   db.collection('rubrosHome').doc(id).set({nombre, icono, imagen, orden})
     .then(()=>{
       toast('✅ Rubro agregado');
-      document.getElementById('nrNombre').value = '';
-      delete fotosCargadas['nr'];
-      document.getElementById('nrFotoBox').innerHTML = `<div class="foto-upload-empty"><div class="foto-upload-ic">📷</div><div class="foto-upload-txt">Tocá para elegir foto (banner apaisado)</div></div>`;
-      document.getElementById('nrFotoEstado').textContent = '';
-      adminCargarRubrosHome();
+      delete fotosCargadas[prefix];
+      adminCargarRubrosHome(esDesktop);
     })
     .catch(e=>{ console.error(e); toast('No se pudo guardar el rubro'); });
 }
