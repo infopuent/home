@@ -9404,21 +9404,19 @@ function admRowsComercios(lista){
   }).join('');
 }
 
-function admAbrirComercioDetalle(id){
+async function admAbrirComercioDetalle(id){
   const c=_adminComercios.find(x=>(x._docId||x.id)===id);
   if(!c) return;
-  adminVerComercio(id);
+  await adminVerComercio(id);
   if(window.innerWidth>=900){
-    setTimeout(()=>{
-      const cont=document.getElementById('admDesktopContent');
-      const mob=document.getElementById('screen-admin-comercio-detalle');
-      if(mob){
-        cont.innerHTML='<button class="adm-btn" style="margin-bottom:14px;" onclick="adminDesktopTab(\'comercios\')">← Volver a Comercios</button>';
-        const cl=mob.cloneNode(true);cl.removeAttribute('id');cl.style.display='block';
-        const bk=cl.querySelector('.link-back');if(bk)bk.remove();
-        cont.appendChild(cl);
-      }
-    },250);
+    const cont=document.getElementById('admDesktopContent');
+    const mob=document.getElementById('screen-admin-comercio-detalle');
+    if(mob){
+      cont.innerHTML='<button class="adm-btn" style="margin-bottom:14px;" onclick="adminDesktopTab(\'comercios\')">← Volver a Comercios</button>';
+      const cl=mob.cloneNode(true);cl.removeAttribute('id');cl.style.display='block';
+      const bk=cl.querySelector('.link-back');if(bk)bk.remove();
+      cont.appendChild(cl);
+    }
   }
 }
 
@@ -9992,7 +9990,7 @@ async function adminVerComercio(docId){
     </div>
     <div style="height:30px;"></div>`;
   // Cargar lista de productos de este comercio
-  adminRenderProductosComercio(c.id);
+  await adminRenderProductosComercio(c.id);
 }
 
 /* ---- Editar comercio desde admin ---- */
@@ -10285,7 +10283,8 @@ async function adminRenovarPublicidad(docId){
     const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
     if(c){ c.publicidadActiva=true; c.publicidadVence=nuevaFecha; }
     toast('✅ Publicidad renovada por 30 días');
-    adminVerComercio(docId);
+    if(window.innerWidth>=900) admAbrirComercioDetalle(docId);
+    else adminVerComercio(docId);
   }catch(e){ toast('Error: '+e.message); }
 }
 
