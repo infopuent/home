@@ -7149,9 +7149,14 @@ function renderSeccionesCategorias(){
 // <70KB con la misma función que las fotos de producto) o agregar uno nuevo.
 async function adminCargarRubrosHome(desktop){
   await cargarRubrosHome(); // refresca RUBROS_HOME por si se editó desde otra sesión
-  const html = RUBROS_HOME.map(function(r){
+  const html = RUBROS_HOME.map(function(r, idx){
     const prev = r.imagen ? `<img src="${r.imagen}" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:22px;">${r.icono||'🛍️'}</span>`;
-    return `<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+    const esPrimero = idx === 0, esUltimo = idx === RUBROS_HOME.length-1;
+    return `<div class="card" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
+          <button class="adm-btn" style="padding:2px 8px;${esPrimero?'opacity:.3;pointer-events:none;':''}" onclick="moverRubroHome('${r.id}',-1)">▲</button>
+          <button class="adm-btn" style="padding:2px 8px;${esUltimo?'opacity:.3;pointer-events:none;':''}" onclick="moverRubroHome('${r.id}',1)">▼</button>
+        </div>
         <div style="width:70px;height:70px;border-radius:12px;overflow:hidden;background:#F0F0EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${prev}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-weight:800;font-size:13.5px;">${r.icono||''} ${r.nombre}</div>
@@ -7170,6 +7175,22 @@ async function adminCargarRubrosHome(desktop){
     const cont = document.getElementById('rubrosHomeLista');
     if(cont) cont.innerHTML = html;
   }
+}
+
+// Sube o baja un rubro un lugar en el orden del home. Reasigna el campo
+// 'orden' de los dos rubros que intercambian lugar y los guarda en Firestore.
+function moverRubroHome(rubroId, direccion){
+  const idx = RUBROS_HOME.findIndex(r=>r.id===rubroId);
+  const idx2 = idx + direccion;
+  if(idx<0 || idx2<0 || idx2>=RUBROS_HOME.length) return;
+  if(!firebaseListo || !db){ toast('⚠️ Sin conexión a Firestore'); return; }
+  const a = RUBROS_HOME[idx], b = RUBROS_HOME[idx2];
+  const ordenA = a.orden||idx, ordenB = b.orden||idx2;
+  Promise.all([
+    db.collection('rubrosHome').doc(a.id).set({orden:ordenB}, {merge:true}),
+    db.collection('rubrosHome').doc(b.id).set({orden:ordenA}, {merge:true})
+  ]).then(()=>{ adminCargarRubrosHome(); })
+    .catch(e=>{ console.error(e); toast('No se pudo cambiar el orden'); });
 }
 
 // Se llama cuando eligen una foto nueva para reemplazar la de un rubro existente.
