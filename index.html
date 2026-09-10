@@ -1979,8 +1979,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="two-col">
         <div class="field"><label>Ciudad</label><input id="editCCiudad" placeholder="Ej: La Paz"></div>
         <div class="field"><label>Rubro</label>
-          <select id="editCRubro"></select>
+          <select id="editCRubro" onchange="onRubroChange('editCRubro','editCTipo','editCTipoField')"></select>
         </div>
+      </div>
+      <div class="field" id="editCTipoField" style="display:none;">
+        <label>Tipo de negocio</label>
+        <select id="editCTipo"></select>
       </div>
       <div class="two-col">
         <div class="field"><label>Teléfono del local</label><input id="editCTelefono" type="tel" placeholder="Fijo o WhatsApp"></div>
@@ -4006,7 +4010,12 @@ function goRegister(role){
         </div>
         <div class="two-col">
           <div class="field"><label>Ciudad</label><input id="rCiudad" placeholder="Ej: La Paz" value="La Paz"></div>
-          <div class="field"><label>Rubro <span style="color:#e05a5a;">*</span></label><select id="rRubro"></select></div>
+          <div class="field"><label>Rubro <span style="color:#e05a5a;">*</span></label><select id="rRubro" onchange="onRubroChange('rRubro','rTipo','rTipoField')"></select></div>
+        </div>
+        <div class="field" id="rTipoField" style="display:none;">
+          <label>Tipo de negocio <span style="color:#e05a5a;">*</span></label>
+          <select id="rTipo"></select>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:5px;">Elegí el tipo que mejor describe tu comercio — así los clientes te encuentran más fácil.</div>
         </div>
 
         <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">📞 Contacto</div>
@@ -4194,6 +4203,7 @@ function submitRegister(){
     const direccion = document.getElementById('rDireccion').value.trim();
     const ciudad = document.getElementById('rCiudad').value.trim() || 'La Paz';
     const rubro = document.getElementById('rRubro').value;
+    const tipo = document.getElementById('rTipo').value;
     const telefono = document.getElementById('rTelefono').value.trim();
     const whatsapp = document.getElementById('rWhatsapp').value.trim().replace(/\D/g,'');
     const email = document.getElementById('rEmail').value.trim();
@@ -4224,7 +4234,7 @@ function submitRegister(){
     if(nombreOcupado){ toast('Ya existe un comercio registrado con ese nombre, elegí otro'); return; }
     if(!tyc){ toast('Necesitás aceptar los Términos y Condiciones'); return; }
 
-    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, sinPedidos,
+    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, tipo, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, sinPedidos,
       plan: planTipo, planMonto, planComPct, planVence, planActivo: true,
       bannerActivo: false, bannerVence: null, pagos: [],
       adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng,
@@ -5894,7 +5904,14 @@ function abrirEditarComercio(){
   document.getElementById('editCNombre').value = c.nombre || '';
   document.getElementById('editCDireccion').value = c.direccion || '';
   document.getElementById('editCCiudad').value = c.ciudad || 'La Paz';
-  fillRubroSelect('editCRubro', c.rubro || 'Otros / varios');
+  fillRubroSelect('editCRubro', c.rubro || '');
+  // Cargar subcategoría guardada
+  if(c.rubro && TIPOS_POR_RUBRO[c.rubro]){
+    const tipoField = document.getElementById('editCTipoField');
+    const tipoSel   = document.getElementById('editCTipo');
+    tipoSel.innerHTML = buildTipoOptions(c.rubro, c.tipo || '');
+    if(tipoField) tipoField.style.display = '';
+  }
   document.getElementById('editCTelefono').value = c.telefono || '';
   document.getElementById('editCTelefonoAlt').value = c.telefonoAlt || '';
   document.getElementById('editCEmail').value = c.email || '';
@@ -5960,6 +5977,7 @@ function guardarEdicionComercio(){
   c.direccion = document.getElementById('editCDireccion').value.trim();
   c.ciudad = document.getElementById('editCCiudad').value.trim() || 'La Paz';
   c.rubro = document.getElementById('editCRubro').value;
+  c.tipo  = document.getElementById('editCTipo').value || '';
   c.telefono = document.getElementById('editCTelefono').value.trim();
   c.telefonoAlt = document.getElementById('editCTelefonoAlt').value.trim();
   c.email = document.getElementById('editCEmail').value.trim();
@@ -6669,111 +6687,167 @@ function setCiudad(c){
 const FLUENT_BASE = 'https://cdn.jsdelivr.net/gh/shuding/fluentui-emoji-unicode/assets/';
 
 /* ─── FUENTE ÚNICA DE RUBROS ─────────────────────────────────────────────────
-   Cada entrada: [nombre, archivo-emoji-fluent]
-   Para agregar un rubro nuevo: solo tocás acá. Los selects y los iconos
-   se generan automáticamente desde esta lista.
+   17 rubros públicos con sus subcategorías (TIPOS_POR_RUBRO).
+   En el registro: primero se elige el rubro, luego aparece el select de tipo.
+   Los filtros del feed usan el rubro público (nivel 1).
    ─────────────────────────────────────────────────────────────────────────── */
 const RUBROS_LIST = [
-  // ── Gastronomía: Rápido y al paso ──
-  ['Pizzería',                               '1f355_3d.png'],
-  ['Hamburguesería',                         '1f355_3d.png'],
-  ['Panchería',                              '1f355_3d.png'],
-  ['Lomitería',                              '1f355_3d.png'],
-  ['Empanadas',                              '1f355_3d.png'],
-  ['Rotisería',                              '1f355_3d.png'],
-  // ── Gastronomía: Para sentarse a comer ──
-  ['Restaurante',                            '1f969_3d.png'],
-  ['Parrilla',                               '1f969_3d.png'],
-  ['Cantina',                                '1f969_3d.png'],
-  ['Cocina casera',                          '1f969_3d.png'],
-  ['Bar y restaurante',                      '1f969_3d.png'],
-  // ── Gastronomía: Café y algo dulce ──
-  ['Cafetería',                              '2615_3d.png'],
-  ['Panadería',                              '2615_3d.png'],
-  ['Pastelería',                             '2615_3d.png'],
-  ['Heladería',                              '2615_3d.png'],
-  ['Casa de té',                             '2615_3d.png'],
-  ['Crepería',                               '2615_3d.png'],
-  // ── Gastronomía: Sabores del mundo ──
-  ['Sushi',                                  '1f363_3d.png'],
-  ['Comida mexicana',                        '1f363_3d.png'],
-  ['Comida árabe',                           '1f363_3d.png'],
-  ['Comida china',                           '1f363_3d.png'],
-  ['Comida peruana',                         '1f363_3d.png'],
-  ['Comida italiana',                        '1f363_3d.png'],
-  // ── Gastronomía: Saludable ──
-  ['Viandas',                                '1f957_3d.png'],
-  ['Ensaladas',                              '1f957_3d.png'],
-  ['Vegetariana',                            '1f957_3d.png'],
-  ['Vegana',                                 '1f957_3d.png'],
-  ['Sin TACC',                               '1f957_3d.png'],
-  // Almacén / alimentos
-  ['Kiosco',                                 '1f36c_3d.png'],
-  ['Almacén',                                '1f35e_3d.png'],
-  ['Verdulería y frutería',                  '1f345_3d.png'],
-  ['Carnicería',                             '1f356_3d.png'],
-  ['Pescadería',                             '1f41f_3d.png'],
-  ['Fiambrería',                             '1f9c0_3d.png'],
-  ['Distribuidora de bebidas',               '1f37a_3d.png'],
-  ['Dietéticas y naturistas',                '1f33f_3d.png'],
-  // Moda y cuidado personal
-  ['Indumentaria y calzado',                 '1f455_3d.png'],
-  ['Joyería y accesorios',                   '1f48d_3d.png'],
-  ['Ópticas',                                '1f453_3d.png'],
-  ['Peluquerías y barberías',                '2702_3d.png'],
-  ['Belleza y cuidado personal',             '1f485_3d.png'],
-  // Hogar y construcción
-  ['Hogar y decoración',                     '1f3e0_3d.png'],
-  ['Muebles y colchones',                    '1f6cb_3d.png'],
-  ['Ferretería y construcción',              '1f527_3d.png'],
-  ['Electricidad y plomería',                '1f4a1_3d.png'],
-  ['Jardín y viveros',                       '1f33b_3d.png'],
-  // Vehículos
-  ['Repuestos y automotor',                  '1f697_3d.png'],
-  ['Agencias de autos',                      '1f699_3d.png'],
-  ['Agencias de motos',                      '1f3cd_3d.png'],
-  ['Bicicleterías',                          '1f6b2_3d.png'],
-  // Agro y animales
-  ['Agro e insumos rurales',                 '1f69c_3d.png'],
-  ['Veterinaria y ganadería',                '1f404_3d.png'],
-  ['Mascotas',                               '1f43e_3d.png'],
-  // Salud
-  ['Salud y farmacia',                       '1f48a_3d.png'],
-  ['Ópticas',                                '1f453_3d.png'],
-  // Tecnología y medios
-  ['Tecnología',                             '1f4f1_3d.png'],
-  ['Librería y papelería',                   '1f4da_3d.png'],
-  ['Juguetería y cotillón',                  '1f9f8_3d.png'],
-  // Deportes y ocio
-  ['Deportes y aire libre',                  '26bd_3d.png'],
-  ['Gimnasios y fitness',                    '1f3cb_3d.png'],
-  // Servicios
-  ['Inmobiliarias',                          '1f3e1_3d.png'],
-  ['Alojamiento y turismo',                  '1f3e8_3d.png'],
-  ['Transporte y viajes',                    '1f68c_3d.png'],
-  ['Seguros y financiero',                   '1f4b3_3d.png'],
-  ['Servicios profesionales',                '1f4bc_3d.png'],
-  ['Costura y arreglos',                     '1f9f5_3d.png'],
-  ['Servicios del hogar',                    '1f9f9_3d.png'],
-  ['Servicios varios',                       '1f9f0_3d.png'],
-  ['Otros / varios',                         '2728_3d.png'],
+  ['Gastronomía',               '1f355_3d.png'],
+  ['Belleza y Estética',        '2702_3d.png'],
+  ['Hogar y Construcción',      '1f3e0_3d.png'],
+  ['Almacén y Alimentos',       '1f6d2_3d.png'],
+  ['Indumentaria y Calzado',    '1f455_3d.png'],
+  ['Salud y Farmacia',          '1f48a_3d.png'],
+  ['Automotor',                 '1f697_3d.png'],
+  ['Agro y Mascotas',           '1f69c_3d.png'],
+  ['Tecnología',                '1f4f1_3d.png'],
+  ['Educación y Librerías',     '1f4da_3d.png'],
+  ['Deportes y Recreación',     '26bd_3d.png'],
+  ['Inmobiliarias y Turismo',   '1f3e1_3d.png'],
+  ['Servicios Profesionales',   '1f4bc_3d.png'],
+  ['Servicios Varios',          '1f9f0_3d.png'],
+  ['Regalos y Detalles',        '1f381_3d.png'],
+  ['Imprenta y Gráfica',        '1f5a8_3d.png'],
+  ['Alquiler y Préstamo',       '1f527_3d.png'],
 ];
 
-// Eliminar duplicados (Ópticas aparece dos veces por organización)
-const _rubrosVistos = new Set();
-const RUBROS_UNICOS = RUBROS_LIST.filter(([nombre]) => {
-  if(_rubrosVistos.has(nombre)) return false;
-  _rubrosVistos.add(nombre); return true;
-});
+/* ─── SUBCATEGORÍAS POR RUBRO ────────────────────────────────────────────────
+   Se usa en el registro del comercio: al elegir el rubro aparece este select.
+   El valor guardado en Firestore es el tipo (subcategoría).
+   ─────────────────────────────────────────────────────────────────────────── */
+const TIPOS_POR_RUBRO = {
+  'Gastronomía': [
+    // Rápido al paso
+    'Pizzería','Hamburguesería','Lomitería','Panchería','Empanadas','Rotisería','Sandwichería',
+    // Para sentarse
+    'Restaurante','Parrilla / Asador','Cantina','Bar y restaurante','Cocina casera',
+    // Café y dulce
+    'Cafetería','Panadería','Pastelería / Repostería','Heladería','Casa de té','Crepería',
+    // Sabores del mundo
+    'Sushi','Comida mexicana','Comida árabe','Comida china','Comida italiana','Comida peruana',
+    // Saludable
+    'Viandas saludables','Ensaladas','Vegetariana / Vegana','Sin TACC',
+    // Bebidas
+    'Bar / Pub','Cervecería','Jugos y licuados',
+  ],
+  'Belleza y Estética': [
+    // Cabello
+    'Peluquería femenina','Barbería','Peluquería unisex','Peluquería infantil',
+    // Uñas
+    'Manicura y pedicura','Uñas acrílicas / gel / esculpidas','Nail art',
+    // Estética facial y corporal
+    'Centro de estética','Depilación','Micropigmentación / tatuaje de cejas',
+    'Extensiones y lifting de pestañas','Tratamientos faciales / limpieza de cutis',
+    // Relajación
+    'Masajes','Spa',
+    // Otros
+    'Maquillaje profesional / artístico','Tatuajes y piercings',
+  ],
+  'Hogar y Construcción': [
+    // Materiales
+    'Corralón / materiales','Ferretería','Pinturería','Sanitarios y revestimientos','Vidriería / aberturas',
+    // Instalaciones
+    'Electricista','Plomero','Gasista matriculado','Pintor','Albañil / constructor',
+    'Cerrajería','Herrería / soldadura','Carpintería',
+    // Decoración
+    'Mueblería','Colchonería','Decoración y textil del hogar','Cortinas y persianas','Iluminación',
+    // Limpieza
+    'Servicio de limpieza','Fumigación','Jardinería y paisajismo',
+    // Electrodomésticos
+    'Venta de electrodomésticos','Reparación de electrodomésticos',
+  ],
+  'Almacén y Alimentos': [
+    'Almacén','Minimercado / autoservicio','Kiosco','Dietética y naturista',
+    'Carnicería','Pescadería','Fiambrería','Verdulería y frutería',
+    'Panadería artesanal','Lácteos y quesos','Conservas y productos regionales',
+    'Distribuidora de bebidas','Vinoteca','Cervecería artesanal (venta)',
+  ],
+  'Indumentaria y Calzado': [
+    'Ropa femenina','Ropa masculina','Ropa unisex','Ropa infantil',
+    'Ropa deportiva','Lencería y pijamas','Uniformes y ropa de trabajo',
+    'Zapatería','Calzado deportivo','Calzado infantil',
+    'Joyería y bijouterie','Carteras y marroquinería','Sombreros y gorros','Anteojos de sol',
+  ],
+  'Salud y Farmacia': [
+    'Farmacia','Perfumería y cosmética','Óptica',
+    'Médico clínico','Pediatra','Odontología','Psicología','Nutrición',
+    'Kinesiología / fisioterapia','Fonoaudiología','Enfermería a domicilio',
+    'Centro de salud integral','Terapias alternativas / holísticas',
+  ],
+  'Automotor': [
+    'Agencia de autos','Agencia de motos','Bicicletería',
+    'Repuestos y autopartes','Accesorios para autos','Lubricentro / cambio de aceite',
+    'Taller mecánico','Gomería','Chapería y pintura','Lavadero de autos',
+    'Instalación de alarmas y audio',
+  ],
+  'Agro y Mascotas': [
+    'Agro e insumos rurales','Semillas y plantines','Maquinaria agrícola','Veterinaria rural / ganadería',
+    'Veterinaria de pequeños animales','Pet shop','Peluquería canina','Guardería / hotel para mascotas',
+  ],
+  'Tecnología': [
+    'Celulares y smartphones','Computadoras y notebooks','Electrodomésticos pequeños',
+    'Consolas y videojuegos','Accesorios tecnológicos',
+    'Reparación de celulares','Reparación de computadoras',
+    'Instalación de cámaras de seguridad','Redes y WiFi','Servicio técnico de electrodomésticos',
+  ],
+  'Educación y Librerías': [
+    'Librería y papelería','Juguetería','Cotillón y fiestas',
+    'Clases particulares','Inglés y otros idiomas','Música e instrumentos',
+    'Danza y movimiento','Apoyo escolar','Jardín / guardería / estimulación temprana',
+    'Cursos y talleres',
+  ],
+  'Deportes y Recreación': [
+    'Artículos deportivos','Indumentaria deportiva','Pesca y camping','Náutica',
+    'Gimnasio','Pilates / yoga','Artes marciales','Natación','Fútbol / canchas',
+    'Alquiler de juegos / inflables','Salón de eventos','Bowling / billar',
+  ],
+  'Inmobiliarias y Turismo': [
+    'Inmobiliaria','Administración de propiedades',
+    'Agencia de viajes','Alojamiento / hospedaje','Cabañas y alquiler temporario',
+    'Remis y traslados','Flete y mudanzas','Mensajería / delivery',
+  ],
+  'Servicios Profesionales': [
+    'Estudio contable / impuestos','Estudio jurídico / escribanía','Seguros','Préstamos / financiera',
+    'Diseño gráfico','Fotografía y video','Marketing digital','Imprenta y gráfica',
+    'Arquitectura e ingeniería','Agrimensura','Traductor / intérprete','Recursos humanos',
+  ],
+  'Servicios Varios': [
+    'Costura y arreglos','Confección a medida','Bordado y tejido','Tapicería',
+    'DJ y música','Animación infantil','Catering','Fotografía de eventos','Decoración de eventos',
+    'Lavandería / tintorería','Reparación de calzado','Serigrafía y estampado','Gestión y trámites',
+  ],
+  'Regalos y Detalles': [
+    'Regalería','Souvenirs','Canastas y presentes',
+    'Flores y florería','Globos y decoración',
+    'Personalizados y grabados','Chocolatería y golosinas artesanales',
+  ],
+  'Imprenta y Gráfica': [
+    'Imprenta digital','Serigrafía','Estampado de remeras',
+    'Ploteo y vinilo','Diseño e impresión de folletería',
+    'Tarjetas personales y comerciales','Banners y carteles',
+  ],
+  'Alquiler y Préstamo': [
+    'Alquiler de herramientas',
+    'Alquiler de equipos para eventos (sonido, luces, sillas, mesas)',
+    'Alquiler de disfraces','Alquiler de vajilla y mantelería',
+  ],
+};
 
 // Objeto de iconos (compatible con el código existente)
-const ICONOS_RUBRO = Object.fromEntries(RUBROS_UNICOS);
+const ICONOS_RUBRO = Object.fromEntries(RUBROS_LIST);
 
-// Genera los <option> de un select desde la lista central
+// Genera los <option> del select de RUBROS (nivel 1)
 function buildRubroOptions(valorSeleccionado){
-  return RUBROS_UNICOS.map(([nombre]) =>
+  return RUBROS_LIST.map(([nombre]) =>
     `<option${nombre === valorSeleccionado ? ' selected' : ''}>${nombre}</option>`
   ).join('');
+}
+
+// Genera los <option> del select de TIPOS/subcategorías (nivel 2)
+function buildTipoOptions(rubro, valorSeleccionado){
+  const tipos = TIPOS_POR_RUBRO[rubro] || [];
+  return `<option value="">— Elegí el tipo de negocio —</option>` +
+    tipos.map(t => `<option${t === valorSeleccionado ? ' selected' : ''}>${t}</option>`).join('');
 }
 
 // Rellena un <select> existente con los rubros
@@ -6781,6 +6855,20 @@ function fillRubroSelect(selectId, valorActual){
   const sel = document.getElementById(selectId);
   if(!sel) return;
   sel.innerHTML = buildRubroOptions(valorActual || '');
+}
+
+// Rellena el select de tipos según el rubro elegido y muestra/oculta el campo
+function onRubroChange(rubroSelectId, tipoSelectId, tipoFieldId){
+  const rubro = document.getElementById(rubroSelectId)?.value || '';
+  const tipoField = document.getElementById(tipoFieldId);
+  const tipoSel   = document.getElementById(tipoSelectId);
+  if(!tipoField || !tipoSel) return;
+  if(rubro && TIPOS_POR_RUBRO[rubro]){
+    tipoSel.innerHTML = buildTipoOptions(rubro, '');
+    tipoField.style.display = '';
+  } else {
+    tipoField.style.display = 'none';
+  }
 }
 function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
 function renderExploraCiudad(){
@@ -9042,6 +9130,11 @@ function verLocalDesdeMap(comercioId){
 /* ================= INIT ================= */
 // Poblar todos los selects de rubro desde la fuente única
 ['cnpRubro','editCRubro','editAdRubro','adRubro','rRubro'].forEach(id => fillRubroSelect(id));
+// Asegurar que los campos de tipo/subcategoría arrancan ocultos
+['rTipoField','editCTipoField'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.style.display = 'none';
+});
 
 renderCiudadDropdown();
 renderExploraCiudad();
