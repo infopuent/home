@@ -328,6 +328,49 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 }
 .cat-chip.active .cat-chip-label{color:#333;font-weight:800;}
 
+/* ---- Banners de rubro apilados (home), tipo acordeón ---- */
+.cat-banner-item{
+  overflow:hidden; background:#fff;
+}
+.cat-banner-item:first-child{ border-top-left-radius:16px; border-top-right-radius:16px; }
+.cat-banner-item:last-child{ border-bottom-left-radius:16px; border-bottom-right-radius:16px; }
+.cat-banner-item:last-child .cat-banner-panel:not(.open){ border-bottom:none; }
+.cat-banner{
+  position:relative; display:flex; align-items:center; height:108px;
+  cursor:pointer; background-size:cover; background-position:center;
+  border:none; border-bottom:1.5px solid rgba(255,255,255,.35); width:100%; padding:0;
+  -webkit-appearance:none; appearance:none;
+}
+.cat-banner-item:last-child .cat-banner{ border-bottom:none; }
+.cat-banner::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg, var(--cb-color,#333) 0%, var(--cb-color,#333) 42%, rgba(0,0,0,0) 100%);
+  opacity:.92;
+}
+.cat-banner-icon{
+  position:relative; z-index:1; margin-left:16px; flex-shrink:0;
+  width:42px; height:42px; border-radius:50%; background:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:19px;
+}
+.cat-banner-label{
+  position:relative; z-index:1; margin-left:12px; color:#fff;
+  font-weight:800; font-size:16.5px; line-height:1.15; text-align:left;
+}
+.cat-banner-chevron{
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  z-index:1; color:#fff; font-size:16px; transition:transform .22s;
+}
+.cat-banner-item.open .cat-banner-chevron{ transform:translateY(-50%) rotate(180deg); }
+.cat-banner-panel{
+  max-height:0; overflow:hidden; transition:max-height .35s ease;
+  background:#FAFAF8;
+}
+.cat-banner-item.open .cat-banner-panel{ max-height:2400px; }
+.cat-banner-panel-inner{ padding:12px; }
+.cat-banner-empty{
+  padding:18px 4px; text-align:center; font-size:12.5px; color:var(--muted);
+}
+
 /* ---- Secciones de categoría en el home ---- */
 .feed-cat-seccion{ display:block; }
 .feed-cat-seccion.hidden{ display:none; }
@@ -780,11 +823,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     ================================================================ -->
     <div id="feedHomeView">
 
-      <!-- Chips de categoría (generados dinámicamente desde RUBROS_HOME, ver cargarRubrosHome()) -->
-      <div id="feedCategoriaChips" style="padding:14px 16px 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        <div id="catChipsRow" style="display:flex;gap:8px;width:max-content;"></div>
-      </div>
-
       <!-- Comercios adheridos (logos) -->
       <div style="padding:14px 16px 0;">
         <div class="section-title-row">
@@ -793,6 +831,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div id="adheridosGrid" class="adheridos-grid"></div>
       </div>
+
+      <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
+           dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
+      <div id="catBannerList" style="padding:14px 16px 4px;display:flex;flex-direction:column;gap:0;"></div>
 
       <!-- Te va a encantar — sección paga (productos destacados) -->
       <div style="padding:0 16px;" id="secEncantar">
@@ -809,9 +851,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           🌪️ Tornado de Ofertas
         </button>
       </div>
-
-      <!-- Secciones por categoría — generadas dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
-      <div id="feedSeccionesCategorias" style="padding-bottom:8px;"></div>
 
       <!-- CTA ingreso (solo si no está logueado) -->
       <div id="feedCtaIngreso" style="padding:18px 16px 8px;">
@@ -7003,45 +7042,52 @@ async function cargarRubrosHome(){
   renderSeccionesCategorias();
 }
 
-// Arma los chips de categoría y las secciones del feed en base a RUBROS_HOME.
-function renderCatChipsYSecciones(){
-  const chipsRow = document.getElementById('catChipsRow');
-  if(chipsRow){
-    chipsRow.innerHTML = RUBROS_HOME.map(function(r){
-      const fondo = r.imagen ? `<img class="cat-chip-icon cat-chip-img" src="${r.imagen}" alt="${r.nombre}" style="object-fit:cover;width:119px;height:157px;border-radius:22px;display:block;">`
-        : `<div class="cat-chip-icon" style="background:#999;font-size:22px;color:white;width:119px;height:157px;border-radius:22px;display:flex;align-items:center;justify-content:center;">${r.icono||'🛍️'}</div>`;
-      return `<button class="cat-chip" id="catChip-${r.id}" onclick="setFeedCategoria('${r.id}',this)">${fondo}<div class="cat-chip-label">${r.icono||''} ${r.nombre}</div></button>`;
-    }).join('');
-  }
-  const secciones = document.getElementById('feedSeccionesCategorias');
-  if(secciones){
-    secciones.innerHTML = RUBROS_HOME.map(function(r){
-      return `<div class="feed-cat-seccion" id="secCat-${r.id}">
-          <div style="padding:14px 16px 6px;">
-            <div class="section-title-row">
-              <div class="section-title">${r.icono||''} ${r.nombre}</div>
-              <span class="ver-todo" onclick="setFeedCategoria('${r.id}',document.getElementById('catChip-${r.id}'))">Ver más →</span>
-            </div>
-          </div>
-          <div class="feed-cat-grid" id="gridCat-${r.id}"></div>
-        </div>`;
-    }).join('');
-  }
+// Paleta de respaldo para el degradé del banner cuando el rubro no tiene un
+// color propio guardado en Firestore (campo opcional 'color').
+const COLOR_RUBRO_DEFAULT = {
+  comida:'#FF6600', indumentaria:'#7B4B94', hogar:'#5C8A3C', salud:'#0E8C7F',
+  mascotas:'#D9A400', repuestos:'#0F3F73', agencia:'#1B4C86', tecnologia:'#2B3A67',
+  servicios:'#FF6600', almacen:'#3C7A3C', otros:'#6D5B47'
+};
+const PALETA_ROTATIVA = ['#FF6600','#7B4B94','#5C8A3C','#0E8C7F','#D9A400','#0F3F73','#1B4C86','#2B3A67','#3C7A3C','#6D5B47'];
+function colorDeRubro(r, idx){
+  return r.color || COLOR_RUBRO_DEFAULT[r.id] || PALETA_ROTATIVA[idx % PALETA_ROTATIVA.length];
 }
 
+// Arma la lista de banners de rubro (uno abajo del otro) en base a RUBROS_HOME.
+// Cada banner es un acordeón: al tocarlo se despliega hacia abajo mostrando
+// las ofertas de ese rubro, sin salir del home.
+function renderCatChipsYSecciones(){
+  const lista = document.getElementById('catBannerList');
+  if(!lista) return;
+  lista.innerHTML = RUBROS_HOME.map(function(r, idx){
+    const color = colorDeRubro(r, idx);
+    const fondoImg = r.imagen ? `background-image:linear-gradient(90deg, ${color}EE 0%, ${color}55 45%, ${color}00 100%), url('${r.imagen}');` : `background-color:${color};`;
+    return `<div class="cat-banner-item" id="catItem-${r.id}">
+        <button class="cat-banner" style="${fondoImg}" onclick="setFeedCategoria('${r.id}',this)">
+          <div class="cat-banner-icon">${r.icono||'🛍️'}</div>
+          <div class="cat-banner-label">${r.nombre}</div>
+          <div class="cat-banner-chevron">▾</div>
+        </button>
+        <div class="cat-banner-panel" id="secCat-${r.id}">
+          <div class="feed-cat-grid" id="gridCat-${r.id}" style="padding:12px;"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// Abre/cierra el acordeón de un rubro (solo uno abierto a la vez, para que
+// el home no quede eterno). Tocar el que ya está abierto lo cierra.
 function setFeedCategoria(cat, btn){
-  _feedCategoriaActual = cat;
-  document.querySelectorAll('.cat-chip').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
+  const yaAbierto = _feedCategoriaActual === cat;
+  _feedCategoriaActual = yaAbierto ? 'todos' : cat;
+  document.querySelectorAll('.cat-banner-item').forEach(function(item){
+    item.classList.toggle('open', item.id === 'catItem-'+_feedCategoriaActual);
+  });
   renderSeccionesCategorias();
-  // Scroll a la sección correspondiente (despliega hacia abajo, tipo acordeón)
-  if(cat === 'todos'){
-    window.scrollTo({top:0, behavior:'smooth'});
-  } else {
-    const sec = document.getElementById('secCat-'+cat);
-    if(sec && !sec.classList.contains('hidden')){
-      setTimeout(()=>{ sec.scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
-    }
+  if(!yaAbierto){
+    const item = document.getElementById('catItem-'+cat);
+    if(item) setTimeout(()=>{ item.scrollIntoView({behavior:'smooth', block:'start'}); }, 120);
   }
 }
 
@@ -7057,26 +7103,20 @@ function renderSeccionesCategorias(){
   });
 
   FEED_CATEGORIAS.forEach(function(c){
-    var sec = document.getElementById('secCat-'+c);
     var grid = document.getElementById('gridCat-'+c);
-    if(!sec || !grid) return;
-    // Filtrar: si hay categoría seleccionada, solo mostrar esa sección
-    if(cat !== 'todos' && cat !== c){ sec.classList.add('hidden'); return; }
-    // Productos de esta categoría
+    if(!grid) return;
+    // Solo se renderiza el contenido del rubro que está desplegado —
+    // los demás quedan vacíos (el CSS los mantiene colapsados igual).
+    if(cat !== c){ grid.innerHTML=''; return; }
     var prods = todosProd.filter(function(p){
       var pCat = p.categoria || categoriaDeRubro(p._comercioRubro||p.rubro||'');
       return pCat === c;
     });
-    if(!prods.length){ sec.classList.add('hidden'); return; }
-    sec.classList.remove('hidden');
-    // Si es la categoría elegida (desplegada), muestra TODOS los productos;
-    // si está en la vista general del home, muestra una muestra de 4 (2x2).
-    var muestra = prods;
-    if(cat === 'todos'){
-      prods.sort(()=>Math.random()-.5);
-      muestra = prods.slice(0,4);
+    if(!prods.length){
+      grid.innerHTML = '<div class="cat-banner-empty" style="grid-column:1/-1;">Todavía no hay ofertas cargadas en este rubro.</div>';
+      return;
     }
-    grid.innerHTML = muestra.map(function(p){
+    grid.innerHTML = prods.map(function(p){
       var foto = p.img
         ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">'
         : '<span style="font-size:28px;">🛍️</span>';
@@ -7091,6 +7131,7 @@ function renderSeccionesCategorias(){
     }).join('');
   });
 }
+
 
 // ── Admin: "🖼️ Imágenes del home" ──────────────────────────
 // Lista los rubros con su imagen actual y permite cambiarla (comprime a
