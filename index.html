@@ -11,13 +11,13 @@
 <!-- Vista previa al compartir el link (WhatsApp, Instagram, Facebook, etc.) -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="PuenT — Todo tu pueblo, en un solo lugar">
-<meta property="og:description" content="Descubrí las ofertas del día, los comercios y los vendedores de tu ciudad, todo en un solo lugar.">
+<meta property="og:description" content="Descubrí las ofertas del día, los comercios y los ConectorT de tu ciudad, todo en un solo lugar.">
 <meta property="og:image" content="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="PuenT — Todo tu pueblo, en un solo lugar">
-<meta name="twitter:description" content="Descubrí las ofertas del día, los comercios y los vendedores de tu ciudad, todo en un solo lugar.">
+<meta name="twitter:description" content="Descubrí las ofertas del día, los comercios y los ConectorT de tu ciudad, todo en un solo lugar.">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -872,7 +872,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div id="feedCtaIngreso" style="padding:18px 16px 8px;">
         <div class="divider"></div>
         <button class="btn btn-primary" onclick="showScreen('home')" style="background:linear-gradient(135deg,#FF6600,#FF9500); font-size:15.5px; padding:16px; border-radius:16px; box-shadow:0 4px 16px rgba(255,102,0,0.38);">🚀 Ingresar / Registrarme</button>
-        <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Vendedores, comercios y clientes entran desde acá.</p>
+        <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">ConectorT, comercios y clientes entran desde acá.</p>
       </div>
     </div>
 
@@ -980,7 +980,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
       <div id="feedVendedoresView" style="margin-top:24px;">
         <div class="section-title" style="margin-bottom:10px;">🔗 Catálogos de ConectoresT</div>
-        <p style="font-size:13px; color:var(--muted); margin-bottom:14px; line-height:1.5;">Productos armados por vendedores independientes de La Paz.</p>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:14px; line-height:1.5;">Productos armados por ConectorT independientes de La Paz.</p>
         <div class="chiprow" id="feedChipsVend"></div>
         <div id="feedGridVend" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"></div>
       </div>
@@ -1843,10 +1843,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
     <div class="divider"></div>
-    <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">Vendedores vendiendo tus productos</div>
+    <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">ConectorT vendiendo tus productos</div>
     <div id="cVendedoresList"></div>
     <div class="divider"></div>
-    <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">📬 Pedidos de vendedores</div>
+    <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">📬 Pedidos de ConectorT</div>
     <div id="cPedidosProducto" style="margin-bottom:8px;"></div>
     <div class="divider"></div>
     <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">Historial de ventas confirmadas</div>
@@ -1902,7 +1902,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen(productoEditandoId?'c-productos':'c-panel')">← Volver</div>
     <div class="kicker">Publicidad ElPuente</div>
     <h1 class="page-title" id="cnpTitulo">Cargar producto</h1>
-    <p class="page-sub" id="cnpSub">Vos decidís el precio y la comisión. Si ponés comisión, cualquier vendedor sumado a tu comercio va a poder elegir venderlo. Si la dejás en 0, queda como venta directa desde el feed, sin vendedores.</p>
+    <p class="page-sub" id="cnpSub">Vos decidís el precio y la comisión. Si ponés comisión, cualquier ConectorT va a poder elegir venderlo. Si la dejás en 0, queda como venta directa desde el feed, sin ConectorT.</p>
     <div class="card">
       <div class="field">
         <label>Foto del producto</label>
@@ -1923,7 +1923,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="field"><label>Nombre del producto</label><input id="cnpNombre" placeholder="Ej: Combo desayuno x2"></div>
       <div class="two-col">
         <div class="field"><label>Precio</label><input id="cnpPrecio" type="number" placeholder="Ej: 8500"></div>
-        <div class="field"><label>Comisión para vendedores (%) *</label><input id="cnpComision" type="number" min="0" max="100" placeholder="Obligatorio — 0 si no querés vendedores"></div>
+        <div class="field"><label>Comisión para ConectorT (%) *</label><input id="cnpComision" type="number" min="0" max="100" placeholder="Obligatorio — 0 si no querés ConectorT"></div>
       </div>
       <div class="field">
         <label>Stock disponible</label>
@@ -2162,7 +2162,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-cl-buscador">
     <button class="cerrar-sesion-btn" onclick="confirmarCierreSesion()">👤 Cerrar sesión</button>
     <div class="kicker">Tu ciudad</div>
-    <h1 class="page-title">Buscá vendedores o productos</h1>
+    <h1 class="page-title">Buscá ConectorT o productos</h1>
 
     <div class="section-title-row" style="margin-bottom:10px;">
       <div class="section-title">🎟️ Mis códigos</div>
@@ -2296,7 +2296,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div class="card" style="margin:0;text-align:center;padding:12px 8px;">
           <div style="font-size:22px;font-weight:800;color:var(--navy);" id="statVendedores">—</div>
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">Vendedores</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">ConectorT</div>
         </div>
         <div class="card" style="margin:0;text-align:center;padding:12px 8px;">
           <div style="font-size:22px;font-weight:800;color:var(--navy);" id="statVentas">—</div>
@@ -2305,7 +2305,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="btn-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <button class="btn-tile btn-tile-sage" onclick="showScreen('admin-comercios');adminCargarComercios()"><i class="ti ti-building-store ic"></i>Comercios</button>
-        <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-vendedores');adminCargarVendedores()"><i class="ti ti-users ic"></i>Vendedores</button>
+        <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-vendedores');adminCargarVendedores()"><i class="ti ti-users ic"></i>ConectorT</button>
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
         <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-usuarios');adminCargarUsuarios()"><i class="ti ti-user-circle ic"></i>Usuarios</button>
         <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
@@ -2330,7 +2330,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">General</div>
           <button class="adm-nav active" id="admNav-dashboard" onclick="adminDesktopTab('dashboard')"><i class="ti ti-layout-dashboard" style="font-size:16px;"></i>Dashboard</button>
           <button class="adm-nav" id="admNav-comercios" onclick="adminDesktopTab('comercios')"><i class="ti ti-building-store" style="font-size:16px;"></i>Comercios</button>
-          <button class="adm-nav" id="admNav-vendedores" onclick="adminDesktopTab('vendedores')"><i class="ti ti-users" style="font-size:16px;"></i>Vendedores</button>
+          <button class="adm-nav" id="admNav-vendedores" onclick="adminDesktopTab('vendedores')"><i class="ti ti-users" style="font-size:16px;"></i>ConectorT</button>
           <button class="adm-nav" id="admNav-usuarios" onclick="adminDesktopTab('usuarios')"><i class="ti ti-user-circle" style="font-size:16px;"></i>Usuarios</button>
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Operaciones</div>
           <button class="adm-nav" id="admNav-ventas" onclick="adminDesktopTab('ventas')"><i class="ti ti-receipt" style="font-size:16px;"></i>Ventas</button>
@@ -2532,7 +2532,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ SCREEN: ADMIN VENDEDORES ============ -->
   <div class="screen hidden" id="screen-admin-vendedores">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
-    <div class="page-title">Vendedores</div>
+    <div class="page-title">ConectorT</div>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
       <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('todos')" style="flex:1;">Todos</button>
       <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('pendientes')" style="flex:1;">Pendientes</button>
@@ -2657,7 +2657,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <label>Destinatarios</label>
       <select id="adminMsgDest" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;">
         <option value="todos">Todos los usuarios</option>
-        <option value="vendedores">Solo vendedores</option>
+        <option value="vendedores">Solo ConectorT</option>
         <option value="comercios">Solo comercios</option>
         <option value="clientes">Solo clientes</option>
       </select>
@@ -2838,7 +2838,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="font-size:22px; font-weight:800; color:var(--navy); margin:6px 0;" id="clPPrecio">$0</div>
       <span class="pill pill-navy" id="clPZona">Zona</span>
     </div>
-    <p class="page-sub">El comercio donde retirarlo se confirma una vez que coordines la compra con tu vendedor.</p>
+    <p class="page-sub">El comercio donde retirarlo se confirma una vez que coordines la compra con tu ConectorT.</p>
     <button class="btn btn-primary" onclick="pedirProducto()">Quiero este producto</button>
   </div>
 
@@ -4055,9 +4055,9 @@ function goRegister(role){
   const fields = document.getElementById('regFields');
 
   if(role==='vendedor'){
-    kick.textContent='Registro de vendedor';
+    kick.textContent='Registro de ConectorT';
     title.textContent='Contanos sobre vos';
-    sub.textContent='Sin inscripción fiscal por ahora — pero sí necesitamos tus datos completos para que comercios y clientes confíen en vos.';
+    sub.textContent='Sin inscripción fiscal por ahora — pero sí necesitamos tus datos completos para que comercios y clientes confíen en vos como ConectorT.';
     fields.innerHTML = `
       <div class="card">
         <div class="field"><label>Foto de perfil</label>
@@ -4087,7 +4087,7 @@ function goRegister(role){
   } else if(role==='comercio'){
     kick.textContent='Registro de comercio';
     title.textContent='Datos del comercio';
-    sub.textContent='Vos facturás como siempre. Completá los datos del local para que tus clientes y vendedores confíen en vos.';
+    sub.textContent='Vos facturás como siempre. Completá los datos del local para que tus clientes y ConectorT confíen en vos.';
     fields.innerHTML = `
       <div class="card">
 
@@ -4267,7 +4267,7 @@ function goRegister(role){
   } else {
     kick.textContent='Registro de cliente';
     title.textContent='Un dato rápido';
-    sub.textContent='Con esto ya podés explorar catálogos completos de vendedores de tu ciudad.';
+    sub.textContent='Con esto ya podés explorar catálogos completos de ConectorT de tu ciudad.';
     fields.innerHTML = `
       <div class="card">
         <div class="field"><label>Nombre</label><input id="rNombre" placeholder="Tu nombre"></div>
@@ -4499,13 +4499,13 @@ function renderPublicidadBox(){
     box.innerHTML = `
       <div class="pub-card activa">
         <div class="pub-title">⭐ Venta directa activa</div>
-        <div class="pub-txt">Tenés tu propio catálogo activo, sumado al de tus vendedores — no lo reemplaza. Y tu local se destaca en Locales. Vence el ${vence}.</div>
+        <div class="pub-txt">Tenés tu propio catálogo activo, sumado al de tus ConectorT — no lo reemplaza. Y tu local se destaca en Locales. Vence el ${vence}.</div>
       </div>`;
   } else {
     box.innerHTML = `
       <div class="pub-card inactiva">
         <div class="pub-title">📣 ¿Querés vender vos mismo?</div>
-        <div class="pub-txt">Sumar tu local a ElPuente y que los vendedores independientes vendan tus productos es <b>gratis</b>, como hasta ahora, y no cambia. Este plan es para sumar, además, tu propio catálogo directo a la plataforma — un canal extra, no un reemplazo de tus vendedores.</div>
+        <div class="pub-txt">Sumar tu local a ElPuente y que los ConectorT independientes vendan tus productos es <b>gratis</b>, como hasta ahora, y no cambia. Este plan es para sumar, además, tu propio catálogo directo a la plataforma — un canal extra, no un reemplazo de tus ConectorT.</div>
         <div class="pub-price">$${PRECIO_PUBLICIDAD_MENSUAL.toLocaleString('es-AR')} / mes</div>
         <button class="btn btn-green btn-sm" onclick="activarPublicidad()">Activar venta directa (demo)</button>
       </div>`;
@@ -4728,7 +4728,7 @@ let productoEditandoId = null;
 function abrirNuevoProducto(){
   productoEditandoId = null;
   document.getElementById('cnpTitulo').textContent = 'Cargar producto';
-  document.getElementById('cnpSub').textContent = 'Vos decidís el precio y la comisión. Si ponés comisión, cualquier vendedor sumado a tu comercio va a poder elegir venderlo. Si la dejás en 0, queda como venta directa desde el feed, sin vendedores.';
+  document.getElementById('cnpSub').textContent = 'Vos decidís el precio y la comisión. Si ponés comisión, cualquier ConectorT va a poder elegir venderlo. Si la dejás en 0, queda como venta directa desde el feed, sin ConectorT.';
   document.getElementById('cnpBtnGuardar').textContent = 'Publicar producto';
   document.getElementById('cnpBtnEliminar').classList.add('hidden');
   document.getElementById('cnpNombre').value=''; document.getElementById('cnpPrecio').value='';
@@ -5252,7 +5252,7 @@ function crearProductoComercio(){
   if(!foto){ toast('Sacá o elegí una foto del producto para poder publicarlo'); return; }
   if(!nombre){ toast('Completá el nombre del producto'); return; }
   if(!precio){ toast('El precio es obligatorio'); return; }
-  if(comisionInput===''){ toast('Ingresá el % de comisión para vendedores (poné 0 si no querés vendedores)'); return; }
+  if(comisionInput===''){ toast('Ingresá el % de comisión para ConectorT (poné 0 si no querés ConectorT)'); return; }
   const comision = parseFloat(comisionInput);
   if(isNaN(comision) || comision<0 || comision>100){ toast('La comisión tiene que ser un número entre 0 y 100'); return; }
   if(TIPOS_OFERTA[tipoOferta].descuento && !descuento){ toast('Ingresá el porcentaje de descuento'); return; }
@@ -6361,7 +6361,7 @@ function renderComercioPanel(){
 
   const list = document.getElementById('cVendedoresList');
   if(idsConSeleccion.length===0){
-    list.innerHTML = `<div class="empty"><div class="ic">🤝</div><div class="t">Todavía ningún vendedor eligió tus productos</div><div class="s">En cuanto pongas comisión en un producto, va a estar disponible para que lo elijan.</div></div>`;
+    list.innerHTML = `<div class="empty"><div class="ic">🤝</div><div class="t">Todavía ningún ConectorT eligió tus productos</div><div class="s">En cuanto pongas comisión en un producto, va a estar disponible para que lo elijan.</div></div>`;
   } else {
     list.innerHTML = idsConSeleccion.map(id=>{
       const v = state.vendedores.find(x=>x.id===id);
@@ -6744,7 +6744,7 @@ async function renderClienteBuscador(){
 
   const list = document.getElementById('clVendedoresList');
   if(vendedoresConProductos.length===0){
-    list.innerHTML = `<div class="empty"><div class="ic">🔎</div><div class="t">No hay vendedores en este rubro todavía</div></div>`;
+    list.innerHTML = `<div class="empty"><div class="ic">🔎</div><div class="t">No hay ConectorT en este rubro todavía</div></div>`;
     return;
   }
   list.innerHTML = vendedoresConProductos.map(id=>{
@@ -6792,7 +6792,7 @@ function pedirProducto(){
     clienteNombre: state.currentUser.nombre, estado:'pendiente'
   };
   state.solicitudes.push(solicitud);
-  toast('¡Listo! Le avisamos a tu vendedor. Te va a escribir por WhatsApp con el código.');
+  toast('¡Listo! Le avisamos a tu ConectorT. Te va a escribir por WhatsApp con el código.');
   showScreen('cl-buscador');
 }
 
@@ -9606,7 +9606,7 @@ async function admRenderDashboard(){
     cont.innerHTML=`
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
         <div class="adm-stat"><div class="val">${cs.size}</div><div class="lbl">Comercios registrados</div></div>
-        <div class="adm-stat"><div class="val">${vs.size}</div><div class="lbl">Vendedores ConectorT</div></div>
+        <div class="adm-stat"><div class="val">${vs.size}</div><div class="lbl">ConectorT</div></div>
         <div class="adm-stat"><div class="val">${cls.size}</div><div class="lbl">Clientes registrados</div></div>
         <div class="adm-stat"><div class="val">${vts.size}</div><div class="lbl">Ventas totales</div></div>
       </div>
@@ -10852,7 +10852,7 @@ function adminAbrirOpDetalle(docId){
   if(tieneConector){
     html += `<div class="card">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">🤝 Conector T</div>
-      <div style="font-size:14px;font-weight:700;color:var(--navy);">${v.vendedorNombre || 'Conector'}</div>
+      <div style="font-size:14px;font-weight:700;color:var(--navy);">${v.vendedorNombre || 'ConectorT'}</div>
       <div style="font-size:12px;color:var(--muted);margin-top:2px;font-family:monospace;">${v.vendedorId || ''}</div>
       ${v.comisionMonto ? `<div style="margin-top:10px;background:#EAF0E6;border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:#2F7A55;font-weight:700;">Comisión acordada</span>
