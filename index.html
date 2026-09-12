@@ -8364,6 +8364,16 @@ function abrirOferta(prodId){
 }
 
 // --- Solapas del detalle de producto: Detalle del producto / Info del comercio / Calificaciones ---
+function toggleMenuDiaDetalle(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const visible = el.style.display !== 'none';
+  el.style.display = visible ? 'none' : 'block';
+  // Actualizar texto del botón
+  const btn = el.previousElementSibling?.querySelector('button');
+  if(btn) btn.textContent = visible ? 'Ver menú' : 'Cerrar';
+}
+
 function setOfertaTab(tab){
   const tabs = {detalle:'ofTabBtnDetalle', comercio:'ofTabBtnComercio', calif:'ofTabBtnCalif'};
   const paneles = {detalle:'ofTabDetallePanel', comercio:'ofTabComercioPanel', calif:'ofTabCalifPanel'};
@@ -8417,15 +8427,33 @@ function renderOfertaTabs(p, c){
         ${(c.telefono && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
         ${esFree ? '' : `<button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>`}
         ${(()=>{
+          const tieneMenuDia = c.wizardData?.menuDelDia !== 'No' || c.menuDelDia;
           const hoy = hoyISO();
           const menu = c.menuDelDia;
-          if(!menu || menu.fecha !== hoy || (!menu.texto && !menu.foto)) return '';
-          return `
-            <div style="margin-top:14px; border-top:1px solid var(--line); padding-top:12px;">
-              <div style="font-weight:800; font-size:13px; color:var(--navy); margin-bottom:8px;">📋 Menú del día</div>
-              ${menu.foto ? `<img src="${menu.foto}" alt="Menú del día" style="width:100%; border-radius:10px; margin-bottom:8px; display:block;">` : ''}
+          const publicadoHoy = menu && menu.fecha === hoy && (menu.texto || menu.foto);
+
+          let html = '';
+
+          // Badge informativo — tiene menú del día como característica del local
+          if(tieneMenuDia){
+            html += `<div style="margin-top:12px; padding:10px 12px; background:#E8F4FF; border-radius:10px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+              <div>
+                <div style="font-weight:700; font-size:13px; color:#1a5fa8;">📋 Ofrece menú del día</div>
+                <div style="font-size:11.5px; color:#4a7fc1; margin-top:2px;">${publicadoHoy ? 'Hoy tiene el menú publicado' : 'Consultá el menú en el local'}</div>
+              </div>
+              ${publicadoHoy ? `<button class="btn btn-ghost btn-sm" style="white-space:nowrap;" onclick="toggleMenuDiaDetalle('menuDiaDetalle_${c.id}')">Ver menú</button>` : ''}
+            </div>`;
+          }
+
+          // Detalle colapsable del menú de hoy
+          if(publicadoHoy){
+            html += `<div id="menuDiaDetalle_${c.id}" style="display:none; margin-top:8px; padding:12px; background:#f7fbff; border-radius:10px; border:1px solid #cce0f5;">
+              ${menu.foto ? `<img src="${menu.foto}" alt="Menú del día" style="width:100%; border-radius:8px; margin-bottom:10px; display:block;">` : ''}
               ${menu.texto ? `<div style="font-size:13px; color:var(--ink); white-space:pre-line; line-height:1.6;">${menu.texto}</div>` : ''}
             </div>`;
+          }
+
+          return html;
         })()}
       ` : `<p style="color:var(--muted);">Registrate para ver la dirección, el horario y cómo llegar a este comercio.</p>`}
     `;
