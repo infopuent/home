@@ -1517,16 +1517,23 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-editar-vendedor">
     <div class="link-back" onclick="showScreen('v-catalogo')">← Volver al catálogo</div>
     <div class="kicker">Mi cuenta</div>
-    <h1 class="page-title">Editar mi información</h1>
-    <p class="page-sub">Estos datos aparecen en tu catálogo y son los que ven tus clientes.</p>
+    <h1 class="page-title" id="editVTitulo">Editar mi información</h1>
+    <p class="page-sub" id="editVSub">Estos datos aparecen en tu catálogo y son los que ven tus clientes.</p>
     <div class="card">
       <div class="field"><label>Nombre completo</label><input id="editVNombre" placeholder="Tu nombre"></div>
-      <div class="field"><label>Teléfono / WhatsApp</label><input id="editVTelefono" type="tel" placeholder="Tu WhatsApp"></div>
-      <div class="field"><label>Alias de transferencia (CBU/CVU)</label><input id="editVAlias" placeholder="Ej: juan.perez.mp o tu CBU" autocomplete="off"><div style="font-size:11px;color:var(--muted);margin-top:3px;">El comercio usa este dato para transferirte la comisión.</div></div>
+      <div class="field"><label>Nombre de usuario (único)</label><input id="editVUsuario" placeholder="Ej: juan_pesca" autocapitalize="none"></div>
+      <div class="field"><label>DNI <span style="color:#e05a5a;">*</span></label><input id="editVDni" type="text" inputmode="numeric" placeholder="Sin puntos"></div>
+      <div class="two-col">
+        <div class="field"><label>Fecha de nacimiento</label><input id="editVNacimiento" type="date"></div>
+        <div class="field"><label>Teléfono / WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editVTelefono" type="tel" placeholder="Tu WhatsApp"></div>
+      </div>
+      <div class="field"><label>Email</label><input id="editVEmail" type="email" placeholder="tucorreo@ejemplo.com"></div>
+      <div class="field"><label>Dirección</label><input id="editVDireccion" placeholder="Calle y número"></div>
       <div class="two-col">
         <div class="field"><label>Ciudad</label><input id="editVCiudad" placeholder="Ej: La Paz"></div>
         <div class="field"><label>Zona</label><input id="editVZona" placeholder="Ej: Zona Centro"></div>
       </div>
+      <div class="field"><label>Alias de transferencia (CBU/CVU)</label><input id="editVAlias" placeholder="Ej: juan.perez.mp o tu CBU" autocomplete="off"><div style="font-size:11px;color:var(--muted);margin-top:3px;">El comercio usa este dato para transferirte la comisión.</div></div>
     </div>
     <button class="btn btn-primary" onclick="guardarEdicionVendedor()">Guardar cambios</button>
   </div>
@@ -3832,8 +3839,15 @@ function entrarConDatosGuardados(rol, data){
     cargarCatalogoVendedorGuardado(data.id); // llama renderVendedorCatalogo() al terminar
     renderVendedorStats();
     cargarReservasDeConector(data.id || data.uid);
-    if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
     showScreen('v-catalogo'); updateBottomNav('v-catalogo'); updateTopbarUser();
+    // Si entró con Google y todavía no cargó DNI/teléfono reales, se los pedimos
+    // ahora mismo para terminar de completar el registro de ConectorT.
+    if((data.dni==='—' || !data.dni) || (data.telefono==='—' || !data.telefono)){
+      toast('📋 Completá tus datos, incluido el DNI, para terminar tu registro');
+      abrirEditarVendedor();
+      return;
+    }
+    if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
   } else if(rol==='comercio'){
     if(!publicidadActiva(data)){
       data.publicidadActiva = true;
@@ -6110,8 +6124,18 @@ function guardarEdicionComercio(){
 
 function abrirEditarVendedor(){
   const v = state.currentUser;
+  const esPrimeraCarga = (v.telefono==='—' || !v.telefono) || (v.dni==='—' || !v.dni);
+  document.getElementById('editVTitulo').textContent = esPrimeraCarga ? '¡Ya casi! Completá tus datos' : 'Editar mi información';
+  document.getElementById('editVSub').textContent = esPrimeraCarga
+    ? 'Necesitamos tus datos completos, incluido tu DNI, para que comercios y clientes confíen en vos.'
+    : 'Estos datos aparecen en tu catálogo y son los que ven tus clientes.';
   document.getElementById('editVNombre').value = v.nombre || '';
+  document.getElementById('editVUsuario').value = (v.usuario && v.usuario!=='—') ? v.usuario : '';
+  document.getElementById('editVDni').value = (v.dni && v.dni!=='—') ? v.dni : '';
+  document.getElementById('editVNacimiento').value = v.nacimiento || '';
   document.getElementById('editVTelefono').value = (v.telefono && v.telefono!=='—') ? v.telefono : '';
+  document.getElementById('editVEmail').value = (v.email && v.email!=='—') ? v.email : '';
+  document.getElementById('editVDireccion').value = (v.direccion && v.direccion!=='—') ? v.direccion : '';
   document.getElementById('editVAlias').value = v.alias || '';
   document.getElementById('editVCiudad').value = v.ciudad || 'La Paz';
   document.getElementById('editVZona').value = v.zona || '';
@@ -6120,8 +6144,24 @@ function abrirEditarVendedor(){
 
 function guardarEdicionVendedor(){
   const v = state.currentUser;
+  const dni = document.getElementById('editVDni').value.trim();
+  const telefono = document.getElementById('editVTelefono').value.trim();
+  const usuario = document.getElementById('editVUsuario').value.trim();
+
+  if(!dni){ toast('El DNI es obligatorio para completar tu registro como ConectorT'); return; }
+  if(!telefono){ toast('Ingresá tu WhatsApp — lo necesitan los clientes y comercios para contactarte'); return; }
+  if(usuario){
+    const usuarioOcupado = state.vendedores.some(x => x.uid!==v.uid && (x.usuario||'').toLowerCase() === usuario.toLowerCase());
+    if(usuarioOcupado){ toast('Ese nombre de usuario ya está en uso, elegí otro'); return; }
+  }
+
   v.nombre = document.getElementById('editVNombre').value.trim() || v.nombre;
-  v.telefono = document.getElementById('editVTelefono').value.trim() || '—';
+  v.usuario = usuario || v.usuario;
+  v.dni = dni;
+  v.nacimiento = document.getElementById('editVNacimiento').value || v.nacimiento;
+  v.telefono = telefono;
+  v.email = document.getElementById('editVEmail').value.trim() || v.email;
+  v.direccion = document.getElementById('editVDireccion').value.trim();
   v.alias = document.getElementById('editVAlias').value.trim();
   v.ciudad = document.getElementById('editVCiudad').value.trim() || 'La Paz';
   v.zona = document.getElementById('editVZona').value.trim();
