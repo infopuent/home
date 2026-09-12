@@ -2308,7 +2308,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-vendedores');adminCargarVendedores()"><i class="ti ti-users ic"></i>ConectorT</button>
         <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-clientes');adminCargarClientes()"><i class="ti ti-user ic"></i>Clientes</button>
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
-        <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-usuarios');adminCargarUsuarios()"><i class="ti ti-user-circle ic"></i>Usuarios</button>
         <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
@@ -2333,7 +2332,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <button class="adm-nav" id="admNav-comercios" onclick="adminDesktopTab('comercios')"><i class="ti ti-building-store" style="font-size:16px;"></i>Comercios</button>
           <button class="adm-nav" id="admNav-vendedores" onclick="adminDesktopTab('vendedores')"><i class="ti ti-users" style="font-size:16px;"></i>ConectorT</button>
           <button class="adm-nav" id="admNav-clientes" onclick="adminDesktopTab('clientes')"><i class="ti ti-user" style="font-size:16px;"></i>Clientes</button>
-          <button class="adm-nav" id="admNav-usuarios" onclick="adminDesktopTab('usuarios')"><i class="ti ti-user-circle" style="font-size:16px;"></i>Usuarios</button>
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Operaciones</div>
           <button class="adm-nav" id="admNav-ventas" onclick="adminDesktopTab('ventas')"><i class="ti ti-receipt" style="font-size:16px;"></i>Ventas</button>
           <button class="adm-nav" id="admNav-planes" onclick="adminDesktopTab('planes')"><i class="ti ti-credit-card" style="font-size:16px;"></i>Planes y pagos</button>
@@ -2620,18 +2618,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen('admin-ventas')">← Operaciones</div>
     <div class="kicker" id="adminOpKicker">Detalle de operación</div>
     <div id="adminOpContenido"></div>
-  </div>
-
-  <!-- ============ SCREEN: ADMIN USUARIOS ============ -->
-  <div class="screen hidden" id="screen-admin-usuarios">
-    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
-    <div class="page-title">Usuarios</div>
-    <input class="feed-search-inline" type="text" placeholder="🔍 Buscar por nombre o email…" oninput="adminBuscarUsuario(this.value)" style="width:100%;margin-bottom:10px;">
-    <div style="display:flex;gap:7px;margin-bottom:14px;">
-      <button class="chip active" id="chipUsFiltroTodos" onclick="adminFiltrarUsuariosPorTelefono('todos')">Todos</button>
-      <button class="chip" id="chipUsFiltroSinTel" onclick="adminFiltrarUsuariosPorTelefono('sin-telefono')">📵 Sin WhatsApp</button>
-    </div>
-    <div id="adminUsuariosList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN REPARTIDORES ============ -->
@@ -9606,7 +9592,7 @@ function adminDesktopTab(tab){
   document.querySelectorAll('.adm-nav').forEach(b=>b.classList.remove('active'));
   const navBtn = document.getElementById('admNav-'+tab);
   if(navBtn) navBtn.classList.add('active');
-  const titles = {dashboard:'Dashboard',comercios:'Comercios',vendedores:'ConectorT',clientes:'Clientes',usuarios:'Usuarios',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home'};
+  const titles = {dashboard:'Dashboard',comercios:'Comercios',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home'};
   document.getElementById('admDesktopTitle').textContent = titles[tab]||tab;
   document.getElementById('admDesktopBadge').innerHTML = '';
   const cont = document.getElementById('admDesktopContent');
@@ -9615,7 +9601,6 @@ function adminDesktopTab(tab){
   else if(tab==='comercios')    admRenderComerciosDesktop();
   else if(tab==='vendedores')   admRenderVendedoresDesktop();
   else if(tab==='clientes')     admRenderClientesDesktop();
-  else if(tab==='usuarios')     admRenderUsuariosDesktop();
   else if(tab==='ventas')       admRenderVentasDesktop();
   else if(tab==='planes')       admRenderPlanesDesktop();
   else if(tab==='repartidores') admRenderRepartidoresDesktop();
@@ -9859,16 +9844,6 @@ async function admAbrirClienteDetalle(id){
       cont.appendChild(cl);
     }
   }
-}
-
-async function admRenderUsuariosDesktop(){
-  const cont=document.getElementById('admDesktopContent');
-  try{
-    const snap=await db.collection('clientes').get();
-    const lista=snap.docs.map(d=>({...d.data(),_docId:d.id}));
-    cont.innerHTML=`<div class="adm-section"><table class="adm-table"><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Ciudad</th></tr></thead>
-    <tbody>${lista.map(u=>`<tr><td style="font-weight:700;">${u.nombre||'&mdash;'}</td><td style="color:#888;">${u.email||'&mdash;'}</td><td><span class="adm-badge gray">${u.rol||'cliente'}</span></td><td style="color:#888;">${u.ciudad||'&mdash;'}</td></tr>`).join('')}</tbody></table></div>`;
-  }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
 }
 
 async function admRenderVentasDesktop(){
@@ -11697,90 +11672,6 @@ async function adminCancelarViaje(pedidoId, repDocId){
 // FIN ADMIN REPARTIDORES
 // =============================================
 // =============================================
-
-// ---- USUARIOS ----
-let _adminUsuarios = [];
-async function adminCargarUsuarios(){
-  const el = document.getElementById('adminUsuariosList');
-  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
-  try{
-    const [cs, vs, cls] = await Promise.all([
-      db.collection('comercios').get(),
-      db.collection('vendedores').get(),
-      db.collection('clientes').get()
-    ]);
-    _adminUsuarios = [
-      ...cs.docs.map(d=>({...d.data(), _rol:'comercio', _docId:d.id})),
-      ...vs.docs.map(d=>({...d.data(), _rol:'vendedor', _docId:d.id})),
-      ...cls.docs.map(d=>({...d.data(), _rol:'cliente', _docId:d.id}))
-    ];
-    adminAplicarFiltrosUsuarios();
-  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
-}
-
-function adminBuscarUsuario(q){
-  _adminUsuariosBusqueda = q;
-  adminAplicarFiltrosUsuarios();
-}
-
-let _adminUsuariosBusqueda = '';
-let _adminUsuariosFiltroTel = 'todos';
-
-function adminFiltrarUsuariosPorTelefono(modo){
-  _adminUsuariosFiltroTel = modo;
-  document.getElementById('chipUsFiltroTodos').classList.toggle('active', modo==='todos');
-  document.getElementById('chipUsFiltroSinTel').classList.toggle('active', modo==='sin-telefono');
-  adminAplicarFiltrosUsuarios();
-}
-
-function _tieneWhatsappValido(u){
-  return (u.telefono||'').replace(/\D/g,'').length >= 8;
-}
-
-function adminAplicarFiltrosUsuarios(){
-  let lista = _adminUsuarios;
-  if(_adminUsuariosBusqueda){
-    const q = _adminUsuariosBusqueda.toLowerCase();
-    lista = lista.filter(u=>(u.nombre+' '+u.email).toLowerCase().includes(q));
-  }
-  if(_adminUsuariosFiltroTel === 'sin-telefono'){
-    lista = lista.filter(u => !_tieneWhatsappValido(u));
-  }
-  adminRenderUsuarios(lista);
-}
-
-function adminRenderUsuarios(lista){
-  const el = document.getElementById('adminUsuariosList');
-  if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
-  const ic = {comercio:'🏬', vendedor:'🛍️', cliente:'🙋'};
-  const bg = {comercio:'var(--green)', vendedor:'var(--blue)', cliente:'var(--muted)'};
-  el.innerHTML = lista.map(u=>{
-    const tieneTel = _tieneWhatsappValido(u);
-    const badgeTel = tieneTel
-      ? `<span title="WhatsApp cargado" style="font-size:14px;">📱</span>`
-      : `<span title="Sin WhatsApp cargado" style="font-size:11px;font-weight:800;color:#c23b3b;background:#fdeaea;padding:3px 7px;border-radius:100px;white-space:nowrap;">📵 Sin WhatsApp</span>`;
-    return `
-    <div class="list-row">
-      <div class="av" style="background:${bg[u._rol]||'#ccc'};">${ic[u._rol]||'👤'}</div>
-      <div class="main">
-        <div class="t" style="display:flex;align-items:center;gap:7px;">${u.nombre||'Sin nombre'} ${badgeTel}</div>
-        <div class="s">${u.email||'—'} · ${u._rol}</div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="adminEliminarUsuario('${u._docId}','${u._rol}','${(u.nombre||'').replace(/'/g,'')}')" style="padding:6px 10px;">🗑️</button>
-    </div>`;
-  }).join('');
-}
-
-async function adminEliminarUsuario(docId, rol, nombre){
-  const col = {comercio:'comercios', vendedor:'vendedores', cliente:'clientes'}[rol];
-  if(!col) return;
-  if(!confirm(`¿Eliminar a "${nombre}" (${rol})?`)) return;
-  try{
-    await db.collection(col).doc(docId).delete();
-    toast('Usuario eliminado.');
-    adminCargarUsuarios();
-  }catch(e){ toast('Error al eliminar.'); }
-}
 
 // ---- MENSAJES ----
 async function adminEnviarMensaje(){
