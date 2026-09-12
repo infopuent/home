@@ -8413,6 +8413,17 @@ function renderOfertaTabs(p, c){
         ${(c.horario && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Horario:</span> ${c.horario}</div>` : ''}
         ${(c.telefono && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
         ${esFree ? '' : `<button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>`}
+        ${(()=>{
+          const hoy = hoyISO();
+          const menu = c.menuDelDia;
+          if(!menu || menu.fecha !== hoy || (!menu.texto && !menu.foto)) return '';
+          return `
+            <div style="margin-top:14px; border-top:1px solid var(--line); padding-top:12px;">
+              <div style="font-weight:800; font-size:13px; color:var(--navy); margin-bottom:8px;">📋 Menú del día</div>
+              ${menu.foto ? `<img src="${menu.foto}" alt="Menú del día" style="width:100%; border-radius:10px; margin-bottom:8px; display:block;">` : ''}
+              ${menu.texto ? `<div style="font-size:13px; color:var(--ink); white-space:pre-line; line-height:1.6;">${menu.texto}</div>` : ''}
+            </div>`;
+        })()}
       ` : `<p style="color:var(--muted);">Registrate para ver la dirección, el horario y cómo llegar a este comercio.</p>`}
     `;
   } else {
