@@ -1196,14 +1196,46 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ SCREEN: PRODUCTOS DE UN LOCAL (vidriera del comercio) ============ -->
   <div class="screen hidden" id="screen-local-productos">
     <div class="link-back" onclick="showScreen('feed')">← Volver a Locales</div>
-    <div class="card" style="text-align:center; margin-bottom:18px;">
-      <div class="local-cover" style="height:120px; border-radius:14px; margin-bottom:12px;" id="lpCover"></div>
-      <h1 class="page-title" style="margin-bottom:4px;" id="lpNombre">Comercio</h1>
-      <div class="page-sub" style="margin-bottom:2px;" id="lpMeta">Rubro · Dirección</div>
-      <div class="page-sub" style="margin-bottom:14px;" id="lpHorario"></div>
-      <button class="btn btn-ghost" onclick="comoLlegar(window._lpComercioId)">📍 Cómo llegar</button>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="local-cover" style="height:140px; border-radius:12px; margin:-16px -16px 14px; overflow:hidden;" id="lpCover"></div>
+      <h1 class="page-title" style="margin-bottom:2px;" id="lpNombre">Comercio</h1>
+      <div class="page-sub" style="margin-bottom:14px;" id="lpMeta">Rubro</div>
+
+      <!-- Info del local -->
+      <div id="lpInfoBloque">
+        <div id="lpDireccionRow" style="display:none; padding:8px 0; border-top:1px solid var(--line); display:flex; align-items:center; gap:8px;">
+          <span style="font-size:15px;">📍</span>
+          <div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;">Dirección</div><div id="lpDireccion" style="font-size:13.5px; font-weight:600; color:var(--navy);"></div></div>
+        </div>
+        <div id="lpHorarioRow" style="display:none; padding:8px 0; border-top:1px solid var(--line); align-items:center; gap:8px;">
+          <span style="font-size:15px;">🕐</span>
+          <div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;">Horario</div><div id="lpHorario" style="font-size:13.5px; font-weight:600; color:var(--navy);"></div></div>
+        </div>
+        <div id="lpTelefonoRow" style="display:none; padding:8px 0; border-top:1px solid var(--line); align-items:center; gap:8px;">
+          <span style="font-size:15px;">📞</span>
+          <div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;">Teléfono</div><div id="lpTelefono" style="font-size:13.5px; font-weight:600; color:var(--navy);"></div></div>
+        </div>
+        <div id="lpWhatsappRow" style="display:none; padding:8px 0; border-top:1px solid var(--line); align-items:center; gap:8px;">
+          <span style="font-size:15px;">💬</span>
+          <div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;">WhatsApp</div><div id="lpWhatsapp" style="font-size:13.5px; font-weight:600; color:var(--navy);"></div></div>
+        </div>
+        <div id="lpInstagramRow" style="display:none; padding:8px 0; border-top:1px solid var(--line); align-items:center; gap:8px;">
+          <span style="font-size:15px;">📸</span>
+          <div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;">Instagram</div><div id="lpInstagram" style="font-size:13.5px; font-weight:600; color:var(--navy);"></div></div>
+        </div>
+      </div>
+
+      <!-- Menú del día -->
+      <div id="lpMenuDiaBloque" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:12px;"></div>
+
+      <!-- Botones de acción -->
+      <div style="display:flex; gap:8px; margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="comoLlegar(window._lpComercioId)">📍 Cómo llegar</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;" id="lpBtnWsp" style="display:none;" onclick="abrirWhatsappLocal()">💬 WhatsApp</button>
+      </div>
     </div>
-    <div class="section-title" style="margin-bottom:12px;">Todos sus productos</div>
+
+    <div class="section-title" style="margin-bottom:12px;">Productos del local</div>
     <div class="prod-grid" id="lpGrid"></div>
   </div>
 
@@ -8608,15 +8640,68 @@ function comoLlegar(comercioId){
 let feedRubroFiltroLocales = 'Todos';
 function setFeedRubroLocales(r){ feedRubroFiltroLocales = r; renderLocales(); }
 
+function abrirWhatsappLocal(){
+  const c = window._lpComercio;
+  if(!c) return;
+  const tel = (c.whatsapp||'').replace(/\D/g,'');
+  if(tel) window.open(`https://wa.me/${tel}`, '_blank');
+}
+
 function verProductosDeLocal(comercioId){
   const c = state.comercios.find(x=>x.id===comercioId);
   if(!c){ toast('No encontramos ese local'); return; }
   window._lpComercioId = comercioId;
+  window._lpComercio = c;
 
-  document.getElementById('lpCover').innerHTML = c.img ? `<img src="${c.img}" alt="${c.nombre}" style="width:100%;height:100%;object-fit:cover;">` : '';
+  // Cover e identidad
+  const cover = document.getElementById('lpCover');
+  cover.style.display = c.img ? 'block' : 'none';
+  cover.innerHTML = c.img ? `<img src="${c.img}" alt="${c.nombre}" style="width:100%;height:100%;object-fit:cover;">` : '';
   document.getElementById('lpNombre').textContent = c.nombre;
-  document.getElementById('lpMeta').textContent = c.rubro + (c.direccion ? ' · ' + c.direccion : '');
-  document.getElementById('lpHorario').textContent = c.horario || '';
+  document.getElementById('lpMeta').textContent = c.rubro || '';
+
+  // Filas de info — mostrar solo si tienen dato
+  const showRow = (rowId, valId, val) => {
+    const row = document.getElementById(rowId);
+    if(!row) return;
+    if(val){ row.style.display = 'flex'; document.getElementById(valId).textContent = val; }
+    else { row.style.display = 'none'; }
+  };
+  showRow('lpDireccionRow', 'lpDireccion', c.direccion);
+  showRow('lpHorarioRow',   'lpHorario',   c.horario);
+  showRow('lpTelefonoRow',  'lpTelefono',  c.telefono);
+  showRow('lpWhatsappRow',  'lpWhatsapp',  c.whatsapp);
+  showRow('lpInstagramRow', 'lpInstagram', c.instagram ? '@'+c.instagram.replace('@','') : '');
+
+  // Botón WhatsApp
+  const btnWsp = document.getElementById('lpBtnWsp');
+  if(btnWsp) btnWsp.style.display = c.whatsapp ? 'flex' : 'none';
+
+  // Menú del día
+  const menuBloque = document.getElementById('lpMenuDiaBloque');
+  const hoy = hoyISO();
+  const menu = c.menuDelDia;
+  const tieneMenuDia = c.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(c.rubro);
+  const publicadoHoy = menu && menu.fecha === hoy && (menu.texto || menu.foto);
+  if(tieneMenuDia || publicadoHoy){
+    menuBloque.style.display = 'block';
+    menuBloque.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:${publicadoHoy?'10px':'0'};">
+        <div>
+          <div style="font-weight:800; font-size:13px; color:var(--navy);">📋 Menú del día</div>
+          <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">${publicadoHoy ? 'Hoy tienen el menú publicado' : 'Este local ofrece menú del día'}</div>
+        </div>
+        ${publicadoHoy ? `<button class="btn btn-ghost btn-sm" onclick="toggleMenuDiaDetalle('lpMenuDiaDetalle')">Ver menú</button>` : ''}
+      </div>
+      ${publicadoHoy ? `
+        <div id="lpMenuDiaDetalle" style="display:none; margin-top:8px; padding:12px; background:#f7fbff; border-radius:10px; border:1px solid #cce0f5;">
+          ${menu.foto ? `<img src="${menu.foto}" alt="Menú del día" style="width:100%; border-radius:8px; margin-bottom:10px; display:block;">` : ''}
+          ${menu.texto ? `<div style="font-size:13px; color:var(--ink); white-space:pre-line; line-height:1.6;">${menu.texto}</div>` : ''}
+        </div>` : ''}
+    `;
+  } else {
+    menuBloque.style.display = 'none';
+  }
 
   const prods = state.productos.filter(p=>p.comercioId===comercioId);
   const grid = document.getElementById('lpGrid');
