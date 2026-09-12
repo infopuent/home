@@ -3439,6 +3439,17 @@ const RUBROS_GASTRO_TODOS = [
   ...RUBROS_POR_TIPO.gastronomia
 ];
 
+// Determina si un comercio es gastronómico (rubro o subcategoría/tipo),
+// cubriendo tanto el wizard viejo (guarda la subcategoría directo en rubro)
+// como el panel admin (guarda "Gastronomía" en rubro y la subcategoría en tipo).
+function esComercioGastronomico(c){
+  if(!c) return false;
+  return c.rubro === 'Gastronomía'
+    || c.tipo === 'gastronomia'
+    || RUBROS_GASTRO_TODOS.includes(c.rubro)
+    || RUBROS_GASTRO_TODOS.includes(c.tipo);
+}
+
 const PREGUNTAS_POR_TIPO = {
   gastronomia: [
     { id:'menuDelDia',    label:'¿Tenés menú del día?',              opts:['Sí, todos los días','A veces','No'] },
@@ -4689,7 +4700,7 @@ function abrirNuevoProducto(){
   document.getElementById('cnpFotoEstado').className = 'foto-upload-estado';
   delete fotosCargadas['cnp'];
   // Mostrar opción menú del día solo para gastronómicos
-  const esGastro = state.currentUser?.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+  const esGastro = esComercioGastronomico(state.currentUser);
   const menuDiaBox = document.getElementById('cnpMenuDiaBox');
   if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
   const cbMenuDia = document.getElementById('cnpMenuDia');
@@ -4723,7 +4734,7 @@ function abrirEditarProducto(prodId){
   document.getElementById('cnpFotoEstado').textContent = '✅ Foto actual — tocá la imagen para cambiarla';
   document.getElementById('cnpFotoEstado').className = 'foto-upload-estado';
   // Mostrar opción menú del día solo para gastronómicos
-  const esGastro = state.currentUser?.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+  const esGastro = esComercioGastronomico(state.currentUser);
   const menuDiaBox = document.getElementById('cnpMenuDiaBox');
   if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
   const cbMenuDia = document.getElementById('cnpMenuDia');
@@ -6239,7 +6250,7 @@ function renderComercioPanel(){
   // Mostrar botón de Menú del día solo a comercios gastronómicos
   const btnMenu = document.getElementById('btnMenuDia');
   if(btnMenu){
-    const esGastro = typeof RUBROS_GASTRO_TODOS !== 'undefined' && (state.currentUser?.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro));
+    const esGastro = typeof esComercioGastronomico !== 'undefined' && esComercioGastronomico(state.currentUser);
     btnMenu.classList.toggle('hidden', !esGastro);
   }
   if(state.currentUser?.uid){
@@ -7624,7 +7635,7 @@ function renderLocalesComida(){
   if(!cont) return;
   var localesComida = (state.comercios||[]).filter(function(c){
     if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
-    return RUBROS_GASTRO_TODOS.includes(c.rubro);
+    return esComercioGastronomico(c);
   });
   if(!localesComida.length){
     cont.style.display='none'; return;
@@ -7809,7 +7820,7 @@ function renderGastronomiaGrid(){
   // ── Menú del día (arriba de todo) ──
   const hoy = hoyISO();
   const localesConMenu = (state.comercios||[]).filter(c=>
-    mismaCiudad(c.ciudad, ciudadSeleccionada) && RUBROS_GASTRO_TODOS.includes(c.rubro) &&
+    mismaCiudad(c.ciudad, ciudadSeleccionada) && esComercioGastronomico(c) &&
     c.menuDelDia && c.menuDelDia.fecha === hoy && !esComercioFree(c) && !c.restricciones?.ocultarFeed
   );
   html += `<div class="card" style="margin-bottom:16px;border:1.5px solid #FFD9A0;background:linear-gradient(135deg,#FFF8EC,#FFF3DD);">
@@ -8466,7 +8477,7 @@ function renderOfertaTabs(p, c){
         ${(c.telefono && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
         ${esFree ? '' : `<button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>`}
         ${(()=>{
-          const esGastroMenu = c.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(c.rubro);
+          const esGastroMenu = esComercioGastronomico(c);
           const tieneMenuDia = esGastroMenu && (c.wizardData?.menuDelDia !== 'No' || c.menuDelDia);
           const hoy = hoyISO();
           const menu = c.menuDelDia;
@@ -8702,7 +8713,7 @@ function verProductosDeLocal(comercioId){
   const menuBloque = document.getElementById('lpMenuDiaBloque');
   const hoy = hoyISO();
   const menu = c.menuDelDia;
-  const tieneMenuDia = c.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(c.rubro);
+  const tieneMenuDia = esComercioGastronomico(c);
   const publicadoHoy = menu && menu.fecha === hoy && (menu.texto || menu.foto);
   if(tieneMenuDia || publicadoHoy){
     menuBloque.style.display = 'block';
@@ -10380,7 +10391,7 @@ function adminAbrirFormProducto(docId){
   ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
   adminLimpiarFotoProducto();
   const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
-  const esGastro = !!c && (c.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(c.rubro));
+  const esGastro = esComercioGastronomico(c);
   const menuDiaBox = document.getElementById('apMenuDiaBox');
   if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
   const cbMenuDia = document.getElementById('apMenuDia');
@@ -10406,7 +10417,7 @@ async function adminEditarProducto(firestoreId, comercioId){
   if(fn('apDescripcion'))fn('apDescripcion').value = p.descripcion||'';
   if(fn('apFotoNombre')) fn('apFotoNombre').textContent = p.img ? 'Foto actual cargada' : '';
   const c2 = _adminComercios.find(x=>x.id===comercioId || (x._docId||x.id)===comercioId);
-  const esGastro2 = !!c2 && (c2.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(c2.rubro));
+  const esGastro2 = esComercioGastronomico(c2);
   const menuDiaBox2 = fn('apMenuDiaBox');
   if(menuDiaBox2) menuDiaBox2.style.display = esGastro2 ? 'block' : 'none';
   const cbMenuDia2 = fn('apMenuDia');
