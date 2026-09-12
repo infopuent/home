@@ -2315,7 +2315,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
-        <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="adminCargarRepartidores();showScreen('admin-repartidores')"><i class="ti ti-bike ic"></i>Repartidores 🛵</button>
+        <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-papelera');admCargarPapelera()"><i class="ti ti-trash ic"></i>🗑️ Papelera</button>
         <button class="btn-tile btn-tile-gold" style="grid-column:1/-1;" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
         <button class="btn-tile btn-tile-navy" style="grid-column:1/-1;" onclick="abrirPlanesPublico()"><i class="ti ti-share ic"></i>📋 Planes (para compartir)</button>
       </div>
@@ -2345,6 +2345,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <button class="adm-nav" id="admNav-mensajes" onclick="adminDesktopTab('mensajes')"><i class="ti ti-message-2" style="font-size:16px;"></i>Mensajes</button>
           <button class="adm-nav" id="admNav-rubroshome" onclick="adminDesktopTab('rubroshome')"><i class="ti ti-photo" style="font-size:16px;"></i>🖼️ Imágenes del home</button>
           <button class="adm-nav" id="admNav-nuevo" onclick="adminDesktopTab('nuevo')"><i class="ti ti-plus" style="font-size:16px;"></i>Nuevo comercio</button>
+          <button class="adm-nav" id="admNav-papelera" onclick="adminDesktopTab('papelera')"><i class="ti ti-trash" style="font-size:16px;"></i>🗑️ Papelera</button>
           <button class="adm-nav" onclick="abrirPlanesPublico()"><i class="ti ti-share" style="font-size:16px;"></i>Planes (compartir)</button>
         </div>
         <div style="padding:14px 18px;border-top:1px solid #E8E8E4;">
@@ -2521,6 +2522,21 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn btn-ghost" style="flex:1;" onclick="compartirPlanesPublico('link')">🔗 Copiar link</button>
       <button class="btn btn-ghost" style="flex:1;" onclick="compartirPlanesPublico('whatsapp')">💬 Compartir por WhatsApp</button>
     </div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN PAPELERA ============ -->
+  <div class="screen hidden" id="screen-admin-papelera">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">🗑️ Papelera</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="admFiltroPapelera('todos',this)" style="flex:1;font-weight:800;">Todos</button>
+      <button class="btn btn-ghost btn-sm" onclick="admFiltroPapelera('comercios',this)" style="flex:1;">Comercios</button>
+      <button class="btn btn-ghost btn-sm" onclick="admFiltroPapelera('productos',this)" style="flex:1;">Productos</button>
+      <button class="btn btn-ghost btn-sm" onclick="admFiltroPapelera('vendedores',this)" style="flex:1;">ConectorT</button>
+      <button class="btn btn-ghost btn-sm" onclick="admFiltroPapelera('clientes',this)" style="flex:1;">Clientes</button>
+    </div>
+    <button onclick="admVaciarPapelera()" style="width:100%;margin-bottom:14px;background:#7A1A1A;color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">💀 Vaciar papelera completa</button>
+    <div id="admPapeleraList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN PRODUCTOS ============ -->
@@ -4001,9 +4017,8 @@ async function cargarDatosPublicosDeFirestore(){
   ]);
   if(comerciosR.status==='fulfilled'){
     comerciosR.value.forEach(doc=>{
-      // Preservar el campo 'id' interno si ya existe (puede diferir del doc.id cuando el comercio
-      // se guardó con .doc(uid) pero tiene un id interno tipo 'c-001' vinculado a sus productos).
       const data = doc.data();
+      if(data.estado === 'papelera') return; // ignorar papelera
       const c = {...data, id: data.id || doc.id};
       const idxExiste = c.uid
         ? state.comercios.findIndex(x=>x.uid===c.uid)
@@ -4015,7 +4030,8 @@ async function cargarDatosPublicosDeFirestore(){
   if(productosR.status==='fulfilled'){
     productosR.value.forEach(doc=>{
       const data = doc.data();
-      const p = {...data, id: data.id || doc.id}; // preservar id interno si existe
+      if(data.estado === 'papelera') return; // ignorar papelera
+      const p = {...data, id: data.id || doc.id};
       const idx = state.productos.findIndex(x=>x.id===p.id);
       if(idx>=0) state.productos[idx] = p;
       else state.productos.push(p);
@@ -9636,7 +9652,7 @@ function adminDesktopTab(tab){
   document.querySelectorAll('.adm-nav').forEach(b=>b.classList.remove('active'));
   const navBtn = document.getElementById('admNav-'+tab);
   if(navBtn) navBtn.classList.add('active');
-  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home'};
+  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home',papelera:'🗑️ Papelera'};
   document.getElementById('admDesktopTitle').textContent = titles[tab]||tab;
   document.getElementById('admDesktopBadge').innerHTML = '';
   const cont = document.getElementById('admDesktopContent');
@@ -9644,7 +9660,7 @@ function adminDesktopTab(tab){
   if(tab==='dashboard')         admRenderDashboard();
   else if(tab==='comercios')    admRenderComerciosDesktop();
   else if(tab==='productos')    admRenderProductosDesktop();
-  else if(tab==='vendedores')   admRenderVendedoresDesktop();
+  else if(tab==='papelera')    admRenderPapeleraDesktop();
   else if(tab==='clientes')     admRenderClientesDesktop();
   else if(tab==='ventas')       admRenderVentasDesktop();
   else if(tab==='planes')       admRenderPlanesDesktop();
@@ -9694,6 +9710,130 @@ async function admRenderDashboard(){
   }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
 }
 
+/* ===== ADMIN: PAPELERA ===== */
+let _papeleraItems = [];
+let _papeleraFiltro = 'todos';
+
+async function admCargarPapelera(){
+  const esDesktop = window.innerWidth >= 900;
+  const contId = esDesktop ? 'admDesktopContent' : 'admPapeleraList';
+  const cont = document.getElementById(contId);
+  if(!cont) return;
+  cont.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const [snapC, snapP, snapV, snapCl] = await Promise.all([
+      db.collection('comercios').where('estado','==','papelera').get(),
+      db.collection('productos').where('estado','==','papelera').get(),
+      db.collection('vendedores').where('estado','==','papelera').get(),
+      db.collection('clientes').where('estado','==','papelera').get()
+    ]);
+    _papeleraItems = [
+      ...snapC.docs.map(d=>({...d.data(),_docId:d.id,_tipo:'comercio',_col:'comercios',_label:d.data().nombre||'Comercio sin nombre'})),
+      ...snapP.docs.map(d=>({...d.data(),_docId:d.id,_tipo:'producto',_col:'productos',_label:d.data().nombre||'Producto sin nombre'})),
+      ...snapV.docs.map(d=>({...d.data(),_docId:d.id,_tipo:'vendedor',_col:'vendedores',_label:d.data().nombre||'ConectorT sin nombre'})),
+      ...snapCl.docs.map(d=>({...d.data(),_docId:d.id,_tipo:'cliente',_col:'clientes',_label:d.data().nombre||d.data().email||'Cliente sin nombre'}))
+    ].sort((a,b)=> (b.fechaPapelera||'').localeCompare(a.fechaPapelera||''));
+    admRenderPapelera(esDesktop);
+  }catch(e){ cont.innerHTML = `<p style="color:red;font-size:13px;">Error: ${e.message}</p>`; }
+}
+
+function admFiltroPapelera(f, btn){
+  _papeleraFiltro = f;
+  document.querySelectorAll('#screen-admin-papelera .btn').forEach(b=>b.style.fontWeight='');
+  if(btn) btn.style.fontWeight='800';
+  admRenderPapelera(false);
+}
+
+const _tipoLabel = {comercio:'🏪 Comercio', producto:'📦 Producto', vendedor:'🤝 ConectorT', cliente:'👤 Cliente'};
+const _tipoColor = {comercio:'#5C7355', producto:'#C99A3E', vendedor:'#4A7EB5', cliente:'#888'};
+
+function admRenderPapelera(esDesktop){
+  const cont = document.getElementById(esDesktop ? 'admDesktopContent' : 'admPapeleraList');
+  if(!cont) return;
+  let lista = _papeleraItems;
+  if(_papeleraFiltro !== 'todos') lista = lista.filter(x=>x._tipo===_papeleraFiltro.slice(0,-1)||x._tipo===_papeleraFiltro);
+  // normalizar: "comercios"→"comercio", "productos"→"producto", etc.
+  const tipoMap = {comercios:'comercio',productos:'producto',vendedores:'vendedor',clientes:'cliente'};
+  if(_papeleraFiltro !== 'todos') lista = _papeleraItems.filter(x=>x._tipo===(tipoMap[_papeleraFiltro]||_papeleraFiltro));
+
+  const vaciaBtnHtml = `<button onclick="admVaciarPapelera()" style="margin-bottom:14px;background:#7A1A1A;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;">💀 Vaciar papelera completa</button>`;
+
+  if(!lista.length){
+    cont.innerHTML = (esDesktop ? vaciaBtnHtml : '') + '<p style="color:var(--muted);font-size:13px;padding:20px 0;">La papelera está vacía.</p>';
+    return;
+  }
+
+  const items = lista.map(x=>{
+    const fecha = x.fechaPapelera ? new Date(x.fechaPapelera).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+    const colorTipo = _tipoColor[x._tipo]||'#888';
+    const labelTipo = _tipoLabel[x._tipo]||x._tipo;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--line);">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+          <span style="font-size:10px;font-weight:800;color:${colorTipo};background:${colorTipo}18;padding:2px 7px;border-radius:20px;">${labelTipo}</span>
+          <span style="font-size:10px;color:var(--muted);">Eliminado ${fecha}</span>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${x._label}</div>
+        ${x._tipo==='producto'&&x.comercioId?`<div style="font-size:11px;color:var(--muted);">Comercio: ${x.comercioId}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+        <button class="adm-btn" style="color:#2F7A55;border-color:#b0d9be;" onclick="admRestaurar('${x._docId}','${x._col}','${(x._label).replace(/'/g,"&#39;")}')">↩️ Restaurar</button>
+        <button class="adm-btn" style="color:#7A1A1A;border-color:#d4a0a0;" onclick="admEliminarDefinitivoPapelera('${x._docId}','${x._col}','${(x._label).replace(/'/g,"&#39;")}')">💀 Borrar</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  cont.innerHTML = (esDesktop ? `
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+      <button class="adm-filter-btn ${_papeleraFiltro==='todos'?'active':''}" onclick="admFiltroPapelera('todos',this)">Todos</button>
+      <button class="adm-filter-btn ${_papeleraFiltro==='comercios'?'active':''}" onclick="admFiltroPapelera('comercios',this)">Comercios</button>
+      <button class="adm-filter-btn ${_papeleraFiltro==='productos'?'active':''}" onclick="admFiltroPapelera('productos',this)">Productos</button>
+      <button class="adm-filter-btn ${_papeleraFiltro==='vendedores'?'active':''}" onclick="admFiltroPapelera('vendedores',this)">ConectorT</button>
+      <button class="adm-filter-btn ${_papeleraFiltro==='clientes'?'active':''}" onclick="admFiltroPapelera('clientes',this)">Clientes</button>
+      <span style="font-size:12px;color:var(--muted);font-weight:700;margin-left:auto;">${lista.length} ítem${lista.length!==1?'s':''}</span>
+      ${vaciaBtnHtml}
+    </div>` : `<div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;">${lista.length} ítem${lista.length!==1?'s':''}</div>`) +
+    `<div class="adm-section" style="padding:0 16px;">${items}</div>`;
+}
+
+async function admRenderPapeleraDesktop(){
+  await admCargarPapelera();
+}
+
+async function admRestaurar(docId, coleccion, nombre){
+  if(!confirm(`¿Restaurar "${nombre}"?`)) return;
+  try{
+    const estadoAnterior = coleccion==='comercios' ? {aprobado:true} : {};
+    await db.collection(coleccion).doc(docId).update({estado: firebase.firestore.FieldValue.delete(), fechaPapelera: firebase.firestore.FieldValue.delete(), ...estadoAnterior});
+    _papeleraItems = _papeleraItems.filter(x=>x._docId!==docId);
+    toast(`✅ "${nombre}" restaurado.`);
+    admRenderPapelera(window.innerWidth>=900);
+  }catch(e){ toast('Error al restaurar: '+e.message); }
+}
+
+async function admEliminarDefinitivoPapelera(docId, coleccion, nombre){
+  if(!confirm(`⚠️ Eliminar definitivamente "${nombre}".\n\nEsta acción no tiene vuelta atrás.`)) return;
+  try{
+    await db.collection(coleccion).doc(docId).delete();
+    _papeleraItems = _papeleraItems.filter(x=>x._docId!==docId);
+    toast(`💀 "${nombre}" eliminado definitivamente.`);
+    admRenderPapelera(window.innerWidth>=900);
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+async function admVaciarPapelera(){
+  if(!_papeleraItems.length){ toast('La papelera ya está vacía.'); return; }
+  if(!confirm(`⚠️ VACIAR PAPELERA\n\nSe eliminarán definitivamente ${_papeleraItems.length} ítem(s).\n\n¿Confirmar? No hay vuelta atrás.`)) return;
+  try{
+    const batch = db.batch();
+    _papeleraItems.forEach(x=> batch.delete(db.collection(x._col).doc(x._docId)));
+    await batch.commit();
+    _papeleraItems = [];
+    toast('✅ Papelera vaciada.');
+    admRenderPapelera(window.innerWidth>=900);
+  }catch(e){ toast('Error al vaciar: '+e.message); }
+}
+
 /* ===== ADMIN: PRODUCTOS PUBLICADOS ===== */
 let _admTodosProductos = [];
 let _admFiltroProd = 'todos';
@@ -9711,7 +9851,7 @@ async function admCargarProductosAdmin(){
     ]);
     const comerciosMap = {};
     snapCom.docs.forEach(d=>{ const c=d.data(); comerciosMap[c.id||d.id]=c.nombre||'—'; });
-    _admTodosProductos = snapProd.docs.map(d=>({...d.data(), _docId:d.id, _comercioNombre: comerciosMap[d.data().comercioId]||d.data().comercioId||'—'}));
+    _admTodosProductos = snapProd.docs.map(d=>({...d.data(), _docId:d.id, _comercioNombre: comerciosMap[d.data().comercioId]||d.data().comercioId||'—'})).filter(p=>p.estado!=='papelera');
     // Llenar select de rubros
     const rubros = [...new Set(_admTodosProductos.map(p=>p.rubro).filter(Boolean))].sort();
     ['admProdFiltroRubro'].forEach(id=>{
@@ -9778,13 +9918,13 @@ function admRenderProductosAdmin(){
 }
 
 async function admEliminarProductoAdmin(docId, nombre){
-  if(!confirm(`¿Eliminar el producto "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  if(!confirm(`¿Mandar "${nombre}" a la papelera?`)) return;
   try{
-    await db.collection('productos').doc(docId).delete();
+    await db.collection('productos').doc(docId).update({estado:'papelera', fechaPapelera: new Date().toISOString()});
     _admTodosProductos = _admTodosProductos.filter(p=>p._docId!==docId);
-    toast('Producto eliminado.');
+    toast('Producto enviado a la papelera.');
     admRenderProductosAdmin();
-  }catch(e){ toast('Error al eliminar: '+e.message); }
+  }catch(e){ toast('Error: '+e.message); }
 }
 
 async function admRenderProductosDesktop(){
@@ -9931,7 +10071,7 @@ async function admRenderVendedoresDesktop(){
   const cont=document.getElementById('admDesktopContent');
   try{
     const snap=await db.collection('vendedores').get();
-    _adminVendedores=snap.docs.map(d=>({...d.data(),_docId:d.id}));
+    _adminVendedores=snap.docs.map(d=>({...d.data(),_docId:d.id})).filter(v=>v.estado!=='papelera');
     cont.innerHTML=`<div class="adm-section"><table class="adm-table"><thead><tr><th>Nombre</th><th>Email</th><th>Ciudad</th><th>Estado</th><th></th></tr></thead>
     <tbody>${_adminVendedores.map(v=>{
       const id=v._docId;
@@ -9967,7 +10107,7 @@ async function admRenderClientesDesktop(){
   const cont=document.getElementById('admDesktopContent');
   try{
     const snap=await db.collection('clientes').get();
-    _adminClientes=snap.docs.map(d=>({...d.data(),_docId:d.id}));
+    _adminClientes=snap.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera');
     cont.innerHTML=`<div class="adm-section"><table class="adm-table"><thead><tr><th>Nombre</th><th>Email</th><th>Ciudad</th><th>Estado</th><th></th></tr></thead>
     <tbody>${_adminClientes.map(c=>{
       const id=c._docId;
@@ -10210,7 +10350,7 @@ async function adminCargarComercios(){
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
     const snap = await db.collection('comercios').get();
-    _adminComercios = snap.docs.map(d=>({...d.data(), _docId: d.id}));
+    _adminComercios = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(c=>c.estado!=='papelera');
     adminRenderComercios(_adminComercios);
   }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
 }
@@ -10815,15 +10955,15 @@ async function adminGuardarProductoEnComercio(docId){
 
 // ── Eliminar producto ─────────────────────────────────────────
 async function adminEliminarProducto(firestoreId, nombre, comercioId){
-  if(!confirm(`¿Eliminar "${nombre}"?`)) return;
+  if(!confirm(`¿Mandar "${nombre}" a la papelera?`)) return;
   try{
-    await db.collection('productos').doc(firestoreId).delete();
+    await db.collection('productos').doc(firestoreId).update({estado:'papelera', fechaPapelera: new Date().toISOString()});
     const idx = state.productos.findIndex(x=>x.id===firestoreId);
     if(idx>=0) state.productos.splice(idx,1);
-    toast('Producto eliminado');
+    toast('Producto enviado a la papelera.');
     adminRenderProductosComercio(comercioId);
     renderFeed();
-  }catch(e){ toast('Error al eliminar: '+e.message); }
+  }catch(e){ toast('Error: '+e.message); }
 }
 
 async function adminRenovarPublicidad(docId){
@@ -10847,10 +10987,10 @@ async function adminAprobarComercio(docId){
 }
 
 async function adminEliminarComercio(docId, nombre, desktop){
-  if(!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  if(!confirm(`¿Mandar "${nombre}" a la papelera?`)) return;
   try{
-    await db.collection('comercios').doc(docId).delete();
-    toast('Comercio eliminado.');
+    await db.collection('comercios').doc(docId).update({estado:'papelera', fechaPapelera: new Date().toISOString()});
+    toast('Comercio enviado a la papelera.');
     if(desktop) admRenderComerciosDesktop();
     else adminCargarComercios();
   }catch(e){ toast('Error al eliminar.'); }
@@ -10889,7 +11029,7 @@ async function adminCargarVendedores(){
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
     const snap = await db.collection('vendedores').get();
-    _adminVendedores = snap.docs.map(d=>({...d.data(), _docId: d.id}));
+    _adminVendedores = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(v=>v.estado!=='papelera');
     adminRenderVendedores(_adminVendedores);
   }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
 }
@@ -10960,10 +11100,10 @@ async function adminReactivarVendedor(docId){
 }
 
 async function adminEliminarVendedor(docId, nombre){
-  if(!confirm(`¿Eliminar a "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  if(!confirm(`¿Mandar a "${nombre}" a la papelera?`)) return;
   try{
-    await db.collection('vendedores').doc(docId).delete();
-    toast('ConectorT eliminado.');
+    await db.collection('vendedores').doc(docId).update({estado:'papelera', fechaPapelera: new Date().toISOString()});
+    toast('ConectorT enviado a la papelera.');
     if(window.innerWidth>=900) admRenderVendedoresDesktop(); else adminCargarVendedores();
   }catch(e){ toast('Error al eliminar.'); }
 }
@@ -11123,7 +11263,7 @@ async function adminCargarClientes(){
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
     const snap = await db.collection('clientes').get();
-    _adminClientes = snap.docs.map(d=>({...d.data(), _docId: d.id}));
+    _adminClientes = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(c=>c.estado!=='papelera');
     adminAplicarFiltrosClientes();
   }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
 }
@@ -11188,10 +11328,10 @@ async function adminReactivarCliente(docId){
 }
 
 async function adminEliminarCliente(docId, nombre){
-  if(!confirm(`¿Eliminar a "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  if(!confirm(`¿Mandar a "${nombre}" a la papelera?`)) return;
   try{
-    await db.collection('clientes').doc(docId).delete();
-    toast('Cliente eliminado.');
+    await db.collection('clientes').doc(docId).update({estado:'papelera', fechaPapelera: new Date().toISOString()});
+    toast('Cliente enviado a la papelera.');
     if(window.innerWidth>=900) admRenderClientesDesktop(); else adminCargarClientes();
   }catch(e){ toast('Error al eliminar.'); }
 }
