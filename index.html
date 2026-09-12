@@ -4653,7 +4653,7 @@ function abrirNuevoProducto(){
   document.getElementById('cnpFotoEstado').className = 'foto-upload-estado';
   delete fotosCargadas['cnp'];
   // Mostrar opción menú del día solo para gastronómicos
-  const esGastro = RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+  const esGastro = state.currentUser?.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
   const menuDiaBox = document.getElementById('cnpMenuDiaBox');
   if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
   const cbMenuDia = document.getElementById('cnpMenuDia');
@@ -4687,7 +4687,7 @@ function abrirEditarProducto(prodId){
   document.getElementById('cnpFotoEstado').textContent = '✅ Foto actual — tocá la imagen para cambiarla';
   document.getElementById('cnpFotoEstado').className = 'foto-upload-estado';
   // Mostrar opción menú del día solo para gastronómicos
-  const esGastro = RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+  const esGastro = state.currentUser?.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
   const menuDiaBox = document.getElementById('cnpMenuDiaBox');
   if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
   const cbMenuDia = document.getElementById('cnpMenuDia');
@@ -6203,7 +6203,7 @@ function renderComercioPanel(){
   // Mostrar botón de Menú del día solo a comercios gastronómicos
   const btnMenu = document.getElementById('btnMenuDia');
   if(btnMenu){
-    const esGastro = typeof RUBROS_GASTRO_TODOS !== 'undefined' && RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+    const esGastro = typeof RUBROS_GASTRO_TODOS !== 'undefined' && (state.currentUser?.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro));
     btnMenu.classList.toggle('hidden', !esGastro);
   }
   if(state.currentUser?.uid){
@@ -10246,9 +10246,9 @@ function adminAbrirFormProducto(docId){
   ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
   adminLimpiarFotoProducto();
   const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
-  const esGastro = c && RUBROS_GASTRO_TODOS.includes(c.rubro);
+  const esGastro = !c || c.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(c.rubro) || true; // admin siempre puede marcarlo
   const menuDiaBox = document.getElementById('apMenuDiaBox');
-  if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
+  if(menuDiaBox) menuDiaBox.style.display = 'block';
   const cbMenuDia = document.getElementById('apMenuDia');
   if(cbMenuDia) cbMenuDia.checked = false;
   const box = document.getElementById('adminFormProductoBox');
@@ -10272,9 +10272,9 @@ async function adminEditarProducto(firestoreId, comercioId){
   if(fn('apDescripcion'))fn('apDescripcion').value = p.descripcion||'';
   if(fn('apFotoNombre')) fn('apFotoNombre').textContent = p.img ? 'Foto actual cargada' : '';
   const c2 = _adminComercios.find(x=>x.id===comercioId || (x._docId||x.id)===comercioId);
-  const esGastro2 = c2 && RUBROS_GASTRO_TODOS.includes(c2.rubro);
+  const esGastro2 = true; // admin siempre puede marcarlo
   const menuDiaBox2 = fn('apMenuDiaBox');
-  if(menuDiaBox2) menuDiaBox2.style.display = esGastro2 ? 'block' : 'none';
+  if(menuDiaBox2) menuDiaBox2.style.display = 'block';
   const cbMenuDia2 = fn('apMenuDia');
   if(cbMenuDia2) cbMenuDia2.checked = !!p.enMenuDia;
   const prev = fn('apFotoPreviewBox');
