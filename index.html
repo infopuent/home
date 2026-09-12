@@ -3388,11 +3388,6 @@ const GASTRO_GRUPOS = [
   { nombre:'Sabores del mundo',     emoji:'🌮', rubros:['Sushi','Comida mexicana','Comida árabe','Comida china','Comida peruana','Comida italiana'] },
   { nombre:'Saludable',             emoji:'🥗', rubros:['Viandas','Ensaladas','Vegetariana','Vegana','Sin TACC'] },
 ];
-const RUBROS_GASTRO_TODOS = [
-  ...GASTRO_GRUPOS.flatMap(g=>g.rubros),
-  ...RUBROS_POR_TIPO.gastronomia
-];
-
 let wizardData = {};  // acumula las respuestas del wizard
 let wizardPasoActual = 1;
 
@@ -3402,6 +3397,11 @@ const RUBROS_POR_TIPO = {
   servicios:   ['Peluquería / Estética','Taller mecánico','Salud / Médico','Veterinaria','Contador / Escribano','Inmobiliaria','Gimnasio','Otro servicio'],
   mixto:       ['Kiosco','Minimercado','Fotocopias / Imprenta','Otro mixto']
 };
+
+const RUBROS_GASTRO_TODOS = [
+  ...GASTRO_GRUPOS.flatMap(g=>g.rubros),
+  ...RUBROS_POR_TIPO.gastronomia
+];
 
 const PREGUNTAS_POR_TIPO = {
   gastronomia: [
