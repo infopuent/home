@@ -8431,6 +8431,9 @@ function setOfertaTab(tab){
 
 function renderOfertaTabs(p, c){
   // --- Detalle del producto ---
+  const descHtml = p.descripcion
+    ? `<p style="white-space:pre-line; margin:0 0 12px; color:var(--ink);">${p.descripcion}</p>`
+    : '';
   const filas = [];
   if(p.rubro) filas.push(['Rubro', p.rubro]);
   if(p.stockInicial!==undefined && p.stockInicial!==null) filas.push(['Stock inicial', p.stockInicial + ' unidad' + (p.stockInicial===1?'':'es')]);
@@ -8445,9 +8448,9 @@ function renderOfertaTabs(p, c){
       filas.push([labelMap[id] || id, val]);
     });
   }
-  document.getElementById('ofTabDetalleContenido').innerHTML = filas.length
+  document.getElementById('ofTabDetalleContenido').innerHTML = descHtml + (filas.length
     ? filas.map(f=>`<div style="display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line);"><span style="color:var(--muted); font-weight:600;">${f[0]}</span><span style="font-weight:700; text-align:right;">${f[1]}</span></div>`).join('')
-    : '<p style="color:var(--muted);">Este producto todavía no tiene más detalles cargados.</p>';
+    : (descHtml ? '' : '<p style="color:var(--muted);">Este producto todavía no tiene más detalles cargados.</p>'));
 
   // --- Info del comercio ---
   if(c){
