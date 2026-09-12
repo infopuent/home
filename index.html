@@ -2712,7 +2712,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </select>
       </div>
       <div class="field"><label>Rubro</label>
-        <select id="editAdRubro"></select>
+        <select id="editAdRubro" onchange="onRubroChange('editAdRubro','editAdTipo','editAdTipoField')"></select>
+      </div>
+      <div class="field" id="editAdTipoField" style="display:none;"><label>Tipo de negocio</label>
+        <select id="editAdTipo"></select>
       </div>
       <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text"></div>
       <div class="field">
@@ -9763,7 +9766,8 @@ function admAbrirEditarDesktop(docId){
         <div class="field"><label>Ciudad</label>
           <select id="editAdCiudad">${ciudades.map(cd=>`<option value="${cd}"${cd===c.ciudad?' selected':''}>${cd}</option>`).join('')}</select>
         </div>
-        <div class="field"><label>Rubro</label><select id="editAdRubro"></select></div>
+        <div class="field"><label>Rubro</label><select id="editAdRubro" onchange="onRubroChange('editAdRubro','editAdTipo','editAdTipoField')"></select></div>
+        <div class="field" id="editAdTipoField" style="display:none;"><label>Tipo de negocio</label><select id="editAdTipo"></select></div>
         <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text" value="${esc(c.direccion)}"></div>
       </div>
       <div class="field">
@@ -9788,6 +9792,12 @@ function admAbrirEditarDesktop(docId){
       <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="adminGuardarEdicionComercio()">Guardar cambios</button>
     </div>`;
   fillRubroSelect('editAdRubro', c.rubro);
+  if(c.rubro && TIPOS_POR_RUBRO[c.rubro]){
+    const tipoField = document.getElementById('editAdTipoField');
+    const tipoSel   = document.getElementById('editAdTipo');
+    if(tipoSel) tipoSel.innerHTML = buildTipoOptions(c.rubro, c.tipo || '');
+    if(tipoField) tipoField.style.display = '';
+  }
 }
 
 async function admRenderVendedoresDesktop(){
@@ -10396,6 +10406,16 @@ function adminAbrirEditar(docId){
   for(let opt of selCiudad.options) if(opt.value===c.ciudad) opt.selected=true;
   // Rubro select
   fillRubroSelect('editAdRubro', c.rubro);
+  // Subrubro/tipo
+  if(c.rubro && TIPOS_POR_RUBRO[c.rubro]){
+    const tipoField = document.getElementById('editAdTipoField');
+    const tipoSel   = document.getElementById('editAdTipo');
+    if(tipoSel) tipoSel.innerHTML = buildTipoOptions(c.rubro, c.tipo || '');
+    if(tipoField) tipoField.style.display = '';
+  } else {
+    const tipoField = document.getElementById('editAdTipoField');
+    if(tipoField) tipoField.style.display = 'none';
+  }
   // Fecha de publicidad
   if(c.publicidadVence){
     document.getElementById('editAdPublicidadVence').value = c.publicidadVence.slice(0,10);
@@ -10426,6 +10446,7 @@ async function adminGuardarEdicionComercio(){
     nombre:     document.getElementById('editAdNombre').value.trim(),
     ciudad:     document.getElementById('editAdCiudad').value,
     rubro:      document.getElementById('editAdRubro').value,
+    tipo:       (document.getElementById('editAdTipo') ? document.getElementById('editAdTipo').value : ''),
     direccion:  document.getElementById('editAdDireccion').value.trim(),
     telefono:   document.getElementById('editAdTelefono').value.trim(),
     whatsapp:   document.getElementById('editAdWhatsapp').value.trim().replace(/\D/g,''),
