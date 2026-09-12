@@ -2306,6 +2306,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="btn-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <button class="btn-tile btn-tile-sage" onclick="showScreen('admin-comercios');adminCargarComercios()"><i class="ti ti-building-store ic"></i>Comercios</button>
         <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-vendedores');adminCargarVendedores()"><i class="ti ti-users ic"></i>ConectorT</button>
+        <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-clientes');adminCargarClientes()"><i class="ti ti-user ic"></i>Clientes</button>
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
         <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-usuarios');adminCargarUsuarios()"><i class="ti ti-user-circle ic"></i>Usuarios</button>
         <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
@@ -2331,6 +2332,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <button class="adm-nav active" id="admNav-dashboard" onclick="adminDesktopTab('dashboard')"><i class="ti ti-layout-dashboard" style="font-size:16px;"></i>Dashboard</button>
           <button class="adm-nav" id="admNav-comercios" onclick="adminDesktopTab('comercios')"><i class="ti ti-building-store" style="font-size:16px;"></i>Comercios</button>
           <button class="adm-nav" id="admNav-vendedores" onclick="adminDesktopTab('vendedores')"><i class="ti ti-users" style="font-size:16px;"></i>ConectorT</button>
+          <button class="adm-nav" id="admNav-clientes" onclick="adminDesktopTab('clientes')"><i class="ti ti-user" style="font-size:16px;"></i>Clientes</button>
           <button class="adm-nav" id="admNav-usuarios" onclick="adminDesktopTab('usuarios')"><i class="ti ti-user-circle" style="font-size:16px;"></i>Usuarios</button>
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Operaciones</div>
           <button class="adm-nav" id="admNav-ventas" onclick="adminDesktopTab('ventas')"><i class="ti ti-receipt" style="font-size:16px;"></i>Ventas</button>
@@ -2533,12 +2535,38 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-admin-vendedores">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
     <div class="page-title">ConectorT</div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('todos')" style="flex:1;">Todos</button>
       <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('pendientes')" style="flex:1;">Pendientes</button>
       <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('aprobados')" style="flex:1;">Aprobados</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarVendedores('suspendidos')" style="flex:1;">Suspendidos</button>
     </div>
     <div id="adminVendedoresList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN VENDEDOR DETALLE (ficha completa) ============ -->
+  <div class="screen hidden" id="screen-admin-vendedor-detalle">
+    <div class="link-back" onclick="showScreen('admin-vendedores')">← Volver a ConectorT</div>
+    <div id="adminVendedorDetalleContenido"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN CLIENTES ============ -->
+  <div class="screen hidden" id="screen-admin-clientes">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Clientes</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarClientes('todos')" style="flex:1;">Todos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarClientes('activos')" style="flex:1;">Activos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarClientes('suspendidos')" style="flex:1;">Suspendidos</button>
+    </div>
+    <div class="field" style="margin-bottom:10px;"><input type="search" placeholder="Buscar por nombre o email…" oninput="adminBuscarCliente(this.value)"></div>
+    <div id="adminClientesList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN CLIENTE DETALLE (ficha completa) ============ -->
+  <div class="screen hidden" id="screen-admin-cliente-detalle">
+    <div class="link-back" onclick="showScreen('admin-clientes')">← Volver a Clientes</div>
+    <div id="adminClienteDetalleContenido"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN VENTAS ============ -->
@@ -3809,6 +3837,12 @@ function crearCuentaDesdeGoogle(rol, user){
 
 // Toma los datos (ya sea recién creados o recuperados de Firestore) y arma la sesión activa.
 function entrarConDatosGuardados(rol, data){
+  if((rol==='cliente' || rol==='vendedor') && data.estado==='suspendido'){
+    toast('🚫 Tu cuenta fue suspendida. Contactá al soporte de PuenT para más info.');
+    if(firebaseAuth) firebaseAuth.signOut().catch(()=>{});
+    showScreen('home');
+    return;
+  }
   state.currentUser = data; state.role = rol;
 
   if(window._ventaPendienteDeGuardar){
@@ -9572,7 +9606,7 @@ function adminDesktopTab(tab){
   document.querySelectorAll('.adm-nav').forEach(b=>b.classList.remove('active'));
   const navBtn = document.getElementById('admNav-'+tab);
   if(navBtn) navBtn.classList.add('active');
-  const titles = {dashboard:'Dashboard',comercios:'Comercios',vendedores:'Vendedores',usuarios:'Usuarios',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home'};
+  const titles = {dashboard:'Dashboard',comercios:'Comercios',vendedores:'ConectorT',clientes:'Clientes',usuarios:'Usuarios',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home'};
   document.getElementById('admDesktopTitle').textContent = titles[tab]||tab;
   document.getElementById('admDesktopBadge').innerHTML = '';
   const cont = document.getElementById('admDesktopContent');
@@ -9580,6 +9614,7 @@ function adminDesktopTab(tab){
   if(tab==='dashboard')         admRenderDashboard();
   else if(tab==='comercios')    admRenderComerciosDesktop();
   else if(tab==='vendedores')   admRenderVendedoresDesktop();
+  else if(tab==='clientes')     admRenderClientesDesktop();
   else if(tab==='usuarios')     admRenderUsuariosDesktop();
   else if(tab==='ventas')       admRenderVentasDesktop();
   else if(tab==='planes')       admRenderPlanesDesktop();
@@ -9759,9 +9794,71 @@ async function admRenderVendedoresDesktop(){
   try{
     const snap=await db.collection('vendedores').get();
     _adminVendedores=snap.docs.map(d=>({...d.data(),_docId:d.id}));
-    cont.innerHTML=`<div class="adm-section"><table class="adm-table"><thead><tr><th>Nombre</th><th>Email</th><th>Ciudad</th><th>Ventas</th></tr></thead>
-    <tbody>${_adminVendedores.map(v=>`<tr><td style="font-weight:700;">${v.nombre||'&mdash;'}</td><td style="color:#888;">${v.email||'&mdash;'}</td><td style="color:#888;">${v.ciudad||'&mdash;'}</td><td style="color:#888;">${(v.ventas||[]).length}</td></tr>`).join('')}</tbody></table></div>`;
+    cont.innerHTML=`<div class="adm-section"><table class="adm-table"><thead><tr><th>Nombre</th><th>Email</th><th>Ciudad</th><th>Estado</th><th></th></tr></thead>
+    <tbody>${_adminVendedores.map(v=>{
+      const id=v._docId;
+      const suspendido = v.estado==='suspendido';
+      const badge = suspendido ? '<span class="adm-badge red">🚫 Suspendido</span>' : (v.aprobado?'<span class="adm-badge green">Aprobado</span>':'<span class="adm-badge gray">Pendiente</span>');
+      const nombreSafe=(v.nombre||'').replace(/'/g,"\\'");
+      return `<tr onclick="admAbrirVendedorDetalle('${id}')" style="cursor:pointer;"><td style="font-weight:700;">${v.nombre||'&mdash;'}</td><td style="color:#888;">${v.email||'&mdash;'}</td><td style="color:#888;">${v.ciudad||'&mdash;'}</td><td>${badge}</td><td style="white-space:nowrap;">
+        <button class="adm-btn" onclick="event.stopPropagation();admAbrirVendedorDetalle('${id}')">Ver / Editar &rarr;</button>
+        ${suspendido
+          ? `<button class="adm-btn" onclick="event.stopPropagation();adminReactivarVendedor('${id}')">🔓 Reactivar</button>`
+          : `<button class="adm-btn" onclick="event.stopPropagation();adminSuspenderVendedor('${id}')">🚫 Suspender</button>`}
+        <button class="adm-btn" style="color:#c23b3b;" onclick="event.stopPropagation();adminEliminarVendedor('${id}','${nombreSafe}')">🗑️ Eliminar</button>
+      </td></tr>`;
+    }).join('')}</tbody></table></div>`;
   }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
+}
+
+async function admAbrirVendedorDetalle(id){
+  await adminVerVendedor(id);
+  if(window.innerWidth>=900){
+    const cont=document.getElementById('admDesktopContent');
+    const mob=document.getElementById('screen-admin-vendedor-detalle');
+    if(mob){
+      cont.innerHTML='<button class="adm-btn" style="margin-bottom:14px;" onclick="adminDesktopTab(\'vendedores\')">← Volver a ConectorT</button>';
+      const cl=mob.cloneNode(true);cl.removeAttribute('id');cl.classList.remove('hidden');cl.style.display='block';
+      const bk=cl.querySelector('.link-back');if(bk)bk.remove();
+      cont.appendChild(cl);
+    }
+  }
+}
+
+async function admRenderClientesDesktop(){
+  const cont=document.getElementById('admDesktopContent');
+  try{
+    const snap=await db.collection('clientes').get();
+    _adminClientes=snap.docs.map(d=>({...d.data(),_docId:d.id}));
+    cont.innerHTML=`<div class="adm-section"><table class="adm-table"><thead><tr><th>Nombre</th><th>Email</th><th>Ciudad</th><th>Estado</th><th></th></tr></thead>
+    <tbody>${_adminClientes.map(c=>{
+      const id=c._docId;
+      const suspendido = c.estado==='suspendido';
+      const badge = suspendido ? '<span class="adm-badge red">🚫 Suspendido</span>' : '<span class="adm-badge green">Activo</span>';
+      const nombreSafe=(c.nombre||'').replace(/'/g,"\\'");
+      return `<tr onclick="admAbrirClienteDetalle('${id}')" style="cursor:pointer;"><td style="font-weight:700;">${c.nombre||'&mdash;'}</td><td style="color:#888;">${c.email||'&mdash;'}</td><td style="color:#888;">${c.ciudad||'&mdash;'}</td><td>${badge}</td><td style="white-space:nowrap;">
+        <button class="adm-btn" onclick="event.stopPropagation();admAbrirClienteDetalle('${id}')">Ver / Editar &rarr;</button>
+        ${suspendido
+          ? `<button class="adm-btn" onclick="event.stopPropagation();adminReactivarCliente('${id}')">🔓 Reactivar</button>`
+          : `<button class="adm-btn" onclick="event.stopPropagation();adminSuspenderCliente('${id}')">🚫 Suspender</button>`}
+        <button class="adm-btn" style="color:#c23b3b;" onclick="event.stopPropagation();adminEliminarCliente('${id}','${nombreSafe}')">🗑️ Eliminar</button>
+      </td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
+}
+
+async function admAbrirClienteDetalle(id){
+  await adminVerCliente(id);
+  if(window.innerWidth>=900){
+    const cont=document.getElementById('admDesktopContent');
+    const mob=document.getElementById('screen-admin-cliente-detalle');
+    if(mob){
+      cont.innerHTML='<button class="adm-btn" style="margin-bottom:14px;" onclick="adminDesktopTab(\'clientes\')">← Volver a Clientes</button>';
+      const cl=mob.cloneNode(true);cl.removeAttribute('id');cl.classList.remove('hidden');cl.style.display='block';
+      const bk=cl.querySelector('.link-back');if(bk)bk.remove();
+      cont.appendChild(cl);
+    }
+  }
 }
 
 async function admRenderUsuariosDesktop(){
@@ -10615,8 +10712,9 @@ async function adminEliminarComercio(docId, nombre, desktop){
   }catch(e){ toast('Error al eliminar.'); }
 }
 
-// ---- VENDEDORES ----
+// ---- VENDEDORES (ConectorT) ----
 let _adminVendedores = [];
+let _adminVendedorActual = null;
 async function adminCargarVendedores(){
   const el = document.getElementById('adminVendedoresList');
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
@@ -10631,27 +10729,39 @@ function adminFiltrarVendedores(filtro){
   let lista = _adminVendedores;
   if(filtro==='pendientes') lista = lista.filter(v=>!v.aprobado);
   if(filtro==='aprobados') lista = lista.filter(v=>v.aprobado);
+  if(filtro==='suspendidos') lista = lista.filter(v=>v.estado==='suspendido');
   adminRenderVendedores(lista);
 }
 
 function adminRenderVendedores(lista){
   const el = document.getElementById('adminVendedoresList');
   if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
-  el.innerHTML = lista.map(v=>`
+  el.innerHTML = lista.map(v=>{
+    const suspendido = v.estado==='suspendido';
+    const badgeBg = suspendido ? '#FDE8E8' : (v.aprobado?'#E3F3EA':'#FBF1DC');
+    const badgeColor = suspendido ? '#C23B3B' : (v.aprobado?'#2F7A55':'#93732A');
+    const badgeLabel = suspendido ? '🚫 Suspendido' : (v.aprobado?'Aprobado':'Pendiente');
+    const nombreSafe = (v.nombre||'').replace(/'/g,'&#39;');
+    return `
     <div class="list-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
       <div style="display:flex;align-items:center;gap:10px;width:100%;">
-        <div class="av" style="background:var(--blue);">🛍️</div>
+        <div class="av" style="background:var(--blue);">🔗</div>
         <div class="main">
           <div class="t">${v.nombre||'Sin nombre'}</div>
           <div class="s">${v.email||'—'} · ${v.zona||'—'}</div>
         </div>
-        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${v.aprobado?'#E3F3EA':'#FBF1DC'};color:${v.aprobado?'#2F7A55':'#93732A'};">${v.aprobado?'Aprobado':'Pendiente'}</span>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${badgeBg};color:${badgeColor};">${badgeLabel}</span>
       </div>
       <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerVendedor('${v._docId}')">👁️ Ver / Editar</button>
         ${!v.aprobado?`<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarVendedor('${v._docId}')">✅ Aprobar</button>`:''}
-        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminEliminarVendedor('${v._docId}','${v.nombre||''}')">🗑️ Eliminar</button>
+        ${suspendido
+          ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminReactivarVendedor('${v._docId}')">🔓 Reactivar</button>`
+          : `<button class="btn btn-ghost btn-sm" style="flex:1;color:#93732A;border-color:#f0e0c0;" onclick="adminSuspenderVendedor('${v._docId}')">🚫 Suspender</button>`}
+        <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarVendedor('${v._docId}','${nombreSafe}')">🗑️ Eliminar</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function adminAprobarVendedor(docId){
@@ -10659,16 +10769,378 @@ async function adminAprobarVendedor(docId){
     await db.collection('vendedores').doc(docId).update({aprobado: true});
     toast('ConectorT aprobado ✅');
     adminCargarVendedores();
+    if(_adminVendedorActual && (_adminVendedorActual._docId===docId)) adminVerVendedor(docId);
   }catch(e){ toast('Error al aprobar.'); }
 }
 
+async function adminSuspenderVendedor(docId){
+  if(!confirm('¿Suspender esta cuenta? No va a poder iniciar sesión hasta que la reactives.')) return;
+  try{
+    await db.collection('vendedores').doc(docId).update({estado:'suspendido'});
+    toast('ConectorT suspendido 🚫');
+    if(window.innerWidth>=900) admAbrirVendedorDetalle(docId); else { adminCargarVendedores(); if(_adminVendedorActual && _adminVendedorActual._docId===docId) adminVerVendedor(docId); }
+  }catch(e){ toast('Error al suspender.'); }
+}
+
+async function adminReactivarVendedor(docId){
+  try{
+    await db.collection('vendedores').doc(docId).update({estado:'activo'});
+    toast('ConectorT reactivado ✅');
+    if(window.innerWidth>=900) admAbrirVendedorDetalle(docId); else { adminCargarVendedores(); if(_adminVendedorActual && _adminVendedorActual._docId===docId) adminVerVendedor(docId); }
+  }catch(e){ toast('Error al reactivar.'); }
+}
+
 async function adminEliminarVendedor(docId, nombre){
-  if(!confirm(`¿Eliminar a "${nombre}"?`)) return;
+  if(!confirm(`¿Eliminar a "${nombre}"? Esta acción no se puede deshacer.`)) return;
   try{
     await db.collection('vendedores').doc(docId).delete();
     toast('ConectorT eliminado.');
-    adminCargarVendedores();
+    if(window.innerWidth>=900) admRenderVendedoresDesktop(); else adminCargarVendedores();
   }catch(e){ toast('Error al eliminar.'); }
+}
+
+// Ficha completa: datos editables + movimientos (catálogo, ventas/comisiones, valoraciones)
+async function adminVerVendedor(docId){
+  const v = _adminVendedores.find(x=>x._docId===docId);
+  if(!v){ toast('ConectorT no encontrado'); return; }
+  _adminVendedorActual = v;
+  const el = document.getElementById('adminVendedorDetalleContenido');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando datos…</p>';
+  if(window.innerWidth<900) showScreen('admin-vendedor-detalle');
+
+  const suspendido = v.estado==='suspendido';
+  const vId = v.id || docId;
+
+  let ventasHtml = '<p style="color:var(--muted);font-size:12px;">Sin ventas registradas.</p>';
+  let catalogoHtml = '<p style="color:var(--muted);font-size:12px;">Sin productos en su catálogo.</p>';
+  let valoracionesHtml = '<p style="color:var(--muted);font-size:12px;">Sin valoraciones registradas.</p>';
+
+  try{
+    const [snapVentas, snapVal] = await Promise.all([
+      firebaseListo ? db.collection('ventas').where('vendedorId','==', vId).get() : null,
+      firebaseListo ? db.collection('valoraciones').where('paraUid','==', v.uid||'').get() : null
+    ]);
+
+    if(snapVentas && !snapVentas.empty){
+      const ventas = snapVentas.docs.map(d=>d.data()).sort((a,b)=>(b.fechaReserva||'')>(a.fechaReserva||'')?1:-1);
+      const confirmadas = ventas.filter(x=>x.estado==='confirmada');
+      const totalComision = confirmadas.reduce((s,x)=>s+(x.comisionMonto||0),0);
+      ventasHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">${ventas.length} venta(s) · ${confirmadas.length} confirmada(s) · $${totalComision.toLocaleString('es-AR')} en comisiones</div>` +
+        ventas.slice(0,30).map(x=>{
+          const eConf = x.estado==='confirmada';
+          const eNo = x.estado==='no_realizada';
+          const bg = eConf?'#E3F3EA':eNo?'#FDE8E8':'#EAF0F6';
+          const fg = eConf?'#2F7A55':eNo?'#C23B3B':'#3A5A8A';
+          const fecha = x.fechaReserva ? new Date(x.fechaReserva).toLocaleDateString('es-AR') : '—';
+          return `<div style="padding:8px 0;border-bottom:.5px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:700;">${x.clienteNombre||'—'}</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;background:${bg};color:${fg};">${x.estado||'pendiente'}</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${x.codigo||''} · ${fecha} · Comisión: $${(x.comisionMonto||0).toLocaleString('es-AR')}</div>
+          </div>`;
+        }).join('');
+    }
+
+    const catSel = state.catalogoVendedor.filter(s=>s.vendedorId===vId);
+    if(catSel.length){
+      catalogoHtml = catSel.map(s=>{
+        const p = state.productos.find(x=>x.id===s.productoId);
+        return `<div style="padding:7px 0;border-bottom:.5px solid var(--line);font-size:13px;display:flex;justify-content:space-between;">
+          <span>${p?.nombre||'Producto eliminado'}</span><span style="color:var(--muted);">${p?p.comision+'% com.':''}</span>
+        </div>`;
+      }).join('');
+    }
+
+    if(snapVal && !snapVal.empty){
+      const vals = snapVal.docs.map(d=>d.data());
+      const prom = vals.length ? (vals.reduce((s,x)=>s+(x.estrellas||0),0)/vals.length).toFixed(1) : '—';
+      valoracionesHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">⭐ ${prom} promedio · ${vals.length} valoración(es)</div>` +
+        vals.map(x=>`<div style="padding:8px 0;border-bottom:.5px solid var(--line);">
+          <div style="font-size:12px;">⭐ ${'★'.repeat(x.estrellas||0)}${'☆'.repeat(5-(x.estrellas||0))} — <span style="font-weight:700;">${x.deNombre||'Anónimo'}</span></div>
+          ${x.comentario?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">"${x.comentario}"</div>`:''}
+        </div>`).join('');
+    }
+  }catch(e){ console.error(e); }
+
+  const fila = (l,val) => val ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--line);font-size:13px;"><span style="color:var(--muted);font-weight:700;">${l}</span><span>${val}</span></div>` : '';
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+      <div style="width:56px;height:56px;border-radius:14px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🔗</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--navy);">${v.nombre||'—'}</div>
+        <div style="font-size:12px;color:var(--muted);">${v.ciudad||'—'} · ${v.zona||'—'}</div>
+        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:${suspendido?'#FDE8E8':(v.aprobado?'#E3F3EA':'#FBF1DC')};color:${suspendido?'#C23B3B':(v.aprobado?'#2F7A55':'#93732A')};">${suspendido?'🚫 Suspendido':(v.aprobado?'Aprobado':'Pendiente')}</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      ${!v.aprobado?`<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminAprobarVendedor('${docId}')">✅ Aprobar</button>`:''}
+      ${suspendido
+        ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminReactivarVendedor('${docId}')">🔓 Reactivar</button>`
+        : `<button class="btn btn-ghost btn-sm" style="flex:1;color:#93732A;border-color:#f0e0c0;" onclick="adminSuspenderVendedor('${docId}')">🚫 Suspender</button>`}
+      <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarVendedor('${docId}','${(v.nombre||'').replace(/'/g,'&#39;')}')">🗑️ Eliminar</button>
+    </div>
+
+    <div class="section-title" style="margin-bottom:8px;">✏️ Editar datos</div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="field"><label>Nombre completo</label><input id="avNombre" value="${(v.nombre||'').replace(/"/g,'&quot;')}"></div>
+      <div class="field"><label>Nombre de usuario</label><input id="avUsuario" value="${(v.usuario||'').replace(/"/g,'&quot;')}"></div>
+      <div class="field"><label>DNI</label><input id="avDni" value="${(v.dni&&v.dni!=='—')?v.dni:''}"></div>
+      <div class="two-col">
+        <div class="field"><label>Fecha nacimiento</label><input id="avNacimiento" type="date" value="${v.nacimiento||''}"></div>
+        <div class="field"><label>Teléfono</label><input id="avTelefono" value="${(v.telefono&&v.telefono!=='—')?v.telefono:''}"></div>
+      </div>
+      <div class="field"><label>Email</label><input id="avEmail" value="${(v.email&&v.email!=='—')?v.email:''}"></div>
+      <div class="field"><label>Dirección</label><input id="avDireccion" value="${(v.direccion&&v.direccion!=='—')?v.direccion:''}"></div>
+      <div class="two-col">
+        <div class="field"><label>Ciudad</label><input id="avCiudad" value="${v.ciudad||''}"></div>
+        <div class="field"><label>Zona</label><input id="avZona" value="${v.zona||''}"></div>
+      </div>
+      <div class="field"><label>Alias de transferencia</label><input id="avAlias" value="${(v.alias||'').replace(/"/g,'&quot;')}"></div>
+      <button class="btn btn-primary btn-sm" style="width:100%;margin-top:6px;" onclick="adminGuardarEdicionVendedor('${docId}')">Guardar cambios</button>
+    </div>
+
+    <div class="card" style="padding:4px 16px;margin-bottom:16px;">
+      ${fila('Alta', v.fechaAlta ? new Date(v.fechaAlta).toLocaleDateString('es-AR') : null)}
+      ${fila('Cuenta vinculada', v.uid ? '✅ Sí (Google)' : '⏳ No')}
+    </div>
+
+    <div class="section-title" style="margin-bottom:8px;">🛍️ Catálogo actual</div>
+    <div class="card" style="margin-bottom:16px;">${catalogoHtml}</div>
+
+    <div class="section-title" style="margin-bottom:8px;">💰 Ventas y comisiones</div>
+    <div class="card" style="margin-bottom:16px;">${ventasHtml}</div>
+
+    <div class="section-title" style="margin-bottom:8px;">⭐ Valoraciones recibidas</div>
+    <div class="card" style="margin-bottom:16px;">${valoracionesHtml}</div>
+  `;
+}
+
+async function adminGuardarEdicionVendedor(docId){
+  const v = _adminVendedores.find(x=>x._docId===docId);
+  if(!v) return;
+  const cambios = {
+    nombre: document.getElementById('avNombre').value.trim() || v.nombre,
+    usuario: document.getElementById('avUsuario').value.trim(),
+    dni: document.getElementById('avDni').value.trim() || '—',
+    nacimiento: document.getElementById('avNacimiento').value,
+    telefono: document.getElementById('avTelefono').value.trim() || '—',
+    email: document.getElementById('avEmail').value.trim(),
+    direccion: document.getElementById('avDireccion').value.trim() || '—',
+    ciudad: document.getElementById('avCiudad').value.trim() || 'La Paz',
+    zona: document.getElementById('avZona').value.trim(),
+    alias: document.getElementById('avAlias').value.trim(),
+  };
+  try{
+    await db.collection('vendedores').doc(docId).update(cambios);
+    Object.assign(v, cambios);
+    const idxLocal = state.vendedores.findIndex(x=>x.id===v.id || x.uid===v.uid);
+    if(idxLocal>=0) Object.assign(state.vendedores[idxLocal], cambios);
+    toast('Datos actualizados ✅');
+    adminVerVendedor(docId);
+  }catch(e){ console.error(e); toast('Error al guardar.'); }
+}
+
+// ---- CLIENTES ----
+let _adminClientes = [];
+let _adminClienteActual = null;
+let _adminClientesBusqueda = '';
+let _adminClientesFiltro = 'todos';
+
+async function adminCargarClientes(){
+  const el = document.getElementById('adminClientesList');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const snap = await db.collection('clientes').get();
+    _adminClientes = snap.docs.map(d=>({...d.data(), _docId: d.id}));
+    adminAplicarFiltrosClientes();
+  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
+}
+
+function adminBuscarCliente(q){ _adminClientesBusqueda = q; adminAplicarFiltrosClientes(); }
+
+function adminFiltrarClientes(filtro){ _adminClientesFiltro = filtro; adminAplicarFiltrosClientes(); }
+
+function adminAplicarFiltrosClientes(){
+  let lista = _adminClientes;
+  if(_adminClientesFiltro==='activos') lista = lista.filter(c=>c.estado!=='suspendido');
+  if(_adminClientesFiltro==='suspendidos') lista = lista.filter(c=>c.estado==='suspendido');
+  if(_adminClientesBusqueda){
+    const q = _adminClientesBusqueda.toLowerCase();
+    lista = lista.filter(c=>((c.nombre||'')+' '+(c.email||'')).toLowerCase().includes(q));
+  }
+  adminRenderClientes(lista);
+}
+
+function adminRenderClientes(lista){
+  const el = document.getElementById('adminClientesList');
+  if(!lista.length){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin resultados.</p>'; return; }
+  el.innerHTML = lista.map(c=>{
+    const suspendido = c.estado==='suspendido';
+    const nombreSafe = (c.nombre||'').replace(/'/g,'&#39;');
+    return `
+    <div class="list-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;width:100%;">
+        <div class="av" style="background:var(--muted);">🙋</div>
+        <div class="main">
+          <div class="t">${c.nombre||'Sin nombre'}</div>
+          <div class="s">${c.email||'—'} · ${c.ciudad||'—'}</div>
+        </div>
+        ${suspendido?`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#FDE8E8;color:#C23B3B;">🚫 Suspendido</span>`:''}
+      </div>
+      <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerCliente('${c._docId}')">👁️ Ver / Editar</button>
+        ${suspendido
+          ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminReactivarCliente('${c._docId}')">🔓 Reactivar</button>`
+          : `<button class="btn btn-ghost btn-sm" style="flex:1;color:#93732A;border-color:#f0e0c0;" onclick="adminSuspenderCliente('${c._docId}')">🚫 Suspender</button>`}
+        <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarCliente('${c._docId}','${nombreSafe}')">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function adminSuspenderCliente(docId){
+  if(!confirm('¿Suspender esta cuenta? No va a poder iniciar sesión hasta que la reactives.')) return;
+  try{
+    await db.collection('clientes').doc(docId).update({estado:'suspendido'});
+    toast('Cliente suspendido 🚫');
+    if(window.innerWidth>=900) admAbrirClienteDetalle(docId); else { adminCargarClientes(); if(_adminClienteActual && _adminClienteActual._docId===docId) adminVerCliente(docId); }
+  }catch(e){ toast('Error al suspender.'); }
+}
+
+async function adminReactivarCliente(docId){
+  try{
+    await db.collection('clientes').doc(docId).update({estado:'activo'});
+    toast('Cliente reactivado ✅');
+    if(window.innerWidth>=900) admAbrirClienteDetalle(docId); else { adminCargarClientes(); if(_adminClienteActual && _adminClienteActual._docId===docId) adminVerCliente(docId); }
+  }catch(e){ toast('Error al reactivar.'); }
+}
+
+async function adminEliminarCliente(docId, nombre){
+  if(!confirm(`¿Eliminar a "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  try{
+    await db.collection('clientes').doc(docId).delete();
+    toast('Cliente eliminado.');
+    if(window.innerWidth>=900) admRenderClientesDesktop(); else adminCargarClientes();
+  }catch(e){ toast('Error al eliminar.'); }
+}
+
+// Ficha completa: datos editables + movimientos (reservas hechas, valoraciones)
+async function adminVerCliente(docId){
+  const c = _adminClientes.find(x=>x._docId===docId);
+  if(!c){ toast('Cliente no encontrado'); return; }
+  _adminClienteActual = c;
+  const el = document.getElementById('adminClienteDetalleContenido');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando datos…</p>';
+  if(window.innerWidth<900) showScreen('admin-cliente-detalle');
+
+  const suspendido = c.estado==='suspendido';
+  let reservasHtml = '<p style="color:var(--muted);font-size:12px;">Sin reservas registradas.</p>';
+  let valoracionesHtml = '<p style="color:var(--muted);font-size:12px;">Sin valoraciones registradas.</p>';
+
+  try{
+    const [snapVentas, snapVal] = await Promise.all([
+      firebaseListo ? db.collection('ventas').where('ownerUid','==', c.uid||'').get() : null,
+      firebaseListo ? db.collection('valoraciones').where('paraUid','==', c.uid||'').get() : null
+    ]);
+
+    if(snapVentas && !snapVentas.empty){
+      const ventas = snapVentas.docs.map(d=>d.data()).sort((a,b)=>(b.fecha||b.fechaReserva||'')>(a.fecha||a.fechaReserva||'')?1:-1);
+      reservasHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">${ventas.length} reserva(s)</div>` +
+        ventas.slice(0,30).map(x=>{
+          const com = state.comercios.find(cc=>cc.id===x.comercioId);
+          const eConf = x.estado==='confirmada';
+          const eNo = x.estado==='no_realizada';
+          const bg = eConf?'#E3F3EA':eNo?'#FDE8E8':'#EAF0F6';
+          const fg = eConf?'#2F7A55':eNo?'#C23B3B':'#3A5A8A';
+          const fecha = (x.fecha||x.fechaReserva) ? new Date(x.fecha||x.fechaReserva).toLocaleDateString('es-AR') : '—';
+          return `<div style="padding:8px 0;border-bottom:.5px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:700;">${com?.nombre||'—'}</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;background:${bg};color:${fg};">${x.estado||'pendiente'}</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${x.codigo||''} · ${fecha}</div>
+          </div>`;
+        }).join('');
+    }
+
+    if(snapVal && !snapVal.empty){
+      const vals = snapVal.docs.map(d=>d.data());
+      const prom = vals.length ? (vals.reduce((s,x)=>s+(x.estrellas||0),0)/vals.length).toFixed(1) : '—';
+      valoracionesHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">⭐ ${prom} promedio · ${vals.length} valoración(es) recibidas</div>` +
+        vals.map(x=>`<div style="padding:8px 0;border-bottom:.5px solid var(--line);">
+          <div style="font-size:12px;">⭐ ${'★'.repeat(x.estrellas||0)}${'☆'.repeat(5-(x.estrellas||0))} — <span style="font-weight:700;">${x.deNombre||'Anónimo'}</span></div>
+          ${x.comentario?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">"${x.comentario}"</div>`:''}
+        </div>`).join('');
+    }
+  }catch(e){ console.error(e); }
+
+  const fila = (l,val) => val ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--line);font-size:13px;"><span style="color:var(--muted);font-weight:700;">${l}</span><span>${val}</span></div>` : '';
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+      <div style="width:56px;height:56px;border-radius:14px;background:var(--muted);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🙋</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--navy);">${c.nombre||'—'}</div>
+        <div style="font-size:12px;color:var(--muted);">${c.ciudad||'—'} ${c.zona?'· '+c.zona:''}</div>
+        ${suspendido?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:#FDE8E8;color:#C23B3B;">🚫 Suspendido</span>`:''}
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      ${suspendido
+        ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminReactivarCliente('${docId}')">🔓 Reactivar</button>`
+        : `<button class="btn btn-ghost btn-sm" style="flex:1;color:#93732A;border-color:#f0e0c0;" onclick="adminSuspenderCliente('${docId}')">🚫 Suspender</button>`}
+      <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="adminEliminarCliente('${docId}','${(c.nombre||'').replace(/'/g,'&#39;')}')">🗑️ Eliminar</button>
+    </div>
+
+    <div class="section-title" style="margin-bottom:8px;">✏️ Editar datos</div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="field"><label>Nombre completo</label><input id="acNombre" value="${(c.nombre||'').replace(/"/g,'&quot;')}"></div>
+      <div class="field"><label>Teléfono</label><input id="acTelefono" value="${(c.telefono||'').replace(/"/g,'&quot;')}"></div>
+      <div class="field"><label>Email</label><input id="acEmail" value="${(c.email||'').replace(/"/g,'&quot;')}"></div>
+      <div class="two-col">
+        <div class="field"><label>Ciudad</label><input id="acCiudad" value="${c.ciudad||''}"></div>
+        <div class="field"><label>Zona</label><input id="acZona" value="${c.zona||''}"></div>
+      </div>
+      <div class="field"><label>Dirección</label><input id="acDireccion" value="${(c.direccion||'').replace(/"/g,'&quot;')}"></div>
+      <button class="btn btn-primary btn-sm" style="width:100%;margin-top:6px;" onclick="adminGuardarEdicionCliente('${docId}')">Guardar cambios</button>
+    </div>
+
+    <div class="card" style="padding:4px 16px;margin-bottom:16px;">
+      ${fila('Alta', c.fechaAlta ? new Date(c.fechaAlta).toLocaleDateString('es-AR') : null)}
+      ${fila('Cuenta vinculada', c.uid ? '✅ Sí (Google)' : '⏳ No')}
+    </div>
+
+    <div class="section-title" style="margin-bottom:8px;">🛒 Reservas hechas</div>
+    <div class="card" style="margin-bottom:16px;">${reservasHtml}</div>
+
+    <div class="section-title" style="margin-bottom:8px;">⭐ Valoraciones recibidas</div>
+    <div class="card" style="margin-bottom:16px;">${valoracionesHtml}</div>
+  `;
+}
+
+async function adminGuardarEdicionCliente(docId){
+  const c = _adminClientes.find(x=>x._docId===docId);
+  if(!c) return;
+  const cambios = {
+    nombre: document.getElementById('acNombre').value.trim() || c.nombre,
+    telefono: document.getElementById('acTelefono').value.trim(),
+    email: document.getElementById('acEmail').value.trim(),
+    ciudad: document.getElementById('acCiudad').value.trim() || 'La Paz',
+    zona: document.getElementById('acZona').value.trim(),
+    direccion: document.getElementById('acDireccion').value.trim(),
+  };
+  try{
+    await db.collection('clientes').doc(docId).update(cambios);
+    Object.assign(c, cambios);
+    const idxLocal = state.clientes.findIndex(x=>x.id===c.id || x.uid===c.uid);
+    if(idxLocal>=0) Object.assign(state.clientes[idxLocal], cambios);
+    toast('Datos actualizados ✅');
+    adminVerCliente(docId);
+  }catch(e){ console.error(e); toast('Error al guardar.'); }
 }
 
 // ---- VENTAS ----
