@@ -1535,14 +1535,22 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-editar-cliente">
     <div class="link-back" onclick="abrirPerfil()">← Volver a mi perfil</div>
     <div class="kicker">Mi cuenta</div>
-    <h1 class="page-title">Editar mi información</h1>
-    <p class="page-sub">Completá o corregí tus datos de contacto.</p>
+    <h1 class="page-title" id="editClTitulo">Editar mi información</h1>
+    <p class="page-sub" id="editClSub">Completá o corregí tus datos de contacto.</p>
     <div class="card">
       <div class="field"><label>Nombre completo</label><input id="editClNombre" placeholder="Tu nombre"></div>
-      <div class="field"><label>Teléfono / WhatsApp</label><input id="editClTelefono" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
+      <div class="field"><label>Teléfono / WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editClTelefono" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
       <div class="field"><label>Email</label><input id="editClEmail" type="email" placeholder="tu@email.com"></div>
-      <div class="field"><label>Ciudad</label><input id="editClCiudad" placeholder="Ej: La Paz"></div>
+      <div class="two-col">
+        <div class="field"><label>Ciudad</label><input id="editClCiudad" placeholder="Ej: La Paz"></div>
+        <div class="field"><label>Barrio / Zona</label><input id="editClZona" placeholder="Ej: Centro"></div>
+      </div>
       <div class="field"><label>Dirección (para envíos)</label><input id="editClDireccion" placeholder="Calle y número"></div>
+      <div class="field">
+        <label>Ubicación exacta</label>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="marcarUbicacionCliente()" style="margin-bottom:2px;">📍 Usar mi ubicación actual</button>
+        <div id="clUbicacionEstado" style="font-size:12px;color:var(--muted);margin-top:6px;">Todavía no marcaste tu ubicación — igual podés guardar así.</div>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="guardarEdicionCliente()">Guardar cambios</button>
   </div>
@@ -3683,6 +3691,11 @@ function loginConGoogle(){
 // Si es cuenta nueva: si ya había elegido un rol en la pantalla de inicio, la crea directo con ese rol;
 // si no (ej: alguien entra por "Iniciar sesión" genérico), le pedimos que elija.
 async function manejarUsuarioGoogle(user){
+  // Google dispara el login por dos caminos a la vez (el .then() del popup/redirect
+  // y el listener onAuthStateChanged) — sin esta guarda, esta función se ejecuta dos
+  // veces para el mismo login y la segunda pasada (con rolPreElegido ya limpio) termina
+  // mandando a la pantalla de "elegí tu perfil" aunque ya se haya elegido y creado la cuenta.
+  if(state.currentUser && state.currentUser.uid === user.uid) return;
   if(esAdmin(user)){ entrarComoAdmin(user); return; }
   try{
     for(const rol of Object.keys(COL_POR_ROL)){
@@ -3727,6 +3740,7 @@ async function manejarUsuarioGoogle(user){
   }
 
   // Cuenta nueva
+  if(state.currentUser && state.currentUser.uid === user.uid) return; // la otra llamada (popup/onAuthStateChanged) ya la creó
   if(rolPreElegido){
     crearCuentaDesdeGoogle(rolPreElegido, user);
     rolPreElegido = null;
@@ -6119,13 +6133,38 @@ function guardarEdicionVendedor(){
   showScreen('v-catalogo');
 }
 
+let clienteLatLng = null;
+function marcarUbicacionCliente(){
+  const estado = document.getElementById('clUbicacionEstado');
+  if(!navigator.geolocation){ estado.textContent = 'Tu navegador no soporta geolocalización, usá la dirección como respaldo.'; return; }
+  estado.textContent = 'Buscando tu ubicación…';
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      clienteLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+      estado.textContent = '✅ Ubicación marcada correctamente.';
+    },
+    ()=>{ estado.textContent = 'No pudimos acceder a tu ubicación — usá la dirección como respaldo.'; },
+    {timeout:8000}
+  );
+}
+
 function abrirEditarCliente(){
   const cl = state.currentUser;
+  const esPrimeraCarga = (cl.telefono||'').replace(/\D/g,'').length < 8;
+  document.getElementById('editClTitulo').textContent = esPrimeraCarga ? '¡Ya casi! Completá tus datos' : 'Editar mi información';
+  document.getElementById('editClSub').textContent = esPrimeraCarga
+    ? 'Los necesitamos para que los comercios puedan contactarte y entregarte lo que reserves.'
+    : 'Completá o corregí tus datos de contacto.';
   document.getElementById('editClNombre').value = cl.nombre || '';
   document.getElementById('editClTelefono').value = cl.telefono || '';
   document.getElementById('editClEmail').value = cl.email || '';
   document.getElementById('editClCiudad').value = cl.ciudad || 'La Paz';
+  document.getElementById('editClZona').value = cl.zona || '';
   document.getElementById('editClDireccion').value = cl.direccion || '';
+  clienteLatLng = (cl.lat && cl.lng) ? {lat:cl.lat, lng:cl.lng} : null;
+  document.getElementById('clUbicacionEstado').textContent = clienteLatLng
+    ? '✅ Ya tenés una ubicación guardada — tocá el botón si querés actualizarla.'
+    : 'Todavía no marcaste tu ubicación — igual podés guardar así.';
   showScreen('editar-cliente');
 }
 
@@ -6140,7 +6179,9 @@ function guardarEdicionCliente(){
   cl.telefono = telefono;
   cl.email = document.getElementById('editClEmail').value.trim();
   cl.ciudad = document.getElementById('editClCiudad').value.trim() || 'La Paz';
+  cl.zona = document.getElementById('editClZona').value.trim();
   cl.direccion = document.getElementById('editClDireccion').value.trim();
+  if(clienteLatLng){ cl.lat = clienteLatLng.lat; cl.lng = clienteLatLng.lng; }
 
   const idx = state.clientes.findIndex(x => x.id === cl.id || x.uid === cl.uid);
   if(idx >= 0) state.clientes[idx] = cl;
