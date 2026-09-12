@@ -3373,6 +3373,15 @@ function mostrarSeleccionDeRol(){
 // ══════════════════════════════════════════════════════
 //  WIZARD DE REGISTRO DE COMERCIO
 // ══════════════════════════════════════════════════════
+const GASTRO_GRUPOS = [
+  { nombre:'Rápido y al paso',      emoji:'🍕', rubros:['Pizzería','Hamburguesería','Panchería','Lomitería','Empanadas','Rotisería'] },
+  { nombre:'Para sentarse a comer', emoji:'🍽️', rubros:['Restaurante','Parrilla','Cantina','Cocina casera','Bar y restaurante'] },
+  { nombre:'Café y algo dulce',     emoji:'☕', rubros:['Cafetería','Panadería','Pastelería','Heladería','Casa de té','Crepería'] },
+  { nombre:'Sabores del mundo',     emoji:'🌮', rubros:['Sushi','Comida mexicana','Comida árabe','Comida china','Comida peruana','Comida italiana'] },
+  { nombre:'Saludable',             emoji:'🥗', rubros:['Viandas','Ensaladas','Vegetariana','Vegana','Sin TACC'] },
+];
+const RUBROS_GASTRO_TODOS = GASTRO_GRUPOS.flatMap(g=>g.rubros);
+
 let wizardData = {};  // acumula las respuestas del wizard
 let wizardPasoActual = 1;
 
@@ -7712,15 +7721,6 @@ function renderGuiaMini(containerId, rubro, icono){
     </div>`;
   }).join('');
 }
-
-const GASTRO_GRUPOS = [
-  { nombre:'Rápido y al paso',      emoji:'🍕', rubros:['Pizzería','Hamburguesería','Panchería','Lomitería','Empanadas','Rotisería'] },
-  { nombre:'Para sentarse a comer', emoji:'🍽️', rubros:['Restaurante','Parrilla','Cantina','Cocina casera','Bar y restaurante'] },
-  { nombre:'Café y algo dulce',     emoji:'☕', rubros:['Cafetería','Panadería','Pastelería','Heladería','Casa de té','Crepería'] },
-  { nombre:'Sabores del mundo',     emoji:'🌮', rubros:['Sushi','Comida mexicana','Comida árabe','Comida china','Comida peruana','Comida italiana'] },
-  { nombre:'Saludable',             emoji:'🥗', rubros:['Viandas','Ensaladas','Vegetariana','Vegana','Sin TACC'] },
-];
-const RUBROS_GASTRO_TODOS = GASTRO_GRUPOS.flatMap(g=>g.rubros);
 
 let gastroFiltroActivo = 'Todos';
 function setGastroFiltro(nombre){ gastroFiltroActivo = nombre; renderGastronomiaGrid(); }
