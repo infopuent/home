@@ -1910,6 +1910,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <!-- Campos dinámicos según el rubro -->
       <div id="cnpAtributosRubro"></div>
+      <!-- Campo menú del día — solo visible para gastronómicos -->
+      <div class="field" id="cnpMenuDiaBox" style="display:none; background:var(--cream); border-radius:10px; padding:12px; margin-top:4px;">
+        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:600;">
+          <input type="checkbox" id="cnpMenuDia" style="width:18px; height:18px; accent-color:var(--primary); cursor:pointer;">
+          📋 Incluir en el menú del día de hoy
+        </label>
+        <div style="font-size:12px; color:var(--muted); margin-top:6px; padding-left:28px;">Aparecerá en la sección "¿Qué se te antoja?" del home junto al menú publicado.</div>
+      </div>
     </div>
     <div class="card" style="background:var(--cream);">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🚚 Envío a domicilio</div>
@@ -4641,6 +4649,12 @@ function abrirNuevoProducto(){
   document.getElementById('cnpFotoEstado').textContent = '';
   document.getElementById('cnpFotoEstado').className = 'foto-upload-estado';
   delete fotosCargadas['cnp'];
+  // Mostrar opción menú del día solo para gastronómicos
+  const esGastro = RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+  const menuDiaBox = document.getElementById('cnpMenuDiaBox');
+  if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
+  const cbMenuDia = document.getElementById('cnpMenuDia');
+  if(cbMenuDia) cbMenuDia.checked = false;
   irNuevoProductoComercio();
 }
 
@@ -4669,6 +4683,12 @@ function abrirEditarProducto(prodId){
   document.getElementById('cnpFotoBox').innerHTML = `<img src="${p.img}" alt="Foto del producto">`;
   document.getElementById('cnpFotoEstado').textContent = '✅ Foto actual — tocá la imagen para cambiarla';
   document.getElementById('cnpFotoEstado').className = 'foto-upload-estado';
+  // Mostrar opción menú del día solo para gastronómicos
+  const esGastro = RUBROS_GASTRO_TODOS.includes(state.currentUser?.rubro);
+  const menuDiaBox = document.getElementById('cnpMenuDiaBox');
+  if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
+  const cbMenuDia = document.getElementById('cnpMenuDia');
+  if(cbMenuDia) cbMenuDia.checked = !!p.enMenuDia;
   showScreen('c-nuevo-producto');
 }
 
@@ -5165,13 +5185,14 @@ function crearProductoComercio(){
   const envio = cnpEnvioVal === 'si_gratis' || cnpEnvioVal === 'si_costo';
   const envioPolitica = cnpEnvioVal;
   const caja = null;
+  const enMenuDia = !!(document.getElementById('cnpMenuDia')?.checked);
 
   const atributos = leerAtributos();
 
   if(productoEditandoId){
     const p = state.productos.find(x=>x.id===productoEditandoId);
     if(!p){ toast('No se encontró el producto'); return; }
-    Object.assign(p, {nombre, precio, comision, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos});
+    Object.assign(p, {nombre, precio, comision, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia});
     guardarProductoEnFirestore(p, c.uid);
     toast('Cambios guardados ✅');
     productoEditandoId = null;
@@ -5181,7 +5202,7 @@ function crearProductoComercio(){
     return;
   }
 
-  const p = {id: nextId('p'), comercioId:c.id, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos};
+  const p = {id: nextId('p'), comercioId:c.id, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia};
   state.productos.push(p);
   guardarProductoEnFirestore(p, c.uid);
   toast('Producto publicado en tu ficha y en el feed de La Paz ✅');
