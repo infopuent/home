@@ -6888,7 +6888,7 @@ function setCiudad(c){
 const FLUENT_BASE = 'https://cdn.jsdelivr.net/gh/shuding/fluentui-emoji-unicode/assets/';
 
 /* ─── FUENTE ÚNICA DE RUBROS ─────────────────────────────────────────────────
-   17 rubros públicos con sus subcategorías (TIPOS_POR_RUBRO).
+   19 rubros públicos con sus subcategorías (TIPOS_POR_RUBRO).
    En el registro: primero se elige el rubro, luego aparece el select de tipo.
    Los filtros del feed usan el rubro público (nivel 1).
    ─────────────────────────────────────────────────────────────────────────── */
@@ -6910,6 +6910,8 @@ const RUBROS_LIST = [
   ['Regalos y Detalles',        '1f381_3d.png'],
   ['Imprenta y Gráfica',        '1f5a8_3d.png'],
   ['Alquiler y Préstamo',       '1f527_3d.png'],
+  ['Transporte, Encomiendas y Viajes', '1f69a_3d.png'],
+  ['Caza, Pesca y Camping',     '1f3d5_3d.png'],
 ];
 
 /* ─── SUBCATEGORÍAS POR RUBRO ────────────────────────────────────────────────
@@ -7031,6 +7033,16 @@ const TIPOS_POR_RUBRO = {
     'Alquiler de herramientas',
     'Alquiler de equipos para eventos (sonido, luces, sillas, mesas)',
     'Alquiler de disfraces','Alquiler de vajilla y mantelería',
+  ],
+  'Transporte, Encomiendas y Viajes': [
+    'Remises y taxis','Combis y traslados','Transporte escolar',
+    'Encomiendas y paquetería','Fletes y mudanzas',
+    'Agencia de viajes','Excursiones y turismo','Alquiler de vehículos','Charter',
+  ],
+  'Caza, Pesca y Camping': [
+    'Pesca deportiva','Artículos de pesca y carnada','Caza',
+    'Camping y aire libre','Kayak y canotaje','Náutica',
+    'Indumentaria y calzado outdoor','Guías y excursiones',
   ],
 };
 
@@ -7245,7 +7257,7 @@ function v_ciudadOk(vendedorId){
 // ══════════════════════════════════════════════════════
 
 // Fallback: se usa solo si todavía no hay nada cargado en Firestore
-// (primer arranque, antes de correr la carga inicial). Refleja los 17 rubros
+// (primer arranque, antes de correr la carga inicial). Refleja los 19 rubros
 // actuales de RUBROS_LIST — mismo orden y nombres, con un id/ícono propio
 // para el banner del home de cada uno.
 const RUBROS_HOME_DEFAULT = [
@@ -7266,6 +7278,8 @@ const RUBROS_HOME_DEFAULT = [
   {id:'regalos',            nombre:'Regalos y Detalles',       icono:'🎁', orden:15, imagen:''},
   {id:'imprenta',           nombre:'Imprenta y Gráfica',       icono:'🖨️', orden:16, imagen:''},
   {id:'alquiler',           nombre:'Alquiler y Préstamo',      icono:'🔩', orden:17, imagen:''},
+  {id:'transporte',         nombre:'Transporte, Encomiendas y Viajes', icono:'🚚', orden:18, imagen:''},
+  {id:'caza-pesca-camping', nombre:'Caza, Pesca y Camping',    icono:'⛺', orden:19, imagen:''},
 ];
 
 // Mapea el rubro del comercio (uno de los 17 nombres exactos de RUBROS_LIST,
@@ -7290,6 +7304,8 @@ const RUBRO_A_CATEGORIA = {
   'Regalos y Detalles':'regalos',
   'Imprenta y Gráfica':'imprenta',
   'Alquiler y Préstamo':'alquiler',
+  'Transporte, Encomiendas y Viajes':'transporte',
+  'Caza, Pesca y Camping':'caza-pesca-camping',
 };
 
 function categoriaDeRubro(rubro){
@@ -7530,7 +7546,7 @@ function eliminarRubroHome(rubroId, nombreMostrado){
   if(!firebaseListo || !db){ toast('⚠️ Sin conexión a Firestore'); return; }
   const esDeLos17 = RUBROS_HOME_DEFAULT.some(r=>r.id===rubroId);
   const msg = esDeLos17
-    ? `"${nombreMostrado}" es uno de los 17 rubros actuales de la app — no se puede sacar el banner del todo, pero se le va a borrar el nombre/foto cargados y vuelve a su estado por defecto. ¿Seguimos?`
+    ? `"${nombreMostrado}" es uno de los rubros actuales de la app — no se puede sacar el banner del todo, pero se le va a borrar el nombre/foto cargados y vuelve a su estado por defecto. ¿Seguimos?`
     : `¿Eliminar el rubro "${nombreMostrado}" del home? Esta acción no se puede deshacer.`;
   if(!confirm(msg)) return;
   db.collection('rubrosHome').doc(rubroId).delete()
