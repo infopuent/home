@@ -10021,6 +10021,13 @@ async function adminVerComercio(docId){
         </div>
         <input type="file" id="apFotoInput" accept="image/*" style="display:none" onchange="onAdminFotoProducto(this)">
       </div>
+      <div class="field" id="apMenuDiaBox" style="display:none; background:var(--cream); border-radius:10px; padding:12px;">
+        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:600;">
+          <input type="checkbox" id="apMenuDia" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;">
+          📋 Incluir en el menú del día de hoy
+        </label>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px; padding-left:26px;">Aparece en la info del local para que el cliente vea el menú del día.</div>
+      </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button class="btn btn-primary" style="flex:1;" onclick="adminGuardarProductoEnComercio('${docId}')">Guardar</button>
         <button class="btn btn-ghost" onclick="adminCerrarFormProducto()">Cancelar</button>
@@ -10235,6 +10242,12 @@ function adminAbrirFormProducto(docId){
   const titulo = document.getElementById('apFormTitulo'); if(titulo) titulo.textContent='Nuevo producto';
   ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
   adminLimpiarFotoProducto();
+  const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+  const esGastro = c && RUBROS_GASTRO_TODOS.includes(c.rubro);
+  const menuDiaBox = document.getElementById('apMenuDiaBox');
+  if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
+  const cbMenuDia = document.getElementById('apMenuDia');
+  if(cbMenuDia) cbMenuDia.checked = false;
   const box = document.getElementById('adminFormProductoBox');
   if(box) box.style.display = (box.style.display==='none'||!box.style.display) ? 'block' : 'none';
 }
@@ -10255,6 +10268,12 @@ async function adminEditarProducto(firestoreId, comercioId){
   if(fn('apComision'))   fn('apComision').value   = p.comision||0;
   if(fn('apDescripcion'))fn('apDescripcion').value = p.descripcion||'';
   if(fn('apFotoNombre')) fn('apFotoNombre').textContent = p.img ? 'Foto actual cargada' : '';
+  const c2 = _adminComercios.find(x=>x.id===comercioId || (x._docId||x.id)===comercioId);
+  const esGastro2 = c2 && RUBROS_GASTRO_TODOS.includes(c2.rubro);
+  const menuDiaBox2 = fn('apMenuDiaBox');
+  if(menuDiaBox2) menuDiaBox2.style.display = esGastro2 ? 'block' : 'none';
+  const cbMenuDia2 = fn('apMenuDia');
+  if(cbMenuDia2) cbMenuDia2.checked = !!p.enMenuDia;
   const prev = fn('apFotoPreviewBox');
   const img  = fn('apFotoPreviewImg');
   if(p.img && prev && img){ img.src=p.img; prev.style.display='block'; } else if(prev) prev.style.display='none';
@@ -10272,9 +10291,10 @@ async function adminGuardarProductoEnComercio(docId){
   const comision   = parseFloat(document.getElementById('apComision')?.value)||0;
   const descripcion = (document.getElementById('apDescripcion')?.value||'').trim();
   const editId = document.getElementById('apEditId')?.value || '';
+  const enMenuDia = !!(document.getElementById('apMenuDia')?.checked);
 
   const prod = {
-    nombre, precio, comision, descripcion,
+    nombre, precio, comision, descripcion, enMenuDia,
     img: _adminFotoProducto !== undefined ? _adminFotoProducto : null,
     origen:'comercio', rubro: c.rubro||'',
     ownerUid: c.uid || c.id,
