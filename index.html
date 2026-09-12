@@ -8466,7 +8466,8 @@ function renderOfertaTabs(p, c){
         ${(c.telefono && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
         ${esFree ? '' : `<button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>`}
         ${(()=>{
-          const tieneMenuDia = c.wizardData?.menuDelDia !== 'No' || c.menuDelDia;
+          const esGastroMenu = c.tipo === 'gastronomia' || RUBROS_GASTRO_TODOS.includes(c.rubro);
+          const tieneMenuDia = esGastroMenu && (c.wizardData?.menuDelDia !== 'No' || c.menuDelDia);
           const hoy = hoyISO();
           const menu = c.menuDelDia;
           const publicadoHoy = menu && menu.fecha === hoy && (menu.texto || menu.foto);
