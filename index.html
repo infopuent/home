@@ -10347,12 +10347,12 @@ async function adminCargarStats(){
 let _adminComercios = [];
 async function adminCargarComercios(){
   const el = document.getElementById('adminComerciosList');
-  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  if(el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
     const snap = await db.collection('comercios').get();
     _adminComercios = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(c=>c.estado!=='papelera');
-    adminRenderComercios(_adminComercios);
-  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
+    if(el) adminRenderComercios(_adminComercios);
+  }catch(e){ if(el) el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
 }
 
 function adminFiltrarComercios(filtro){
@@ -11026,12 +11026,12 @@ let _adminVendedores = [];
 let _adminVendedorActual = null;
 async function adminCargarVendedores(){
   const el = document.getElementById('adminVendedoresList');
-  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  if(el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
     const snap = await db.collection('vendedores').get();
     _adminVendedores = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(v=>v.estado!=='papelera');
-    adminRenderVendedores(_adminVendedores);
-  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
+    if(el) adminRenderVendedores(_adminVendedores);
+  }catch(e){ if(el) el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
 }
 
 function adminFiltrarVendedores(filtro){
@@ -11260,12 +11260,12 @@ let _adminClientesFiltro = 'todos';
 
 async function adminCargarClientes(){
   const el = document.getElementById('adminClientesList');
-  el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  if(el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
     const snap = await db.collection('clientes').get();
     _adminClientes = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(c=>c.estado!=='papelera');
-    adminAplicarFiltrosClientes();
-  }catch(e){ el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
+    if(el) adminAplicarFiltrosClientes();
+  }catch(e){ if(el) el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
 }
 
 function adminBuscarCliente(q){ _adminClientesBusqueda = q; adminAplicarFiltrosClientes(); }
