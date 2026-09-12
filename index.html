@@ -1851,6 +1851,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="divider"></div>
     <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">Historial de ventas confirmadas</div>
     <div id="cHistorial"></div>
+    <div class="divider"></div>
+    <div id="cBajaSolicitadaBox"></div>
+    <div style="height:16px;"></div>
   </div>
 
   <!-- ============ COMERCIO: MENÚ DEL DÍA ============ -->
@@ -2305,6 +2308,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="btn-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <button class="btn-tile btn-tile-sage" onclick="showScreen('admin-comercios');adminCargarComercios()"><i class="ti ti-building-store ic"></i>Comercios</button>
+        <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-productos');admCargarProductosAdmin()"><i class="ti ti-package ic"></i>Productos</button>
         <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-vendedores');adminCargarVendedores()"><i class="ti ti-users ic"></i>ConectorT</button>
         <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-clientes');adminCargarClientes()"><i class="ti ti-user ic"></i>Clientes</button>
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
@@ -2330,6 +2334,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">General</div>
           <button class="adm-nav active" id="admNav-dashboard" onclick="adminDesktopTab('dashboard')"><i class="ti ti-layout-dashboard" style="font-size:16px;"></i>Dashboard</button>
           <button class="adm-nav" id="admNav-comercios" onclick="adminDesktopTab('comercios')"><i class="ti ti-building-store" style="font-size:16px;"></i>Comercios</button>
+          <button class="adm-nav" id="admNav-productos" onclick="adminDesktopTab('productos')"><i class="ti ti-package" style="font-size:16px;"></i>Productos</button>
           <button class="adm-nav" id="admNav-vendedores" onclick="adminDesktopTab('vendedores')"><i class="ti ti-users" style="font-size:16px;"></i>ConectorT</button>
           <button class="adm-nav" id="admNav-clientes" onclick="adminDesktopTab('clientes')"><i class="ti ti-user" style="font-size:16px;"></i>Clientes</button>
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Operaciones</div>
@@ -2377,6 +2382,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       .adm-badge.orange{background:#FFF3E8;color:#CC4400;}
       .adm-badge.red{background:#FDE8E8;color:#A32020;}
       .adm-badge.gray{background:#F0F0EE;color:#666;}
+      .adm-badge.bordo{background:#F5E6E6;color:#7A1A1A;}
       .adm-btn{font-size:11px;font-weight:700;color:#FF6600;background:none;border:1px solid #FFD4A8;border-radius:6px;padding:4px 10px;cursor:pointer;}
       .adm-section{background:#fff;border:1px solid #E8E8E4;border-radius:12px;overflow:hidden;margin-bottom:16px;}
       .adm-section-hdr{padding:12px 16px;border-bottom:1px solid #E8E8E4;font-size:10.5px;font-weight:800;color:#AAA;text-transform:uppercase;letter-spacing:.06em;background:#FAFAF8;}
@@ -2517,14 +2523,32 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
   </div>
 
+  <!-- ============ SCREEN: ADMIN PRODUCTOS ============ -->
+  <div class="screen hidden" id="screen-admin-productos">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">Productos publicados</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <input id="admProdSearch" class="adm-search" style="flex:1;min-width:160px;margin:0;" placeholder="Buscar por nombre o comercio…" oninput="admFiltrarProductosAdmin()">
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="admSetFiltroProd('todos',this)" style="flex:1;">Todos</button>
+      <button class="btn btn-ghost btn-sm" onclick="admSetFiltroProd('rubro',this)" style="flex:1;">Por rubro</button>
+      <select id="admProdFiltroRubro" onchange="admFiltrarProductosAdmin()" style="flex:1;padding:7px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:12px;font-weight:600;background:#fff;">
+        <option value="">— Todos los rubros —</option>
+      </select>
+    </div>
+    <div id="admProductosList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+  </div>
+
   <!-- ============ SCREEN: ADMIN COMERCIOS ============ -->
   <div class="screen hidden" id="screen-admin-comercios">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
     <div class="page-title">Comercios</div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" id="adminFiltroTodos" onclick="adminFiltrarComercios('todos')" style="flex:1;">Todos</button>
       <button class="btn btn-ghost btn-sm" id="adminFiltroPendientes" onclick="adminFiltrarComercios('pendientes')" style="flex:1;">Pendientes</button>
       <button class="btn btn-ghost btn-sm" id="adminFiltroActivos" onclick="adminFiltrarComercios('activos')" style="flex:1;">Activos</button>
+      <button class="btn btn-ghost btn-sm" id="adminFiltroBaja" onclick="adminFiltrarComercios('baja')" style="flex:1;color:#7A1A1A;border-color:#d4a0a0;">🔴 Baja</button>
     </div>
     <div id="adminComerciosList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
   </div>
@@ -6366,6 +6390,7 @@ function renderComercioPanel(){
   renderProductosPropios();
   renderPedidosProducto();
   renderCAlertasComercio();
+  renderCBajaSolicitadaBox();
   // Mostrar botón de Menú del día solo a comercios gastronómicos
   const btnMenu = document.getElementById('btnMenuDia');
   if(btnMenu){
@@ -9611,13 +9636,14 @@ function adminDesktopTab(tab){
   document.querySelectorAll('.adm-nav').forEach(b=>b.classList.remove('active'));
   const navBtn = document.getElementById('admNav-'+tab);
   if(navBtn) navBtn.classList.add('active');
-  const titles = {dashboard:'Dashboard',comercios:'Comercios',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home'};
+  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home'};
   document.getElementById('admDesktopTitle').textContent = titles[tab]||tab;
   document.getElementById('admDesktopBadge').innerHTML = '';
   const cont = document.getElementById('admDesktopContent');
   cont.innerHTML = '<p style="color:#AAA;font-size:13px;padding:20px 0;">Cargando…</p>';
   if(tab==='dashboard')         admRenderDashboard();
   else if(tab==='comercios')    admRenderComerciosDesktop();
+  else if(tab==='productos')    admRenderProductosDesktop();
   else if(tab==='vendedores')   admRenderVendedoresDesktop();
   else if(tab==='clientes')     admRenderClientesDesktop();
   else if(tab==='ventas')       admRenderVentasDesktop();
@@ -9668,6 +9694,103 @@ async function admRenderDashboard(){
   }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
 }
 
+/* ===== ADMIN: PRODUCTOS PUBLICADOS ===== */
+let _admTodosProductos = [];
+let _admFiltroProd = 'todos';
+
+async function admCargarProductosAdmin(){
+  const esDesktop = window.innerWidth >= 900;
+  const contId = esDesktop ? 'admDesktopContent' : 'admProductosList';
+  const cont = document.getElementById(contId);
+  if(!cont) return;
+  if(!esDesktop) cont.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  try{
+    const [snapProd, snapCom] = await Promise.all([
+      db.collection('productos').get(),
+      db.collection('comercios').get()
+    ]);
+    const comerciosMap = {};
+    snapCom.docs.forEach(d=>{ const c=d.data(); comerciosMap[c.id||d.id]=c.nombre||'—'; });
+    _admTodosProductos = snapProd.docs.map(d=>({...d.data(), _docId:d.id, _comercioNombre: comerciosMap[d.data().comercioId]||d.data().comercioId||'—'}));
+    // Llenar select de rubros
+    const rubros = [...new Set(_admTodosProductos.map(p=>p.rubro).filter(Boolean))].sort();
+    ['admProdFiltroRubro'].forEach(id=>{
+      const sel = document.getElementById(id);
+      if(sel) sel.innerHTML = '<option value="">— Todos los rubros —</option>' + rubros.map(r=>`<option value="${r}">${r}</option>`).join('');
+    });
+    admRenderProductosAdmin();
+  }catch(e){ cont.innerHTML = `<p style="color:red;font-size:13px;">Error: ${e.message}</p>`; }
+}
+
+function admSetFiltroProd(f, btn){
+  _admFiltroProd = f;
+  document.querySelectorAll('#screen-admin-productos .btn').forEach(b=>b.style.fontWeight='');
+  if(btn) btn.style.fontWeight='800';
+  admFiltrarProductosAdmin();
+}
+
+function admFiltrarProductosAdmin(){
+  admRenderProductosAdmin();
+}
+
+function admRenderProductosAdmin(){
+  const esDesktop = window.innerWidth >= 900;
+  const cont = document.getElementById(esDesktop ? 'admDesktopContent' : 'admProductosList');
+  if(!cont) return;
+  const q = (document.getElementById('admProdSearch')?.value||'').toLowerCase();
+  const rubroFiltro = document.getElementById('admProdFiltroRubro')?.value||'';
+  let lista = _admTodosProductos.filter(p=>p.origen==='comercio'||!p.origen);
+  if(q) lista = lista.filter(p=>(p.nombre||'').toLowerCase().includes(q)||(p._comercioNombre||'').toLowerCase().includes(q));
+  if(rubroFiltro) lista = lista.filter(p=>p.rubro===rubroFiltro);
+  if(!lista.length){
+    cont.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:20px 0;">Sin productos.</p>';
+    return;
+  }
+  const filas = lista.map(p=>{
+    const foto = p.img ? `<img src="${p.img}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;">` : `<div style="width:44px;height:44px;border-radius:8px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🛍️</div>`;
+    const docId = p._docId;
+    const nombreSafe = (p.nombre||'').replace(/'/g,"&#39;");
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line);">
+      ${foto}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'Sin nombre'}</div>
+        <div style="font-size:11px;color:var(--muted);">${p._comercioNombre} · ${p.rubro||'—'}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--primary);">$${Number(p.precio||0).toLocaleString('es-AR')}</div>
+      </div>
+      <button class="adm-btn" style="color:#c23b3b;border-color:#f0d0d0;white-space:nowrap;" onclick="admEliminarProductoAdmin('${docId}','${nombreSafe}')">🗑️ Eliminar</button>
+    </div>`;
+  }).join('');
+
+  if(esDesktop){
+    cont.innerHTML = `
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+        <input id="admProdSearch" class="adm-search" style="max-width:260px;margin:0;" placeholder="Buscar por nombre o comercio…" oninput="admRenderProductosAdmin()">
+        <select id="admProdFiltroRubro" onchange="admRenderProductosAdmin()" style="padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;background:#fff;">
+          <option value="">— Todos los rubros —</option>
+          ${[...new Set(_admTodosProductos.map(p=>p.rubro).filter(Boolean))].sort().map(r=>`<option value="${r}"${r===rubroFiltro?' selected':''}>${r}</option>`).join('')}
+        </select>
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">${lista.length} producto${lista.length!==1?'s':''}</span>
+      </div>
+      <div class="adm-section" style="padding:0 16px;">${filas}</div>`;
+  } else {
+    cont.innerHTML = `<div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;">${lista.length} producto${lista.length!==1?'s':''}</div>${filas}`;
+  }
+}
+
+async function admEliminarProductoAdmin(docId, nombre){
+  if(!confirm(`¿Eliminar el producto "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  try{
+    await db.collection('productos').doc(docId).delete();
+    _admTodosProductos = _admTodosProductos.filter(p=>p._docId!==docId);
+    toast('Producto eliminado.');
+    admRenderProductosAdmin();
+  }catch(e){ toast('Error al eliminar: '+e.message); }
+}
+
+async function admRenderProductosDesktop(){
+  await admCargarProductosAdmin();
+}
+
 async function admRenderComerciosDesktop(){
   const cont=document.getElementById('admDesktopContent');
   try{
@@ -9680,6 +9803,7 @@ async function admRenderComerciosDesktop(){
         <button class="adm-filter-btn" onclick="admSetFiltroComercio('activos',this)">Activos</button>
         <button class="adm-filter-btn" onclick="admSetFiltroComercio('pendientes',this)">Pendientes</button>
         <button class="adm-filter-btn" onclick="admSetFiltroComercio('vencidos',this)">Vencidos</button>
+        <button class="adm-filter-btn" onclick="admSetFiltroComercio('baja',this)" style="color:#7A1A1A;border-color:#d4a0a0;">🔴 Baja solicitada</button>
       </div>
       <div class="adm-section"><table class="adm-table"><thead><tr><th>Comercio</th><th>Rubro</th><th>Tipo</th><th>Plan</th><th>Días restantes</th><th>Estado</th><th></th></tr></thead>
       <tbody id="admTbodyComercios">${admRowsComercios(_adminComercios)}</tbody></table></div>`;
@@ -9695,9 +9819,10 @@ function admSetFiltroComercio(f,btn){
 }
 function admFiltrarComerciosDesktop(q){
   let lista=[..._adminComercios];
-  if(window._admFiltroComercio==='activos')    lista=lista.filter(c=>c.aprobado&&(planDiasRestantes(c)!==null?planDiasRestantes(c)>=0:true));
-  if(window._admFiltroComercio==='pendientes') lista=lista.filter(c=>!c.aprobado);
-  if(window._admFiltroComercio==='vencidos')   lista=lista.filter(c=>{const d=planDiasRestantes(c);return d!==null&&d<0;});
+  if(window._admFiltroComercio==='activos')    lista=lista.filter(c=>c.aprobado&&c.estado!=='baja_solicitada'&&(planDiasRestantes(c)!==null?planDiasRestantes(c)>=0:true));
+  if(window._admFiltroComercio==='pendientes') lista=lista.filter(c=>!c.aprobado&&c.estado!=='baja_solicitada');
+  if(window._admFiltroComercio==='vencidos')   lista=lista.filter(c=>{const d=planDiasRestantes(c);return d!==null&&d<0&&c.estado!=='baja_solicitada';});
+  if(window._admFiltroComercio==='baja')       lista=lista.filter(c=>c.estado==='baja_solicitada');
   if(q) lista=lista.filter(c=>(c.nombre||'').toLowerCase().includes(q.toLowerCase()));
   const el=document.getElementById('admTbodyComercios');
   if(el) el.innerHTML=admRowsComercios(lista);
@@ -9706,15 +9831,17 @@ function admRowsComercios(lista){
   if(!lista||!lista.length) return '<tr><td colspan="7" style="color:#AAA;text-align:center;padding:24px;">Sin resultados</td></tr>';
   return lista.map(c=>{
     const dias=planDiasRestantes(c);
-    const badge=!c.aprobado?'<span class="adm-badge gray">Pendiente</span>':dias===null?'<span class="adm-badge green">Activo</span>':dias<0?'<span class="adm-badge red">Vencido</span>':dias<=7?`<span class="adm-badge orange">Vence en ${dias}d</span>`:'<span class="adm-badge green">Activo</span>';
+    const esBaja=c.estado==='baja_solicitada';
+    const badge=esBaja?'<span class="adm-badge bordo">🔴 Baja solicitada</span>':!c.aprobado?'<span class="adm-badge gray">Pendiente</span>':dias===null?'<span class="adm-badge green">Activo</span>':dias<0?'<span class="adm-badge red">Vencido</span>':dias<=7?`<span class="adm-badge orange">Vence en ${dias}d</span>`:'<span class="adm-badge green">Activo</span>';
     const plan=c.plan==='fijo'?'Fijo $20k':c.plan==='comision'?`Com. ${c.comisionPct||5}%`:c.plan||'Gracia';
     const diasTxt=dias===null?'&mdash;':dias<0?`Vencido hace ${Math.abs(dias)}d`:`${dias} días`;
     const id=c._docId||c.id;
     const nombreSafe=(c.nombre||'').replace(/'/g,"\\'");
-    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;"><td style="font-weight:700;">${c.nombre||'&mdash;'}</td><td style="color:#888;">${c.rubro||'&mdash;'}</td><td style="color:#888;">${c.tipo||'&mdash;'}</td><td style="color:#888;">${plan}</td><td style="color:#888;">${diasTxt}</td><td>${badge}</td><td style="white-space:nowrap;">
+    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;${esBaja?'background:#fdf4f4;':''}"><td style="font-weight:700;">${c.nombre||'&mdash;'}</td><td style="color:#888;">${c.rubro||'&mdash;'}</td><td style="color:#888;">${c.tipo||'&mdash;'}</td><td style="color:#888;">${plan}</td><td style="color:#888;">${diasTxt}</td><td>${badge}</td><td style="white-space:nowrap;">
       <button class="adm-btn" onclick="event.stopPropagation();admAbrirComercioDetalle('${id}')">Ver &rarr;</button>
       <button class="adm-btn" onclick="event.stopPropagation();admEditarComercio('${id}')">✏️ Editar</button>
       <button class="adm-btn" style="color:#c23b3b;" onclick="event.stopPropagation();admEliminarComercio('${id}','${nombreSafe}')">🗑️ Eliminar</button>
+      <button class="adm-btn" style="color:#7A1A1A;border-color:#d4a0a0;" onclick="event.stopPropagation();admEliminarDefinitivo('${id}','${nombreSafe}')">💀 Def.</button>
     </td></tr>`;
   }).join('');
 }
@@ -10090,8 +10217,9 @@ async function adminCargarComercios(){
 
 function adminFiltrarComercios(filtro){
   let lista = _adminComercios;
-  if(filtro==='pendientes') lista = lista.filter(c=>!c.aprobado);
-  if(filtro==='activos') lista = lista.filter(c=>c.aprobado);
+  if(filtro==='pendientes') lista = lista.filter(c=>!c.aprobado && c.estado!=='baja_solicitada');
+  if(filtro==='activos')    lista = lista.filter(c=>c.aprobado && c.estado!=='baja_solicitada');
+  if(filtro==='baja')       lista = lista.filter(c=>c.estado==='baja_solicitada');
   adminRenderComercios(lista);
 }
 
@@ -10101,9 +10229,10 @@ function adminRenderComercios(lista){
   el.innerHTML = lista.map(c=>{
     const docId = c._docId || c.id;
     const nombreSafe = (c.nombre||'').replace(/'/g,'&#39;');
-    const badgeBg = c.aprobado ? '#E3F3EA' : '#FBF1DC';
-    const badgeColor = c.aprobado ? '#2F7A55' : '#93732A';
-    const badgeLabel = c.aprobado ? 'Activo' : 'Pendiente';
+    const esBaja = c.estado === 'baja_solicitada';
+    const badgeBg    = esBaja ? '#F5E6E6' : c.aprobado ? '#E3F3EA' : '#FBF1DC';
+    const badgeColor = esBaja ? '#7A1A1A' : c.aprobado ? '#2F7A55' : '#93732A';
+    const badgeLabel = esBaja ? '🔴 Baja solicitada' : c.aprobado ? 'Activo' : 'Pendiente';
     // Semáforo de plan (mismo criterio que "Planes y pagos")
     const diasPlan = c.plan ? planDiasRestantes(c) : null;
     const esGraciaPlan = c.plan && !c.pagos?.length;
@@ -10139,6 +10268,7 @@ function adminRenderComercios(lista){
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="admEditarComercio('${docId}')">✏️ Editar</button>
         ${btnAprobar}
         <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="admEliminarComercio('${docId}','${nombreSafe}')">🗑️ Eliminar</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;color:#7A1A1A;border-color:#d4a0a0;background:#fdf4f4;" onclick="admEliminarDefinitivo('${docId}','${nombreSafe}')">💀 Eliminar def.</button>
       </div>
     </div>`;
   }).join('');
@@ -10253,10 +10383,12 @@ async function adminVerComercio(docId){
       </div>
     </div>
 
+    ${c.estado==='baja_solicitada' ? `<div style="background:#F5E6E6;border:1.5px solid #d4a0a0;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;font-weight:700;color:#7A1A1A;">🔴 Este comercio solicitó la baja de la plataforma.</div>` : ''}
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="admEditarComercio('${docId}')">✏️ Editar datos</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminRenovarPublicidad('${docId}')">📅 Renovar publicidad</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="admEliminarComercio('${docId}','${(c.nombre||'').replace(/'/g,'&#39;')}')">🗑️ Eliminar</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;color:#7A1A1A;border-color:#d4a0a0;background:#fdf4f4;" onclick="admEliminarDefinitivo('${docId}','${(c.nombre||'').replace(/'/g,'&#39;')}')">💀 Eliminar definitivamente</button>
     </div>
 
     <div class="card" style="padding:4px 16px;margin-bottom:16px;">
@@ -10722,6 +10854,31 @@ async function adminEliminarComercio(docId, nombre, desktop){
     if(desktop) admRenderComerciosDesktop();
     else adminCargarComercios();
   }catch(e){ toast('Error al eliminar.'); }
+}
+
+function admEliminarDefinitivo(docId, nombre){
+  adminEliminarDefinitivo(docId, nombre, window.innerWidth>=900);
+}
+
+async function adminEliminarDefinitivo(docId, nombre, desktop){
+  if(!confirm(`⚠️ ELIMINAR DEFINITIVAMENTE "${nombre}"\n\nEsto borrará:\n• El comercio\n• Todos sus productos\n\nNO borrará el historial de ventas.\n\n¿Confirmar? No hay vuelta atrás.`)) return;
+  try{
+    // Borrar todos los productos del comercio
+    const snapProd = await db.collection('productos').where('comercioId','==', docId).get();
+    const batch = db.batch();
+    snapProd.docs.forEach(d => batch.delete(d.ref));
+    // También buscar por el id interno (campo 'id' del comercio, no el docId)
+    const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+    if(c && c.id && c.id !== docId){
+      const snapProd2 = await db.collection('productos').where('comercioId','==', c.id).get();
+      snapProd2.docs.forEach(d => batch.delete(d.ref));
+    }
+    batch.delete(db.collection('comercios').doc(docId));
+    await batch.commit();
+    toast(`✅ "${nombre}" y sus productos fueron eliminados.`);
+    if(desktop) admRenderComerciosDesktop();
+    else adminCargarComercios();
+  }catch(e){ console.error(e); toast('Error al eliminar: ' + e.message); }
 }
 
 // ---- VENDEDORES (ConectorT) ----
@@ -13439,7 +13596,42 @@ function cCancelarVentaPendiente(ventaId){
     </div>
   </div>
   <script>
-    function srTMinimizar(ev){
+    /* ===== SOLICITAR BAJA (comercio) ===== */
+  function renderCBajaSolicitadaBox(){
+    const el = document.getElementById('cBajaSolicitadaBox');
+    if(!el) return;
+    const c = state.currentUser;
+    if(!c) return;
+    if(c.estado === 'baja_solicitada'){
+      el.innerHTML = `
+        <div style="background:#F5E6E6;border:1.5px solid #d4a0a0;border-radius:12px;padding:14px 16px;">
+          <div style="font-size:13px;font-weight:800;color:#7A1A1A;margin-bottom:4px;">🔴 Solicitud de baja enviada</div>
+          <div style="font-size:12px;color:#7A1A1A;line-height:1.5;">Tu solicitud fue recibida. El equipo de PuenT la va a procesar en los próximos días y te va a contactar para confirmar.</div>
+        </div>`;
+    } else {
+      el.innerHTML = `
+        <div style="text-align:center;padding:8px 0 4px;">
+          <button onclick="solicitarBajaComercio()" style="background:none;border:none;font-size:12px;color:#999;text-decoration:underline;cursor:pointer;">Solicitar baja de PuenT</button>
+        </div>`;
+    }
+  }
+
+  async function solicitarBajaComercio(){
+    const c = state.currentUser;
+    if(!c) return;
+    if(!confirm('¿Querés solicitar la baja de tu comercio en PuenT?\n\nEl equipo va a revisar tu solicitud y te va a contactar para confirmar. Tus datos no se borran de inmediato.')) return;
+    try{
+      await db.collection('comercios').doc(c._docId || c.id).update({
+        estado: 'baja_solicitada',
+        fechaBajaSolicitada: new Date().toISOString()
+      });
+      state.currentUser.estado = 'baja_solicitada';
+      renderCBajaSolicitadaBox();
+      toast('✅ Solicitud de baja enviada. Te vamos a contactar pronto.');
+    }catch(e){ console.error(e); toast('Error al enviar la solicitud.'); }
+  }
+
+  function srTMinimizar(ev){
       ev.stopPropagation();
       localStorage.setItem('srTMinimizado','1');
       document.getElementById('srTFloatBig').style.display = 'none';
