@@ -9707,7 +9707,7 @@ async function admRenderDashboard(){
   const cont=document.getElementById('admDesktopContent');
   try{
     const [cs,vs,vts,cls,msgs]=await Promise.all([db.collection('comercios').get(),db.collection('vendedores').get(),db.collection('ventas').get(),db.collection('clientes').get(),db.collection('mensajes_admin').get()]);
-    const comercios=cs.docs.map(d=>({...d.data(),_docId:d.id}));
+    const comercios=cs.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera');
     const ventas=vts.docs.map(d=>({...d.data(),_docId:d.id}));
     const ahora=new Date(),inicioMes=new Date(ahora.getFullYear(),ahora.getMonth(),1);
     const totalMes=ventas.filter(v=>v.fecha&&v.fecha.toDate&&v.fecha.toDate()>=inicioMes).reduce((a,v)=>a+(v.monto||0),0);
@@ -9719,7 +9719,7 @@ async function admRenderDashboard(){
     _adminComercios=comercios;
     cont.innerHTML=`
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
-        <div class="adm-stat"><div class="val">${cs.size}</div><div class="lbl">Comercios registrados</div></div>
+        <div class="adm-stat"><div class="val">${comercios.length}</div><div class="lbl">Comercios registrados</div></div>
         <div class="adm-stat"><div class="val">${vs.size}</div><div class="lbl">ConectorT</div></div>
         <div class="adm-stat"><div class="val">${cls.size}</div><div class="lbl">Clientes registrados</div></div>
         <div class="adm-stat"><div class="val">${vts.size}</div><div class="lbl">Ventas totales</div></div>
@@ -9968,7 +9968,7 @@ async function admRenderComerciosDesktop(){
   const cont=document.getElementById('admDesktopContent');
   try{
     const snap=await db.collection('comercios').get();
-    _adminComercios=snap.docs.map(d=>({...d.data(),_docId:d.id}));
+    _adminComercios=snap.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera');
     cont.innerHTML=`
       <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
         <input class="adm-search" style="max-width:260px;margin:0;" placeholder="Buscar comercio…" oninput="admFiltrarComerciosDesktop(this.value)" id="admSearchComercio">
@@ -10857,8 +10857,9 @@ async function adminRenderProductosComercio(comercioId){
   if(!el) return;
   try{
     const snap = await db.collection('productos').where('comercioId','==',comercioId).get();
-    if(snap.empty){ el.innerHTML='<p style="color:var(--muted);font-size:12px;">Sin productos cargados aún.</p>'; return; }
-    el.innerHTML = snap.docs.map(d=>{
+    const docs = snap.docs.filter(d=>d.data().estado!=='papelera');
+    if(!docs.length){ el.innerHTML='<p style="color:var(--muted);font-size:12px;">Sin productos cargados aún.</p>'; return; }
+    el.innerHTML = docs.map(d=>{
       const p = d.data();
       const foto = p.img
         ? `<img src="${p.img}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;cursor:pointer;" onclick="adminVerFotoProducto('${d.id}')">`
