@@ -2314,7 +2314,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-vendedores');adminCargarVendedores()"><i class="ti ti-users ic"></i>ConectorT</button>
         <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-clientes');adminCargarClientes()"><i class="ti ti-user ic"></i>Clientes</button>
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
-        <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes')"><i class="ti ti-message-2 ic"></i>Mensajes</button>
+        <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes');adminCargarMensajesEnviados()"><i class="ti ti-message-2 ic"></i>Mensajes</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-papelera');admCargarPapelera()"><i class="ti ti-trash ic"></i>🗑️ Papelera</button>
@@ -9679,6 +9679,7 @@ function adminDesktopTab(tab){
   else if(tab==='productos')    admRenderProductosDesktop();
   else if(tab==='papelera')    admRenderPapeleraDesktop();
   else if(tab==='clientes')     admRenderClientesDesktop();
+  else if(tab==='vendedores')   admRenderVendedoresDesktop();
   else if(tab==='ventas')       admRenderVentasDesktop();
   else if(tab==='planes')       admRenderPlanesDesktop();
   else if(tab==='repartidores') admRenderRepartidoresDesktop();
