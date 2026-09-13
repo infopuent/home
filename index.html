@@ -1966,17 +1966,25 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="field">
         <label>Categoría en el home</label>
         <select id="cnpCategoria">
-          <option value="comida">🍽️ Comida</option>
-          <option value="indumentaria">👗 Indumentaria</option>
-          <option value="hogar">🏠 Hogar</option>
-          <option value="salud">💊 Salud</option>
-          <option value="mascotas">🐾 Mascotas</option>
-          <option value="repuestos">🔧 Repuestos</option>
-          <option value="agencia">🚗 Agencia</option>
+          <option value="gastronomia">🍽️ Gastronomía</option>
+          <option value="belleza">💅 Belleza y Estética</option>
+          <option value="hogar">🏠 Hogar y Construcción</option>
+          <option value="almacen">🛒 Almacén y Alimentos</option>
+          <option value="indumentaria">👗 Indumentaria y Calzado</option>
+          <option value="salud">💊 Salud y Farmacia</option>
+          <option value="automotor">🚗 Automotor</option>
+          <option value="agro-mascotas">🐾 Agro y Mascotas</option>
           <option value="tecnologia">💻 Tecnología</option>
-          <option value="servicios">🏢 Servicios</option>
-          <option value="almacen">🛒 Almacén</option>
-          <option value="otros">➕ Más</option>
+          <option value="educacion">📚 Educación y Librerías</option>
+          <option value="deportes">⚽ Deportes y Recreación</option>
+          <option value="inmobiliarias">🏡 Inmobiliarias y Turismo</option>
+          <option value="servicios-prof">💼 Servicios Profesionales</option>
+          <option value="servicios-varios">🧰 Servicios Varios</option>
+          <option value="regalos">🎁 Regalos y Detalles</option>
+          <option value="imprenta">🖨️ Imprenta y Gráfica</option>
+          <option value="alquiler">🔩 Alquiler y Préstamo</option>
+          <option value="transporte">🚚 Transporte, Encomiendas y Viajes</option>
+          <option value="caza-pesca-camping">⛺ Caza, Pesca y Camping</option>
         </select>
       </div>
       <!-- Campos dinámicos según el rubro -->
@@ -4084,6 +4092,7 @@ async function cargarDatosPublicosDeFirestore(){
   renderFeedVendedores();
   renderExploraCiudad();
   renderLocales();
+  migrarCategorias();
 }
 // Por si Firebase ya había terminado de cargar antes de que este script se ejecutara.
 if(firebaseListo) onFirebaseReady();
@@ -7672,22 +7681,28 @@ function guardarRubroNuevo(prefix){
     .catch(e=>{ console.error(e); toast('No se pudo guardar el rubro'); });
 }
 
-// Migrar productos existentes sin categoría
+// Migrar productos existentes sin categoría o con una categoría vieja/inválida
+// (por ejemplo, cargados cuando el select de categoría tenía las 11 opciones
+// viejas en vez de las 19 actuales — quedaban con "comida", "mascotas", etc.,
+// que ya no existen como banner y por eso el producto no aparecía en ningún lado).
 async function migrarCategorias(){
   if(!firebaseListo || !db) return;
   try{
+    const validas = new Set(RUBROS_HOME_DEFAULT.map(r=>r.id));
     const snap = await db.collection('productos').get();
     const batch = db.batch();
     let count = 0;
     snap.docs.forEach(doc=>{
       const p = doc.data();
-      if(!p.categoria){
+      if(!p.categoria || !validas.has(p.categoria)){
         const cat = categoriaDeRubro(p.rubro || '');
         batch.update(doc.ref, {categoria: cat});
         count++;
+        const idxEnMemoria = state.productos.findIndex(x=>x.id===(p.id||doc.id));
+        if(idxEnMemoria>=0) state.productos[idxEnMemoria].categoria = cat;
       }
     });
-    if(count > 0){ await batch.commit(); console.log('Migradas', count, 'categorías'); }
+    if(count > 0){ await batch.commit(); console.log('Migradas', count, 'categorías'); renderFeed(); }
   }catch(e){ console.warn('migrarCategorias:', e); }
 }
 
