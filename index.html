@@ -7110,8 +7110,8 @@ function buildTipoOptions(rubro, valorSeleccionado){
 }
 
 // Rellena un <select> existente con los rubros
-function fillRubroSelect(selectId, valorActual){
-  const sel = document.getElementById(selectId);
+function fillRubroSelect(selectId, valorActual, scope){
+  const sel = (scope||document).querySelector('#'+selectId);
   if(!sel) return;
   sel.innerHTML = buildRubroOptions(valorActual || '');
 }
@@ -10060,10 +10060,10 @@ function admAbrirEditarDesktop(docId){
       <div class="field"><label>Horario</label><input id="editAdHorario" type="text" value="${esc(c.horario)}"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="adminGuardarEdicionComercio()">Guardar cambios</button>
     </div>`;
-  fillRubroSelect('editAdRubro', c.rubro);
+  fillRubroSelect('editAdRubro', c.rubro, cont);
   if(c.rubro && TIPOS_POR_RUBRO[c.rubro]){
-    const tipoField = document.getElementById('editAdTipoField');
-    const tipoSel   = document.getElementById('editAdTipo');
+    const tipoField = cont.querySelector('#editAdTipoField');
+    const tipoSel   = cont.querySelector('#editAdTipo');
     if(tipoSel) tipoSel.innerHTML = buildTipoOptions(c.rubro, c.tipo || '');
     if(tipoField) tipoField.style.display = '';
   }
@@ -10714,29 +10714,36 @@ async function adminBuscarCoordenadasPorDireccion(){
 }
 
 async function adminGuardarEdicionComercio(){
-  const docId = document.getElementById('editAdComercioId').value;
+  // En desktop el form vive dentro de admDesktopContent; en mobile en screen-admin-editar-comercio
+  const esDesktop = window.innerWidth >= 900;
+  const scope = esDesktop
+    ? document.getElementById('admDesktopContent')
+    : document;
+  const g = id => scope.getElementById ? scope.getElementById(id) : scope.querySelector('#'+id);
+
+  const docId = g('editAdComercioId')?.value;
   if(!docId){ toast('Error: ID no encontrado'); return; }
   const cambios = {
-    nombre:     document.getElementById('editAdNombre').value.trim(),
-    ciudad:     document.getElementById('editAdCiudad').value,
-    rubro:      document.getElementById('editAdRubro').value,
-    tipo:       (document.getElementById('editAdTipo') ? document.getElementById('editAdTipo').value : ''),
-    direccion:  document.getElementById('editAdDireccion').value.trim(),
-    telefono:   document.getElementById('editAdTelefono').value.trim(),
-    whatsapp:   document.getElementById('editAdWhatsapp').value.trim().replace(/\D/g,''),
-    email:      document.getElementById('editAdEmail').value.trim(),
-    instagram:  document.getElementById('editAdInstagram').value.trim(),
-    web:        document.getElementById('editAdWeb').value.trim(),
-    descripcion:document.getElementById('editAdDescripcion').value.trim(),
-    horario:    document.getElementById('editAdHorario').value.trim(),
+    nombre:     g('editAdNombre')?.value.trim(),
+    ciudad:     g('editAdCiudad')?.value,
+    rubro:      g('editAdRubro')?.value,
+    tipo:       g('editAdTipo')?.value || '',
+    direccion:  g('editAdDireccion')?.value.trim(),
+    telefono:   g('editAdTelefono')?.value.trim(),
+    whatsapp:   g('editAdWhatsapp')?.value.trim().replace(/\D/g,''),
+    email:      g('editAdEmail')?.value.trim(),
+    instagram:  g('editAdInstagram')?.value.trim(),
+    web:        g('editAdWeb')?.value.trim(),
+    descripcion:g('editAdDescripcion')?.value.trim(),
+    horario:    g('editAdHorario')?.value.trim(),
   };
-  const latVal = parseFloat(document.getElementById('editAdLat').value.replace(',', '.'));
-  const lngVal = parseFloat(document.getElementById('editAdLng').value.replace(',', '.'));
+  const latVal = parseFloat((g('editAdLat')?.value||'').replace(',', '.'));
+  const lngVal = parseFloat((g('editAdLng')?.value||'').replace(',', '.'));
   if(!isNaN(latVal) && !isNaN(lngVal)){
     cambios.lat = latVal;
     cambios.lng = lngVal;
   }
-  const fechaVence = document.getElementById('editAdPublicidadVence').value;
+  const fechaVence = g('editAdPublicidadVence')?.value;
   if(fechaVence){
     cambios.publicidadVence = new Date(fechaVence).toISOString();
     cambios.publicidadActiva = new Date(fechaVence) > new Date();
