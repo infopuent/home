@@ -2639,11 +2639,46 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="screen hidden" id="screen-admin-planes">
     <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
     <div class="page-title">💳 Planes y pagos</div>
+
+    <!-- Resumen de planes -->
+    <div class="adm-section" style="margin-bottom:16px;">
+      <div class="adm-section-hdr">📋 Planes disponibles</div>
+      <div style="padding:14px 16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div style="background:#F5F5F5;border-radius:10px;padding:12px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#888;margin-bottom:2px;">Gracia</div>
+            <div style="font-size:15px;font-weight:800;color:var(--navy);">Gratis</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">30 días · hasta 4 productos</div>
+          </div>
+          <div style="background:#E8F3FF;border-radius:10px;padding:12px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#2F5EA8;margin-bottom:2px;">Base</div>
+            <div style="font-size:15px;font-weight:800;color:var(--navy);">$24.999<span style="font-size:10px;font-weight:400;">/mes</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Hasta 20 productos</div>
+          </div>
+          <div style="background:#F0EAFF;border-radius:10px;padding:12px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#6B3FA0;margin-bottom:2px;">Medio</div>
+            <div style="font-size:15px;font-weight:800;color:var(--navy);">$34.999<span style="font-size:10px;font-weight:400;">/mes</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Hasta 40 productos</div>
+          </div>
+          <div style="background:#FFF3E0;border-radius:10px;padding:12px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#E65100;margin-bottom:2px;">Alto</div>
+            <div style="font-size:15px;font-weight:800;color:var(--navy);">$44.999<span style="font-size:10px;font-weight:400;">/mes</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Hasta 60 productos</div>
+          </div>
+        </div>
+        <div style="background:#E8F7EE;border-radius:10px;padding:10px 12px;font-size:11.5px;color:#1A6B35;font-weight:600;line-height:1.5;">
+          🤝 <strong>ConectorT</strong> — activable en cualquier plan · PuenT cobra <strong>20%</strong> sobre cada comisión pagada al ConectorT · Comisión mínima por producto: <strong>3%</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('todos')" style="flex:1;">Todos</button>
-      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('vencidos')" style="flex:1;">🔴 Vencidos</button>
-      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('por_vencer')" style="flex:1;">⚠️ Por vencer</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('gracia')" style="flex:1;">🎁 Gracia</button>
       <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('activos')" style="flex:1;">✅ Activos</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('por_vencer')" style="flex:1;">⚠️ Por vencer</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminFiltrarPlanes('vencidos')" style="flex:1;">🔴 Vencidos</button>
     </div>
     <div id="adminPlanesList"></div>
   </div>
@@ -9009,61 +9044,60 @@ function adminFiltrarPlanes(filtro){
   renderAdminPlanes();
 }
 
+const PLANES_LABEL = {gracia:'🎁 Gracia', base:'Base', medio:'Medio', alto:'Alto', fijo:'Fijo', comision:'Comisión'};
+const PLANES_MONTO = {gracia:'Gratis', base:'$24.999/mes', medio:'$34.999/mes', alto:'$44.999/mes'};
+const PLANES_PRODS = {gracia:'hasta 4 productos', base:'hasta 20 productos', medio:'hasta 40 productos', alto:'hasta 60 productos'};
+const PLANES_COLOR = {gracia:'#888', base:'#2F5EA8', medio:'#6B3FA0', alto:'#E65100', fijo:'#5C7355', comision:'#C99A3E'};
+
+function planLabelNuevo(c){
+  if(c.planNuevo) return PLANES_LABEL[c.planNuevo] || c.planNuevo;
+  if(c.plan === 'fijo') return 'Fijo';
+  if(c.plan === 'comision') return 'Comisión';
+  return 'Gracia';
+}
+
 function renderAdminPlanes(){
   const list = document.getElementById('adminPlanesList');
   if(!list) return;
-  const hoy = new Date(); hoy.setHours(0,0,0,0);
 
-  let comercios = state.comercios.filter(c => c.plan); // solo los que tienen plan cargado
+  let comercios = state.comercios;
 
-  if(adminPlanesFiltro === 'vencidos'){
-    comercios = comercios.filter(c => {
-      const d = planDiasRestantes(c);
-      return d !== null && d < 0;
-    });
+  if(adminPlanesFiltro === 'gracia'){
+    comercios = comercios.filter(c => !c.planNuevo || c.planNuevo === 'gracia');
+  } else if(adminPlanesFiltro === 'vencidos'){
+    comercios = comercios.filter(c => { const d = planDiasRestantes(c); return d !== null && d < 0; });
   } else if(adminPlanesFiltro === 'por_vencer'){
-    comercios = comercios.filter(c => {
-      const d = planDiasRestantes(c);
-      return d !== null && d >= 0 && d <= 7;
-    });
+    comercios = comercios.filter(c => { const d = planDiasRestantes(c); return d !== null && d >= 0 && d <= 7; });
   } else if(adminPlanesFiltro === 'activos'){
-    comercios = comercios.filter(c => {
-      const d = planDiasRestantes(c);
-      return d !== null && d > 7;
-    });
+    comercios = comercios.filter(c => { const d = planDiasRestantes(c); return d === null || d > 7; });
   }
 
-  if(comercios.length === 0){
+  if(!comercios.length){
     list.innerHTML = `<div class="empty"><div class="ic">💳</div><div class="t">No hay comercios con ese estado</div></div>`;
     return;
   }
 
   list.innerHTML = comercios.map(c => {
     const dias = planDiasRestantes(c);
-    const esGracia = !c.pagos?.length;
-    let estadoBadge, estadoColor;
-    if(dias === null || dias < 0){
-      estadoBadge = '🔴 Vencido'; estadoColor = '#e05a5a';
-    } else if(dias <= 7){
-      estadoBadge = `⚠️ ${dias}d`; estadoColor = '#C99A3E';
-    } else if(esGracia){
-      estadoBadge = `🎁 Gracia ${dias}d`; estadoColor = '#5C7355';
-    } else {
-      estadoBadge = `✅ ${dias}d`; estadoColor = '#5C7355';
-    }
-    const planLabel = c.plan === 'fijo'
-      ? `Fijo $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
-      : `Comisión ${c.planComPct||5}%`;
-    const bannerBadge = c.bannerActivo ? ' 📣' : '';
+    const esGracia = !c.planNuevo || c.planNuevo === 'gracia';
+    const label = planLabelNuevo(c);
+    const color = PLANES_COLOR[c.planNuevo || 'gracia'] || '#888';
+    const conector = c.conectorActivo ? ' · 🤝 ConectorT activo' : '';
+    let estadoBadge;
+    if(esGracia) estadoBadge = `🎁 Gracia`;
+    else if(dias !== null && dias < 0) estadoBadge = '🔴 Vencido';
+    else if(dias !== null && dias <= 7) estadoBadge = `⚠️ ${dias}d`;
+    else estadoBadge = `✅ Activo`;
+
     return `
       <div class="list-row" onclick="abrirAdminPlan('${c.id}')" style="cursor:pointer;">
-        <div class="av" style="background:${estadoColor};color:white;font-size:11px;font-weight:800;width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;">${c.pagos?.length||0}<br><span style="font-size:9px;">pagos</span></div>
+        <div class="av" style="background:${color};color:white;font-size:10px;font-weight:800;width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;">${label}</div>
         <div class="main">
-          <div class="t">${c.nombre}${bannerBadge}</div>
-          <div class="s">${planLabel} · ${estadoBadge}</div>
-          <div class="s">Vence: ${c.planVence||'—'}</div>
+          <div class="t">${c.nombre}</div>
+          <div class="s">${PLANES_MONTO[c.planNuevo||'gracia']||'—'} · ${PLANES_PRODS[c.planNuevo||'gracia']||'—'}${conector}</div>
+          <div class="s">${estadoBadge}${dias !== null && !esGracia ? ` · Vence: ${c.planVence||'—'}` : ''}</div>
         </div>
-        <div style="font-size:11px;font-weight:700;color:${estadoColor};flex-shrink:0;">→</div>
+        <div style="font-size:11px;font-weight:700;color:${color};flex-shrink:0;">→</div>
       </div>`;
   }).join('');
 }
@@ -9080,11 +9114,9 @@ function renderAdminPlanDetalle(c){
   const cont = document.getElementById('adminPlanContenido');
   if(!cont) return;
   const dias = planDiasRestantes(c);
-  const esGracia = !c.pagos?.length;
-
-  const planLabel = c.plan === 'fijo'
-    ? `Fijo — $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
-    : `Comisión — ${c.planComPct||5}% sobre ventas`;
+  const planActual = c.planNuevo || 'gracia';
+  const color = PLANES_COLOR[planActual] || '#888';
+  const conectorActivo = c.conectorActivo || false;
 
   const historial = (c.pagos||[]).length === 0
     ? `<div style="color:var(--muted);font-size:13px;padding:12px 0;">Sin pagos registrados aún.</div>`
@@ -9097,35 +9129,43 @@ function renderAdminPlanDetalle(c){
           </div>
         </div>`).join('');
 
-  const bannerSection = `
-    <div class="divider"></div>
-    <div class="page-sub" style="font-weight:700;color:var(--navy);margin-bottom:10px;">📣 Banner publicitario</div>
-    <div class="card" style="margin-bottom:0;">
-      ${c.bannerActivo
-        ? `<div style="font-size:13px;font-weight:700;color:#5C7355;margin-bottom:8px;">✅ Activo — vence ${c.bannerVence||'—'}</div>`
-        : `<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Sin banner activo</div>`}
-      <div class="two-col" style="margin-bottom:10px;">
-        <div class="field"><label>Monto cobrado</label><input id="apBannerMonto" type="number" placeholder="Ej: 8000"></div>
-        <div class="field"><label>Vence</label><input id="apBannerVence" type="date"></div>
-      </div>
-      <div class="field"><label>Nota</label><input id="apBannerNota" placeholder="Opcional"></div>
-      <div class="btn-block-row">
-        <button class="btn btn-primary" onclick="adminActivarBanner('${c.id}')">Activar banner</button>
-        ${c.bannerActivo ? `<button class="btn btn-ghost" onclick="adminDesactivarBanner('${c.id}')">Desactivar</button>` : ''}
-      </div>
-    </div>`;
-
   cont.innerHTML = `
-    <div class="card" style="margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Estado del plan</div>
-      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;">${planLabel}</div>
-      <div style="font-size:13px;color:var(--muted);">Vence: ${c.planVence||'—'} ${dias !== null ? `(${dias >= 0 ? dias+'d restantes' : 'VENCIDO'})` : ''}</div>
-      ${esGracia ? `<div style="font-size:12px;color:#5C7355;font-weight:700;margin-top:4px;">🎁 En período de gracia</div>` : ''}
+    <!-- Estado actual -->
+    <div class="card" style="margin-bottom:12px;border-left:4px solid ${color};">
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Plan actual</div>
+      <div style="font-size:18px;font-weight:800;color:${color};margin-bottom:2px;">${PLANES_LABEL[planActual]||planActual} — ${PLANES_MONTO[planActual]||'—'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${PLANES_PRODS[planActual]||'—'}</div>
+      ${dias !== null ? `<div style="font-size:13px;color:${dias<0?'#e05a5a':dias<=7?'#C99A3E':'#5C7355'};font-weight:700;">
+        ${dias < 0 ? `🔴 Vencido hace ${Math.abs(dias)} días` : dias <= 7 ? `⚠️ Vence en ${dias} días` : `✅ ${dias} días restantes`}
+      </div>` : '<div style="font-size:12px;color:#5C7355;font-weight:700;">🎁 En período de gracia</div>'}
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;font-weight:700;color:${conectorActivo?'#1A6B35':'#999'};">
+        🤝 ConectorT: ${conectorActivo ? '<span style="color:#1A6B35;">Activado · PuenT cobra 20% sobre comisiones</span>' : '<span style="color:#999;">No activado</span>'}
+      </div>
     </div>
 
+    <!-- Cambiar plan -->
     <div class="card" style="margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Registrar pago y renovar</div>
-      <div class="field"><label>Monto cobrado ($)</label><input id="apMonto" type="number" placeholder="Ej: 20000"></div>
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Cambiar plan</div>
+      <div class="field"><label>Plan</label>
+        <select id="apPlanNuevo" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
+          <option value="gracia" ${planActual==='gracia'?'selected':''}>🎁 Gracia — Gratis (30 días, hasta 4 productos)</option>
+          <option value="base" ${planActual==='base'?'selected':''}>Base — $24.999/mes (hasta 20 productos)</option>
+          <option value="medio" ${planActual==='medio'?'selected':''}>Medio — $34.999/mes (hasta 40 productos)</option>
+          <option value="alto" ${planActual==='alto'?'selected':''}>Alto — $44.999/mes (hasta 60 productos)</option>
+        </select>
+      </div>
+      <div class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:0;">
+        <input type="checkbox" id="apConectorActivo" ${conectorActivo?'checked':''} style="width:18px;height:18px;cursor:pointer;">
+        <label for="apConectorActivo" style="font-size:13px;font-weight:600;cursor:pointer;">🤝 Activar ConectorT (+20% sobre comisiones al ConectorT · mín. 3% por producto)</label>
+      </div>
+      <div style="height:10px;"></div>
+      <button class="btn btn-primary" onclick="adminCambiarPlan('${c.id}')">Guardar plan</button>
+    </div>
+
+    <!-- Registrar pago -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Registrar pago mensual</div>
+      <div class="field"><label>Monto cobrado ($)</label><input id="apMonto" type="number" placeholder="Ej: 24999"></div>
       <div class="two-col">
         <div class="field"><label>Método</label>
           <select id="apMetodo" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
@@ -9140,52 +9180,30 @@ function renderAdminPlanDetalle(c){
       <button class="btn btn-primary" onclick="adminRegistrarPago('${c.id}')">✅ Registrar pago</button>
     </div>
 
+    <!-- Historial de pagos -->
     <div class="card" style="margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Cambiar plan</div>
-      <div class="two-col" style="margin-bottom:8px;">
-        <div class="field"><label>Tipo</label>
-          <select id="apTipoPlan" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;" onchange="toggleAdminPlanOpts()">
-            <option value="fijo" ${c.plan==='fijo'?'selected':''}>Fijo mensual</option>
-            <option value="comision" ${c.plan==='comision'?'selected':''}>Por comisión</option>
-          </select>
-        </div>
-        <div class="field" id="apMontoFijoField" style="${c.plan!=='fijo'?'display:none':''}">
-          <label>Monto fijo</label>
-          <select id="apMontoFijo" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
-            <option value="20000" ${c.planMonto===20000?'selected':''}>$20.000/mes</option>
-          </select>
-        </div>
-        <div class="field" id="apComPctField" style="${c.plan!=='comision'?'display:none':''}">
-          <label>% comisión</label>
-          <select id="apComPct" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
-            <option value="3" ${c.planComPct===3?'selected':''}>3%</option>
-            <option value="5" ${c.planComPct===5?'selected':''}>5%</option>
-            <option value="7" ${c.planComPct===7?'selected':''}>7%</option>
-            <option value="10" ${c.planComPct===10?'selected':''}>10%</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn btn-ghost" onclick="adminGuardarCambioPlan('${c.id}')">Guardar cambio de plan</button>
-    </div>
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Historial de pagos</div>
+      ${historial}
+    </div>`;
+}
 
-    <div class="divider"></div>
-    <div class="page-sub" style="font-weight:700;color:var(--navy);margin-bottom:10px;">Historial de pagos</div>
-    ${historial}
-    ${bannerSection}`;
-
-  // Poner fecha default de vencimiento (hoy + 30 días)
-  const d30 = new Date(); d30.setDate(d30.getDate()+30);
-  const d30str = d30.toISOString().slice(0,10);
-  const apv = document.getElementById('apVence');
-  if(apv) apv.value = d30str;
-  const abv = document.getElementById('apBannerVence');
-  if(abv) abv.value = d30str;
+async function adminCambiarPlan(comercioId){
+  const c = state.comercios.find(x => x.id === comercioId);
+  if(!c) return;
+  const planNuevo = document.getElementById('apPlanNuevo').value;
+  const conectorActivo = document.getElementById('apConectorActivo').checked;
+  try{
+    await db.collection('comercios').doc(c._docId||c.id).update({ planNuevo, conectorActivo });
+    c.planNuevo = planNuevo;
+    c.conectorActivo = conectorActivo;
+    toast(`✅ Plan actualizado: ${PLANES_LABEL[planNuevo]} · ConectorT: ${conectorActivo?'Activado':'No activado'}`);
+    renderAdminPlanDetalle(c);
+    renderAdminPlanes();
+  }catch(e){ toast('Error al guardar: '+e.message); }
 }
 
 function toggleAdminPlanOpts(){
-  const tipo = document.getElementById('apTipoPlan').value;
-  document.getElementById('apMontoFijoField').style.display = tipo==='fijo' ? '' : 'none';
-  document.getElementById('apComPctField').style.display = tipo==='comision' ? '' : 'none';
+  // Mantenida por compatibilidad — ya no hace nada
 }
 
 function adminRegistrarPago(comercioId){
@@ -9201,19 +9219,16 @@ function adminRegistrarPago(comercioId){
   c.pagos.push({ fecha: hoy, monto: parseInt(monto), tipo: metodo, nota, vence });
   c.planVence = vence;
   c.planActivo = true;
-  toast(`✅ Pago de $${parseInt(monto).toLocaleString('es-AR')} registrado. Plan renovado hasta ${vence}.`);
+  db.collection('comercios').doc(c._docId||c.id).update({ pagos: c.pagos, planVence: vence, planActivo: true })
+    .then(()=> toast(`✅ Pago de $${parseInt(monto).toLocaleString('es-AR')} registrado. Plan renovado hasta ${vence}.`))
+    .catch(e=> toast('Error al guardar pago: '+e.message));
   renderAdminPlanDetalle(c);
   renderAdminPlanes();
 }
 
 function adminGuardarCambioPlan(comercioId){
-  const c = state.comercios.find(x => x.id === comercioId);
-  if(!c) return;
-  c.plan = document.getElementById('apTipoPlan').value;
-  c.planMonto = c.plan === 'fijo' ? parseInt(document.getElementById('apMontoFijo').value) : null;
-  c.planComPct = c.plan === 'comision' ? parseInt(document.getElementById('apComPct').value) : null;
-  toast('Plan actualizado');
-  renderAdminPlanDetalle(c);
+  // Reemplazada por adminCambiarPlan
+  adminCambiarPlan(comercioId);
 }
 
 function adminActivarBanner(comercioId){
@@ -10158,28 +10173,53 @@ async function admRenderVentasDesktop(){
 async function admRenderPlanesDesktop(){
   const cont = document.getElementById('admDesktopContent');
   try{
-    // Usar state.comercios si ya están cargados, sino buscar en Firestore
     let comercios = (state.comercios && state.comercios.length) ? state.comercios : [];
     if(!comercios.length){
       const snap = await db.collection('comercios').get();
       comercios = snap.docs.map(d=>({...d.data(), _docId:d.id}));
     }
-    const conPlan = comercios.filter(c=>c.plan);
-    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    window._admPlanesData = comercios;
     cont.innerHTML = `
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <!-- Resumen de planes -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+        <div style="background:#F5F5F5;border-radius:10px;padding:14px;">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#888;margin-bottom:2px;">Gracia</div>
+          <div style="font-size:17px;font-weight:800;color:var(--navy);">Gratis</div>
+          <div style="font-size:11px;color:var(--muted);">30 días · hasta 4 productos</div>
+        </div>
+        <div style="background:#E8F3FF;border-radius:10px;padding:14px;">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#2F5EA8;margin-bottom:2px;">Base</div>
+          <div style="font-size:17px;font-weight:800;color:var(--navy);">$24.999<span style="font-size:11px;font-weight:400;">/mes</span></div>
+          <div style="font-size:11px;color:var(--muted);">Hasta 20 productos</div>
+        </div>
+        <div style="background:#F0EAFF;border-radius:10px;padding:14px;">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#6B3FA0;margin-bottom:2px;">Medio</div>
+          <div style="font-size:17px;font-weight:800;color:var(--navy);">$34.999<span style="font-size:11px;font-weight:400;">/mes</span></div>
+          <div style="font-size:11px;color:var(--muted);">Hasta 40 productos</div>
+        </div>
+        <div style="background:#FFF3E0;border-radius:10px;padding:14px;">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#E65100;margin-bottom:2px;">Alto</div>
+          <div style="font-size:17px;font-weight:800;color:var(--navy);">$44.999<span style="font-size:11px;font-weight:400;">/mes</span></div>
+          <div style="font-size:11px;color:var(--muted);">Hasta 60 productos</div>
+        </div>
+      </div>
+      <div style="background:#E8F7EE;border-radius:10px;padding:10px 14px;font-size:12px;color:#1A6B35;font-weight:600;margin-bottom:18px;">
+        🤝 <strong>ConectorT</strong> — activable en cualquier plan · PuenT cobra <strong>20%</strong> sobre comisiones pagadas al ConectorT · Comisión mínima por producto: <strong>3%</strong>
+      </div>
+      <!-- Filtros y tabla -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
         <button class="adm-filter-btn active" onclick="admFiltroPlanes('todos',this)">Todos</button>
-        <button class="adm-filter-btn" onclick="admFiltroPlanes('activos',this)">Activos</button>
-        <button class="adm-filter-btn" onclick="admFiltroPlanes('por_vencer',this)">Por vencer</button>
-        <button class="adm-filter-btn" onclick="admFiltroPlanes('vencidos',this)">Vencidos</button>
+        <button class="adm-filter-btn" onclick="admFiltroPlanes('gracia',this)">🎁 Gracia</button>
+        <button class="adm-filter-btn" onclick="admFiltroPlanes('activos',this)">✅ Activos</button>
+        <button class="adm-filter-btn" onclick="admFiltroPlanes('por_vencer',this)">⚠️ Por vencer</button>
+        <button class="adm-filter-btn" onclick="admFiltroPlanes('vencidos',this)">🔴 Vencidos</button>
       </div>
       <div class="adm-section" id="admPlanesTabla">
-        <table class="adm-table" id="admTablaPlanesDesktop">
-          <thead><tr><th>Comercio</th><th>Rubro</th><th>Plan</th><th>Vence</th><th>Días restantes</th><th>Estado</th><th></th></tr></thead>
-          <tbody id="admTbodyPlanes">${admRowsPlanes(conPlan)}</tbody>
+        <table class="adm-table">
+          <thead><tr><th>Comercio</th><th>Plan</th><th>ConectorT</th><th>Vence</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="admTbodyPlanes">${admRowsPlanes(comercios)}</tbody>
         </table>
       </div>`;
-    window._admPlanesData = conPlan;
   }catch(e){ cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`; }
 }
 
@@ -10188,30 +10228,37 @@ function admFiltroPlanes(filtro, btn){
   document.querySelectorAll('.adm-filter-btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   let lista = window._admPlanesData;
-  if(filtro==='activos')    lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null && d>7; });
-  if(filtro==='por_vencer') lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null && d>=0 && d<=7; });
-  if(filtro==='vencidos')   lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null && d<0; });
+  if(filtro==='gracia')     lista = lista.filter(c=>!c.planNuevo||c.planNuevo==='gracia');
+  if(filtro==='activos')    lista = lista.filter(c=>{ const d=planDiasRestantes(c); return (d===null||d>7)&&c.planNuevo&&c.planNuevo!=='gracia'; });
+  if(filtro==='por_vencer') lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null&&d>=0&&d<=7; });
+  if(filtro==='vencidos')   lista = lista.filter(c=>{ const d=planDiasRestantes(c); return d!==null&&d<0; });
   const el = document.getElementById('admTbodyPlanes');
   if(el) el.innerHTML = admRowsPlanes(lista);
 }
 
 function admRowsPlanes(lista){
-  if(!lista||!lista.length) return '<tr><td colspan="7" style="color:#AAA;text-align:center;padding:24px;">Sin comercios con plan</td></tr>';
+  if(!lista||!lista.length) return '<tr><td colspan="6" style="color:#AAA;text-align:center;padding:24px;">Sin comercios</td></tr>';
   return lista.map(c=>{
     const dias = planDiasRestantes(c);
-    const diasTxt = dias===null?'—':dias<0?`Vencido hace ${Math.abs(dias)}d`:`${dias} días`;
-    const badge = dias===null?'<span class="adm-badge green">Activo</span>':dias<0?'<span class="adm-badge red">Vencido</span>':dias<=7?`<span class="adm-badge orange">Vence en ${dias}d</span>`:'<span class="adm-badge green">Activo</span>';
-    const plan = c.plan==='fijo'?'Fijo $20k':c.plan==='comision'?`Com. ${c.comisionPct||5}%`:c.plan||'Gracia';
-    const vence = c.publicidadVence ? (c.publicidadVence.toDate ? c.publicidadVence.toDate().toLocaleDateString('es-AR') : '—') : '—';
+    const planActual = c.planNuevo || 'gracia';
+    const color = PLANES_COLOR[planActual]||'#888';
+    const label = PLANES_LABEL[planActual]||planActual;
+    const monto = PLANES_MONTO[planActual]||'Gratis';
+    const conector = c.conectorActivo ? '<span class="adm-badge green">🤝 Activo</span>' : '<span class="adm-badge gray">No</span>';
+    const vence = c.planVence || '—';
+    let badge;
+    if(!c.planNuevo||c.planNuevo==='gracia') badge='<span class="adm-badge gray">🎁 Gracia</span>';
+    else if(dias===null||dias>7) badge='<span class="adm-badge green">Activo</span>';
+    else if(dias<0) badge='<span class="adm-badge red">Vencido</span>';
+    else badge=`<span class="adm-badge orange">Vence en ${dias}d</span>`;
     const id = c._docId||c.id;
-    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;">
+    return `<tr onclick="abrirAdminPlan('${c.id}')" style="cursor:pointer;">
       <td style="font-weight:700;">${c.nombre||'—'}</td>
-      <td style="color:#888;">${c.rubro||'—'}</td>
-      <td style="color:#888;">${plan}</td>
+      <td><span style="font-weight:800;color:${color};">${label}</span> <span style="color:#AAA;font-size:11px;">${monto}</span></td>
+      <td>${conector}</td>
       <td style="color:#888;">${vence}</td>
-      <td style="color:#888;">${diasTxt}</td>
       <td>${badge}</td>
-      <td><button class="adm-btn" onclick="event.stopPropagation();admAbrirComercioDetalle('${id}')">Ver →</button></td>
+      <td><button class="adm-btn" onclick="event.stopPropagation();abrirAdminPlan('${c.id}')">Ver →</button></td>
     </tr>`;
   }).join('');
 }
