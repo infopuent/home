@@ -2934,6 +2934,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <label>Días que abre</label>
         <input type="text" id="adDias" placeholder="Ej: Lun a Vie, o Lun-Sáb">
       </div>
+      <div class="field" style="background:var(--cream);border-radius:10px;padding:12px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;">
+          <input type="checkbox" id="adConectorActivo" style="width:20px;height:20px;flex-shrink:0;">
+          🤝 Quiere ConectorT (activado/desactivado)
+        </label>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:30px;">Si está tildado, cualquier ConectorT puede vender los productos con comisión de este comercio. Necesario para poder cargarle comisión a un producto.</div>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="adminGuardarNuevoComercio()">Guardar comercio</button>
     <div style="height:20px;"></div>
@@ -10602,6 +10609,13 @@ function admRenderNuevoComercioDesktop(){
         </div>
         <input type="hidden" id="adPlan" value="gracia">
       </div>
+      <div class="field" style="background:var(--cream);border-radius:10px;padding:12px;margin-top:12px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;">
+          <input type="checkbox" id="adConectorActivo" style="width:20px;height:20px;flex-shrink:0;">
+          🤝 Quiere ConectorT (activado/desactivado)
+        </label>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:30px;">Si está tildado, cualquier ConectorT puede vender los productos con comisión de este comercio. Necesario para poder cargarle comisión a un producto.</div>
+      </div>
       <button class="btn btn-primary" style="margin-top:20px;width:100%;" onclick="adminGuardarNuevoComercio()">💾 Guardar comercio</button>
     </div>`;
   // Inicializar el select de rubros (misma fuente única que el resto de la app)
@@ -12363,6 +12377,7 @@ async function adminGuardarNuevoComercio(){
     img2:        fotosCargadas['adFoto2'] || null,
     qrPersonal: qr, aprobado:true, publicidadActiva:true,
     publicidadVence: new Date(Date.now()+30*864e5).toISOString(),
+    conectorActivo: document.getElementById('adConectorActivo') ? document.getElementById('adConectorActivo').checked : false,
     adheridos:[], creadoPorAdmin:true, fechaAlta: new Date().toISOString()
   };
   try{
@@ -12378,6 +12393,7 @@ async function adminGuardarNuevoComercio(){
     delete fotosCargadas['adLogo']; delete fotosCargadas['adFoto2'];
     document.getElementById('adLogoFotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">📷</div></div>';
     document.getElementById('adFoto2FotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">🖼️</div></div>';
+    const adConectorActivoEl = document.getElementById('adConectorActivo'); if(adConectorActivoEl) adConectorActivoEl.checked = false;
     showScreen('admin-comercios'); adminCargarComercios();
   }catch(e){ toast('Error al guardar: ' + e.message); }
 }
