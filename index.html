@@ -5499,7 +5499,7 @@ function crearProductoComercio(){
   const descuento = parseFloat(document.getElementById('cnpDescuento').value) || null;
   const foto = fotosCargadas['cnp'];
 
-  if(!foto){ toast('Sacá o elegí una foto del producto para poder publicarlo'); return; }
+  if(!foto && !productoEditandoId){ toast('Sacá o elegí una foto del producto para poder publicarlo'); return; }
   if(!nombre){ toast('Completá el nombre del producto'); return; }
   if(!precio){ toast('El precio es obligatorio'); return; }
   if(comisionInput===''){ toast(c.conectorActivo ? 'Ingresá el % de comisión para ConectorT (mínimo 3%)' : 'Ingresá el % de comisión (poné 0, todavía no tenés ConectorT activado)'); return; }
@@ -5547,7 +5547,8 @@ function crearProductoComercio(){
     return;
   }
 
-  const p = {id: nextId('p'), comercioId:c.id, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia};
+  const _comercioId = c.id || c._docId || c.uid;
+  const p = {id: nextId('p'), comercioId:_comercioId, nombre, precio, comision, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia};
   state.productos.push(p);
   guardarProductoEnFirestore(p, c.uid);
   toast('Producto publicado en tu ficha y en el feed de La Paz ✅');
@@ -5568,16 +5569,25 @@ function guardarProductoEnFirestore(producto, ownerUid){
 // Trae los productos que ese comercio ya había cargado en sesiones anteriores, para que no se pierdan al recargar.
 async function cargarProductosGuardados(ownerUid){
   if(!firebaseListo || !ownerUid) return;
+  const c = state.currentUser;
+  const agregarProd = (doc) => {
+    const data = doc.data();
+    const p = {...data, id: data.id || doc.id};
+    const idx = state.productos.findIndex(x=>x.id===p.id);
+    if(idx>=0) state.productos[idx] = p; else state.productos.push(p);
+  };
   try{
-    const snap = await db.collection('productos').where('ownerUid','==',ownerUid).get();
-    snap.forEach(doc=>{
-      const data = doc.data();
-      const p = {...data, id: data.id || doc.id};
-      const idx = state.productos.findIndex(existing=>existing.id===p.id);
-      if(idx>=0) state.productos[idx] = p;
-      else state.productos.push(p);
-    });
+    // Por ownerUid (uid de Google)
+    const snap1 = await db.collection('productos').where('ownerUid','==',ownerUid).get();
+    snap1.forEach(agregarProd);
+    // Por comercioId (id interno del comercio, ej: c-1789254828500)
+    const comercioIdInterno = c?.id || c?._docId;
+    if(comercioIdInterno && comercioIdInterno !== ownerUid){
+      const snap2 = await db.collection('productos').where('comercioId','==',comercioIdInterno).get();
+      snap2.forEach(agregarProd);
+    }
     renderProductosPropios();
+    renderFeed();
   }catch(e){
     console.error('No se pudieron cargar los productos guardados:', e);
   }
