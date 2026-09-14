@@ -6059,12 +6059,11 @@ async function cargarVentasDeComercio(comercioId){
     renderComercioPanel();
     actualizarBadgeReservas();
   } catch(e){ console.error('Error cargando ventas del comercio:', e); }
-  // Polling cada 30s
-  if(!window._comercioPolling){
-    window._comercioPolling = setInterval(function(){
-      cargarVentasDeComercio(comercioId).then(function(){ actualizarBadgeReservas(); });
-    }, 30000);
-  }
+  // Polling cada 15s — limpiar anterior si existe (por cambio de cuenta)
+  if(window._comercioPolling) clearInterval(window._comercioPolling);
+  window._comercioPolling = setInterval(function(){
+    cargarVentasDeComercio(comercioId).then(function(){ actualizarBadgeReservas(); });
+  }, 15000);
 }
 
 // Carga las reservas propias del ConectorT al iniciar sesión
@@ -12879,12 +12878,16 @@ function invitarRegistroDesdeProducto(){
 // HISTORIAL DE QR — persiste en localStorage
 // =============================================
 
+function _historialKey(){
+  const uid = state.currentUser?.uid || state.currentUser?.id || 'guest';
+  return 'puente_historial_qr_' + uid;
+}
 function cargarHistorialQR(){
-  try{ return JSON.parse(localStorage.getItem('puente_historial_qr') || '[]'); }
+  try{ return JSON.parse(localStorage.getItem(_historialKey()) || '[]'); }
   catch(e){ return []; }
 }
 function guardarHistorialQR(arr){
-  try{ localStorage.setItem('puente_historial_qr', JSON.stringify(arr.slice(0,30))); }catch(e){}
+  try{ localStorage.setItem(_historialKey(), JSON.stringify(arr.slice(0,30))); }catch(e){}
 }
 function agregarAlHistorialQR(entrada){
   const arr = cargarHistorialQR();
@@ -13054,27 +13057,45 @@ function abrirPerfil(){
       <button class="btn-tile btn-tile-rose" style="${editAction ? '' : 'grid-column:1/-1;'}" onclick="confirmarCierreSesion()"><span class="ic">🚪</span>Cerrar sesión</button>
     </div>`;
 
-  // Historial de QR
+  // Historial de QR — agrupado por comercio
   const historial = cargarHistorialQR();
-  const historialHtml = historial.length === 0
-    ? `<div class="empty" style="padding:22px 0;">
+  let historialHtml;
+  if(historial.length === 0){
+    historialHtml = `<div class="empty" style="padding:22px 0;">
         <div class="ic">📋</div>
         <div class="t">Sin compras todavía</div>
         <div class="s">Tus códigos QR generados van a aparecer acá.</div>
-       </div>`
-    : historial.map((h, idx) => {
+       </div>`;
+  } else {
+    // Agrupar por comercioNombre
+    const grupos = {};
+    historial.forEach((h, idx) => {
+      const key = h.comercioNombre || 'Comercio';
+      if(!grupos[key]) grupos[key] = [];
+      grupos[key].push({...h, _idx: idx});
+    });
+    historialHtml = Object.entries(grupos).map(([nombreComercio, items]) => {
+      const cardsHtml = items.map(h => {
         const fecha = new Date(h.fecha).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit'});
         const hora  = new Date(h.fecha).toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
         return `
-        <div class="list-row" style="align-items:flex-start;gap:12px;cursor:pointer;" onclick="reabrirQRHistorial(${idx})">
-          <div class="av" style="background:var(--navy);flex-shrink:0;">🛒</div>
-          <div class="main" style="flex:1;min-width:0;">
-            <div class="t">${h.comercioNombre}</div>
-            <div class="s">${h.items.map(i=>i.nombre).join(', ')}</div>
-            <div style="font-size:10.5px;color:var(--blue);font-weight:700;margin-top:3px;">${fecha} ${hora} · $${h.total.toLocaleString('es-AR')} · <span style="font-family:monospace;">${h.codigo}</span></div>
+          <div onclick="reabrirQRHistorial(${h._idx})" style="background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:11px;font-weight:800;color:var(--navy);font-family:monospace;">${h.codigo}</div>
+            <div style="font-size:11.5px;color:var(--ink);line-height:1.4;">${h.items.map(i=>i.nombre).join(', ')}</div>
+            <div style="font-size:10.5px;color:var(--muted);">${fecha} ${hora}</div>
+            <div style="font-size:13px;font-weight:800;color:var(--navy);">$${h.total.toLocaleString('es-AR')}</div>
+            <div style="font-size:10.5px;font-weight:700;color:var(--blue);text-align:right;">Ver QR →</div>
+          </div>`;
+      }).join('');
+      return `
+        <div style="margin-bottom:18px;">
+          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">🏬 ${nombreComercio}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            ${cardsHtml}
           </div>
-          <span style="font-size:11px;font-weight:700;background:#EAF0E6;color:var(--navy-2);padding:4px 9px;border-radius:100px;flex-shrink:0;margin-top:2px;">Ver QR</span>
-        </div>`}).join('');
+        </div>`;
+    }).join('');
+  }
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
