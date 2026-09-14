@@ -4004,7 +4004,9 @@ function entrarConDatosGuardados(rol, data){
     document.getElementById('cNombre').textContent = data.nombre;
     renderComercioPanel();
     cargarProductosGuardados(data.uid);
-    cargarVentasDeComercio(data.id || data.uid);
+    // Buscar ventas por todos los identificadores posibles del comercio
+    const _cIdsParaVentas = [...new Set([data.id, data.uid, data._docId].filter(Boolean))];
+    for(const _cid of _cIdsParaVentas){ cargarVentasDeComercio(_cid); }
     cargarVendedoresParaComercio();
     iniciarListenerVentasComercio(data.id || data.uid);
     if(window._codigoPendienteDesdeURL) procesarCodigoPendienteDesdeURL();
