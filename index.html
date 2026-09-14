@@ -4094,7 +4094,36 @@ async function cargarDatosPublicosDeFirestore(){
   renderExploraCiudad();
   renderLocales();
   migrarCategorias();
+  migrarConectorActivo();
 }
+
+// Antes el checkbox "Activar ConectorT" era decorativo: un comercio con productos
+// con comisión funcionaba con ConectorT aunque nunca lo hubiera tildado. Ahora que
+// bloquea de verdad, esta migración prende el interruptor una sola vez para los
+// comercios que ya tenían productos con comisión cargados, así no pierden lo que
+// ya tenían funcionando. De acá en adelante, un comercio nuevo sí tiene que activarlo.
+async function migrarConectorActivo(){
+  if(!firebaseListo || !db) return;
+  try{
+    const idsConComision = new Set((state.productos||[]).filter(p=>p.comision>0).map(p=>p.comercioId));
+    if(!idsConComision.size) return;
+    const snap = await db.collection('comercios').get();
+    const batch = db.batch();
+    let count = 0;
+    snap.docs.forEach(doc=>{
+      const c = doc.data();
+      if(idsConComision.has(doc.id) && c.conectorActivo!==true){
+        batch.update(doc.ref, {conectorActivo: true});
+        count++;
+        const idxEnMemoria = state.comercios.findIndex(x=>x.id===doc.id);
+        if(idxEnMemoria>=0) state.comercios[idxEnMemoria].conectorActivo = true;
+        if(state.currentUser && (state.currentUser._docId===doc.id || state.currentUser.id===doc.id)) state.currentUser.conectorActivo = true;
+      }
+    });
+    if(count > 0){ await batch.commit(); console.log('Migrados', count, 'comercios a conectorActivo'); renderFeed(); if(state.role==='comercio') renderCConectorToggle(); }
+  }catch(e){ console.warn('migrarConectorActivo:', e); }
+}
+
 // Por si Firebase ya había terminado de cargar antes de que este script se ejecutara.
 if(firebaseListo) onFirebaseReady();
 // Retry para guests que abren la app antes de que Firebase cargue
