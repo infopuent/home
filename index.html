@@ -1846,6 +1846,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
     <div class="divider"></div>
     <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">ConectorT vendiendo tus productos</div>
+    <div id="cConectorToggleBox" style="margin-bottom:12px;"></div>
     <div id="cVendedoresList"></div>
     <div class="divider"></div>
     <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">📬 Pedidos de ConectorT</div>
@@ -1928,7 +1929,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="field"><label>Nombre del producto</label><input id="cnpNombre" placeholder="Ej: Combo desayuno x2"></div>
       <div class="two-col">
         <div class="field"><label>Precio</label><input id="cnpPrecio" type="number" placeholder="Ej: 8500"></div>
-        <div class="field"><label>Comisión para ConectorT (%) *</label><input id="cnpComision" type="number" min="0" max="100" placeholder="Obligatorio — 0 si no querés ConectorT"></div>
+        <div class="field"><label>Comisión para ConectorT (%) *</label><input id="cnpComision" type="number" min="0" max="100" placeholder="Mínimo 3% si tenés ConectorT activado — 0 si no"></div>
       </div>
       <div class="field">
         <label>Stock disponible</label>
@@ -4837,7 +4838,9 @@ let productoEditandoId = null;
 function abrirNuevoProducto(){
   productoEditandoId = null;
   document.getElementById('cnpTitulo').textContent = 'Cargar producto';
-  document.getElementById('cnpSub').textContent = 'Vos decidís el precio y la comisión. Si ponés comisión, cualquier ConectorT va a poder elegir venderlo. Si la dejás en 0, queda como venta directa desde el feed, sin ConectorT.';
+  document.getElementById('cnpSub').textContent = state.currentUser?.conectorActivo
+    ? 'Vos decidís el precio. Si ponés comisión (mínimo 3%), cualquier ConectorT va a poder elegir venderlo. Si la dejás en 0, queda como venta directa desde el feed, sin ConectorT.'
+    : 'Vos decidís el precio. Todavía no tenés ConectorT activado en tu panel, así que este producto queda como venta directa (sin comisión).';
   document.getElementById('cnpBtnGuardar').textContent = 'Publicar producto';
   document.getElementById('cnpBtnEliminar').classList.add('hidden');
   document.getElementById('cnpNombre').value=''; document.getElementById('cnpPrecio').value='';
@@ -5361,9 +5364,11 @@ function crearProductoComercio(){
   if(!foto){ toast('Sacá o elegí una foto del producto para poder publicarlo'); return; }
   if(!nombre){ toast('Completá el nombre del producto'); return; }
   if(!precio){ toast('El precio es obligatorio'); return; }
-  if(comisionInput===''){ toast('Ingresá el % de comisión para ConectorT (poné 0 si no querés ConectorT)'); return; }
-  const comision = parseFloat(comisionInput);
+  if(comisionInput===''){ toast(c.conectorActivo ? 'Ingresá el % de comisión para ConectorT (mínimo 3%)' : 'Ingresá el % de comisión (poné 0, todavía no tenés ConectorT activado)'); return; }
+  let comision = parseFloat(comisionInput);
   if(isNaN(comision) || comision<0 || comision>100){ toast('La comisión tiene que ser un número entre 0 y 100'); return; }
+  if(c.conectorActivo && comision>0 && comision<3){ toast('La comisión mínima para ConectorT es 3%'); return; }
+  if(!c.conectorActivo && comision>0){ toast('Activá ConectorT en tu panel para poder asignar comisión a un producto'); return; }
   if(TIPOS_OFERTA[tipoOferta].descuento && !descuento){ toast('Ingresá el porcentaje de descuento'); return; }
   if(TIPOS_OFERTA[tipoOferta].hora && requierePlanPago('Las ofertas relámpago')) return;
   const horaInicio = document.getElementById('cnpHoraInicio').value;
@@ -5492,7 +5497,7 @@ function renderVElegirComercio(){
   // Ya no hace falta "sumarse" a un comercio: cualquier vendedor puede ver el catálogo
   // de cualquier comercio de su ciudad que tenga productos con comisión para vendedores.
   const idsConProductosVendibles = new Set(state.productos.filter(p=>p.comision>0).map(p=>p.comercioId));
-  const misComercios = state.comercios.filter(c => c.ciudad===state.currentUser.ciudad && idsConProductosVendibles.has(c.id));
+  const misComercios = state.comercios.filter(c => c.ciudad===state.currentUser.ciudad && c.conectorActivo && idsConProductosVendibles.has(c.id));
   const list = document.getElementById('vComerciosList');
   document.getElementById('vSinComercios').classList.toggle('hidden', misComercios.length>0);
   list.innerHTML = misComercios.map(c=>{
@@ -5518,8 +5523,7 @@ function abrirComercioParaElegir(comercioId){
   comercioElegido = comercioId;
   const c = state.comercios.find(x=>x.id===comercioId);
   document.getElementById('vepComercioNombre').textContent = c ? c.nombre : 'Comercio';
-  const prods = state.productos.filter(p=>p.comercioId===comercioId);
-  const yaElegidos = new Set(state.catalogoVendedor.filter(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id)).map(s=>s.productoId));
+  const prods = state.productos.filter(p=>p.comercioId===comercioId && p.comision>0);
   const list = document.getElementById('vepProdList');
   if(prods.length===0){
     list.innerHTML = `<div class="empty" style="padding:30px 10px;"><div class="ic">📦</div><div class="t">Este comercio todavía no cargó productos</div></div>`;
@@ -5642,6 +5646,7 @@ function confirmarReservaParaCliente(){
   const p = _prodReservando;
   if(!p){ toast('Error: producto no encontrado'); return; }
   const com = state.comercios.find(c=>c.id===p.comercioId);
+  if(!com?.conectorActivo){ toast('Este comercio no tiene ConectorT activado'); return; }
   const codigo = genCodigo();
   const comMonto = Math.round(p.precio * p.comision / 100);
 
@@ -5653,7 +5658,8 @@ function confirmarReservaParaCliente(){
     comercioId: p.comercioId,
     comercioUid: com?.uid || null,
     clienteNombre, clienteTel, estado:'pendiente',
-    comisionMonto: comMonto, fechaReserva: new Date().toISOString(),
+    comisionMonto: comMonto, comisionPuenT: Math.round(comMonto * 0.2),
+    fechaReserva: new Date().toISOString(),
     origen: 'conector'
   };
   state.ventas.push(venta);
@@ -6446,9 +6452,41 @@ function contactarPuenT(){
   window.open(`https://wa.me/${wa}?text=Hola%2C%20soy%20${encodeURIComponent(state.currentUser?.nombre||'un comercio')}%20y%20quiero%20renovar%20o%20cambiar%20mi%20plan%20en%20PuenT.`, '_blank');
 }
 
+// El comercio decide si quiere que los ConectorT (vendedores independientes) puedan
+// vender sus productos. Aparte de su plan mensual, si activa esto va a pagar a PuenT
+// un 20% de cada comisión que se genere por una venta hecha a través de un ConectorT
+// (el ConectorT siempre cobra el 100% de la comisión que el comercio le puso al producto).
+function renderCConectorToggle(){
+  const box = document.getElementById('cConectorToggleBox');
+  if(!box) return;
+  const c = state.currentUser;
+  if(!c) return;
+  const activo = !!c.conectorActivo;
+  box.innerHTML = `
+    <div style="background:${activo?'#f0f7ee':'#f7f7f5'};border:1.5px solid ${activo?'var(--olive,#5C7355)':'var(--line)'};border-radius:13px;padding:13px 14px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="cConectorActivoChk" ${activo?'checked':''} onchange="guardarConectorActivoComercio(this.checked)" style="width:20px;height:20px;flex-shrink:0;">
+        <div>
+          <div style="font-weight:800;font-size:13.5px;color:var(--ink);">${activo?'🤝 ConectorT activado':'ConectorT desactivado'}</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Si lo activás, cualquier ConectorT de la ciudad va a poder vender los productos a los que les pongas comisión (mínimo 3%). El ConectorT cobra el 100% de esa comisión; aparte de tu plan, PuenT te cobra un 20% de cada comisión generada por venta a través de un ConectorT.</div>
+        </div>
+      </label>
+    </div>`;
+}
+
+function guardarConectorActivoComercio(valor){
+  const c = state.currentUser;
+  if(!c) return;
+  c.conectorActivo = valor;
+  guardarPerfilEnFirestore('comercios', c);
+  toast(valor ? '🤝 ConectorT activado' : 'ConectorT desactivado');
+  renderCConectorToggle();
+}
+
 function renderComercioPanel(){
   renderPublicidadBox();
   renderCPlanBox();
+  renderCConectorToggle();
   renderProductosPropios();
   renderPedidosProducto();
   renderCAlertasComercio();
@@ -7312,9 +7350,9 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
     const comercioDelProd = state.comercios.find(x=>x.id===p.comercioId);
     // Todos los productos tienen envío disponible via repartidor PuenT
     const envioBadge = '<span class="envio-badge">🛵 Con envío</span>';
-    const comisionBadge = (state.role==='vendedor' && p.comision>0) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
+    const comisionBadge = (state.role==='vendedor' && p.comision>0 && comercioDelProd?.conectorActivo) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
     let botonVendedor = '';
-    if(state.role==='vendedor' && p.comision>0){
+    if(state.role==='vendedor' && p.comision>0 && comercioDelProd?.conectorActivo){
       const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
       botonVendedor = yaEnCatalogo
         ? `<button class="share-btn" disabled style="opacity:.55; cursor:default;" onclick="event.stopPropagation()">✅ En tu catálogo</button>`
@@ -8593,7 +8631,7 @@ function abrirOferta(prodId){
   }
 
   const banner = document.getElementById('ofVendedorBanner');
-  if(state.role==='vendedor' && p.comision>0){
+  if(state.role==='vendedor' && p.comision>0 && c?.conectorActivo){
     const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
     document.getElementById('ofVendedorComision').textContent = `💰 Este comercio ofrece ${p.comision}% de comisión`;
     const btn = document.getElementById('ofVendedorBtn');
@@ -8979,6 +9017,7 @@ function verProductosDeLocal(comercioId){
   }
 
   const prods = state.productos.filter(p=>p.comercioId===comercioId);
+  const comercioConector = state.comercios.find(x=>x.id===comercioId)?.conectorActivo;
   const grid = document.getElementById('lpGrid');
   if(prods.length===0){
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="ic">📦</div><div class="t">Este local todavía no cargó productos</div></div>`;
@@ -8986,9 +9025,9 @@ function verProductosDeLocal(comercioId){
     grid.innerHTML = prods.map(p=>{
       const foto = p.img ? `<img src="${p.img}" alt="${p.nombre}">` : (p.foto||'📦');
       const badge = etiquetaOferta(p);
-      const comisionBadge = (state.role==='vendedor' && p.comision>0) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
+      const comisionBadge = (state.role==='vendedor' && p.comision>0 && comercioConector) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
       let botonVendedor = '';
-      if(state.role==='vendedor' && p.comision>0){
+      if(state.role==='vendedor' && p.comision>0 && comercioConector){
         const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
         botonVendedor = yaEnCatalogo
           ? `<button class="share-btn" disabled style="opacity:.55; cursor:default;" onclick="event.stopPropagation()">✅ En tu catálogo</button>`
@@ -12230,6 +12269,7 @@ function reservarProducto(){
   // Verificar si es vendedor → flujo QR (sin cambios)
   if(state.role === 'vendedor'){
     const c = state.comercios.find(x=>x.id===p.comercioId);
+    if(!c?.conectorActivo){ toast('Este comercio no tiene ConectorT activado'); return; }
     if(!carrito[p.comercioId]){
       carrito[p.comercioId] = { comercioNombre: c?.nombre||'Local', comercioId: p.comercioId, items:[] };
     }
@@ -12700,6 +12740,7 @@ function generarQRCarrito(comercioId){
   if(!grupo || !grupo.items.length){ toast('No hay productos en este carrito'); return; }
 
   const c = state.comercios.find(x=>x.id===comercioId);
+  if(!c?.conectorActivo){ toast('Este comercio no tiene ConectorT activado'); return; }
   const codigo = genCodigo();
   const clienteNombre = state.currentUser?.nombre || 'Cliente';
   const total = grupo.items.reduce((s,i)=>s+i.precio,0);
@@ -12709,11 +12750,13 @@ function generarQRCarrito(comercioId){
     const p = state.productos.find(x=>x.id===item.prodId);
     if(!p) return;
     const com = state.comercios.find(x=>x.id===comercioId);
+    const unidades = item.cantidad || 1;
+    const comMonto = Math.round((p.precio * (p.comision||0) / 100) * unidades);
     const venta = {
-      id: nextId('t'), codigo, vendedorId:null, vendedorUid:null,
+      id: nextId('t'), codigo, vendedorId: state.currentUser?.id || state.currentUser?.uid, vendedorUid: state.currentUser?.uid || null,
       productoId:p.id, comercioId, comercioUid: com?.uid || null,
-      clienteNombre, estado:'pendiente', comisionMonto:0, origen:'carrito',
-      precioUnidad: p.precio, fechaReserva: new Date().toISOString()
+      clienteNombre, estado:'pendiente', comisionMonto: comMonto, comisionPuenT: Math.round(comMonto * 0.2), origen:'carrito',
+      precioUnidad: p.precio, cantidad: unidades, fechaReserva: new Date().toISOString()
     };
     state.ventas.push(venta);
     if(typeof guardarVentaEnFirestore === 'function') guardarVentaEnFirestore(venta);
