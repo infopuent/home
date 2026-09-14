@@ -10922,8 +10922,10 @@ async function adminVerComercio(docId){
       <div class="field"><label>Nombre</label><input type="text" id="apNombre" placeholder="Ej: Remera básica"></div>
       <div class="two-col">
         <div class="field"><label>Precio ($)</label><input type="number" id="apPrecio" placeholder="0"></div>
-        <div class="field"><label>Comisión (%)</label><input type="number" id="apComision" placeholder="0 si no tiene ConectorT, o mínimo 3%" min="0" max="100"></div>
+        <div class="field"><label>Stock disponible</label><input type="number" id="apStock" min="0" placeholder="Vacío = sin límite"></div>
       </div>
+      <div id="apConectorEstadoBox" style="margin-bottom:10px;"></div>
+      <div class="field"><label>Comisión (%)</label><input type="number" id="apComision" placeholder="0 si no tiene ConectorT, o mínimo 3%" min="0" max="100"></div>
       <div class="field"><label>Descripción <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
         <textarea id="apDescripcion" rows="2" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:11px;font-size:13px;"></textarea>
       </div>
@@ -11149,6 +11151,22 @@ function adminCambiarFotoProducto(firestoreId, comercioId, input){
 }
 
 // ── Abrir formulario (nuevo o edición) ───────────────────────
+function adminActualizarEstadoConectorForm(c){
+  const box = document.getElementById('apConectorEstadoBox');
+  const comisionInput = document.getElementById('apComision');
+  if(!box || !comisionInput) return;
+  if(c && c.conectorActivo){
+    box.innerHTML = `<div style="font-size:11.5px;color:#3d7a4a;background:#eaf5ec;border-radius:8px;padding:8px 10px;">✅ Este comercio tiene ConectorT habilitado — podés cargarle comisión.</div>`;
+    comisionInput.disabled = false;
+    comisionInput.style.opacity = '1';
+  } else {
+    box.innerHTML = `<div style="font-size:11.5px;color:#8A6400;background:#FFF8EC;border-radius:8px;padding:8px 10px;">🔒 Este comercio no tiene ConectorT habilitado, así que no se le puede poner comisión. Pedile a PuenT que lo habilite, o el comercio puede activarlo desde su panel.</div>`;
+    comisionInput.value = '0';
+    comisionInput.disabled = true;
+    comisionInput.style.opacity = '.6';
+  }
+}
+
 function adminCerrarFormProducto(){
   _adminFotoProducto = null;
   const box = document.getElementById('adminFormProductoBox'); if(box) box.style.display='none';
@@ -11176,9 +11194,10 @@ function adminAbrirFormProducto(docId){
   _adminFotoProducto = null;
   const editId = document.getElementById('apEditId'); if(editId) editId.value='';
   const titulo = document.getElementById('apFormTitulo'); if(titulo) titulo.textContent='Nuevo producto';
-  ['apNombre','apPrecio','apComision','apDescripcion'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
+  ['apNombre','apPrecio','apComision','apDescripcion','apStock'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; });
   adminLimpiarFotoProducto();
   const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+  adminActualizarEstadoConectorForm(c);
   fillRubroSelect('apRubro', c ? c.rubro : '');
   const esGastro = esComercioGastronomico(c);
   const menuDiaBox = document.getElementById('apMenuDiaBox');
@@ -11202,9 +11221,11 @@ async function adminEditarProducto(firestoreId, comercioId){
   const fn = el=>document.getElementById(el);
   if(fn('apNombre'))     fn('apNombre').value     = p.nombre||'';
   if(fn('apPrecio'))     fn('apPrecio').value     = p.precio||0;
+  if(fn('apStock'))      fn('apStock').value      = (p.stock===null || p.stock===undefined) ? '' : p.stock;
   if(fn('apComision'))   fn('apComision').value   = p.comision||0;
   if(fn('apDescripcion'))fn('apDescripcion').value = p.descripcion||'';
   const c2 = _adminComercios.find(x=>x.id===comercioId || (x._docId||x.id)===comercioId);
+  adminActualizarEstadoConectorForm(c2);
   fillRubroSelect('apRubro', p.rubro || (c2 ? c2.rubro : ''));
   if(fn('apFotoNombre')) fn('apFotoNombre').textContent = p.img ? 'Foto actual cargada' : '';
   const esGastro2 = esComercioGastronomico(c2);
@@ -11230,13 +11251,15 @@ async function adminGuardarProductoEnComercio(docId){
   const comision = comisionInputAp==='' ? 0 : parseFloat(comisionInputAp)||0;
   if(comision>0 && comision<3){ toast('La comisión mínima para ConectorT es 3%'); return; }
   if(comision>0 && !c.conectorActivo){ toast('Este comercio no tiene ConectorT activado. Activalo primero para poder ponerle comisión a un producto.'); return; }
+  const stockInputAp = document.getElementById('apStock')?.value ?? '';
+  const stock = stockInputAp==='' ? null : Math.max(0, parseInt(stockInputAp)||0);
   const descripcion = (document.getElementById('apDescripcion')?.value||'').trim();
   const rubro = document.getElementById('apRubro')?.value || c.rubro || '';
   const editId = document.getElementById('apEditId')?.value || '';
   const enMenuDia = !!(document.getElementById('apMenuDia')?.checked);
 
   const prod = {
-    nombre, precio, comision, descripcion, enMenuDia,
+    nombre, precio, comision, stock, descripcion, enMenuDia,
     img: _adminFotoProducto !== undefined ? _adminFotoProducto : null,
     origen:'comercio', rubro,
     ownerUid: c.uid || c.id,
@@ -11252,7 +11275,7 @@ async function adminGuardarProductoEnComercio(docId){
     } else {
       // Nuevo
       const prodId = 'p-' + Date.now();
-      const prodCompleto = {...prod, id:prodId, comercioId:c.id, creadoPorAdmin:true, fechaAlta:new Date().toISOString()};
+      const prodCompleto = {...prod, id:prodId, comercioId:c.id, stockInicial: stock, creadoPorAdmin:true, fechaAlta:new Date().toISOString()};
       await db.collection('productos').doc(prodId).set(prodCompleto);
       if(!state.productos.some(x=>x.id===prodId)) state.productos.push(prodCompleto);
       toast('Producto creado ✅');
