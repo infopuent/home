@@ -10013,12 +10013,17 @@ function admRenderProductosAdmin(){
     const foto = p.img ? `<img src="${p.img}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;">` : `<div style="width:44px;height:44px;border-radius:8px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🛍️</div>`;
     const docId = p._docId;
     const nombreSafe = (p.nombre||'').replace(/'/g,"&#39;");
+    const comercioDelProd = state.comercios.find(x=>x.id===p.comercioId);
+    const comisionTxt = p.comision>0
+      ? `💰 ${p.comision}% ${comercioDelProd?.conectorActivo ? '' : '<span style="color:#C23B3B;">(comercio sin ConectorT activado)</span>'}`
+      : 'Sin comisión (venta directa)';
     return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line);">
       ${foto}
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'Sin nombre'}</div>
         <div style="font-size:11px;color:var(--muted);">${p._comercioNombre} · ${p.rubro||'—'}</div>
         <div style="font-size:12px;font-weight:700;color:var(--primary);">$${Number(p.precio||0).toLocaleString('es-AR')}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px;">${comisionTxt}</div>
       </div>
       <button class="adm-btn" style="color:#c23b3b;border-color:#f0d0d0;white-space:nowrap;" onclick="admEliminarProductoAdmin('${docId}','${nombreSafe}')">🗑️ Eliminar</button>
     </div>`;
@@ -10784,7 +10789,7 @@ async function adminVerComercio(docId){
       <div class="field"><label>Nombre</label><input type="text" id="apNombre" placeholder="Ej: Remera básica"></div>
       <div class="two-col">
         <div class="field"><label>Precio ($)</label><input type="number" id="apPrecio" placeholder="0"></div>
-        <div class="field"><label>Comisión (%)</label><input type="number" id="apComision" placeholder="0" min="0" max="100"></div>
+        <div class="field"><label>Comisión (%)</label><input type="number" id="apComision" placeholder="0 si no tiene ConectorT, o mínimo 3%" min="0" max="100"></div>
       </div>
       <div class="field"><label>Descripción <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
         <textarea id="apDescripcion" rows="2" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:11px;font-size:13px;"></textarea>
@@ -11088,7 +11093,10 @@ async function adminGuardarProductoEnComercio(docId){
   if(!nombre){ toast('El nombre es obligatorio'); return; }
   const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
   if(!c){ toast('Comercio no encontrado'); return; }
-  const comision   = parseFloat(document.getElementById('apComision')?.value)||0;
+  const comisionInputAp = document.getElementById('apComision')?.value ?? '';
+  const comision = comisionInputAp==='' ? 0 : parseFloat(comisionInputAp)||0;
+  if(comision>0 && comision<3){ toast('La comisión mínima para ConectorT es 3%'); return; }
+  if(comision>0 && !c.conectorActivo){ toast('Este comercio no tiene ConectorT activado. Activalo primero para poder ponerle comisión a un producto.'); return; }
   const descripcion = (document.getElementById('apDescripcion')?.value||'').trim();
   const rubro = document.getElementById('apRubro')?.value || c.rubro || '';
   const editId = document.getElementById('apEditId')?.value || '';
