@@ -3856,6 +3856,29 @@ async function manejarUsuarioGoogle(user){
     }catch(e){ console.error('Error en auto-claim de comercio:', e); }
   }
 
+  // ── AUTO-CLAIM: buscar cliente creado por admin con el mismo email ──
+  // Aplica si la persona no eligió explícitamente ConectorT o Comercio.
+  if(user.email && firebaseListo && (!rolPreElegido || rolPreElegido==='cliente')){
+    try{
+      const snapCl = await db.collection('clientes').where('email','==',user.email).get();
+      const sinUidCl = snapCl.docs.find(d=>{ const v=d.data(); return !v.uid; });
+      if(sinUidCl){
+        const cl = sinUidCl.data();
+        const docIdCl = sinUidCl.id;
+        // 1. Vincular uid al cliente
+        const datosVinculadosCl = {...cl, uid: user.uid, viaGoogle:true, fotoGoogle: user.photoURL||null};
+        await db.collection('clientes').doc(docIdCl).set(datosVinculadosCl, {merge:true});
+        // 2. Actualizar state local
+        const idxCl = state.clientes.findIndex(x=>x.id===cl.id);
+        if(idxCl>=0) state.clientes[idxCl] = datosVinculadosCl; else state.clientes.push(datosVinculadosCl);
+        rolPreElegido = null;
+        toast('¡Tu cuenta fue vinculada! Bienvenido/a 👋');
+        entrarConDatosGuardados('cliente', datosVinculadosCl);
+        return;
+      }
+    }catch(e){ console.error('Error en auto-claim de cliente:', e); }
+  }
+
   // Cuenta nueva
   if(state.currentUser && state.currentUser.uid === user.uid) return; // la otra llamada (popup/onAuthStateChanged) ya la creó
   if(rolPreElegido){
@@ -4428,7 +4451,7 @@ function goRegister(role){
 let pendingVendedorData = null;
 let verifyCodeSent = null;
 
-function submitRegister(){
+async function submitRegister(){
   if(pendingRole==='vendedor'){
     const nombre = document.getElementById('rNombre').value.trim();
     const usuario = document.getElementById('rUsuario').value.trim();
@@ -4494,6 +4517,50 @@ function submitRegister(){
     const nombreOcupado = state.comercios.some(c => (c.nombre||'').toLowerCase() === nombre.toLowerCase());
     if(nombreOcupado){ toast('Ya existe un comercio registrado con ese nombre, elegí otro'); return; }
     if(!tyc){ toast('Necesitás aceptar los Términos y Condiciones'); return; }
+
+    // ── AUTO-CLAIM manual: si el admin ya cargó este comercio con ese email, lo vinculamos ──
+    if(firebaseListo){
+      try{
+        const snapClaim = await db.collection('comercios').where('email','==',email).get();
+        const sinUid = snapClaim.docs.find(d=>{ const v=d.data(); return !v.uid; });
+        if(sinUid){
+          const cExistente = sinUid.data();
+          const docId = sinUid.id;
+          // Completar con los datos que recién ingresó (sin pisar los del admin)
+          const datosActualizados = {
+            ...cExistente,
+            razonSocial: razonSocial || cExistente.razonSocial,
+            cuit: cuit || cExistente.cuit,
+            descripcion: descripcion || cExistente.descripcion,
+            direccion: direccion || cExistente.direccion,
+            telefono: telefono || cExistente.telefono,
+            whatsapp: whatsapp || cExistente.whatsapp,
+            instagram: instagram || cExistente.instagram,
+            facebook: facebook || cExistente.facebook,
+            horario: horario || cExistente.horario,
+            turnos: turnos.length ? turnos : cExistente.turnos,
+            dias: dias.length ? dias : cExistente.dias,
+            metodosPago: metodosPago.length ? metodosPago : cExistente.metodosPago,
+            lat: registroLatLng?.lat || cExistente.lat,
+            lng: registroLatLng?.lng || cExistente.lng,
+            img: fotosCargadas['rLogo'] || cExistente.img || null,
+            registroCompletado: true
+          };
+          await db.collection('comercios').doc(docId).set(datosActualizados, {merge:true});
+          const idx = state.comercios.findIndex(x=>x.id===cExistente.id);
+          if(idx>=0) state.comercios[idx] = datosActualizados; else state.comercios.push(datosActualizados);
+          state.currentUser = datosActualizados; state.role='comercio';
+          setRoleChip('🏬 Comercio', false);
+          document.getElementById('cNombre').textContent = datosActualizados.nombre;
+          toast('¡Tu comercio fue vinculado! Bienvenido 🏬');
+          registroLatLng = null;
+          delete fotosCargadas['rLogo'];
+          renderComercioPanel();
+          showScreen('c-panel');
+          return;
+        }
+      }catch(e){ console.error('Error en auto-claim manual de comercio:', e); }
+    }
 
     const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, tipo, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, sinPedidos,
       plan: planTipo, planMonto, planComPct, planVence, planActivo: true,
