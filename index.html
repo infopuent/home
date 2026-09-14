@@ -3209,7 +3209,7 @@ function onRoleChipClick(){
   if(!state.role){ showScreen('home'); return; }
   if(state.role==='vendedor') showScreen('v-catalogo');
   else if(state.role==='comercio') showScreen('c-panel');
-  else if(state.role==='cliente') showScreen('cl-buscador');
+  else if(state.role==='cliente'){ showScreen('feed'); setFeedTab('home'); }
   else if(state.role==='admin'){ adminCargarStats(); showScreen('admin-panel'); setTimeout(adminIniciarLayout, 80); }
 }
 
@@ -4044,7 +4044,7 @@ function entrarConDatosGuardados(rol, data){
       return;
     }
     if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
-    showScreen('cl-buscador'); updateBottomNav('cl-buscador'); updateTopbarUser();
+    showScreen('feed'); setFeedTab('home'); updateBottomNav('feed'); updateTopbarUser();
   }
 }
 
@@ -4638,9 +4638,9 @@ async function submitRegister(){
       return;
     }
     toast('¡Listo, ya podés explorar!');
-    showScreen('cl-buscador');
+    showScreen('feed'); setFeedTab('home');
   }
-  updateBottomNav(state.role+ (state.role==='vendedor'?'-catalogo': state.role==='comercio'?'-panel':'-buscador'));
+  updateBottomNav(state.role==='vendedor'?'v-catalogo': state.role==='comercio'?'c-panel': state.role==='cliente'?'feed' : state.role+'-buscador');
 }
 
 /* ================= VENDEDOR: CATALOGO ================= */
