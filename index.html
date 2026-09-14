@@ -7761,6 +7761,8 @@ function renderHomeTab(){
   renderSeccionesCategorias();
 }
 
+var _encantarCache = { key:null, ids:[] };
+
 function renderFeedEncantar(){
   var grid = document.getElementById('feedGridEncantar');
   if(!grid) return;
@@ -7778,9 +7780,22 @@ function renderFeedEncantar(){
       return cat === _feedCategoriaActual;
     });
   }
-  // Mezclar y tomar 10 (5x2)
-  prods.sort(()=>Math.random()-.5);
-  var top10 = prods.slice(0,10);
+  // La selección de 10 productos se mezcla al azar UNA sola vez por cada
+  // combinación de ciudad/categoría/productos disponibles, y se cachea —
+  // así no cambia sola cada vez que se vuelve a tocar la pestaña Home.
+  // Solo se vuelve a mezclar si cambia el filtro o si cambió el conjunto
+  // de productos elegibles (se cargó uno nuevo, se borró uno, etc.).
+  var key = (ciudadSeleccionada||'') + '|' + (_feedCategoriaActual||'todos');
+  var idsDisponibles = prods.map(function(p){ return p.id; }).sort().join(',');
+  var cacheKeyCompleta = key + '|' + idsDisponibles;
+  var top10;
+  if(_encantarCache.key === cacheKeyCompleta){
+    top10 = _encantarCache.ids.map(function(id){ return prods.find(function(p){ return p.id===id; }); }).filter(Boolean);
+  } else {
+    var mezclados = prods.slice().sort(()=>Math.random()-.5);
+    top10 = mezclados.slice(0,10);
+    _encantarCache = { key: cacheKeyCompleta, ids: top10.map(function(p){ return p.id; }) };
+  }
   if(!top10.length){
     grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ic">🛍️</div><div class="t">Pronto vas a ver productos acá</div></div>';
     return;
