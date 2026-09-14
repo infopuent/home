@@ -2942,7 +2942,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:30px;">Si está tildado, cualquier ConectorT puede vender los productos con comisión de este comercio. Necesario para poder cargarle comisión a un producto.</div>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="adminGuardarNuevoComercio()">Guardar comercio</button>
+    <button class="btn btn-primary" id="adGuardarBtnMobile" onclick="adminGuardarNuevoComercio()">Guardar comercio</button>
     <div style="height:20px;"></div>
   </div>
 
@@ -10616,7 +10616,7 @@ function admRenderNuevoComercioDesktop(){
         </label>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:30px;">Si está tildado, cualquier ConectorT puede vender los productos con comisión de este comercio. Necesario para poder cargarle comisión a un producto.</div>
       </div>
-      <button class="btn btn-primary" style="margin-top:20px;width:100%;" onclick="adminGuardarNuevoComercio()">💾 Guardar comercio</button>
+      <button class="btn btn-primary" id="adGuardarBtnDesktop" style="margin-top:20px;width:100%;" onclick="adminGuardarNuevoComercio()">💾 Guardar comercio</button>
     </div>`;
   // Inicializar el select de rubros (misma fuente única que el resto de la app)
   fillRubroSelect('adRubro');
@@ -12376,6 +12376,9 @@ async function adminCargarMensajesEnviados(){
 async function adminGuardarNuevoComercio(){
   const nombre = document.getElementById('adNombre').value.trim();
   if(!nombre){ toast('El nombre es obligatorio.'); return; }
+  const btns = [document.getElementById('adGuardarBtnMobile'), document.getElementById('adGuardarBtnDesktop')].filter(Boolean);
+  if(btns.some(b=>b.disabled)) return; // ya se está guardando, ignorar clics de más
+  btns.forEach(b=>{ b.disabled = true; b.dataset.textoOriginal = b.textContent; b.textContent = 'Guardando…'; });
   const id = 'c-' + Date.now();
   const qr = 'CQR-' + String(Date.now()).slice(-4);
   const data = {
@@ -12417,8 +12420,12 @@ async function adminGuardarNuevoComercio(){
     document.getElementById('adLogoFotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">📷</div></div>';
     document.getElementById('adFoto2FotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">🖼️</div></div>';
     const adConectorActivoEl = document.getElementById('adConectorActivo'); if(adConectorActivoEl) adConectorActivoEl.checked = false;
+    btns.forEach(b=>{ b.disabled = false; b.textContent = b.dataset.textoOriginal || b.textContent; });
     showScreen('admin-comercios'); adminCargarComercios();
-  }catch(e){ toast('Error al guardar: ' + e.message); }
+  }catch(e){
+    btns.forEach(b=>{ b.disabled = false; b.textContent = b.dataset.textoOriginal || b.textContent; });
+    toast('Error al guardar: ' + e.message);
+  }
 }
 
 // =============================================
