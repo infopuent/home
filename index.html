@@ -2190,6 +2190,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ CLIENTE: FAVORITOS ============ -->
   <div class="screen hidden" id="screen-cl-favoritos">
     <button class="cerrar-sesion-btn" onclick="confirmarCierreSesion()">👤 Cerrar sesión</button>
+    <div class="link-back" onclick="irInicio()">← Volver al inicio</div>
     <div class="kicker">Tus productos</div>
     <h1 class="page-title">❤️ Favoritos</h1>
     <p class="page-sub">Los productos que guardaste para comprar más adelante.</p>
@@ -7980,7 +7981,7 @@ function setFeedTab(tab){
     });
   }
   if(tab==='mas'){ renderFeedVendedores(); }
-  if(tab==='home'){ renderHomeTab(); }
+  if(tab==='home'){ _encantarCache = { key: null, ids: [] }; renderHomeTab(); }
 }
 
 function renderHomeTab(){
@@ -7999,8 +8000,9 @@ function renderFeedEncantar(){
   var prods = [];
   (state.comercios||[]).forEach(function(c){
     if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
-      (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
-        .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro, _comercioTipo:c.tipo}); });
+      var cId = c.id || c._docId;
+      (state.productos||[]).filter(function(p){ return p.comercioId===cId && (p.origen==='comercio' || !p.origen); })
+        .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo}); });
     }
   });
   // Filtrar por categoría si hay una seleccionada
