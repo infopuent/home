@@ -3850,15 +3850,17 @@ async function manejarUsuarioGoogle(user){
         const c = candidato.data();
         const docId = candidato.id;
         // 1. Vincular uid al comercio — guardar _docId para que los filtros de ventas funcionen
-        const datosVinculados = {...c, uid: user.uid, _docId: docId, viaGoogle:true, fotoGoogle: user.photoURL||null};
+        // Asegurar que el campo id esté siempre presente (puede faltar en comercios cargados por el admin)
+        const datosVinculados = {...c, id: c.id || docId, uid: user.uid, _docId: docId, viaGoogle:true, fotoGoogle: user.photoURL||null};
         await db.collection('comercios').doc(docId).set(datosVinculados, {merge:true});
         // 2. Traspasar ownerUid de todos sus productos
-        const snapProds = await db.collection('productos').where('comercioId','==',c.id).get();
+        const comercioIdParaProds = c.id || docId;
+        const snapProds = comercioIdParaProds ? await db.collection('productos').where('comercioId','==',comercioIdParaProds).get() : { empty: true, forEach: ()=>{} };
         const batch = db.batch();
         snapProds.forEach(pd=>{ batch.update(pd.ref, {ownerUid: user.uid}); });
         if(!snapProds.empty) await batch.commit();
         // 3. Actualizar state local
-        const idx = state.comercios.findIndex(x=>x.id===c.id);
+        const idx = state.comercios.findIndex(x=>x.id===(c.id||docId) || x._docId===docId);
         if(idx>=0) state.comercios[idx] = datosVinculados; else state.comercios.push(datosVinculados);
         rolPreElegido = null;
         toast('¡Tu comercio fue vinculado a esta cuenta! 🏬');
@@ -4109,7 +4111,8 @@ async function cargarDatosPublicosDeFirestore(){
     comerciosR.value.forEach(doc=>{
       const data = doc.data();
       if(data.estado === 'papelera') return; // ignorar papelera
-      const c = {...data, id: data.id || doc.id};
+      // Garantizar id y _docId siempre presentes para que los .find(x=>x.id===...) funcionen
+      const c = {...data, id: data.id || doc.id, _docId: doc.id};
       const idxExiste = c.uid
         ? state.comercios.findIndex(x=>x.uid===c.uid)
         : state.comercios.findIndex(x=>x.id===c.id);
@@ -4139,6 +4142,29 @@ async function cargarDatosPublicosDeFirestore(){
   renderLocales();
   migrarCategorias();
   migrarConectorActivo();
+  migrarIdFaltanteEnComercios();
+}
+
+// Corrige comercios que fueron cargados por el admin sin el campo `id` dentro del documento.
+// Sin ese campo, los .where('comercioId','==', c.id) devuelven undefined y tiran error en Firestore.
+async function migrarIdFaltanteEnComercios(){
+  if(!firebaseListo || !db) return;
+  try{
+    const snap = await db.collection('comercios').get();
+    const batch = db.batch();
+    let count = 0;
+    snap.docs.forEach(doc=>{
+      const data = doc.data();
+      if(!data.id){
+        batch.update(doc.ref, { id: doc.id, _docId: doc.id });
+        // Actualizar también en memoria
+        const idx = state.comercios.findIndex(x=>x._docId===doc.id || (!x.id && x.nombre===data.nombre));
+        if(idx>=0){ state.comercios[idx].id = doc.id; state.comercios[idx]._docId = doc.id; }
+        count++;
+      }
+    });
+    if(count > 0){ await batch.commit(); console.log('Migrados', count, 'comercios sin campo id'); renderFeed(); }
+  }catch(e){ console.warn('migrarIdFaltanteEnComercios:', e); }
 }
 
 // Antes el checkbox "Activar ConectorT" era decorativo: un comercio con productos
@@ -4570,8 +4596,11 @@ async function submitRegister(){
           const cExistente = sinUid.data();
           const docId = sinUid.id;
           // Completar con los datos que recién ingresó (sin pisar los del admin)
+          // Asegurar que id esté presente (puede faltar en comercios cargados por el admin)
           const datosActualizados = {
             ...cExistente,
+            id: cExistente.id || docId,
+            _docId: docId,
             razonSocial: razonSocial || cExistente.razonSocial,
             cuit: cuit || cExistente.cuit,
             descripcion: descripcion || cExistente.descripcion,
@@ -4590,7 +4619,7 @@ async function submitRegister(){
             registroCompletado: true
           };
           await db.collection('comercios').doc(docId).set(datosActualizados, {merge:true});
-          const idx = state.comercios.findIndex(x=>x.id===cExistente.id);
+          const idx = state.comercios.findIndex(x=>x.id===(cExistente.id||docId) || x._docId===docId);
           if(idx>=0) state.comercios[idx] = datosActualizados; else state.comercios.push(datosActualizados);
           state.currentUser = datosActualizados; state.role='comercio';
           setRoleChip('🏬 Comercio', false);
@@ -10781,9 +10810,10 @@ async function adminVerComercio(docId){
   let valoracionesHtml = '<p style="color:var(--muted);font-size:12px;">Sin valoraciones registradas.</p>';
 
   try{
+    const _idParaBuscar = c.id || c._docId || docId;
     const [snapVentas, snapVal] = await Promise.all([
-      firebaseListo ? db.collection('ventas').where('comercioId','==', c.id||docId).get() : null,
-      firebaseListo ? db.collection('valoraciones').where('hacia','==', c.id||docId).get() : null
+      (firebaseListo && _idParaBuscar) ? db.collection('ventas').where('comercioId','==', _idParaBuscar).get() : null,
+      (firebaseListo && _idParaBuscar) ? db.collection('valoraciones').where('hacia','==', _idParaBuscar).get() : null
     ]);
 
     if(snapVentas && !snapVentas.empty){
