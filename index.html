@@ -3828,19 +3828,23 @@ async function manejarUsuarioGoogle(user){
   }
 
   // ── AUTO-CLAIM: buscar comercio creado por admin con el mismo email ──
-  // Solo aplica si la persona no eligió explícitamente ConectorT o Cliente —
-  // así no le "roba" el rol a alguien que sí quería registrarse como otra cosa.
+  // Solo aplica si la persona no eligió explícitamente ConectorT o Cliente.
+  // Acepta el comercio si: no tiene uid, o tiene uid pero es el mismo usuario (re-login).
   if(user.email && firebaseListo && (!rolPreElegido || rolPreElegido==='comercio')){
     try{
       const snapClaim = await db.collection('comercios').where('email','==',user.email).get();
-      const sinUid = snapClaim.docs.find(d=>{ const v=d.data(); return !v.uid; });
-      if(sinUid){
-        const c = sinUid.data();
-        const docId = sinUid.id;
+      // Tomar el que no tiene uid, o cuyo uid coincide con este usuario (mismo dueño)
+      const candidato = snapClaim.docs.find(d=>{
+        const v = d.data();
+        return !v.uid || v.uid === user.uid;
+      });
+      if(candidato){
+        const c = candidato.data();
+        const docId = candidato.id;
         // 1. Vincular uid al comercio
         const datosVinculados = {...c, uid: user.uid, viaGoogle:true, fotoGoogle: user.photoURL||null};
         await db.collection('comercios').doc(docId).set(datosVinculados, {merge:true});
-        // 2. Traspasar ownerUid de todos sus productos (antes guardados con ownerUid=c.id)
+        // 2. Traspasar ownerUid de todos sus productos
         const snapProds = await db.collection('productos').where('comercioId','==',c.id).get();
         const batch = db.batch();
         snapProds.forEach(pd=>{ batch.update(pd.ref, {ownerUid: user.uid}); });
