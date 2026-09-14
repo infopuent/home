@@ -283,6 +283,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   position:fixed; inset:0; z-index:100; background:#FFFFFF;
   display:flex; align-items:center; justify-content:center; padding:32px;
   transition:opacity .5s ease, visibility .5s ease;
+  flex-direction:column; gap:24px;
 }
 #splash.hide{opacity:0; visibility:hidden; pointer-events:none;}
 .splash-logo-wrap{
@@ -291,6 +292,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 }
 .splash-logo-wrap img{width:100%; height:auto; display:block; object-fit:contain;}
 @keyframes splashPop{from{opacity:0; transform:scale(.85) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
+#splashLoader{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transition:opacity .4s ease;}
+#splashLoader.visible{opacity:1;}
+.splash-spinner{width:28px;height:28px;border:3px solid #FFE0CC;border-top-color:#FF6600;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#splashLoaderTxt{font-size:12px;color:#aaa;font-weight:600;letter-spacing:.02em;}
 
 /* ---- Chips de categoría estilo Rappi ---- */
 .cat-chip{
@@ -719,6 +725,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 <div id="splash" onclick="hideSplash()">
   <div class="splash-logo-wrap">
     <img src="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png" alt="ElPuente">
+  </div>
+  <div id="splashLoader">
+    <div class="splash-spinner"></div>
+    <div id="splashLoaderTxt">Cargando…</div>
   </div>
 </div>
 
@@ -1831,7 +1841,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn-tile btn-tile-gold" onclick="mostrarMiQR('comercio')"><i class="ti ti-qrcode ic" aria-hidden="true"></i>Mi código QR</button>
       <button class="btn-tile btn-tile-neutral" onclick="abrirEditarComercio()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
       <button class="btn-tile btn-tile-coral hidden" id="btnMenuDia" style="grid-column:1/-1;" onclick="abrirMenuDia()"><i class="ti ti-clipboard-list ic" aria-hidden="true"></i>📋 Menú del día</button>
-      <button class="btn-tile btn-tile-mint" style="grid-column:1/-1;" onclick="renderCOperaciones();showScreen('c-operaciones')"><i class="ti ti-list-check ic" aria-hidden="true"></i>Operaciones y comisiones</button>
+      <button class="btn-tile btn-tile-mint" style="grid-column:1/-1;position:relative;" id="btnOperacionesComercio" onclick="renderCOperaciones();showScreen('c-operaciones');limpiarBadgeContactos()"><i class="ti ti-list-check ic" aria-hidden="true"></i>Operaciones y comisiones<span id="badgeContactosDirect" style="display:none;position:absolute;top:8px;right:10px;background:#E05A5A;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;"></span></button>
       <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="renderCPedidosEnvio();showScreen('c-pedidos-envio')"><i class="ti ti-truck ic" aria-hidden="true"></i>Pedidos de envío 🚚</button>
     </div>
     <div id="cPlanBox" style="margin-bottom:12px;"></div>
@@ -2033,7 +2043,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
     <div class="kicker">Comercio</div>
     <h1 class="page-title">Operaciones y comisiones</h1>
-    <p class="page-sub">Reservas y pedidos de conectores. Marcá las comisiones que ya transferiste.</p>
+    <p class="page-sub">Reservas via conectores, comisiones y contactos directos de clientes por WhatsApp.</p>
     <div id="cOperacionesList"></div>
   </div>
 
@@ -3049,6 +3059,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         db = firebase.firestore();
         firebaseListo = true;
         console.log(i===0 ? 'Firebase cargado desde gstatic.com' : 'Firebase cargado desde jsDelivr (fallback)');
+        if(typeof _tryHideSplash === 'function') _tryHideSplash();
         if(typeof onFirebaseReady === 'function') onFirebaseReady();
         return;
       }catch(e){
@@ -3056,6 +3067,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       }
     }
     console.error('Firebase no se pudo inicializar por ningún CDN. La app sigue funcionando sin login real.');
+    if(typeof _tryHideSplash === 'function') _tryHideSplash();
   }
   cargarFirebaseConFallback();
 </script>
@@ -6115,7 +6127,7 @@ async function cargarVentasDeComercio(comercioId){
   // Polling cada 15s — limpiar anterior si existe (por cambio de cuenta)
   if(window._comercioPolling) clearInterval(window._comercioPolling);
   window._comercioPolling = setInterval(function(){
-    cargarVentasDeComercio(comercioId).then(function(){ actualizarBadgeReservas(); });
+    cargarVentasDeComercio(comercioId).then(function(){ actualizarBadgeReservas(); actualizarBadgeContactos(); });
   }, 15000);
 }
 
@@ -6678,6 +6690,7 @@ function guardarConectorActivoComercio(valor){
 
 function renderComercioPanel(){
   renderPublicidadBox();
+  actualizarBadgeContactos();
   renderCPlanBox();
   renderCConectorToggle();
   renderProductosPropios();
@@ -7138,7 +7151,10 @@ function pedirProducto(){
 }
 
 /* ================= SPLASH ================= */
+var _splashYaOculto = false;
 function hideSplash(){
+  if(_splashYaOculto) return;
+  _splashYaOculto = true;
   const s = document.getElementById('splash');
   if(!s || s.classList.contains('hide')) return;
   s.classList.add('hide');
@@ -7146,7 +7162,28 @@ function hideSplash(){
   if(state && state.role === 'admin') setTimeout(adminIniciarLayout, 520);
   cargarRubrosHome();
 }
-setTimeout(hideSplash, 3400);
+
+// Mostrar el spinner si Firebase no cargó en 1.5s (red lenta / adblocker / fallback CDN)
+setTimeout(function(){
+  if(!_splashYaOculto){
+    var loader = document.getElementById('splashLoader');
+    if(loader) loader.classList.add('visible');
+  }
+}, 1500);
+
+// Ocultar el splash en cuanto Firebase esté listo (con mínimo visual de 1.2s)
+var _splashMinTime = Date.now() + 1200;
+function _tryHideSplash(){
+  var wait = Math.max(0, _splashMinTime - Date.now());
+  setTimeout(hideSplash, wait);
+}
+
+// Safety net: ocultar el splash a los 6s pase lo que pase (Firebase muy lento o bloqueado)
+setTimeout(function(){
+  var txt = document.getElementById('splashLoaderTxt');
+  if(txt && !_splashYaOculto) txt.textContent = 'Entrando sin conexión…';
+  hideSplash();
+}, 6000);
 // Mostrar el menú inferior desde el inicio (modo invitado)
 updateBottomNav('feed');
 
@@ -12748,9 +12785,29 @@ function fpEnviarWhatsApp(tipo){
   const url = `https://wa.me/54${whatsapp}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 
+  // ── Registrar el contacto directo para que el comercio lo vea en Actividad ──
+  const contacto = {
+    id: nextId('cta'),
+    tipo: 'contacto_directo',
+    origen: 'whatsapp_directo',
+    comercioId: c.id || c._docId,
+    comercioNombre: c.nombre,
+    clienteNombre: nombreUsuario,
+    clienteTel: telUsuario || '—',
+    modalidad: tipo === 'presencial' ? 'Retiro en local' : 'Envio a domicilio',
+    direccion: tipo === 'envio' ? (document.getElementById('fpDireccion')?.value?.trim() || '—') : null,
+    productos: grupo.items.map(i => i.nombre).join(', '),
+    total: tipo === 'presencial' ? total : total + COSTO_ENVIO,
+    fecha: new Date().toISOString(),
+    estado: 'contactado',
+    usuarioId: state.currentUser?.id || state.currentUser?.uid || null,
+  };
+  state.ventas.push(contacto);
+  guardarVentaEnFirestore(contacto);
+
   fpCerrarModal();
   renderCarrito();
-  toast('✅ Pedido enviado al comercio por WhatsApp');
+  toast('Pedido enviado al comercio por WhatsApp');
 }
 
 async function abrirMisPedidos(){
@@ -13791,15 +13848,43 @@ function renderAlertasConector(){
 // OPERACIONES DEL COMERCIO
 // =============================================
 
+// ── Badge de contactos directos no vistos ──────────────────────────────
+var _contactosDirectosVistos = JSON.parse(localStorage.getItem('puent_cta_vistos') || '[]');
+
+function actualizarBadgeContactos(){
+  var misIds = [state.currentUser?.id, state.currentUser?.uid, state.currentUser?._docId].filter(Boolean);
+  var contactos = state.ventas.filter(function(v){ return misIds.indexOf(v.comercioId) >= 0 && v.origen === 'whatsapp_directo'; });
+  var nuevos = contactos.filter(function(ct){ return _contactosDirectosVistos.indexOf(ct.id) < 0; });
+  var badge = document.getElementById('badgeContactosDirect');
+  if(!badge) return;
+  if(nuevos.length > 0){
+    badge.textContent = nuevos.length;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function limpiarBadgeContactos(){
+  var misIds = [state.currentUser?.id, state.currentUser?.uid, state.currentUser?._docId].filter(Boolean);
+  var contactos = state.ventas.filter(function(v){ return misIds.indexOf(v.comercioId) >= 0 && v.origen === 'whatsapp_directo'; });
+  contactos.forEach(function(ct){ if(_contactosDirectosVistos.indexOf(ct.id) < 0) _contactosDirectosVistos.push(ct.id); });
+  try{ localStorage.setItem('puent_cta_vistos', JSON.stringify(_contactosDirectosVistos)); }catch(e){}
+  var badge = document.getElementById('badgeContactosDirect');
+  if(badge) badge.style.display = 'none';
+}
+
 function renderCOperaciones(){
   var el = document.getElementById('cOperacionesList');
   if(!el) return;
   // Incluir también el docId de Firestore (_docId) por si las ventas usan ese ID
   var misIds = [state.currentUser.id, state.currentUser.uid, state.currentUser._docId].filter(Boolean);
-  var todas = state.ventas.filter(function(v){ return misIds.indexOf(v.comercioId) >= 0; });
+  var todas = state.ventas.filter(function(v){ return misIds.indexOf(v.comercioId) >= 0 && v.origen !== 'whatsapp_directo'; });
+  var contactosDirect = state.ventas.filter(function(v){ return misIds.indexOf(v.comercioId) >= 0 && v.origen === 'whatsapp_directo'; });
   todas.sort(function(a,b){ return new Date(b.fechaConfirmacion||b.fecha||0) - new Date(a.fechaConfirmacion||a.fecha||0); });
+  contactosDirect.sort(function(a,b){ return new Date(b.fecha||0) - new Date(a.fecha||0); });
 
-  if(todas.length === 0){
+  if(todas.length === 0 && contactosDirect.length === 0){
     el.innerHTML = '<div class="empty" style="padding:24px;"><div class="s">No hay operaciones registradas todavía.</div></div>';
     return;
   }
@@ -13866,6 +13951,24 @@ function renderCOperaciones(){
     html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#C0392B;margin:14px 0 8px;">❌ Canceladas ('+canceladas.length+')</div>';
     html += canceladas.map(tarjeta).join('');
   }
+
+  // ── Contactos directos por WhatsApp (cliente finalizó compra directo) ──
+  if(contactosDirect.length > 0){
+    html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#1a6e3c;margin:18px 0 8px;border-top:1px solid var(--line);padding-top:14px;">📲 Contactos directos vía WhatsApp ('+contactosDirect.length+')</div>';
+    html += contactosDirect.map(function(ct){
+      var fecha = ct.fecha ? new Date(ct.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"2-digit"}) : "—";
+      var hora  = ct.fecha ? new Date(ct.fecha).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "";
+      var modalBadge = ct.modalidad === "Envio a domicilio"
+        ? "<span style='font-size:10px;background:#EAF3FF;color:#3A5FA0;padding:2px 7px;border-radius:10px;font-weight:700;'>🛵 Envío</span>"
+        : "<span style='font-size:10px;background:#EAF0E6;color:#2F7A55;padding:2px 7px;border-radius:10px;font-weight:700;'>🏪 Retiro</span>";
+      var dirHtml = ct.direccion ? "<div style='font-size:11px;color:var(--muted);margin-top:2px;'>📍 "+ct.direccion+"</div>" : "";
+      var telHtml = ct.clienteTel && ct.clienteTel !== "—"
+        ? "<a href='https://wa.me/54"+ct.clienteTel.replace(/\D/g,"")+"' target='_blank' style='font-size:11px;background:#25D366;color:#fff;padding:2px 8px;border-radius:20px;text-decoration:none;margin-left:6px;'>WhatsApp</a>"
+        : "";
+      return "<div class='card' style='padding:0;margin-bottom:8px;overflow:hidden;'>"        +"<div style='display:flex;align-items:center;gap:12px;padding:12px 14px;'>"        +"<div style='width:40px;height:40px;border-radius:10px;background:#D4F0E2;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;'>📲</div>"        +"<div style='flex:1;min-width:0;'>"        +"<div style='font-size:13.5px;font-weight:700;color:var(--navy);'>"+(ct.clienteNombre||"—")+telHtml+"</div>"        +"<div style='font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'>"+ct.productos+"</div>"        +dirHtml        +"<div style='font-size:11px;color:var(--muted);margin-top:2px;'>📅 "+fecha+" "+hora+"</div>"        +"</div>"        +"<div style='text-align:right;flex-shrink:0;'>"        +"<div style='font-size:15px;font-weight:800;color:#2F7A55;'>$"+Number(ct.total||0).toLocaleString("es-AR")+"</div>"        +modalBadge        +"</div>"        +"</div>"        +"</div>";
+    }).join('');
+  }
+
   el.innerHTML = html;
 }
 
