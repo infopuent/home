@@ -2823,6 +2823,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="field"><label>Sitio web</label><input id="editAdWeb" type="text"></div>
       <div class="field"><label>Descripción</label><textarea id="editAdDescripcion" rows="2" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;"></textarea></div>
       <div class="field"><label>Horario</label><input id="editAdHorario" type="text" placeholder="Ej: Lun a Vie 9 a 13 y 16 a 20hs"></div>
+      <div class="field" style="background:var(--cream);border-radius:10px;padding:12px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;">
+          <input type="checkbox" id="editAdConectorActivo" style="width:20px;height:20px;flex-shrink:0;">
+          🤝 Quiere ConectorT (activado/desactivado)
+        </label>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:30px;">Si está tildado, cualquier ConectorT puede vender los productos con comisión de este comercio.</div>
+      </div>
       <div class="field"><label>Publicidad activa hasta</label><input id="editAdPublicidadVence" type="date"></div>
     </div>
     <button class="btn btn-primary" onclick="adminGuardarEdicionComercio()">Guardar cambios</button>
@@ -10061,7 +10068,7 @@ async function admRenderComerciosDesktop(){
         <button class="adm-filter-btn" onclick="admSetFiltroComercio('vencidos',this)">Vencidos</button>
         <button class="adm-filter-btn" onclick="admSetFiltroComercio('baja',this)" style="color:#7A1A1A;border-color:#d4a0a0;">🔴 Baja solicitada</button>
       </div>
-      <div class="adm-section"><table class="adm-table"><thead><tr><th>Comercio</th><th>Rubro</th><th>Tipo</th><th>Plan</th><th>Días restantes</th><th>Estado</th><th></th></tr></thead>
+      <div class="adm-section"><table class="adm-table"><thead><tr><th>Comercio</th><th>Rubro</th><th>Tipo</th><th>Plan</th><th>ConectorT</th><th>Días restantes</th><th>Estado</th><th></th></tr></thead>
       <tbody id="admTbodyComercios">${admRowsComercios(_adminComercios)}</tbody></table></div>`;
   }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
 }
@@ -10084,16 +10091,17 @@ function admFiltrarComerciosDesktop(q){
   if(el) el.innerHTML=admRowsComercios(lista);
 }
 function admRowsComercios(lista){
-  if(!lista||!lista.length) return '<tr><td colspan="7" style="color:#AAA;text-align:center;padding:24px;">Sin resultados</td></tr>';
+  if(!lista||!lista.length) return '<tr><td colspan="8" style="color:#AAA;text-align:center;padding:24px;">Sin resultados</td></tr>';
   return lista.map(c=>{
     const dias=planDiasRestantes(c);
     const esBaja=c.estado==='baja_solicitada';
     const badge=esBaja?'<span class="adm-badge bordo">🔴 Baja solicitada</span>':!c.aprobado?'<span class="adm-badge gray">Pendiente</span>':dias===null?'<span class="adm-badge green">Activo</span>':dias<0?'<span class="adm-badge red">Vencido</span>':dias<=7?`<span class="adm-badge orange">Vence en ${dias}d</span>`:'<span class="adm-badge green">Activo</span>';
+    const conectorBadge = c.conectorActivo ? '<span class="adm-badge green">🤝 Activado</span>' : '<span class="adm-badge gray">Desactivado</span>';
     const plan=c.plan==='fijo'?'Fijo $20k':c.plan==='comision'?`Com. ${c.comisionPct||5}%`:c.plan||'Gracia';
     const diasTxt=dias===null?'&mdash;':dias<0?`Vencido hace ${Math.abs(dias)}d`:`${dias} días`;
     const id=c._docId||c.id;
     const nombreSafe=(c.nombre||'').replace(/'/g,"\\'");
-    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;${esBaja?'background:#fdf4f4;':''}"><td style="font-weight:700;">${c.nombre||'&mdash;'}</td><td style="color:#888;">${c.rubro||'&mdash;'}</td><td style="color:#888;">${c.tipo||'&mdash;'}</td><td style="color:#888;">${plan}</td><td style="color:#888;">${diasTxt}</td><td>${badge}</td><td style="white-space:nowrap;">
+    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;${esBaja?'background:#fdf4f4;':''}"><td style="font-weight:700;">${c.nombre||'&mdash;'}</td><td style="color:#888;">${c.rubro||'&mdash;'}</td><td style="color:#888;">${c.tipo||'&mdash;'}</td><td style="color:#888;">${plan}</td><td>${conectorBadge}</td><td style="color:#888;">${diasTxt}</td><td>${badge}</td><td style="white-space:nowrap;">
       <button class="adm-btn" onclick="event.stopPropagation();admAbrirComercioDetalle('${id}')">Ver &rarr;</button>
       <button class="adm-btn" onclick="event.stopPropagation();admEditarComercio('${id}')">✏️ Editar</button>
       <button class="adm-btn" style="color:#c23b3b;" onclick="event.stopPropagation();admEliminarComercio('${id}','${nombreSafe}')">🗑️ Eliminar</button>
@@ -10172,6 +10180,13 @@ function admAbrirEditarDesktop(docId){
       </div>
       <div class="field"><label>Descripción</label><textarea id="editAdDescripcion" rows="2" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;">${esc(c.descripcion)}</textarea></div>
       <div class="field"><label>Horario</label><input id="editAdHorario" type="text" value="${esc(c.horario)}"></div>
+      <div class="field" style="background:var(--cream);border-radius:10px;padding:12px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;">
+          <input type="checkbox" id="editAdConectorActivo" ${c.conectorActivo?'checked':''} style="width:20px;height:20px;flex-shrink:0;">
+          🤝 Quiere ConectorT (activado/desactivado)
+        </label>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:30px;">Si está tildado, cualquier ConectorT puede vender los productos con comisión de este comercio.</div>
+      </div>
       <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="adminGuardarEdicionComercio()">Guardar cambios</button>
     </div>`;
   fillRubroSelect('editAdRubro', c.rubro);
@@ -10550,7 +10565,10 @@ function adminRenderComercios(lista){
         </div>
         <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${badgeBg};color:${badgeColor};">${badgeLabel}</span>
       </div>
-      <div style="width:100%;">${planBadge}</div>
+      <div style="width:100%;display:flex;gap:6px;flex-wrap:wrap;">
+        ${planBadge}
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:${c.conectorActivo?'#E3F3EA':'#EFEFEF'};color:${c.conectorActivo?'#2F7A55':'#888'};">${c.conectorActivo?'🤝 ConectorT activado':'ConectorT desactivado'}</span>
+      </div>
       <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerComercio('${docId}')">👁️ Ver</button>
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="admEditarComercio('${docId}')">✏️ Editar</button>
@@ -10818,6 +10836,7 @@ function adminAbrirEditar(docId){
   document.getElementById('editAdWeb').value = c.web||'';
   document.getElementById('editAdDescripcion').value = c.descripcion||'';
   document.getElementById('editAdHorario').value = c.horario||'';
+  document.getElementById('editAdConectorActivo').checked = !!c.conectorActivo;
   document.getElementById('editAdLat').value = c.lat||'';
   document.getElementById('editAdLng').value = c.lng||'';
   document.getElementById('editAdCoordsEstado').textContent = (c.lat && c.lng) ? '' : '⚠️ Este comercio todavía no tiene ubicación exacta en el mapa.';
@@ -10875,6 +10894,7 @@ async function adminGuardarEdicionComercio(){
     web:        document.getElementById('editAdWeb').value.trim(),
     descripcion:document.getElementById('editAdDescripcion').value.trim(),
     horario:    document.getElementById('editAdHorario').value.trim(),
+    conectorActivo: !!document.getElementById('editAdConectorActivo')?.checked,
   };
   const latVal = parseFloat(document.getElementById('editAdLat').value.replace(',', '.'));
   const lngVal = parseFloat(document.getElementById('editAdLng').value.replace(',', '.'));
