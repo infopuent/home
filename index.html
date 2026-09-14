@@ -4215,6 +4215,31 @@ function marcarUbicacion(){
   );
 }
 
+async function verificarEmailComercioExistente(email){
+  const estado = document.getElementById('rEmailEstado');
+  if(!estado) return;
+  email = (email||'').trim();
+  if(!email || !email.includes('@')){ estado.style.display='none'; return; }
+  if(!firebaseListo){ estado.style.display='none'; return; }
+  try{
+    const snap = await db.collection('comercios').where('email','==',email).get();
+    const sinUid = snap.docs.find(d=>!d.data().uid);
+    if(sinUid){
+      const nombre = sinUid.data().nombre || 'tu comercio';
+      estado.style.display='block';
+      estado.style.color='#2a7a2a';
+      estado.innerHTML = '✅ Encontramos el comercio <strong>'+nombre+'</strong> registrado con ese correo. Al continuar, tu cuenta quedará vinculada automáticamente.';
+    } else if(!snap.empty){
+      // Existe pero ya tiene uid (ya reclamado)
+      estado.style.display='block';
+      estado.style.color='#e05a5a';
+      estado.innerHTML = '⚠️ Este correo ya tiene una cuenta activa en PuenT. Si es tuya, ingresá con Google desde la pantalla principal.';
+    } else {
+      estado.style.display='none';
+    }
+  }catch(e){ estado.style.display='none'; }
+}
+
 function goRegister(role){
   pendingRole = role;
   registroLatLng = null;
@@ -4308,7 +4333,11 @@ function goRegister(role){
           <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="rWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:10px;">📲 El WhatsApp es obligatorio — los clientes envían sus pedidos ahí.</div>
-        <div class="field"><label>Correo electrónico <span style="color:#e05a5a;">*</span></label><input id="rEmail" type="email" placeholder="local@ejemplo.com"></div>
+        <div class="field">
+          <label>Correo electrónico <span style="color:#e05a5a;">*</span></label>
+          <input id="rEmail" type="email" placeholder="local@ejemplo.com" onblur="verificarEmailComercioExistente(this.value)">
+          <div id="rEmailEstado" style="font-size:12px;margin-top:5px;display:none;"></div>
+        </div>
         <div class="two-col">
           <div class="field"><label>Instagram</label><input id="rInstagram" type="text" placeholder="@milocal"></div>
           <div class="field"><label>Facebook</label><input id="rFacebook" type="text" placeholder="facebook.com/milocal"></div>
