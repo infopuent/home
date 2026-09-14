@@ -2910,6 +2910,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
         <div class="field"><label>Teléfono alternativo</label><input type="tel" id="adTelefonoAlt" placeholder="Opcional"></div>
       </div>
+      <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input type="tel" inputmode="numeric" id="adWhatsapp" placeholder="Ej: 3454123456 (sin espacios ni guiones)"></div>
       <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
       <div class="field"><label>Instagram</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
       <div class="field"><label>Facebook</label><input type="text" id="adFacebook" placeholder="facebook.com/comercio"></div>
@@ -10589,6 +10590,7 @@ function admRenderNuevoComercioDesktop(){
         <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
         <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
         <div class="field"><label>Teléfono alternativo</label><input type="tel" id="adTelefonoAlt" placeholder="Opcional"></div>
+        <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input type="tel" inputmode="numeric" id="adWhatsapp" placeholder="Ej: 3454123456 (sin espacios ni guiones)"></div>
         <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
         <div class="field"><label>Instagram</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
         <div class="field"><label>Facebook</label><input type="text" id="adFacebook" placeholder="facebook.com/comercio"></div>
@@ -11050,7 +11052,7 @@ async function adminGuardarEdicionComercio(){
   try{
     await db.collection('comercios').doc(docId).set(cambios, {merge:true});
     // Actualizar state local
-    const idx = state.comercios.findIndex(c=>c.id===docId);
+    const idx = state.comercios.findIndex(c=>c.id===docId || (c._docId && c._docId===docId));
     if(idx>=0) Object.assign(state.comercios[idx], cambios);
     const idxA = _adminComercios.findIndex(c=>(c._docId||c.id)===docId);
     if(idxA>=0) Object.assign(_adminComercios[idxA], cambios);
@@ -12389,6 +12391,7 @@ async function adminGuardarNuevoComercio(){
     direccion:   document.getElementById('adDireccion').value.trim(),
     telefono:    document.getElementById('adTelefono').value.trim(),
     telefonoAlt: document.getElementById('adTelefonoAlt').value.trim(),
+    whatsapp:    (document.getElementById('adWhatsapp')?.value||'').trim().replace(/\D/g,'') || document.getElementById('adTelefono').value.trim().replace(/\D/g,''),
     email:       document.getElementById('adEmail').value.trim(),
     instagram:   document.getElementById('adInstagram').value.trim(),
     facebook:    document.getElementById('adFacebook').value.trim(),
@@ -12411,7 +12414,7 @@ async function adminGuardarNuevoComercio(){
     state.comercios.push(data);
     toast('Comercio creado ✅');
     // Limpiar formulario
-    ['adNombre','adCiudad','adDireccion','adTelefono','adTelefonoAlt','adEmail',
+    ['adNombre','adCiudad','adDireccion','adTelefono','adTelefonoAlt','adWhatsapp','adEmail',
      'adInstagram','adFacebook','adWeb','adDescripcion','adDias',
      'adTurnoManDesde','adTurnoManHasta','adTurnoTarDesde','adTurnoTarHasta'].forEach(i=>{
       const el = document.getElementById(i); if(el) el.value = '';
@@ -12651,7 +12654,7 @@ function fpEnviarWhatsApp(tipo){
   if(!grupo || !c){ toast('Error al procesar el pedido'); return; }
 
   // Buscar WhatsApp — puede estar en whatsapp o telefono
-  const whatsapp = (c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  const whatsapp = (c.whatsapp||c.telefono||c.telefonoAlt||'').replace(/\D/g,'');
   if(!whatsapp){
     // Sin WhatsApp: mostrar info de contacto alternativa
     const modal = document.getElementById('modalFinalizarPedido');
