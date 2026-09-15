@@ -13589,13 +13589,14 @@ function updateTopbarUser(){
   nameEl.textContent = u.nombre || u.email || '—';
 }
 
-function abrirPerfil(){
+async function abrirPerfil(){
   const u = state.currentUser;
   const el = document.getElementById('perfilContenido');
   if(!u || state.role === 'guest'){
     showScreen('home');
     return;
   }
+  if(state.role === 'cliente') await cargarMisPedidos();
 
   const fila = (label, valor) => valor ? `
     <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:0.5px solid var(--line);">
@@ -13632,44 +13633,71 @@ function abrirPerfil(){
       <button class="btn-tile btn-tile-rose" style="${editAction ? '' : 'grid-column:1/-1;'}" onclick="confirmarCierreSesion()"><span class="ic">🚪</span>Cerrar sesión</button>
     </div>`;
 
-  // Historial de QR — agrupado por comercio
-  const historial = cargarHistorialQR();
+  // Historial de compras: para vendedor/comercio es el historial de QR generados
+  // (así compraron/vendieron). Para cliente, en cambio, la compra normal es por
+  // WhatsApp (sin QR) — su historial real está en state.misPedidos.
   let historialHtml;
-  if(historial.length === 0){
-    historialHtml = `<div class="empty" style="padding:22px 0;">
-        <div class="ic">📋</div>
-        <div class="t">Sin compras todavía</div>
-        <div class="s">Tus códigos QR generados van a aparecer acá.</div>
-       </div>`;
-  } else {
-    // Agrupar por comercioNombre
-    const grupos = {};
-    historial.forEach((h, idx) => {
-      const key = h.comercioNombre || 'Comercio';
-      if(!grupos[key]) grupos[key] = [];
-      grupos[key].push({...h, _idx: idx});
-    });
-    historialHtml = Object.entries(grupos).map(([nombreComercio, items]) => {
-      const cardsHtml = items.map(h => {
-        const fecha = new Date(h.fecha).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit'});
-        const hora  = new Date(h.fecha).toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+  let tituloHistorial = '📋 Mis compras y QR generados';
+  if(state.role === 'cliente'){
+    tituloHistorial = '📋 Mis compras';
+    const pedidos = state.misPedidos || [];
+    if(!pedidos.length){
+      historialHtml = `<div class="empty" style="padding:22px 0;">
+          <div class="ic">📋</div>
+          <div class="t">Sin compras todavía</div>
+          <div class="s">Cuando hagas un pedido, va a aparecer acá.</div>
+         </div>`;
+    } else {
+      historialHtml = pedidos.slice().reverse().map(p=>{
+        const fecha = new Date(p.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+        const itemsTxt = (p.items||[]).map(i=>(i.cantidad>1?i.cantidad+'× ':'')+i.nombre).join(', ');
         return `
-          <div onclick="reabrirQRHistorial(${h._idx})" style="background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:4px;">
-            <div style="font-size:11px;font-weight:800;color:var(--navy);font-family:monospace;">${h.codigo}</div>
-            <div style="font-size:11.5px;color:var(--ink);line-height:1.4;">${h.items.map(i=>i.nombre).join(', ')}</div>
-            <div style="font-size:10.5px;color:var(--muted);">${fecha} ${hora}</div>
-            <div style="font-size:13px;font-weight:800;color:var(--navy);">$${h.total.toLocaleString('es-AR')}</div>
-            <div style="font-size:10.5px;font-weight:700;color:var(--blue);text-align:right;">Ver QR →</div>
+          <div onclick="abrirMisPedidos()" style="background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:12.5px;font-weight:800;color:var(--navy);">🏬 ${p.comercioNombre}</div>
+            <div style="font-size:11.5px;color:var(--ink);line-height:1.4;">${itemsTxt}</div>
+            <div style="font-size:10.5px;color:var(--muted);">${fecha} · ${p.tipo==='envio'?'🛵 Envío':'🏪 Retiro'}</div>
+            <div style="font-size:13px;font-weight:800;color:var(--navy);">$${Number(p.total||0).toLocaleString('es-AR')}</div>
           </div>`;
       }).join('');
-      return `
-        <div style="margin-bottom:18px;">
-          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">🏬 ${nombreComercio}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            ${cardsHtml}
-          </div>
-        </div>`;
-    }).join('');
+    }
+  } else {
+    const historial = cargarHistorialQR();
+    if(historial.length === 0){
+      historialHtml = `<div class="empty" style="padding:22px 0;">
+          <div class="ic">📋</div>
+          <div class="t">Sin compras todavía</div>
+          <div class="s">Tus códigos QR generados van a aparecer acá.</div>
+         </div>`;
+    } else {
+      // Agrupar por comercioNombre
+      const grupos = {};
+      historial.forEach((h, idx) => {
+        const key = h.comercioNombre || 'Comercio';
+        if(!grupos[key]) grupos[key] = [];
+        grupos[key].push({...h, _idx: idx});
+      });
+      historialHtml = Object.entries(grupos).map(([nombreComercio, items]) => {
+        const cardsHtml = items.map(h => {
+          const fecha = new Date(h.fecha).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit'});
+          const hora  = new Date(h.fecha).toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+          return `
+            <div onclick="reabrirQRHistorial(${h._idx})" style="background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:11px;font-weight:800;color:var(--navy);font-family:monospace;">${h.codigo}</div>
+              <div style="font-size:11.5px;color:var(--ink);line-height:1.4;">${h.items.map(i=>i.nombre).join(', ')}</div>
+              <div style="font-size:10.5px;color:var(--muted);">${fecha} ${hora}</div>
+              <div style="font-size:13px;font-weight:800;color:var(--navy);">$${h.total.toLocaleString('es-AR')}</div>
+              <div style="font-size:10.5px;font-weight:700;color:var(--blue);text-align:right;">Ver QR →</div>
+            </div>`;
+        }).join('');
+        return `
+          <div style="margin-bottom:18px;">
+            <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">🏬 ${nombreComercio}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              ${cardsHtml}
+            </div>
+          </div>`;
+      }).join('');
+    }
   }
 
   el.innerHTML = `
@@ -13686,8 +13714,8 @@ function abrirPerfil(){
     <div class="card" style="padding:4px 16px;">${campos}</div>
 
     <div style="margin-top:22px;margin-bottom:10px;">
-      <div class="section-title">📋 Mis compras y QR generados</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tocá cualquier fila para volver a ver el QR.</div>
+      <div class="section-title">${tituloHistorial}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">${state.role==='cliente' ? 'Tocá cualquier pedido para ver el detalle.' : 'Tocá cualquier fila para volver a ver el QR.'}</div>
     </div>
     ${historialHtml}`;
 
