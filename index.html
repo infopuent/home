@@ -8435,22 +8435,27 @@ function elegirModoEntrega(modo){
   }
 }
 
-function crearPedidoEnvio(prodId, direccion, franja){
-  const p = state.productos.find(x=>x.id===prodId);
-  const c = state.comercios.find(x=>x.id===p?.comercioId);
-  if(!p||!c){ toast('Error al crear el pedido'); return null; }
+function crearPedidoEnvio(items, comercio, direccion, costoEnvio){
+  if(!items || !items.length || !comercio){ toast('Error al crear el pedido'); return null; }
+  const nombreResumen = items.length > 1
+    ? items.map(i=>`${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}`).join(', ')
+    : items[0].nombre;
+  const totalProductos = items.reduce((s,i)=>s+(i.precioTotal||i.precio||0),0);
   const pedido = {
     id: nextId('env'),
-    productoId: prodId,
-    productoNombre: p.nombre,
-    productoPrecio: p.precio,
-    comercioId: c.id,
-    comercioNombre: c.nombre,
+    items: items.map(i=>({prodId:i.prodId, nombre:i.nombre, cantidad:i.cantidad||1, precio:i.precioTotal||i.precio})),
+    productoId: items[0]?.prodId || null,
+    productoNombre: nombreResumen,
+    productoPrecio: totalProductos,
+    total: totalProductos,
+    comercioId: comercio.id,
+    comercioNombre: comercio.nombre,
+    comercioTel: comercio.whatsapp || comercio.telefono || '',
     clienteId: state.currentUser?.uid||state.currentUser?.id,
     clienteNombre: state.currentUser?.nombre||'Cliente',
-    clienteTel: state.currentUser?.tel||'',
+    clienteTel: state.currentUser?.telefono||'',
     direccion,
-    franja,
+    costoEnvio: costoEnvio || 0,
     // El cliente paga el envío al repartidor en mano; el comercio puede cubrirlo opcionalmente
     pagaEnvio: 'cliente',
     comercioCubreEnvio: false, // el comercio puede tildar esto después
@@ -12775,7 +12780,7 @@ function fpEnviarWhatsApp(tipo){
   let pedidoEnvioId = null;
   if(tipo === 'envio'){
     const dir = document.getElementById('fpDireccion').value.trim();
-    const pedidoEnvio = crearPedidoEnvio(grupo.items[0]?.prodId, c, dir, null, COSTO_ENVIO);
+    const pedidoEnvio = crearPedidoEnvio(grupo.items, c, dir, COSTO_ENVIO);
     if(pedidoEnvio) pedidoEnvioId = pedidoEnvio.id;
   }
 
