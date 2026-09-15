@@ -6144,9 +6144,11 @@ let _conectorPollingInterval = null;
 
 async function cargarReservasDeConector(vendedorId){
   if(!firebaseListo) return;
+  var miUid = state.currentUser?.uid;
+  if(!miUid) return;
   try{
     var snap = await db.collection('ventas')
-      .where('vendedorId','==', vendedorId)
+      .where('vendedorUid','==', miUid)
       .get();
     snap.forEach(function(doc){
       var v = doc.data();
@@ -6164,10 +6166,12 @@ async function cargarReservasDeConector(vendedorId){
 
 async function _pollingConectorActualizarEstados(vendedorId){
   if(!firebaseListo) return;
+  var miUid = state.currentUser?.uid;
+  if(!miUid) return;
   try{
     // Solo pedir las que no están cerradas
     var snap = await db.collection('ventas')
-      .where('vendedorId','==', vendedorId)
+      .where('vendedorUid','==', miUid)
       .where('estado','==','confirmada')
       .get();
     snap.forEach(function(doc){
