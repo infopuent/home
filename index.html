@@ -3447,7 +3447,7 @@ const navByRole = {
     {key:'feed',        ic:'ti-home',           label:'Inicio',  action:"irInicio()"},
     {key:'v-catalogo',  ic:'ti-building-store',  label:'Catálogo',action:"showScreen('v-catalogo')"},
     {key:'__cart__',    ic:'ti-shopping-cart',   label:'',        action:""},
-    {key:'v-solicitudes',ic:'ti-bell',           label:'Pedidos', action:"showScreen('v-solicitudes')"},
+    {key:'v-reservas',ic:'ti-bell',           label:'Pedidos', action:"renderVReservas();showScreen('v-reservas')"},
     {key:'v-perfil',    ic:'ti-user',            label:'Perfil',  action:"abrirPerfil()"},
   ],
   comercio:[
@@ -7476,7 +7476,8 @@ function irALocalesPorRubro(rubro){
   setFeedRubroLocales(rubro);
 }
 function estrellas(rating){
-  return `⭐ ${rating.toFixed(1)}`;
+  const n = Number(rating);
+  return `⭐ ${(isNaN(n) ? 4.5 : n).toFixed(1)}`;
 }
 function renderDestacadosYCerca(){
   const todos = state.comercios.filter(c=>mismaCiudad(c.ciudad, ciudadSeleccionada));
