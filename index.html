@@ -7892,7 +7892,7 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
         : `<button class="share-btn" onclick="event.stopPropagation(); agregarProductoAMiCatalogo('${p.id}')">➕ Sumar a mi catálogo</button>`;
     }
     return `
-      <div class="feed-prod-card" onclick="${click}" style="overflow:hidden;min-width:0;">
+      <div class="prod-card" onclick="${click}" style="cursor:pointer;overflow:hidden;min-width:0;">
         <div class="prod-photo">${foto}${badge ? `<span class="oferta-badge">${badge}</span>` : ''}${envioBadge}</div>
         <div class="prod-body" style="flex-direction:column;align-items:stretch;justify-content:flex-start;gap:3px;min-width:0;">
           <div class="prod-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</div>
