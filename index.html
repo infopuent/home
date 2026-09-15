@@ -104,6 +104,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .btn-tile-gold{background:#FFF8E1; color:#E65100;}
 .btn-tile-neutral{background:#F5F5F5; color:#555;}
 .btn-tile-rose{background:#FCE4EC; color:#880E4F;}
+.btn-tile-mustard{background:#FBF0D9; color:#7A5A00;}
 .btn-tile-mint{background:#E0F2F1; color:#00695C;}
 
 /* ---- Cards / inputs ---- */
@@ -2226,6 +2227,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div id="misPedidosContenido"></div>
   </div>
 
+  <!-- ============ SCREEN: CALIFICACIONES (universal, los 3 roles) ============ -->
+  <div class="screen hidden" id="screen-calificaciones">
+    <div class="link-back" onclick="showScreen('perfil')">← Volver a mi perfil</div>
+    <div class="kicker">Reputación</div>
+    <div class="page-title" style="margin-bottom:4px;">Calificaciones</div>
+    <p class="page-sub" style="margin-bottom:16px;">Calificá tus operaciones y mirá qué dicen de vos.</p>
+    <div id="calificacionesContenido"></div>
+  </div>
+
   <!-- ============ MODAL: FINALIZAR PEDIDO ============ -->
   <div id="modalFinalizarPedido" onclick="if(event.target===this)fpCerrarModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:flex-end;justify-content:center;">
     <div style="background:white;border-radius:24px 24px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;">
@@ -3085,6 +3095,7 @@ let state = {
   solicitudes: [],
   ventas: [],
   valoraciones: [], // {id, deUid, deRol, deNombre, paraUid, paraRol, estrellas, comentario, fecha, ventaId}
+  calificaciones: [], // sistema nuevo: todos-a-todos, a ciegas — ver bloque CALIFICACIONES
   seq: 1, // legacy — ya no se usa (nextId usa timestamp)
 };
 
@@ -4005,6 +4016,7 @@ function entrarConDatosGuardados(rol, data){
     cargarCatalogoVendedorGuardado(data.id); // llama renderVendedorCatalogo() al terminar
     renderVendedorStats();
     cargarReservasDeConector(data.id || data.uid);
+    cargarCalificaciones();
     showScreen('v-catalogo'); updateBottomNav('v-catalogo'); updateTopbarUser();
     // Si entró con Google y todavía no cargó DNI/teléfono reales, se los pedimos
     // ahora mismo para terminar de completar el registro de ConectorT.
@@ -4030,6 +4042,7 @@ function entrarConDatosGuardados(rol, data){
     // Buscar ventas por todos los identificadores posibles del comercio
     const _cIdsParaVentas = [...new Set([data.id, data.uid, data._docId].filter(Boolean))];
     for(const _cid of _cIdsParaVentas){ cargarVentasDeComercio(_cid); }
+    cargarCalificaciones();
     cargarVendedoresParaComercio();
     iniciarListenerVentasComercio(data.id || data.uid);
     if(window._codigoPendienteDesdeURL) procesarCodigoPendienteDesdeURL();
@@ -4042,6 +4055,7 @@ function entrarConDatosGuardados(rol, data){
     setRoleChip('🙋 Cliente', false);
     sincronizarFavoritosAlLogin(data);
     renderClienteBuscador();
+    cargarCalificaciones();
     if(_pedidoPendienteComercioId){
       const pid = _pedidoPendienteComercioId; _pedidoPendienteComercioId = null;
       updateTopbarUser();
@@ -6179,6 +6193,267 @@ async function _pollingConectorActualizarEstados(vendedorId){
       _sincronizarReservaEnLocalStorage(v);
     });
   } catch(e){ /* silencioso en polling */ }
+}
+
+/* ================= CALIFICACIONES (todos a todos, a ciegas) =================
+ * Colección Firestore 'calificaciones'. Una calificación por (ventaId, deUid, paraRol).
+ * "A ciegas": no se revela (revelada:true) hasta que ambas partes calificaron
+ * (parKey coincide en 2 documentos) o pasan DIAS_REVELADO_CALIFICACION días.
+ * La reputación pública de cada uno solo cuenta calificaciones ya reveladas. */
+const DIAS_REVELADO_CALIFICACION = 7;
+const MOTIVOS_NEGATIVA_CAL = {
+  comercio:  ['No entregó el pedido','Producto distinto al pactado','Mal trato','No contestó'],
+  cliente:   ['No se presentó a retirar','No contestó','Mal trato','Canceló sin avisar'],
+  conector:  ['No entregó lo acordado','Mal trato','No contestó','No pagó la comisión a tiempo'],
+};
+
+function _calParKey(ventaId, rolA, rolB){
+  return ventaId + '__' + [rolA, rolB].sort().join('-');
+}
+
+async function cargarCalificaciones(){
+  if(!firebaseListo || !db) return;
+  const miUid = state.currentUser?.uid;
+  if(!miUid) return;
+  try{
+    const [snapDe, snapPara] = await Promise.all([
+      db.collection('calificaciones').where('deUid','==', miUid).get(),
+      db.collection('calificaciones').where('paraUid','==', miUid).get(),
+    ]);
+    if(!state.calificaciones) state.calificaciones = [];
+    [...snapDe.docs, ...snapPara.docs].forEach(doc=>{
+      const cal = doc.data();
+      const i = state.calificaciones.findIndex(x=>x.id===cal.id);
+      if(i>=0) state.calificaciones[i] = cal; else state.calificaciones.push(cal);
+    });
+  } catch(e){ console.error('Error cargando calificaciones:', e); }
+}
+
+// Recorre las ventas confirmadas del usuario y arma la lista de a quién todavía
+// tiene que calificar (según el rol propio y el vínculo real de esa venta).
+function obtenerPendientesDeCalificar(){
+  const miUid = state.currentUser?.uid;
+  if(!miUid) return [];
+  const pendientes = [];
+  const yaCalifique = (ventaId, paraRol) => (state.calificaciones||[]).some(c=>c.ventaId===ventaId && c.deUid===miUid && c.paraRol===paraRol);
+  const nombreComercio = uid => state.comercios.find(x=>x.uid===uid)?.nombre || 'el comercio';
+  const nombreConector  = uid => state.vendedores.find(x=>x.uid===uid)?.nombre || 'el ConectorT';
+
+  (state.ventas||[]).forEach(v=>{
+    if(v.estado !== 'confirmada') return;
+
+    // Cliente ↔ Comercio (venta directa por WhatsApp)
+    if(v.origen === 'whatsapp_directo' && v.ownerUid && v.comercioUid){
+      if(v.ownerUid === miUid && !yaCalifique(v.id,'comercio'))
+        pendientes.push({ventaId:v.id, deRol:'cliente', paraUid:v.comercioUid, paraRol:'comercio', paraNombre:v.comercioNombre||nombreComercio(v.comercioUid), contexto:v.productos});
+      if(v.comercioUid === miUid && !yaCalifique(v.id,'cliente'))
+        pendientes.push({ventaId:v.id, deRol:'comercio', paraUid:v.ownerUid, paraRol:'cliente', paraNombre:v.clienteNombre, contexto:v.productos});
+    }
+
+    // Ventas vía ConectorT (QR): Comercio ↔ ConectorT, y si hay ownerUid, también Cliente ↔ ambos
+    if(v.vendedorUid && v.comercioUid){
+      if(v.vendedorUid === miUid && !yaCalifique(v.id,'comercio'))
+        pendientes.push({ventaId:v.id, deRol:'conector', paraUid:v.comercioUid, paraRol:'comercio', paraNombre:nombreComercio(v.comercioUid), contexto:v.codigo});
+      if(v.comercioUid === miUid && !yaCalifique(v.id,'conector'))
+        pendientes.push({ventaId:v.id, deRol:'comercio', paraUid:v.vendedorUid, paraRol:'conector', paraNombre:nombreConector(v.vendedorUid), contexto:v.codigo});
+
+      if(v.ownerUid){
+        if(v.ownerUid === miUid){
+          if(!yaCalifique(v.id,'conector'))
+            pendientes.push({ventaId:v.id, deRol:'cliente', paraUid:v.vendedorUid, paraRol:'conector', paraNombre:nombreConector(v.vendedorUid), contexto:v.codigo});
+          if(!yaCalifique(v.id,'comercio'))
+            pendientes.push({ventaId:v.id, deRol:'cliente', paraUid:v.comercioUid, paraRol:'comercio', paraNombre:nombreComercio(v.comercioUid), contexto:v.codigo});
+        }
+        if(v.vendedorUid === miUid && !yaCalifique(v.id,'cliente'))
+          pendientes.push({ventaId:v.id, deRol:'conector', paraUid:v.ownerUid, paraRol:'cliente', paraNombre:v.clienteNombre, contexto:v.codigo});
+        if(v.comercioUid === miUid && !yaCalifique(v.id,'cliente'))
+          pendientes.push({ventaId:v.id, deRol:'comercio', paraUid:v.ownerUid, paraRol:'cliente', paraNombre:v.clienteNombre, contexto:v.codigo});
+      }
+    }
+  });
+  return pendientes;
+}
+
+async function enviarCalificacion(item, valor, motivo, comentario){
+  const miUid = state.currentUser?.uid;
+  if(!miUid){ toast('Necesitás estar registrado para calificar'); return; }
+  const cal = {
+    id: nextId('cal'),
+    ventaId: item.ventaId,
+    parKey: _calParKey(item.ventaId, item.deRol, item.paraRol),
+    deUid: miUid, deRol: item.deRol, deNombre: state.currentUser?.nombre || '',
+    paraUid: item.paraUid, paraRol: item.paraRol, paraNombre: item.paraNombre || '',
+    valor,
+    motivo: valor === 'negativa' ? (motivo || null) : null,
+    comentario: (comentario || '').trim(),
+    fecha: new Date().toISOString(),
+    fechaLimiteRevelado: new Date(Date.now() + DIAS_REVELADO_CALIFICACION*24*60*60*1000).toISOString(),
+    revelada: false,
+  };
+  if(!state.calificaciones) state.calificaciones = [];
+  state.calificaciones.push(cal);
+  if(firebaseListo && db){
+    try{
+      await db.collection('calificaciones').doc(cal.id).set(cal);
+      await _calRevisarYRevelarPar(cal.parKey);
+    } catch(e){ console.error('Error guardando calificación:', e); }
+  }
+  toast('¡Gracias por calificar! 🙌');
+}
+
+// Si ya existen las 2 calificaciones de un mismo par (ambas direcciones), se revelan
+// para los dos al toque. Si no, quedan ocultas hasta fechaLimiteRevelado.
+async function _calRevisarYRevelarPar(parKeyValor){
+  if(!firebaseListo || !db) return;
+  try{
+    const snap = await db.collection('calificaciones').where('parKey','==', parKeyValor).get();
+    if(snap.size >= 2){
+      const batch = db.batch();
+      snap.docs.forEach(doc => batch.update(doc.ref, {revelada:true}));
+      await batch.commit();
+      snap.docs.forEach(doc=>{
+        const i = state.calificaciones.findIndex(x=>x.id===doc.id);
+        if(i>=0) state.calificaciones[i].revelada = true;
+      });
+    }
+  } catch(e){ /* silencioso */ }
+}
+
+// Revela por vencimiento de plazo las calificaciones cuyo par nunca se completó.
+// Se llama al abrir la pantalla de Calificaciones (no hay cron en este prototipo).
+async function _calRevelarVencidas(){
+  if(!firebaseListo || !db) return;
+  const ahora = Date.now();
+  const vencidas = (state.calificaciones||[]).filter(c => !c.revelada && c.deUid===state.currentUser?.uid && new Date(c.fechaLimiteRevelado).getTime() <= ahora);
+  for(const c of vencidas){
+    try{
+      await db.collection('calificaciones').doc(c.id).update({revelada:true});
+      c.revelada = true;
+    } catch(e){ /* silencioso */ }
+  }
+}
+
+function calcularReputacion(uid){
+  const propias = (state.calificaciones||[]).filter(c => c.paraUid===uid && c.revelada);
+  const total = propias.length;
+  if(!total) return {total:0, pct:null, positivas:0, neutrales:0, negativas:0};
+  const positivas = propias.filter(c=>c.valor==='positiva').length;
+  const neutrales = propias.filter(c=>c.valor==='neutral').length;
+  const negativas = propias.filter(c=>c.valor==='negativa').length;
+  return {total, pct: Math.round((positivas/total)*100), positivas, neutrales, negativas};
+}
+
+async function abrirCalificaciones(){
+  await cargarCalificaciones();
+  await _calRevelarVencidas();
+  renderCalificaciones();
+  showScreen('calificaciones');
+}
+
+function renderCalificaciones(){
+  const el = document.getElementById('calificacionesContenido');
+  if(!el) return;
+  const miUid = state.currentUser?.uid;
+  const rep = miUid ? calcularReputacion(miUid) : {total:0,pct:null};
+  const pendientes = obtenerPendientesDeCalificar();
+  const recibidas = (state.calificaciones||[]).filter(c=>c.paraUid===miUid && c.revelada).sort((a,b)=> new Date(b.fecha)-new Date(a.fecha));
+  const enviadasOcultas = (state.calificaciones||[]).filter(c=>c.deUid===miUid && !c.revelada);
+
+  const termColor = rep.pct===null ? '#999' : rep.pct>=80 ? '#2F7A55' : rep.pct>=50 ? '#C99A3E' : '#D9534F';
+  const resumenHtml = `
+    <div class="card" style="text-align:center;padding:18px;margin-bottom:18px;">
+      <div style="font-size:32px;font-weight:800;color:${termColor};">${rep.pct===null ? '—' : rep.pct+'%'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${rep.total ? `positivas sobre ${rep.total} operaciones` : 'Todavía no tenés calificaciones reveladas'}</div>
+      ${rep.total ? `<div style="font-size:11px;color:var(--muted);">👍 ${rep.positivas} · 😐 ${rep.neutrales} · 👎 ${rep.negativas}</div>` : ''}
+    </div>`;
+
+  const pendientesHtml = pendientes.length ? `
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Pendientes de calificar (${pendientes.length})</div>
+    ${pendientes.map(p=>`
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:12px 14px;">
+        <div>
+          <div style="font-size:13.5px;font-weight:700;">${p.paraNombre}</div>
+          <div style="font-size:11px;color:var(--muted);">${p.contexto||''}</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick='abrirModalCalificar(${JSON.stringify(p)})'>Calificar</button>
+      </div>`).join('')}
+  ` : `<div class="empty" style="padding:18px 0;"><div class="ic">✅</div><div class="t">No tenés calificaciones pendientes</div></div>`;
+
+  const recibidasHtml = recibidas.length ? `
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:20px 0 8px;">Lo que te calificaron</div>
+    ${recibidas.map(c=>{
+      const ic = c.valor==='positiva'?'👍':c.valor==='neutral'?'😐':'👎';
+      return `<div class="card" style="margin-bottom:8px;padding:12px 14px;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">${ic} ${c.deNombre||'—'}</div>
+          <div style="font-size:10.5px;color:var(--muted);">${new Date(c.fecha).toLocaleDateString('es-AR')}</div>
+        </div>
+        ${c.motivo ? `<div style="font-size:11.5px;color:#D9534F;margin-top:2px;">${c.motivo}</div>` : ''}
+        ${c.comentario ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">"${c.comentario}"</div>` : ''}
+      </div>`;
+    }).join('')}
+  ` : '';
+
+  const ocultasHtml = enviadasOcultas.length
+    ? `<div style="font-size:11px;color:var(--muted);margin-top:18px;text-align:center;">🔒 Ya calificaste a ${enviadasOcultas.length} persona${enviadasOcultas.length>1?'s':''} más — se revela cuando la otra parte también califique (o en 7 días).</div>`
+    : '';
+
+  el.innerHTML = resumenHtml + pendientesHtml + recibidasHtml + ocultasHtml;
+}
+
+function abrirModalCalificar(item){
+  const motivos = MOTIVOS_NEGATIVA_CAL[item.paraRol] || ['Mala experiencia'];
+  const overlay = document.createElement('div');
+  overlay.id = 'modalCalificarOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">
+      <div style="font-size:15px;font-weight:800;margin-bottom:4px;">Calificar a ${item.paraNombre}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">${item.contexto||''}</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn-cal" data-valor="positiva" style="flex:1;padding:14px 0;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:22px;cursor:pointer;">👍</button>
+        <button class="btn-cal" data-valor="neutral" style="flex:1;padding:14px 0;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:22px;cursor:pointer;">😐</button>
+        <button class="btn-cal" data-valor="negativa" style="flex:1;padding:14px 0;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:22px;cursor:pointer;">👎</button>
+      </div>
+      <div id="modalCalMotivoWrap" style="display:none;margin-bottom:12px;">
+        <label style="font-size:11.5px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px;">¿Qué pasó?</label>
+        <select id="modalCalMotivo" style="width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;">
+          ${motivos.map(m=>`<option value="${m}">${m}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Comentario (opcional)</label>
+        <textarea id="modalCalComentario" rows="3" placeholder="Contanos cómo te fue..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('modalCalificarOverlay').remove()">Cancelar</button>
+        <button class="btn btn-primary" id="modalCalEnviar" style="flex:1;" disabled onclick="_confirmarEnvioCalificacion()">Enviar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  window._itemCalificarActual = item;
+  window._valorCalificarActual = null;
+  overlay.querySelectorAll('.btn-cal').forEach(btn=>{
+    btn.onclick = () => {
+      window._valorCalificarActual = btn.dataset.valor;
+      overlay.querySelectorAll('.btn-cal').forEach(b=>b.style.borderColor='var(--line)');
+      btn.style.borderColor = 'var(--navy)';
+      document.getElementById('modalCalMotivoWrap').style.display = btn.dataset.valor==='negativa' ? 'block' : 'none';
+      document.getElementById('modalCalEnviar').disabled = false;
+    };
+  });
+}
+
+function _confirmarEnvioCalificacion(){
+  const item = window._itemCalificarActual;
+  const valor = window._valorCalificarActual;
+  if(!item || !valor) return;
+  const motivo = valor==='negativa' ? document.getElementById('modalCalMotivo').value : null;
+  const comentario = document.getElementById('modalCalComentario').value;
+  enviarCalificacion(item, valor, motivo, comentario);
+  document.getElementById('modalCalificarOverlay').remove();
+  renderCalificaciones();
 }
 
 function _sincronizarReservaEnLocalStorage(v){
@@ -13099,7 +13374,7 @@ function generarQRCarrito(comercioId){
     const venta = {
       id: nextId('t'), codigo, vendedorId: state.currentUser?.id || state.currentUser?.uid, vendedorUid: state.currentUser?.uid || null,
       productoId:p.id, comercioId, comercioUid: com?.uid || null,
-      clienteNombre, estado:'pendiente', comisionMonto: comMonto, comisionPuenT: Math.round(comMonto * 0.2), origen:'carrito',
+      clienteNombre, ownerUid: null, estado:'pendiente', comisionMonto: comMonto, comisionPuenT: Math.round(comMonto * 0.2), origen:'carrito',
       precioUnidad: p.precio, cantidad: unidades, fechaReserva: new Date().toISOString()
     };
     state.ventas.push(venta);
@@ -13235,9 +13510,15 @@ function abrirPerfil(){
 
   // Recuadros de acciones — arriba de todo, para no tener que scrollear
   // hasta el final para editar datos o cerrar sesión.
+  const pendientesCal = obtenerPendientesDeCalificar().length;
+  const reputacion = u.uid ? calcularReputacion(u.uid) : {total:0, pct:null};
   const accionesHtml = `
     <div class="btn-grid" style="margin-bottom:20px;">
       ${editAction ? `<button class="btn-tile btn-tile-sage" onclick="${editAction}"><span class="ic">✏️</span>Editar información</button>` : ''}
+      <button class="btn-tile btn-tile-mustard" style="position:relative;" onclick="abrirCalificaciones()">
+        <span class="ic">⭐</span>Calificaciones${reputacion.total ? ` (${reputacion.pct}% 👍)` : ''}
+        ${pendientesCal ? `<span style="position:absolute;top:6px;right:6px;background:#e05a5a;color:#fff;font-size:10px;font-weight:800;border-radius:100px;padding:1px 6px;">${pendientesCal}</span>` : ''}
+      </button>
       <button class="btn-tile btn-tile-rose" style="${editAction ? '' : 'grid-column:1/-1;'}" onclick="confirmarCierreSesion()"><span class="ic">🚪</span>Cerrar sesión</button>
     </div>`;
 
