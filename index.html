@@ -977,6 +977,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div class="mas-text"><div class="mas-t">Explorar por rubro</div><div class="mas-s">Indumentaria, tecnología, hogar y más</div></div>
           <span class="mas-chev">›</span>
         </button>
+        <button class="mas-menu-item" onclick="abrirRankingComercios()">
+          <span class="mas-ic">🏆</span>
+          <div class="mas-text"><div class="mas-t">Ranking de comercios</div><div class="mas-s">Los mejor calificados de tu ciudad</div></div>
+          <span class="mas-chev">›</span>
+        </button>
         <button class="mas-menu-item" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
           <span class="mas-ic">🌪️</span>
           <div class="mas-text"><div class="mas-t">Tornado de Ofertas</div><div class="mas-s">Ofertas relámpago de 24hs</div></div>
@@ -1062,6 +1067,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:14px;">
     </div>
     <div class="explora-grid" id="rubrosGridFull"></div>
+  </div>
+
+  <!-- ============ RANKING DE COMERCIOS ============ -->
+  <div class="screen hidden" id="screen-ranking">
+    <div class="link-back" onclick="showScreen('feed')">← Volver</div>
+    <div class="kicker">Reputación</div>
+    <h1 class="page-title" style="margin-bottom:4px;">🏆 Ranking de comercios</h1>
+    <p class="page-sub" style="margin-bottom:16px;">Los mejor calificados de <span id="rankingCiudadLabel"></span>, según sus clientes.</p>
+    <div id="rankingComerciosContenido"></div>
   </div>
 
   <!-- ============ LOCALES DE LA CIUDAD: PANTALLA DEDICADA ============ -->
@@ -8540,6 +8554,71 @@ function filtrarRubrosGridFull(texto){
   const q = (texto||'').trim().toLowerCase();
   if(!q){ renderRubrosGridFull(_rubrosGridFullTodos); return; }
   renderRubrosGridFull(_rubrosGridFullTodos.filter(([r])=> r.toLowerCase().includes(q)));
+}
+
+/* ================= RANKING DE COMERCIOS ================= */
+const MIN_OPERACIONES_RANKING = 5;
+
+// A diferencia de cargarCalificaciones() (que solo trae LO MÍO), esto trae
+// todas las calificaciones YA REVELADAS hacia comercios — son públicas por
+// definición (si están reveladas, ya forman parte de la reputación visible
+// de ese comercio), por eso la regla de Firestore las deja leer a cualquiera.
+async function cargarCalificacionesPublicasDeComercios(){
+  if(!firebaseListo || !db) return;
+  try{
+    const snap = await db.collection('calificaciones')
+      .where('paraRol','==','comercio')
+      .where('revelada','==', true)
+      .get();
+    if(!state.calificaciones) state.calificaciones = [];
+    snap.forEach(doc=>{
+      const cal = doc.data();
+      const i = state.calificaciones.findIndex(x=>x.id===cal.id);
+      if(i>=0) state.calificaciones[i] = cal; else state.calificaciones.push(cal);
+    });
+  } catch(e){ console.error('Error cargando ranking de comercios:', e); }
+}
+
+async function abrirRankingComercios(){
+  const label = document.getElementById('rankingCiudadLabel');
+  if(label) label.textContent = ciudadSeleccionada || 'tu ciudad';
+  showScreen('ranking');
+  const el = document.getElementById('rankingComerciosContenido');
+  if(el) el.innerHTML = '<div class="empty"><div class="ic">⏳</div><div class="t">Cargando ranking...</div></div>';
+  await cargarCalificacionesPublicasDeComercios();
+  renderRankingComercios();
+}
+
+function renderRankingComercios(){
+  const el = document.getElementById('rankingComerciosContenido');
+  if(!el) return;
+  const comerciosCiudad = (state.comercios||[]).filter(c => c.uid && mismaCiudad(c.ciudad, ciudadSeleccionada));
+  let ranking = comerciosCiudad.map(c => ({comercio:c, rep: calcularReputacion(c.uid)}))
+    .filter(x => x.rep.total >= MIN_OPERACIONES_RANKING);
+  ranking.sort((a,b) => b.rep.pct - a.rep.pct || b.rep.total - a.rep.total);
+
+  if(!ranking.length){
+    el.innerHTML = `<div class="empty"><div class="ic">🏆</div><div class="t">Todavía no hay comercios con al menos ${MIN_OPERACIONES_RANKING} operaciones calificadas en ${ciudadSeleccionada||'tu ciudad'}</div></div>`;
+    return;
+  }
+  const medallas = ['🥇','🥈','🥉'];
+  el.innerHTML = ranking.map((x,i)=>{
+    const termColor = x.rep.pct>=80 ? '#2F7A55' : x.rep.pct>=50 ? '#C99A3E' : '#D9534F';
+    return `<div class="card" style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="verProductosDeLocal('${x.comercio.id}')">
+      <div style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">${medallas[i] || '#'+(i+1)}</div>
+      <div style="width:38px;height:38px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#f2f2f2;display:flex;align-items:center;justify-content:center;">
+        ${x.comercio.img ? `<img src="${x.comercio.img}" style="width:100%;height:100%;object-fit:cover;">` : '🏬'}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${x.comercio.nombre}</div>
+        <div style="font-size:11.5px;color:var(--muted);">${x.comercio.rubro||''} · ${x.rep.total} operaciones</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:16px;font-weight:800;color:${termColor};">${x.rep.pct}%</div>
+        <div style="font-size:10px;color:var(--muted);">positivas</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function abrirLocales(){
