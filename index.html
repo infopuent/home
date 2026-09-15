@@ -612,6 +612,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .explora-ic-emoji{font-size:24px;}
 .explora-label{font-size:10.5px; font-weight:700; color:#1A1A1A; line-height:1.2; text-align:center; word-break:break-word;}
 
+/* Pantalla "Todos los rubros": grilla fija 5 columnas, sin scroll horizontal */
+#rubrosGridFull{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:16px 8px;
+  overflow:visible; padding-bottom:0;
+}
+#rubrosGridFull .explora-item{width:auto;}
+
+
 .destacados-row{display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; margin-bottom:22px;}
 .destacados-row::-webkit-scrollbar{display:none;}
 .destacado-card{flex-shrink:0; width:150px; background:white; border:1px solid var(--line); border-radius:14px; overflow:hidden; cursor:pointer;}
@@ -693,11 +701,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 /* ---- GRILLA "Te va a encantar" (Ofertas del día) ---- */
 .feed-grid-encantar{
-  display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:18px;
+  display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:18px;
 }
-.feed-grid-encantar .prod-body{padding:6px 8px 7px;}
-.feed-grid-encantar .prod-price{font-size:11.5px;}
-.feed-grid-encantar .prod-like{font-size:15px;}
 
 /* ---- MENÚ "MÁS" ---- */
 .mas-menu-item{
