@@ -6108,19 +6108,20 @@ async function cargarVendedoresParaComercio(){
 
 async function cargarVentasDeComercio(comercioId){
   if(!firebaseListo) return;
-  // Buscar por id del comercio Y por uid del usuario (ventas pueden tener cualquiera de los dos)
-  var idsABuscar = [state.currentUser?.id, state.currentUser?.uid, comercioId].filter(Boolean);
-  idsABuscar = [...new Set(idsABuscar)];
+  var miUid = state.currentUser?.uid;
+  if(!miUid) return;
   try{
-    for(var i=0; i<idsABuscar.length; i++){
-      var snap = await db.collection('ventas').where('comercioId','==', idsABuscar[i]).get();
-      snap.forEach(function(doc){
-        var v = doc.data();
-        var existing = state.ventas.findIndex(function(x){ return x.id===v.id; });
-        if(existing >= 0) state.ventas[existing] = v;
-        else state.ventas.push(v);
-      });
-    }
+    // La regla de seguridad de Firestore exige que el filtro de la consulta
+    // coincida con el campo que usa la regla (comercioUid == auth.uid);
+    // filtrar por comercioId/id acá tira "Missing or insufficient permissions"
+    // aunque los documentos sean del comercio correcto.
+    var snap = await db.collection('ventas').where('comercioUid','==', miUid).get();
+    snap.forEach(function(doc){
+      var v = doc.data();
+      var existing = state.ventas.findIndex(function(x){ return x.id===v.id; });
+      if(existing >= 0) state.ventas[existing] = v;
+      else state.ventas.push(v);
+    });
     renderComercioPanel();
     actualizarBadgeReservas();
   } catch(e){ console.error('Error cargando ventas del comercio:', e); }
@@ -6205,24 +6206,22 @@ function iniciarListenerVentasComercio(comercioId){
 
   const poll = async () => {
     if(!firebaseListo || !db || state.role !== 'comercio') return;
-    // Buscar por id del comercio Y uid del usuario Google
-    const idsABuscar = [...new Set([state.currentUser?.id, state.currentUser?.uid, comercioId].filter(Boolean))];
+    const miUid = state.currentUser?.uid;
+    if(!miUid) return;
     try{
-      for(const cid of idsABuscar){
-        const snap = await db.collection('ventas').where('comercioId','==', cid).get();
-        let hayNuevas = false;
-        snap.forEach(doc=>{
-          const v = doc.data();
-          const existe = state.ventas.find(x=>x.id===v.id);
-          if(!existe){
-            state.ventas.push(v);
-            hayNuevas = true;
-          } else {
-            Object.assign(existe, v);
-          }
-        });
-        if(hayNuevas) notificarNuevaReservaAComercio(null);
-      }
+      const snap = await db.collection('ventas').where('comercioUid','==', miUid).get();
+      let hayNuevas = false;
+      snap.forEach(doc=>{
+        const v = doc.data();
+        const existe = state.ventas.find(x=>x.id===v.id);
+        if(!existe){
+          state.ventas.push(v);
+          hayNuevas = true;
+        } else {
+          Object.assign(existe, v);
+        }
+      });
+      if(hayNuevas) notificarNuevaReservaAComercio(null);
       actualizarBadgeReservas();
       renderCOperaciones();
     } catch(e){ /* silencioso */ }
@@ -12791,6 +12790,7 @@ function fpEnviarWhatsApp(tipo){
     tipo: 'contacto_directo',
     origen: 'whatsapp_directo',
     comercioId: c.id || c._docId,
+    comercioUid: c.uid || null,
     comercioNombre: c.nombre,
     clienteNombre: nombreUsuario,
     clienteTel: telUsuario || '—',
@@ -12802,6 +12802,7 @@ function fpEnviarWhatsApp(tipo){
     fechaConfirmacion: new Date().toISOString(),
     estado: 'confirmada',
     usuarioId: state.currentUser?.id || state.currentUser?.uid || null,
+    ownerUid: state.currentUser?.uid || null,
   };
   state.ventas.push(contacto);
   guardarVentaEnFirestore(contacto);
