@@ -13227,6 +13227,83 @@ async function abrirMisPedidos(){
   showScreen('mis-pedidos');
 }
 
+const PASOS_ENVIO_PEDIDO = [
+  {key:'enviado',    ic:'📤', txt:'Pedido enviado'},
+  {key:'confirmado', ic:'✅', txt:'Confirmado'},
+  {key:'pagado',     ic:'💰', txt:'Pago recibido'},
+  {key:'asignado',   ic:'🛵', txt:'Repartidor asignado'},
+  {key:'en_camino',  ic:'🚴', txt:'En camino'},
+  {key:'entregado',  ic:'🏠', txt:'Entregado'},
+];
+const PASOS_PRESENCIAL_PEDIDO = [
+  {key:'enviado',    ic:'📤', txt:'Pedido enviado'},
+  {key:'confirmado', ic:'✅', txt:'Confirmado'},
+  {key:'pagado',     ic:'💰', txt:'Listo para retirar'},
+  {key:'entregado',  ic:'🏠', txt:'Retirado'},
+];
+
+function barraProgresoPedido(estado, tipo){
+  const pasos = tipo==='envio' ? PASOS_ENVIO_PEDIDO : PASOS_PRESENCIAL_PEDIDO;
+  const idx = pasos.findIndex(p=>p.key===estado);
+  const actual = idx === -1 ? 0 : idx;
+  return `
+    <div style="margin:12px 0 4px;overflow-x:auto;scrollbar-width:none;">
+      <div style="display:flex;align-items:flex-start;gap:0;min-width:${pasos.length*72}px;">
+        ${pasos.map((p,i)=>{
+          const hecho = i <= actual;
+          const esActual = i === actual;
+          return `
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;position:relative;">
+              ${i < pasos.length-1 ? `<div style="position:absolute;top:16px;left:50%;width:100%;height:3px;background:${i<actual?'#5C7355':'#e0e0e0'};z-index:0;"></div>` : ''}
+              <div style="width:32px;height:32px;border-radius:50%;background:${hecho?'#5C7355':'#e0e0e0'};display:flex;align-items:center;justify-content:center;font-size:13px;position:relative;z-index:1;box-shadow:${esActual?'0 0 0 3px rgba(92,115,85,0.3)':'none'};">${hecho?p.ic:'·'}</div>
+              <div style="font-size:9.5px;font-weight:${esActual?800:600};color:${hecho?'#5C7355':'#aaa'};text-align:center;margin-top:4px;line-height:1.2;max-width:64px;">${p.txt}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// Tarjeta completa de un pedido: mismo detalle (seguimiento + botón "Ya recibí
+// mi pedido") se usa tanto en la pantalla "Mis pedidos" como en el Perfil,
+// para no duplicar dos versiones distintas del mismo dato.
+function pedidoCardHtml(p){
+  const fecha = new Date(p.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const tipoLabel = p.tipo==='envio' ? '🛵 Con envío' : '🏪 Retiro en local';
+  const itemsHtml = (p.items||[]).map(i=>`
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:2px 0;">
+      <span>${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}</span>
+      <span style="font-weight:600;">$${(i.precioTotal||i.precio||0).toLocaleString('es-AR')}</span>
+    </div>`).join('');
+  const estado = p.estado || 'enviado';
+  const repartidor = p.repartidorNombre ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">🛵 Repartidor: <strong>${p.repartidorNombre}</strong></div>` : '';
+  const direccion = p.direccion ? `<div style="font-size:12px;color:var(--muted);">📍 ${p.direccion}</div>` : '';
+  const esEntregado = estado === 'entregado';
+
+  return `
+    <div class="card" style="margin-bottom:14px;${esEntregado?'opacity:.8':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--navy);">${p.comercioNombre}</div>
+          <div style="font-size:11px;color:var(--muted);">${fecha} · ${tipoLabel}</div>
+        </div>
+        ${esEntregado?`<span style="font-size:10.5px;font-weight:700;background:#eaf5ea;color:#1a6b3a;padding:3px 10px;border-radius:100px;">✔️ Entregado</span>`:''}
+      </div>
+      ${barraProgresoPedido(estado, p.tipo)}
+      <div style="border-top:1px solid var(--line);margin-top:10px;padding-top:8px;">
+        ${itemsHtml}
+      </div>
+      ${direccion}${repartidor}
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:8px;padding-top:8px;">
+        <span style="font-size:12.5px;font-weight:700;">Total</span>
+        <span style="font-size:15px;font-weight:800;color:var(--navy);">$${(p.total||0).toLocaleString('es-AR')}</span>
+      </div>
+      ${!esEntregado ? `
+        <button onclick="confirmarEntregaCliente('${p.pedidoEnvioId||''}')" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;">
+          ✔️ Ya recibí mi pedido
+        </button>` : ''}
+    </div>`;
+}
+
 function renderMisPedidos(){
   const el = document.getElementById('misPedidosContenido');
   const pedidos = state.misPedidos || [];
@@ -13234,80 +13311,7 @@ function renderMisPedidos(){
     el.innerHTML = `<div class="empty"><div class="ic">📋</div><div class="t">Todavía no hiciste pedidos</div><div class="s">Cuando hagas tu primer pedido, va a aparecer acá.</div></div>`;
     return;
   }
-
-  const PASOS_ENVIO = [
-    {key:'enviado',    ic:'📤', txt:'Pedido enviado'},
-    {key:'confirmado', ic:'✅', txt:'Confirmado'},
-    {key:'pagado',     ic:'💰', txt:'Pago recibido'},
-    {key:'asignado',   ic:'🛵', txt:'Repartidor asignado'},
-    {key:'en_camino',  ic:'🚴', txt:'En camino'},
-    {key:'entregado',  ic:'🏠', txt:'Entregado'},
-  ];
-  const PASOS_PRESENCIAL = [
-    {key:'enviado',    ic:'📤', txt:'Pedido enviado'},
-    {key:'confirmado', ic:'✅', txt:'Confirmado'},
-    {key:'pagado',     ic:'💰', txt:'Listo para retirar'},
-    {key:'entregado',  ic:'🏠', txt:'Retirado'},
-  ];
-
-  function barraProgreso(estado, tipo){
-    const pasos = tipo==='envio' ? PASOS_ENVIO : PASOS_PRESENCIAL;
-    const idx = pasos.findIndex(p=>p.key===estado);
-    const actual = idx === -1 ? 0 : idx;
-    return `
-      <div style="margin:12px 0 4px;overflow-x:auto;scrollbar-width:none;">
-        <div style="display:flex;align-items:flex-start;gap:0;min-width:${pasos.length*72}px;">
-          ${pasos.map((p,i)=>{
-            const hecho = i <= actual;
-            const esActual = i === actual;
-            return `
-              <div style="flex:1;display:flex;flex-direction:column;align-items:center;position:relative;">
-                ${i < pasos.length-1 ? `<div style="position:absolute;top:16px;left:50%;width:100%;height:3px;background:${i<actual?'#5C7355':'#e0e0e0'};z-index:0;"></div>` : ''}
-                <div style="width:32px;height:32px;border-radius:50%;background:${hecho?'#5C7355':'#e0e0e0'};display:flex;align-items:center;justify-content:center;font-size:13px;position:relative;z-index:1;box-shadow:${esActual?'0 0 0 3px rgba(92,115,85,0.3)':'none'};">${hecho?p.ic:'·'}</div>
-                <div style="font-size:9.5px;font-weight:${esActual?800:600};color:${hecho?'#5C7355':'#aaa'};text-align:center;margin-top:4px;line-height:1.2;max-width:64px;">${p.txt}</div>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>`;
-  }
-
-  el.innerHTML = pedidos.slice().reverse().map(p=>{
-    const fecha = new Date(p.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const tipoLabel = p.tipo==='envio' ? '🛵 Con envío' : '🏪 Retiro en local';
-    const itemsHtml = (p.items||[]).map(i=>`
-      <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:2px 0;">
-        <span>${i.cantidad>1?i.cantidad+'× ':''}${i.nombre}</span>
-        <span style="font-weight:600;">$${(i.precioTotal||i.precio||0).toLocaleString('es-AR')}</span>
-      </div>`).join('');
-    const estado = p.estado || 'enviado';
-    const repartidor = p.repartidorNombre ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">🛵 Repartidor: <strong>${p.repartidorNombre}</strong></div>` : '';
-    const direccion = p.direccion ? `<div style="font-size:12px;color:var(--muted);">📍 ${p.direccion}</div>` : '';
-    const esEntregado = estado === 'entregado';
-
-    return `
-      <div class="card" style="margin-bottom:14px;${esEntregado?'opacity:.8':''}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
-          <div>
-            <div style="font-size:14px;font-weight:800;color:var(--navy);">${p.comercioNombre}</div>
-            <div style="font-size:11px;color:var(--muted);">${fecha} · ${tipoLabel}</div>
-          </div>
-          ${esEntregado?`<span style="font-size:10.5px;font-weight:700;background:#eaf5ea;color:#1a6b3a;padding:3px 10px;border-radius:100px;">✔️ Entregado</span>`:''}
-        </div>
-        ${barraProgreso(estado, p.tipo)}
-        <div style="border-top:1px solid var(--line);margin-top:10px;padding-top:8px;">
-          ${itemsHtml}
-        </div>
-        ${direccion}${repartidor}
-        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:8px;padding-top:8px;">
-          <span style="font-size:12.5px;font-weight:700;">Total</span>
-          <span style="font-size:15px;font-weight:800;color:var(--navy);">$${(p.total||0).toLocaleString('es-AR')}</span>
-        </div>
-        ${!esEntregado ? `
-          <button onclick="confirmarEntregaCliente('${p.pedidoEnvioId||''}')" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;">
-            ✔️ Ya recibí mi pedido
-          </button>` : ''}
-      </div>`;
-  }).join('');
+  el.innerHTML = pedidos.slice().reverse().map(pedidoCardHtml).join('');
 }
 
 function confirmarEntregaCliente(pedidoEnvioId){
@@ -13317,7 +13321,8 @@ function confirmarEntregaCliente(pedidoEnvioId){
   const mp = (state.misPedidos||[]).find(x=>x.pedidoEnvioId===pedidoEnvioId);
   if(mp){ mp.estado='entregado'; guardarMisPedidosFirestore(); }
   toast('✔️ ¡Gracias! Confirmaste la recepción de tu pedido.');
-  renderMisPedidos();
+  if(!document.getElementById('screen-mis-pedidos')?.classList.contains('hidden')) renderMisPedidos();
+  if(!document.getElementById('screen-perfil')?.classList.contains('hidden')) abrirPerfil();
 }
 
 function repartidorTomarPedido(pedidoId){
@@ -13648,17 +13653,7 @@ async function abrirPerfil(){
           <div class="s">Cuando hagas un pedido, va a aparecer acá.</div>
          </div>`;
     } else {
-      historialHtml = pedidos.slice().reverse().map(p=>{
-        const fecha = new Date(p.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
-        const itemsTxt = (p.items||[]).map(i=>(i.cantidad>1?i.cantidad+'× ':'')+i.nombre).join(', ');
-        return `
-          <div onclick="abrirMisPedidos()" style="background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;flex-direction:column;gap:4px;">
-            <div style="font-size:12.5px;font-weight:800;color:var(--navy);">🏬 ${p.comercioNombre}</div>
-            <div style="font-size:11.5px;color:var(--ink);line-height:1.4;">${itemsTxt}</div>
-            <div style="font-size:10.5px;color:var(--muted);">${fecha} · ${p.tipo==='envio'?'🛵 Envío':'🏪 Retiro'}</div>
-            <div style="font-size:13px;font-weight:800;color:var(--navy);">$${Number(p.total||0).toLocaleString('es-AR')}</div>
-          </div>`;
-      }).join('');
+      historialHtml = pedidos.slice().reverse().map(pedidoCardHtml).join('');
     }
   } else {
     const historial = cargarHistorialQR();
