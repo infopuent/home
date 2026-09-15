@@ -4517,11 +4517,12 @@ function goRegister(role){
     fillRubroSelect('rRubro');
   } else {
     kick.textContent='Registro de cliente';
-    title.textContent='Un dato rápido';
-    sub.textContent='Con esto ya podés explorar catálogos completos de ConectorT de tu ciudad.';
+    title.textContent='Completá tu registro';
+    sub.textContent='Necesitamos tu email y teléfono para que puedas comprar en PuenT.';
     fields.innerHTML = `
       <div class="card">
         <div class="field"><label>Nombre</label><input id="rNombre" placeholder="Tu nombre"></div>
+        <div class="field"><label>Email <span style="color:#e05a5a;">*</span></label><input id="rEmail" type="email" placeholder="tucorreo@ejemplo.com"></div>
         <div class="field"><label>Teléfono / WhatsApp <span style="color:#e05a5a;">*</span></label><input id="rTelefono" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
         <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:10px;">📲 Obligatorio — es lo que usa el comercio para contactarte por tu reserva.</div>
         <div class="field"><label>Ciudad</label><input id="rCiudad" placeholder="Ej: La Paz" value="La Paz"></div>
@@ -4664,13 +4665,19 @@ async function submitRegister(){
     showScreen('c-panel');
   } else {
     const telefono = document.getElementById('rTelefono').value.trim();
+    const email = document.getElementById('rEmail').value.trim().toLowerCase();
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      toast('✉️ Ingresá un email válido para completar tu registro'); return;
+    }
     if(!telefono || telefono.replace(/\D/g,'').length < 8){
       toast('📱 Ingresá un teléfono válido — lo necesita el comercio para contactarte'); return;
     }
     const ciudad = document.getElementById('rCiudad').value.trim() || 'La Paz';
-    const cl = {id: nextId('cl'), nombre, telefono, ciudad};
+    const uidCliente = firebaseAuth?.currentUser?.uid || window._guestUid || null;
+    const cl = {id: nextId('cl'), nombre, email, telefono, ciudad, uid: uidCliente};
     state.clientes.push(cl);
     state.currentUser = cl; state.role='cliente';
+    guardarPerfilEnFirestore('clientes', cl);
     setRoleChip('🙋 Cliente', false);
     renderClienteBuscador();
     if(_pedidoPendienteComercioId){
@@ -6530,13 +6537,18 @@ function abrirEditarCliente(){
 function guardarEdicionCliente(){
   const cl = state.currentUser;
   const telefono = document.getElementById('editClTelefono').value.trim();
+  const email = document.getElementById('editClEmail').value.trim().toLowerCase();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    toast('✉️ Ingresá un email válido para poder comprar en PuenT');
+    return;
+  }
   if(!telefono || telefono.replace(/\D/g,'').length < 8){
     toast('📱 Ingresá un teléfono válido — lo necesita el comercio para contactarte');
     return;
   }
   cl.nombre = document.getElementById('editClNombre').value.trim() || cl.nombre;
   cl.telefono = telefono;
-  cl.email = document.getElementById('editClEmail').value.trim();
+  cl.email = email;
   cl.ciudad = document.getElementById('editClCiudad').value.trim() || 'La Paz';
   cl.zona = document.getElementById('editClZona').value.trim();
   cl.direccion = document.getElementById('editClDireccion').value.trim();
@@ -12672,14 +12684,16 @@ function abrirFinalizarPedido(comercioId){
     showScreen('home');
     return;
   }
-  // Cliente logueado pero sin teléfono cargado (típico de cuentas creadas
-  // con Google, que no piden teléfono): es obligatorio para que el
-  // comercio pueda contactarlo y concretar la reserva.
+  // Cliente logueado pero sin teléfono o email cargado (típico de cuentas
+  // creadas con Google antes de este cambio, o clientes viejos): son
+  // obligatorios para que el comercio pueda contactarlo y para tener un
+  // control real de quién compra en la plataforma.
   if(state.role === 'cliente'){
     const tel = (state.currentUser?.telefono || '').replace(/\D/g,'');
-    if(tel.length < 8){
+    const email = state.currentUser?.email || '';
+    if(tel.length < 8 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
       _pedidoPendienteComercioId = comercioId;
-      toast('📱 Necesitamos tu teléfono para que el comercio te contacte');
+      toast('📋 Completá tu email y teléfono para poder comprar');
       abrirEditarCliente();
       return;
     }
