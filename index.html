@@ -691,10 +691,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .feed-solapa.active{color:var(--orange); border-bottom-color:var(--orange);}
 .feed-solapa:active{opacity:.75;}
 
-/* ---- GRILLA 5x2 "Te va a encantar" ---- */
+/* ---- GRILLA "Te va a encantar" (Ofertas del día) ---- */
 .feed-grid-encantar{
-  display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:18px;
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:18px;
 }
+.feed-grid-encantar .prod-body{padding:6px 8px 7px;}
+.feed-grid-encantar .prod-price{font-size:11.5px;}
+.feed-grid-encantar .prod-like{font-size:15px;}
 
 /* ---- MENÚ "MÁS" ---- */
 .mas-menu-item{
@@ -896,7 +899,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="feed-toolbar-row" style="margin-top:12px;padding:0 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
         <div class="chiprow" id="feedChips" style="flex-wrap:nowrap;white-space:nowrap;"></div>
       </div>
-      <div id="feedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;overflow:hidden;min-width:0;padding:0 16px;"></div>
+      <div id="feedGrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;overflow:hidden;min-width:0;padding:0 16px;"></div>
     </div>
 
     <!-- ================================================================
@@ -1049,7 +1052,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen('feed')">← Volver</div>
     <div class="kicker">Explorar</div>
     <h1 class="page-title">Todos los rubros</h1>
-    <div class="explora-grid" style="margin-top:12px;" id="rubrosGridFull"></div>
+    <div style="position:relative;margin:12px 0;">
+      <input id="buscadorRubrosInput" type="text" placeholder="🔍 Buscar rubro..." oninput="filtrarRubrosGridFull(this.value)"
+        style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:14px;">
+    </div>
+    <div class="explora-grid" id="rubrosGridFull"></div>
   </div>
 
   <!-- ============ LOCALES DE LA CIUDAD: PANTALLA DEDICADA ============ -->
@@ -7741,7 +7748,7 @@ function renderExploraCiudad(){
       <div class="explora-ic">${fluentImg(ICONOS_RUBRO[r])}</div>
       <div class="explora-label">${r}</div>
     </div>`).join('') + `
-    <div class="explora-item" onclick="irALocalesPorRubro('Todos')">
+    <div class="explora-item" onclick="abrirTodosRubros()">
       <div class="explora-ic">${fluentImg('1f4cd_3d.png')}</div>
       <div class="explora-label">Ver todos</div>
     </div>`;
@@ -8498,9 +8505,22 @@ function renderAdheridosGrid(){
 
 function abrirTodosRubros(){
   showScreen('todos-rubros');
+  const input = document.getElementById('buscadorRubrosInput');
+  if(input) input.value = '';
+  _rubrosGridFullTodos = Object.entries(ICONOS_RUBRO);
+  renderRubrosGridFull(_rubrosGridFullTodos);
+}
+
+let _rubrosGridFullTodos = [];
+
+function renderRubrosGridFull(lista){
   const grid = document.getElementById('rubrosGridFull');
   if(!grid) return;
-  grid.innerHTML = Object.entries(ICONOS_RUBRO).map(([r, img])=>`
+  if(!lista.length){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="ic">🔍</div><div class="t">No encontramos ningún rubro con ese nombre</div></div>`;
+    return;
+  }
+  grid.innerHTML = lista.map(([r, img])=>`
     <div class="explora-item" onclick="irALocalesPorRubro('${r}'); showScreen('feed')">
       <div class="explora-ic">${fluentImg(img)}</div>
       <div class="explora-label">${r}</div>
@@ -8509,6 +8529,12 @@ function abrirTodosRubros(){
       <div class="explora-ic">${fluentImg('1f4cd_3d.png')}</div>
       <div class="explora-label">Ver todos</div>
     </div>`;
+}
+
+function filtrarRubrosGridFull(texto){
+  const q = (texto||'').trim().toLowerCase();
+  if(!q){ renderRubrosGridFull(_rubrosGridFullTodos); return; }
+  renderRubrosGridFull(_rubrosGridFullTodos.filter(([r])=> r.toLowerCase().includes(q)));
 }
 
 function abrirLocales(){
