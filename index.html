@@ -872,14 +872,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <!-- Te va a encantar — sección paga (productos destacados) -->
       <div style="padding:0 16px;" id="secEncantar">
         <div class="section-title-row">
-          <div class="section-title">✨ Te va a encantar</div>
+          <div class="section-title" id="tituloSeccionEncantar">✨ Te va a encantar</div>
         </div>
         <div id="feedGridEncantar" class="feed-grid-encantar"></div>
       </div>
-
-      <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
-           dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
-      <div id="catBannerList" style="padding:14px 16px 4px;display:flex;flex-direction:column;gap:0;"></div>
 
       <!-- Tornado de Ofertas -->
       <div style="padding:4px 16px 0;">
@@ -888,6 +884,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           🌪️ Tornado de Ofertas
         </button>
       </div>
+
+      <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
+           dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
+      <div id="catBannerList" style="padding:14px 16px 4px;display:flex;flex-direction:column;gap:0;"></div>
 
       <!-- CTA ingreso (solo si no está logueado) -->
       <div id="feedCtaIngreso" style="padding:18px 16px 8px;">
@@ -2372,7 +2372,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
         <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes');adminCargarMensajesEnviados()"><i class="ti ti-message-2 ic"></i>Mensajes</button>
         <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-repartidores');adminCargarRepartidores()"><i class="ti ti-bike ic"></i>Repartidores</button>
-        <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
+        <button class="btn-tile btn-tile-neutral" onclick="adminReGeocodificarTodo()"><i class="ti ti-map-pin ic"></i>Re-geocodificar mapa</button>
+        <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio');setTimeout(()=>crearMapaPick('adMapaPickMobile', adminNuevoComLatLng?.lat, adminNuevoComLatLng?.lng, (lat,lng)=>{adminNuevoComLatLng={lat,lng};const est=document.getElementById('adUbicacionEstadoMobile');if(est)est.textContent='✅ Ubicación marcada correctamente.';}),50)"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-papelera');admCargarPapelera()"><i class="ti ti-trash ic"></i>🗑️ Papelera</button>
         <button class="btn-tile btn-tile-gold" style="grid-column:1/-1;" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
@@ -2853,13 +2854,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text"></div>
       <div class="field">
-        <label>Ubicación en el mapa (lat, lng)</label>
-        <div style="display:flex;gap:8px;">
-          <input id="editAdLat" type="text" inputmode="decimal" placeholder="Latitud" style="flex:1;">
-          <input id="editAdLng" type="text" inputmode="decimal" placeholder="Longitud" style="flex:1;">
-        </div>
-        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="adminBuscarCoordenadasPorDireccion()">📍 Buscar por dirección</button>
-        <div id="editAdCoordsEstado" style="font-size:11.5px;color:var(--muted);margin-top:6px;"></div>
+        <label>Ubicación exacta (para "Cómo llegar")</label>
+        <div id="editAdMapaPick" style="height:200px;border-radius:12px;border:1.5px solid var(--line);overflow:hidden;"></div>
+        <div id="editAdCoordsEstado" style="font-size:12px;color:var(--muted);margin-top:6px;">Tocá el mapa o arrastrá el pin para marcar el local con precisión.</div>
+        <input id="editAdLat" type="hidden">
+        <input id="editAdLng" type="hidden">
       </div>
       <div class="two-col">
         <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel"></div>
@@ -2954,6 +2953,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="font-size:11.5px;color:var(--muted);margin-top:5px;">Elegí el tipo que mejor describe al comercio — así aparece bien ordenado en la app.</div>
       </div>
       <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
+      <div class="field">
+        <label>Ubicación exacta (para "Cómo llegar")</label>
+        <div id="adMapaPickMobile" style="height:200px;border-radius:12px;border:1.5px solid var(--line);overflow:hidden;"></div>
+        <div id="adUbicacionEstadoMobile" style="font-size:12px;color:var(--muted);margin-top:6px;">Tocá el mapa o arrastrá el pin para marcar el local con precisión.</div>
+      </div>
       <div class="two-col">
         <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
         <div class="field"><label>Teléfono alternativo</label><input type="tel" id="adTelefonoAlt" placeholder="Opcional"></div>
@@ -4268,6 +4272,7 @@ function logoutFirebase(){
 /* ================= REGISTRO ================= */
 let pendingRole = null;
 let registroLatLng = null;
+let adminNuevoComLatLng = null;
 function togglePlanUI(tipo){
   const fijoLabel = document.getElementById('rPlanFijoLabel');
   const comLabel  = document.getElementById('rPlanComLabel');
@@ -4295,6 +4300,49 @@ function togglePlanUI(tipo){
   }
 }
 
+// Mini-mapa con pin arrastrable para marcar la ubicación EXACTA de un comercio
+// a mano — más confiable que la geocodificación automática por dirección,
+// que en pueblos chicos suele estar desactualizada o ser imprecisa.
+// containerId: div donde crear el mapa. latIni/lngIni: centro inicial
+// (si no hay, usa La Paz). onCambio(lat,lng): callback cada vez que se
+// mueve el pin (click en el mapa o arrastre).
+const _mapasPickInstancias = {};
+function crearMapaPick(containerId, latIni, lngIni, onCambio, intentos){
+  intentos = intentos || 0;
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  // El contenedor puede todavía no tener tamaño real (pantalla recién mostrada,
+  // animación en curso, etc.) — Leaflet necesita dimensiones reales para
+  // inicializar bien. Reintentar hasta 20 veces (2 segundos) antes de rendirse.
+  const rect = el.getBoundingClientRect();
+  if(rect.width === 0 || rect.height === 0){
+    if(intentos < 20) setTimeout(()=> crearMapaPick(containerId, latIni, lngIni, onCambio, intentos+1), 100);
+    else console.log('[MapaPick] El contenedor '+containerId+' nunca tomó tamaño, no se pudo iniciar el mapa.');
+    return;
+  }
+  // Si ya había un mapa en este contenedor (ej: se volvió a abrir la pantalla), destruirlo primero
+  if(_mapasPickInstancias[containerId]){
+    _mapasPickInstancias[containerId].mapa.remove();
+    delete _mapasPickInstancias[containerId];
+  }
+  const lat = latIni || -30.7597, lng = lngIni || -59.6497; // centro aprox. La Paz, Entre Ríos
+  const mapa = L.map(containerId, {attributionControl:false}).setView([lat, lng], 15);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(mapa);
+  const marker = L.marker([lat, lng], {draggable:true}).addTo(mapa);
+  marker.on('dragend', ()=>{
+    const p = marker.getLatLng();
+    onCambio(p.lat, p.lng);
+  });
+  mapa.on('click', (e)=>{
+    marker.setLatLng(e.latlng);
+    onCambio(e.latlng.lat, e.latlng.lng);
+  });
+  const instancia = {mapa, marker};
+  _mapasPickInstancias[containerId] = instancia;
+  setTimeout(()=> mapa.invalidateSize(), 150);
+  return instancia;
+}
+
 function marcarUbicacion(){
   const estado = document.getElementById('ubicacionEstado');
   if(!navigator.geolocation){ estado.textContent = 'Tu navegador no soporta geolocalización, usamos la dirección como respaldo.'; return; }
@@ -4303,8 +4351,10 @@ function marcarUbicacion(){
     (pos)=>{
       registroLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
       estado.textContent = '✅ Ubicación marcada correctamente.';
+      const inst = _mapasPickInstancias['registroMapaPick'];
+      if(inst){ inst.marker.setLatLng([registroLatLng.lat, registroLatLng.lng]); inst.mapa.setView([registroLatLng.lat, registroLatLng.lng], 16); }
     },
-    ()=>{ estado.textContent = 'No pudimos acceder a tu ubicación — usamos la dirección como respaldo.'; },
+    ()=>{ estado.textContent = 'No pudimos acceder a tu ubicación — marcá el punto en el mapa manualmente.'; },
     {timeout:8000}
   );
 }
@@ -4408,8 +4458,9 @@ function goRegister(role){
         <div class="field"><label>Dirección del local <span style="color:#e05a5a;">*</span></label><input id="rDireccion" placeholder="Calle, número y ciudad"></div>
         <div class="field">
           <label>Ubicación exacta (para "Cómo llegar")</label>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="marcarUbicacion()" style="margin-bottom:2px;">📍 Usar mi ubicación actual</button>
-          <div id="ubicacionEstado" style="font-size:12px;color:var(--muted);margin-top:6px;">Todavía no marcaste la ubicación — igual podés registrarte.</div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="marcarUbicacion()" style="margin-bottom:8px;">📍 Usar mi ubicación actual</button>
+          <div id="registroMapaPick" style="height:220px;border-radius:12px;border:1.5px solid var(--line);overflow:hidden;"></div>
+          <div id="ubicacionEstado" style="font-size:12px;color:var(--muted);margin-top:6px;">Tocá el mapa o arrastrá el pin para marcar el local con precisión.</div>
         </div>
         <div class="two-col">
           <div class="field"><label>Ciudad</label><input id="rCiudad" placeholder="Ej: La Paz" value="La Paz"></div>
@@ -4556,6 +4607,13 @@ function goRegister(role){
         </div>
       </div>`;
     fillRubroSelect('rRubro');
+    setTimeout(()=>{
+      crearMapaPick('registroMapaPick', registroLatLng?.lat, registroLatLng?.lng, (lat,lng)=>{
+        registroLatLng = {lat, lng};
+        const est = document.getElementById('ubicacionEstado');
+        if(est) est.textContent = '✅ Ubicación marcada correctamente.';
+      });
+    }, 50);
   } else {
     kick.textContent='Registro de cliente';
     title.textContent='Completá tu registro';
@@ -4769,6 +4827,7 @@ function renderVendedorCatalogo(){
           <div style="display:flex;flex-direction:column;gap:5px;margin-top:7px;">
             <button class="share-btn" style="margin-top:0;width:100%;" onclick="compartirProducto('${p.id}')">📤 Compartir</button>
             <button class="share-btn" style="margin-top:0;width:100%;background:var(--navy);color:white;" onclick="abrirReservaParaCliente('${p.id}')">🔖 Reservar</button>
+            <button class="share-btn" style="margin-top:0;width:100%;background:transparent;border:1.5px solid #e0a0a0;color:#B33A3A;" onclick="quitarDeMiCatalogo('${p.id}')">🗑️ Quitar de mi catálogo</button>
           </div>
         </div>
       </div>`;
@@ -5793,6 +5852,26 @@ function abrirComercioParaElegir(comercioId){
     }).join('') + `</div>`;
   }
   showScreen('v-elegir-producto');
+}
+
+function quitarDeMiCatalogo(productoId){
+  const vId = state.currentUser?.uid || state.currentUser?.id;
+  if(!vId) return;
+  const p = state.productos.find(x=>x.id===productoId);
+  if(!confirm(`¿Quitar "${p?.nombre||'este producto'}" de tu catálogo? Vas a dejar de poder compartirlo hasta que lo vuelvas a agregar.`)) return;
+
+  const selId = 'sel-'+vId+'-'+productoId;
+  state.catalogoVendedor = state.catalogoVendedor.filter(s=>s.id !== selId);
+
+  if(firebaseListo && db){
+    db.collection('catalogoVendedor').doc(selId).delete()
+      .then(()=> toast('🗑️ Quitado de tu catálogo'))
+      .catch(e=>{ toast('❌ No se pudo quitar: ' + e.message); console.error(e); });
+  } else {
+    toast('🗑️ Quitado de tu catálogo');
+  }
+  renderVendedorCatalogo();
+  renderVendedorStats();
 }
 
 function agregarProductoAMiCatalogo(productoId){
@@ -7511,6 +7590,7 @@ let buscadorQuery = '';
 
 function onBuscadorInput(valor){
   buscadorQuery = valor.trim().toLowerCase();
+  renderFeedEncantar();
   if(document.getElementById('tabVendedores')?.classList.contains('active')) renderFeedVendedores();
   else if(document.getElementById('tabLocales')?.classList.contains('active')) renderLocales();
   else renderFeed();
@@ -8352,6 +8432,8 @@ var _encantarCache = { key:null, ids:[] };
 function renderFeedEncantar(){
   var grid = document.getElementById('feedGridEncantar');
   if(!grid) return;
+  var titulo = document.getElementById('tituloSeccionEncantar');
+  if(titulo) titulo.textContent = buscadorQuery ? '🔍 Resultados de tu búsqueda' : '✨ Te va a encantar';
   var prods = [];
   (state.comercios||[]).forEach(function(c){
     if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
@@ -8367,6 +8449,34 @@ function renderFeedEncantar(){
       return cat === _feedCategoriaActual;
     });
   }
+
+  // Con búsqueda activa: se muestran TODOS los que matchean (no el top 10 al
+  // azar), y se agrega el nombre a la tarjeta para poder identificar qué es.
+  if(buscadorQuery){
+    var encontrados = prods.filter(function(p){
+      var texto = [p.nombre, p._comercioNombre, p._comercioRubro, p.rubro].filter(Boolean).join(' ').toLowerCase();
+      return texto.includes(buscadorQuery);
+    });
+    if(!encontrados.length){
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ic">🔍</div><div class="t">No encontramos nada con "'+buscadorQuery+'"</div></div>';
+      return;
+    }
+    grid.innerHTML = encontrados.map(function(p){
+      var foto = p.img
+        ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">'
+        : '<span style="font-size:28px;">🛍️</span>';
+      return '<div class="prod-card" onclick="abrirOferta(\''+p.id+'\')" style="cursor:pointer;">'
+        +'<div class="prod-photo">'+foto+'</div>'
+        +'<div class="prod-body" style="flex-direction:column;align-items:stretch;gap:2px;">'
+        +'<div style="font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+p.nombre+'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<div class="prod-price">$'+Number(p.precio||0).toLocaleString('es-AR')+'</div>'
+        +'<button class="prod-like'+(esFavorito(p.id)?' liked':'')+'" onclick="event.stopPropagation(); toggleFavorito(\''+p.id+'\', this)">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
+        +'</div></div></div>';
+    }).join('');
+    return;
+  }
+
   // La selección de 10 productos se mezcla al azar UNA sola vez por cada
   // combinación de ciudad/categoría/productos disponibles, y se cachea —
   // así no cambia sola cada vez que se vuelve a tocar la pestaña Home.
@@ -9133,15 +9243,12 @@ function comercioAsignarRepartidor(pedidoId){
     }).catch(e=>console.error(e));
   }
   toast(`🛵 ${repNombre} asignado al pedido`);
-  // Ofrecer contactar al repartidor por WhatsApp
+  // Avisarle al repartidor por WhatsApp automáticamente (antes pedía
+  // confirmación con un popup y el comercio tenía que mandarlo a mano).
   if(repTel){
     const c = state.currentUser;
     const msg = `¡Hola ${repNombre}! 👋 Tenés un pedido asignado en *${c?.nombre||'el comercio'}*:\n\n📦 Producto: ${p.productoNombre||'—'}\n📍 Entregar en: ${p.direccion}\n👤 Cliente: ${p.clienteNombre}${p.clienteTel?' ('+p.clienteTel+')':''}\n🚚 Envío: $${(p.costoEnvio||0).toLocaleString('es-AR')}\n\nCuando puedas pasá a retirar. ¡Gracias!`;
-    setTimeout(()=>{
-      if(confirm(`¿Avisarle a ${repNombre} por WhatsApp?`)){
-        window.open(`https://wa.me/54${repTel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
-      }
-    }, 300);
+    window.open(`https://wa.me/54${repTel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
   }
   renderCPedidosEnvio();
 }
@@ -9997,20 +10104,10 @@ function mostrarMapa(){
       scrollWheelZoom: false
     });
 
-    // Intentar Esri primero, con fallback a OSM si falla
-    var tileEsri = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom:19, attribution:'Tiles © Esri' }
-    ).addTo(mapaCityInstance);
-
-    // Fallback: si los tiles de Esri no cargan en 5s, cambiar a OSM
-    setTimeout(()=>{
-      if(document.querySelector('#mapaCityFull .leaflet-tile-loaded')) return; // ya cargó
-      tileEsri.remove();
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        maxZoom:19, attribution:'© OpenStreetMap'
-      }).addTo(mapaCityInstance);
-    }, 5000);
+    // OpenStreetMap — más actualizado que Esri para calles nuevas
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(mapaCityInstance);
 
     mapaMarkersLayer = L.layerGroup().addTo(mapaCityInstance);
     console.log('[Mapa] Leaflet iniciado');
@@ -10077,19 +10174,32 @@ window.addEventListener('scroll', function(){
 
 function iniciarMapaCity(){ mostrarMapa(); }
 
-function iconoPin(activo){
+function iconoPin(activo, c){
   const color  = activo ? '#5C7355' : '#9E9E9E';
   const sombra = activo ? 'rgba(92,115,85,0.35)' : 'rgba(0,0,0,0.25)';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
+  // Adentro del pin: la foto real del comercio si tiene, si no el ícono de
+  // su rubro (mismo set que "Explorá tu ciudad" en el home), y si no hay
+  // ninguno de los dos, el puntito genérico de siempre.
+  const rubroImg = c ? ICONOS_RUBRO[c.rubro] : null;
+  let contenidoInterno;
+  if(c?.img){
+    contenidoInterno = `<image href="${c.img}" x="4" y="4" width="18" height="18" clip-path="circle(9px at 9px 9px)" preserveAspectRatio="xMidYMid slice"/>`;
+  } else if(rubroImg){
+    contenidoInterno = `<image href="${FLUENT_BASE}${rubroImg}" x="5.5" y="5.5" width="15" height="15"/>`;
+  } else {
+    contenidoInterno = `<circle cx="13" cy="13" r="3.5" fill="white" opacity=".95"/>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 26 26">
     <filter id="s"><feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="${sombra}"/></filter>
-    <circle cx="13" cy="13" r="10" fill="${color}" stroke="white" stroke-width="3" filter="url(#s)"/>
-    <circle cx="13" cy="13" r="3.5" fill="white" opacity=".95"/>
+    <circle cx="13" cy="13" r="11" fill="white" filter="url(#s)"/>
+    <circle cx="13" cy="13" r="10" fill="${color}" stroke="white" stroke-width="2.5"/>
+    ${contenidoInterno}
   </svg>`;
   return L.divIcon({
     html: svg,
-    iconSize:   [26, 26],
-    iconAnchor: [13, 13],
-    popupAnchor:[0, -16],
+    iconSize:   [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor:[0, -18],
     className:  ''
   });
 }
@@ -10132,10 +10242,28 @@ async function geocodearDireccion(direccion, ciudad){
   const key = (direccion + '|' + (ciudad||'')).toLowerCase().trim();
   if(key in geocodeCache) return geocodeCache[key]; // ya la buscamos antes (puede ser null si no se encontró)
   try{
-    const q = encodeURIComponent(direccion + ', ' + (ciudad||'La Paz') + ', Entre Ríos, Argentina');
-    const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`);
+    // Búsqueda ESTRUCTURADA (street/city/state/country por separado, no todo
+    // junto como texto libre): así Nominatim entiende "La Paz" como CIUDAD
+    // puntual y no como el departamento homónimo (que es mucho más grande
+    // y cubre varios pueblos vecinos, causando ubicaciones corridas).
+    const params = new URLSearchParams({
+      format: 'json',
+      addressdetails: '1',
+      limit: '5',
+      countrycodes: 'ar',
+      street: direccion,
+      city: ciudad || 'La Paz',
+      state: 'Entre Ríos',
+      country: 'Argentina',
+    });
+    const resp = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
     const data = await resp.json();
-    const resultado = (data && data[0]) ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
+    // Descartar resultados que son un LÍMITE ADMINISTRATIVO (departamento,
+    // provincia, municipio) en vez de una dirección puntual — es justo lo
+    // que causaba que cayera en el centro del departamento La Paz.
+    const puntual = (data||[]).find(r => r.class !== 'boundary' && r.type !== 'administrative');
+    const elegido = puntual || data[0] || null;
+    const resultado = elegido ? { lat: parseFloat(elegido.lat), lng: parseFloat(elegido.lon) } : null;
     geocodeCache[key] = resultado;
     _guardarGeocodeCache();
     return resultado;
@@ -10143,6 +10271,26 @@ async function geocodearDireccion(direccion, ciudad){
     console.log('[Mapa] No se pudo geocodificar "'+direccion+'":', e);
     return null;
   }
+}
+
+async function adminReGeocodificarTodo(){
+  if(!confirm('Esto va a volver a buscar la ubicación de TODOS los comercios con dirección cargada, con la búsqueda corregida (antes confundía "La Paz ciudad" con "La Paz departamento"). Puede tardar unos minutos (1 comercio por segundo, por el límite del servicio gratuito). ¿Continuar?')) return;
+  toast('📍 Re-geocodificando… no cierres esta pantalla');
+  // Limpiar la caché local (si no, devuelve las mismas coordenadas viejas)
+  geocodeCache = {};
+  try{ localStorage.setItem('puente_geocode_cache', '{}'); }catch(e){}
+  // Sacar lat/lng de todos los comercios con dirección, para que
+  // geocodearComerciosPendientes() los vuelva a tomar como pendientes
+  const conDireccion = state.comercios.filter(c => c.direccion && c.direccion !== '—');
+  for(const c of conDireccion){
+    c.lat = null; c.lng = null;
+    if(firebaseListo && db && c.id){
+      try{ await db.collection('comercios').doc(c.id).set({lat:null,lng:null},{merge:true}); }catch(e){}
+    }
+  }
+  await geocodearComerciosPendientes();
+  toast(`✅ Listo: se re-geocodificaron ${conDireccion.length} comercios`);
+  renderMarcadoresMap();
 }
 
 let _geocodeEnCurso = false;
@@ -10194,7 +10342,7 @@ function renderMarcadoresMap(){
   comerciosVisibles.forEach(c => {
     const dias   = planDiasRestantes(c);
     const activo = c.plan && c.planVence && dias !== null && dias >= 0 && (c.pagos?.length > 0);
-    const icono  = iconoPin(activo);
+    const icono  = iconoPin(activo, c);
 
     const horarioTexto = c.horario || (c.turnos ? textoTurnos(c.turnos) : 'Consultar horario');
     const diasTexto    = c.dias?.length ? c.dias.join(' · ') : '';
@@ -10421,6 +10569,9 @@ async function admRenderDashboard(){
         <div class="adm-stat2"><div class="val" style="color:${pendCobro>0?'#CC6600':'inherit'}">$${pendCobro.toLocaleString('es-AR')}</div><div class="lbl">Pendiente de cobro</div></div>
         <div class="adm-stat2"><div class="val" style="color:${porVencer>0?'#A32020':'inherit'}">${porVencer}</div><div class="lbl">Planes por vencer</div></div>
         <div class="adm-stat2"><div class="val" style="color:${sinLeer>0?'#CC4400':'inherit'}">${sinLeer}</div><div class="lbl">Mensajes sin leer</div></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="adm-btn" onclick="adminReGeocodificarTodo()">📍 Re-geocodificar mapa</button>
       </div>
       <div class="adm-section">
         <div class="adm-section-hdr">Comercios recientes</div>
@@ -10769,13 +10920,11 @@ function admAbrirEditarDesktop(docId){
         <div class="field"><label>Dirección</label><input id="editAdDireccion" type="text" value="${esc(c.direccion)}"></div>
       </div>
       <div class="field">
-        <label>Ubicación en el mapa (lat, lng)</label>
-        <div style="display:flex;gap:8px;">
-          <input id="editAdLat" type="text" inputmode="decimal" placeholder="Latitud" value="${esc(c.lat)}" style="flex:1;">
-          <input id="editAdLng" type="text" inputmode="decimal" placeholder="Longitud" value="${esc(c.lng)}" style="flex:1;">
-        </div>
-        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="adminBuscarCoordenadasPorDireccion()">📍 Buscar por dirección</button>
-        <div id="editAdCoordsEstado" style="font-size:11.5px;color:var(--muted);margin-top:6px;"></div>
+        <label>Ubicación exacta (para "Cómo llegar")</label>
+        <div id="editAdMapaPick" style="height:220px;border-radius:12px;border:1.5px solid var(--line);overflow:hidden;"></div>
+        <div id="editAdCoordsEstado" style="font-size:12px;color:var(--muted);margin-top:6px;">${(c.lat && c.lng) ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.' : '⚠️ Este comercio todavía no tiene ubicación exacta. Marcala en el mapa.'}</div>
+        <input id="editAdLat" type="hidden" value="${esc(c.lat)}">
+        <input id="editAdLng" type="hidden" value="${esc(c.lng)}">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel" value="${esc(c.telefono)}"></div>
@@ -10803,6 +10952,15 @@ function admAbrirEditarDesktop(docId){
     if(tipoSel) tipoSel.innerHTML = buildTipoOptions(c.rubro, c.tipo || '');
     if(tipoField) tipoField.style.display = '';
   }
+  // Esperar a que el innerHTML se pinte y el div tenga dimensiones reales
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    crearMapaPick('editAdMapaPick', c.lat||null, c.lng||null, (lat,lng)=>{
+      document.getElementById('editAdLat').value = lat;
+      document.getElementById('editAdLng').value = lng;
+      const est = document.getElementById('editAdCoordsEstado');
+      if(est) est.textContent = '✅ Ubicación marcada: '+lat.toFixed(5)+', '+lng.toFixed(5);
+    });
+  }));
 }
 
 async function admRenderVendedoresDesktop(){
@@ -11017,15 +11175,59 @@ async function admRenderRepartidoresDesktop(){
 
 async function admRenderMensajesDesktop(){
   const cont=document.getElementById('admDesktopContent');
+  cont.innerHTML = `
+    <div style="max-width:640px;margin-bottom:24px;">
+      <div class="field"><label>Destinatarios</label>
+        <select id="admMsgDestD">
+          <option value="todos">Todos los usuarios</option>
+          <option value="vendedores">Solo ConectorT</option>
+          <option value="comercios">Solo comercios</option>
+          <option value="clientes">Solo clientes</option>
+        </select>
+      </div>
+      <div class="field"><label>Mensaje</label>
+        <textarea id="admMsgTextoD" rows="4" placeholder="Escribí el mensaje acá…"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="adminEnviarMensajeDesktop()">Enviar mensaje</button>
+    </div>
+    <div class="adm-section">
+      <div class="adm-section-hdr">Mensajes enviados</div>
+      <table class="adm-table"><thead><tr><th>Fecha</th><th>Para</th><th>Mensaje</th></tr></thead>
+      <tbody id="admMensajesEnviadosTbody"><tr><td colspan="3" style="color:#AAA;">Cargando…</td></tr></tbody></table>
+    </div>`;
+  await admCargarMensajesEnviadosDesktop();
+}
+
+const ADM_MSG_DEST_LABEL = {todos:'Todos los usuarios', vendedores:'Solo ConectorT', comercios:'Solo comercios', clientes:'Solo clientes'};
+
+async function admCargarMensajesEnviadosDesktop(){
+  const tbody = document.getElementById('admMensajesEnviadosTbody');
+  if(!tbody) return;
   try{
-    const snap=await db.collection('mensajes_admin').orderBy('fecha','desc').get();
-    const lista=snap.docs.map(d=>({...d.data(),_docId:d.id}));
-    cont.innerHTML=`<div class="adm-section"><table class="adm-table"><thead><tr><th>Fecha</th><th>De</th><th>Mensaje</th><th>Leído</th></tr></thead>
-    <tbody>${lista.map(m=>{
-      const fecha=m.fecha&&m.fecha.toDate?m.fecha.toDate().toLocaleDateString('es-AR'):'&mdash;';
-      return `<tr><td style="color:#888;white-space:nowrap;">${fecha}</td><td style="font-weight:700;">${m.nombre||m.email||'&mdash;'}</td><td style="color:#555;max-width:500px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.texto||'&mdash;'}</td><td>${m.leido?'<span class="adm-badge green">Sí</span>':'<span class="adm-badge orange">No</span>'}</td></tr>`;
-    }).join('')}</tbody></table></div>`;
-  }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
+    const snap = await db.collection('mensajes_admin').orderBy('fecha','desc').limit(30).get();
+    if(snap.empty){ tbody.innerHTML = '<tr><td colspan="3" style="color:#AAA;">Sin mensajes enviados.</td></tr>'; return; }
+    tbody.innerHTML = snap.docs.map(d=>{
+      const m = d.data();
+      const fecha = m.fecha ? new Date(m.fecha).toLocaleDateString('es-AR') : '—';
+      const dest = ADM_MSG_DEST_LABEL[m.dest] || m.dest || '—';
+      return `<tr><td style="color:#888;white-space:nowrap;">${fecha}</td><td style="font-weight:700;">${dest}</td><td style="color:#555;max-width:500px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.texto||'—'}</td></tr>`;
+    }).join('');
+  }catch(e){ tbody.innerHTML = `<tr><td colspan="3" style="color:red;">Error: ${e.message}</td></tr>`; }
+}
+
+async function adminEnviarMensajeDesktop(){
+  const dest = document.getElementById('admMsgDestD').value;
+  const texto = document.getElementById('admMsgTextoD').value.trim();
+  if(!texto){ toast('Escribí un mensaje primero.'); return; }
+  try{
+    await db.collection('mensajes_admin').add({
+      dest, texto, fecha: new Date().toISOString(),
+      de: state.currentUser?.email || 'admin'
+    });
+    document.getElementById('admMsgTextoD').value = '';
+    toast('Mensaje enviado ✅');
+    admCargarMensajesEnviadosDesktop();
+  }catch(e){ toast('Error al enviar.'); }
 }
 
 function admRenderNuevoComercioDesktop(){
@@ -11064,6 +11266,11 @@ function admRenderNuevoComercioDesktop(){
           <select id="adTipo"></select>
         </div>
         <div class="field"><label>Dirección</label><input type="text" id="adDireccion" placeholder="Ej: San Martín 240"></div>
+        <div class="field">
+          <label>Ubicación exacta (para "Cómo llegar")</label>
+          <div id="adMapaPickDesktop" style="height:220px;border-radius:12px;border:1.5px solid var(--line);overflow:hidden;"></div>
+          <div id="adUbicacionEstadoDesktop" style="font-size:12px;color:var(--muted);margin-top:6px;">Tocá el mapa o arrastrá el pin para marcar el local con precisión.</div>
+        </div>
         <div class="field"><label>Teléfono</label><input type="tel" id="adTelefono" placeholder="Ej: 3437-123456"></div>
         <div class="field"><label>Teléfono alternativo</label><input type="tel" id="adTelefonoAlt" placeholder="Opcional"></div>
         <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input type="tel" inputmode="numeric" id="adWhatsapp" placeholder="Ej: 3454123456 (sin espacios ni guiones)"></div>
@@ -11100,6 +11307,13 @@ function admRenderNuevoComercioDesktop(){
   fillRubroSelect('adRubro');
   const tf = document.getElementById('adTipoField');
   if(tf) tf.style.display = 'none';
+  setTimeout(()=>{
+    crearMapaPick('adMapaPickDesktop', adminNuevoComLatLng?.lat, adminNuevoComLatLng?.lng, (lat,lng)=>{
+      adminNuevoComLatLng = {lat, lng};
+      const est = document.getElementById('adUbicacionEstadoDesktop');
+      if(est) est.textContent = '✅ Ubicación marcada correctamente.';
+    });
+  }, 50);
 }
 
 function adSelPlan(plan, btn){
@@ -11458,7 +11672,8 @@ function adminAbrirEditar(docId){
   document.getElementById('editAdConectorActivo').checked = !!c.conectorActivo;
   document.getElementById('editAdLat').value = c.lat||'';
   document.getElementById('editAdLng').value = c.lng||'';
-  document.getElementById('editAdCoordsEstado').textContent = (c.lat && c.lng) ? '' : '⚠️ Este comercio todavía no tiene ubicación exacta en el mapa.';
+  const estadoCoords = document.getElementById('editAdCoordsEstado');
+  if(estadoCoords) estadoCoords.textContent = (c.lat && c.lng) ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.' : '⚠️ Este comercio todavía no tiene ubicación exacta. Marcala en el mapa.';
   // Ciudad select
   const selCiudad = document.getElementById('editAdCiudad');
   for(let opt of selCiudad.options) if(opt.value===c.ciudad) opt.selected=true;
@@ -11478,7 +11693,18 @@ function adminAbrirEditar(docId){
   if(c.publicidadVence){
     document.getElementById('editAdPublicidadVence').value = c.publicidadVence.slice(0,10);
   }
+  // Mostrar pantalla PRIMERO para que el div tenga dimensiones reales,
+  // y recién después inicializar el mapa
   showScreen('admin-editar-comercio');
+  const _latEdit = c.lat||null, _lngEdit = c.lng||null;
+  setTimeout(()=>{
+    crearMapaPick('editAdMapaPick', _latEdit, _lngEdit, (lat,lng)=>{
+      document.getElementById('editAdLat').value = lat;
+      document.getElementById('editAdLng').value = lng;
+      const est = document.getElementById('editAdCoordsEstado');
+      if(est) est.textContent = '✅ Ubicación marcada: '+lat.toFixed(5)+', '+lng.toFixed(5);
+    });
+  }, 200);
 }
 
 async function adminBuscarCoordenadasPorDireccion(){
@@ -11491,9 +11717,11 @@ async function adminBuscarCoordenadasPorDireccion(){
   if(coords){
     document.getElementById('editAdLat').value = coords.lat.toFixed(6);
     document.getElementById('editAdLng').value = coords.lng.toFixed(6);
-    estado.textContent = '✅ Encontrado: ' + coords.lat.toFixed(5) + ', ' + coords.lng.toFixed(5) + ' — revisá que sea correcto y guardá.';
+    estado.textContent = '✅ Encontrado: ' + coords.lat.toFixed(5) + ', ' + coords.lng.toFixed(5) + ' — revisá que sea correcto en el mapa y guardá.';
+    const inst = _mapasPickInstancias['editAdMapaPick'];
+    if(inst){ inst.marker.setLatLng([coords.lat, coords.lng]); inst.mapa.setView([coords.lat, coords.lng], 17); }
   } else {
-    estado.textContent = '❌ No se encontró esa dirección. Cargá lat/lng manualmente (podés obtenerlas tocando el lugar en Google Maps).';
+    estado.textContent = '❌ No se encontró esa dirección. Tocá directamente en el mapa para marcar la ubicación.';
   }
 }
 
@@ -12661,6 +12889,33 @@ async function adminCambiarEstadoRep(docId, nuevoEstado){
   }catch(e){ toast('Error: '+e.message); }
 }
 
+function adminAbrirEditarRep(docId){
+  document.getElementById(`adminRepDatosView-${docId}`).style.display = 'none';
+  document.getElementById(`adminRepDatosEdit-${docId}`).style.display = 'block';
+}
+
+function adminCancelarEditarRep(docId){
+  document.getElementById(`adminRepDatosView-${docId}`).style.display = 'block';
+  document.getElementById(`adminRepDatosEdit-${docId}`).style.display = 'none';
+}
+
+async function adminGuardarEdicionRep(docId){
+  const nombre = document.getElementById(`adminRepEditNombre-${docId}`).value.trim();
+  const tel = document.getElementById(`adminRepEditTel-${docId}`).value.trim();
+  const vehiculo = document.getElementById(`adminRepEditVehiculo-${docId}`).value;
+  const notas = document.getElementById(`adminRepEditNotas-${docId}`).value.trim();
+  if(!nombre){ toast('Falta el nombre'); return; }
+  if(!tel || tel.replace(/\D/g,'').length < 8){ toast('📱 Ingresá un teléfono válido'); return; }
+  const cambios = {nombre, tel, vehiculo, notas};
+  try{
+    if(firebaseListo && db) await db.collection('repartidores').doc(docId).update(cambios);
+    const r = _adminReps.find(x=>x._docId===docId);
+    if(r) Object.assign(r, cambios);
+    toast('✅ Datos actualizados');
+    adminAbrirRepDetalle(docId);
+  } catch(e){ console.error(e); toast('Error al guardar los cambios'); }
+}
+
 async function adminAbrirRepDetalle(docId){
   const r = _adminReps.find(x=>x._docId===docId);
   if(!r){ toast('Repartidor no encontrado'); return; }
@@ -12670,8 +12925,16 @@ async function adminAbrirRepDetalle(docId){
 
   // Datos del repartidor
   var html = `<div class="card">
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Datos</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Datos</div>
+      <button class="btn btn-ghost btn-sm" onclick="adminAbrirEditarRep('${docId}')">✏️ Editar</button>
+    </div>
+    <div id="adminRepDatosView-${docId}">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div style="background:#F5F5F5;border-radius:10px;padding:10px;grid-column:1/-1;">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">NOMBRE</div>
+        <div style="font-size:13px;font-weight:700;">${r.nombre||'—'}</div>
+      </div>
       <div style="background:#F5F5F5;border-radius:10px;padding:10px;">
         <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px;">ESTADO</div>
         <div style="font-size:12px;font-weight:700;color:${est.color};">${est.label}</div>
@@ -12693,6 +12956,21 @@ async function adminAbrirRepDetalle(docId){
     ${r.tel ? `<a href="https://wa.me/54${r.tel.replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+r.nombre+', te contactamos desde PuenT.')}" target="_blank"
       style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:10px;background:#25D366;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
       💬 Escribir por WhatsApp</a>` : ''}
+    </div>
+    <div id="adminRepDatosEdit-${docId}" style="display:none;">
+      <div class="field"><label>Nombre</label><input id="adminRepEditNombre-${docId}" value="${(r.nombre||'').replace(/"/g,'&quot;')}"></div>
+      <div class="field"><label>Teléfono / WhatsApp</label><input id="adminRepEditTel-${docId}" type="tel" inputmode="numeric" value="${(r.tel||'').replace(/"/g,'&quot;')}" placeholder="Ej: 3454123456"></div>
+      <div class="field"><label>Vehículo</label>
+        <select id="adminRepEditVehiculo-${docId}">
+          ${Object.entries(REP_VEHICULO).map(([k,v])=>`<option value="${k}" ${r.vehiculo===k?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>Notas</label><textarea id="adminRepEditNotas-${docId}" rows="2">${r.notas||''}</textarea></div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="adminCancelarEditarRep('${docId}')">Cancelar</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="adminGuardarEdicionRep('${docId}')">Guardar</button>
+      </div>
+    </div>
   </div>`;
 
   // Cambiar estado
@@ -12900,7 +13178,8 @@ async function adminGuardarNuevoComercio(){
     qrPersonal: qr, aprobado:true, publicidadActiva:true,
     publicidadVence: new Date(Date.now()+30*864e5).toISOString(),
     conectorActivo: document.getElementById('adConectorActivo') ? document.getElementById('adConectorActivo').checked : false,
-    adheridos:[], creadoPorAdmin:true, fechaAlta: new Date().toISOString()
+    adheridos:[], creadoPorAdmin:true, fechaAlta: new Date().toISOString(),
+    lat: adminNuevoComLatLng?.lat, lng: adminNuevoComLatLng?.lng,
   };
   try{
     await db.collection('comercios').doc(id).set(data);
@@ -12915,6 +13194,7 @@ async function adminGuardarNuevoComercio(){
     delete fotosCargadas['adLogo']; delete fotosCargadas['adFoto2'];
     document.getElementById('adLogoFotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">📷</div></div>';
     document.getElementById('adFoto2FotoBox').innerHTML = '<div class="logo-upload-empty"><div class="ic">🖼️</div></div>';
+    adminNuevoComLatLng = null;
     const adConectorActivoEl = document.getElementById('adConectorActivo'); if(adConectorActivoEl) adConectorActivoEl.checked = false;
     btns.forEach(b=>{ b.disabled = false; b.textContent = b.dataset.textoOriginal || b.textContent; });
     showScreen('admin-comercios'); adminCargarComercios();
@@ -13316,7 +13596,7 @@ function pedidoCardHtml(p){
         <span style="font-size:15px;font-weight:800;color:var(--navy);">$${(p.total||0).toLocaleString('es-AR')}</span>
       </div>
       ${!esEntregado ? `
-        <button onclick="confirmarEntregaCliente('${p.pedidoEnvioId||''}')" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;">
+        <button onclick="confirmarEntregaCliente('${p.id}')" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;">
           ✔️ Ya recibí mi pedido
         </button>` : ''}
     </div>`;
@@ -13332,12 +13612,18 @@ function renderMisPedidos(){
   el.innerHTML = pedidos.slice().reverse().map(pedidoCardHtml).join('');
 }
 
-function confirmarEntregaCliente(pedidoEnvioId){
-  if(!pedidoEnvioId) return;
-  const p = (state.pedidosEnvio||[]).find(x=>x.id===pedidoEnvioId);
-  if(p){ p.estado='entregado'; if(firebaseListo&&db) db.collection('pedidosEnvio').doc(pedidoEnvioId).update({estado:'entregado'}).catch(()=>{}); }
-  const mp = (state.misPedidos||[]).find(x=>x.pedidoEnvioId===pedidoEnvioId);
-  if(mp){ mp.estado='entregado'; guardarMisPedidosFirestore(); }
+function confirmarEntregaCliente(pedidoId){
+  if(!pedidoId) return;
+  const mp = (state.misPedidos||[]).find(x=>x.id===pedidoId);
+  if(!mp){ toast('No encontramos ese pedido'); return; }
+  mp.estado = 'entregado';
+  guardarMisPedidosFirestore();
+  // Si es un pedido con envío, actualizar también el pedidoEnvio (lo que ve el repartidor/comercio)
+  if(mp.pedidoEnvioId){
+    const p = (state.pedidosEnvio||[]).find(x=>x.id===mp.pedidoEnvioId);
+    if(p) p.estado = 'entregado';
+    if(firebaseListo && db) db.collection('pedidosEnvio').doc(mp.pedidoEnvioId).update({estado:'entregado'}).catch(()=>{});
+  }
   toast('✔️ ¡Gracias! Confirmaste la recepción de tu pedido.');
   if(!document.getElementById('screen-mis-pedidos')?.classList.contains('hidden')) renderMisPedidos();
   if(!document.getElementById('screen-perfil')?.classList.contains('hidden')) abrirPerfil();
