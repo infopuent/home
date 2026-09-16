@@ -2371,6 +2371,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-clientes');adminCargarClientes()"><i class="ti ti-user ic"></i>Clientes</button>
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
         <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes');adminCargarMensajesEnviados()"><i class="ti ti-message-2 ic"></i>Mensajes</button>
+        <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-repartidores');adminCargarRepartidores()"><i class="ti ti-bike ic"></i>Repartidores</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio')"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-papelera');admCargarPapelera()"><i class="ti ti-trash ic"></i>🗑️ Papelera</button>
@@ -10988,6 +10989,7 @@ async function admRenderRepartidoresDesktop(){
   try{
     const snap = await db.collection('repartidores').orderBy('fechaAlta','desc').get();
     const lista = snap.docs.map(d=>({...d.data(), _docId:d.id}));
+    _adminReps = lista;
     const REP_ESTADO = { activo:{label:'Activo',bg:'#E3F3EA',color:'#2F7A55'}, inactivo:{label:'Inactivo',bg:'#F0F0EE',color:'#666'}, suspendido:{label:'Suspendido',bg:'#FDE8E8',color:'#A32020'} };
     cont.innerHTML = `
       <div class="adm-section">
@@ -12731,10 +12733,26 @@ async function adminAbrirRepDetalle(docId){
 
   document.getElementById('adminRepDetalleContenido').innerHTML = html;
   document.getElementById('adminRepDetalleKicker').textContent = '🛵 ' + (r.nombre||'Repartidor');
-  showScreen('admin-rep-detalle');
 
-  // Cargar viajes automáticamente
-  adminRepMostrarViajes(docId, 'activos');
+  // Cargar viajes antes de clonar (si es desktop), para que el clon no quede
+  // pegado en "Cargando viajes…" — el contenedor de viajes vive dentro del
+  // nodo que se clona, así que tiene que estar ya completo.
+  await adminRepMostrarViajes(docId, 'activos');
+
+  if(window.innerWidth >= 900){
+    // Clonar el detalle (ya armado arriba) dentro del panel desktop, con sidebar,
+    // en vez de navegar a la pantalla mobile — mismo patrón que admAbrirComercioDetalle.
+    const cont = document.getElementById('admDesktopContent');
+    const mob = document.getElementById('screen-admin-rep-detalle');
+    if(cont && mob){
+      cont.innerHTML = '<button class="adm-btn" style="margin-bottom:14px;" onclick="adminDesktopTab(\'repartidores\')">← Volver a Repartidores</button>';
+      const cl = mob.cloneNode(true); cl.removeAttribute('id'); cl.classList.remove('hidden'); cl.style.display='block';
+      const bk = cl.querySelector('.link-back'); if(bk) bk.remove();
+      cont.appendChild(cl);
+    }
+  } else {
+    showScreen('admin-rep-detalle');
+  }
 }
 
 async function adminRepMostrarViajes(docId, tipo){
