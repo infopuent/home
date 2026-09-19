@@ -20,6 +20,18 @@
 <meta name="twitter:description" content="Descubrí las ofertas del día, los comercios y los ConectorT de tu ciudad, todo en un solo lugar.">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/infopuent/home/refs/heads/main/imagenes/logo%20puente%203.png">
+
+<!-- PWA: instalable en el celular/PC. Necesita manifest.json + los íconos
+     (/icons/icon-192.png, icon-512.png y sus versiones "maskable") subidos
+     en la MISMA carpeta que este index.html cuando lo despliegues. -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FF6600">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PuenT">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bai+Jamjuree:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -279,6 +291,21 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .cerrar-sesion-btn:active{transform:scale(0.97); background:#fff0f0;}
 .two-col{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
 
+/* ---- Panel cards (todos los roles) ---- */
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.p-card{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:20px 12px;border-radius:18px;border:none;
+  text-align:center;cursor:pointer;position:relative;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  transition:transform .1s,box-shadow .1s;
+  min-height:90px;
+}
+.p-card:active{transform:scale(0.97);box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+.p-card-ic{font-size:26px;flex-shrink:0;}
+.p-card-title{font-weight:800;font-size:13px;line-height:1.25;color:inherit;}
+.p-card-sub{font-size:11px;opacity:.65;font-weight:500;line-height:1.3;margin-top:1px;}
+
 /* ---- Splash ---- */
 #splash{
   position:fixed; inset:0; z-index:100; background:#FFFFFF;
@@ -395,6 +422,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .feed-banner-slider{position:relative; width:100%; aspect-ratio:836/380; overflow:hidden;}
 .feed-banner-slider img{position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; object-position:center center; opacity:0; transition:opacity 1s ease;}
 .feed-banner-slider img.active{opacity:1;}
+/* Banner de publicidad — arriba del todo del tab Home, entre las solapas y
+   "En PuenT". El contenedor se autoajusta a la imagen (que ya viene recortada
+   4:1 desde la compresión), sin forzar un alto fijo ni recortarla de nuevo. */
+.banner-publicidad-home{width:calc(100% - 32px); border-radius:14px; overflow:hidden; margin:10px 16px;}
+.banner-publicidad-home img{width:100%; height:auto; display:block;}
+.banner-tornado-ofertas{position:relative; width:calc(100% - 32px); border-radius:18px; overflow:hidden; margin:4px 16px 18px; cursor:pointer; box-shadow:0 4px 16px rgba(255,102,0,0.28);}
+.banner-tornado-ofertas img{width:100%; height:auto; display:block;}
+.banner-tornado-ofertas:active{transform:scale(0.98);}
 .feed-city{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; background:rgba(255,255,255,0.12); padding:5px 12px; border-radius:100px; margin-bottom:12px; color:white; border:none; cursor:pointer;}
 .ciudad-dd{position:relative; display:inline-block;}
 .feed-title{font-family:'Bai Jamjuree',sans-serif; font-size:22px; font-weight:700; line-height:1.25; margin-bottom:6px;}
@@ -803,8 +838,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="font-size:18px;color:#5A4A00;flex-shrink:0;">›</div>
       </button>
 
+      <!-- Separador visual entre explorar y registrarse -->
+      <div style="display:flex;align-items:center;gap:12px;padding:2px 0;">
+        <div style="flex:1;height:1px;background:#EAEAEA;"></div>
+        <div style="font-size:11px;font-weight:700;color:#CCC;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;">¿Querés más?</div>
+        <div style="flex:1;height:1px;background:#EAEAEA;"></div>
+      </div>
+
       <!-- Chip Registro: Cliente -->
-      <button onclick="elegirRolParaRegistro('cliente')"
+      <button onclick="showScreen('screen-login-cliente')"
         style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:transform .1s,border-color .15s;"
         onmousedown="this.style.transform='scale(0.98)';this.style.borderColor='#FFD400';" onmouseup="this.style.transform='';this.style.borderColor='#EAEAEA';"
         ontouchstart="this.style.transform='scale(0.98)';this.style.borderColor='#FFD400';" ontouchend="this.style.transform='';this.style.borderColor='#EAEAEA';">
@@ -860,6 +902,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     ================================================================ -->
     <div id="feedHomeView">
 
+      <!-- Banner de publicidad — admin lo carga desde "Imágenes del home" -->
+      <div id="bannerPublicidadHome"></div>
+
       <!-- Comercios adheridos (logos) -->
       <div style="padding:14px 16px 0;">
         <div class="section-title-row">
@@ -877,13 +922,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div id="feedGridEncantar" class="feed-grid-encantar"></div>
       </div>
 
-      <!-- Tornado de Ofertas -->
-      <div style="padding:4px 16px 0;">
-        <button class="tornado-ofertas-btn" id="tornadoOfertasBtn" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
-          <span class="tornado-badge hidden" id="tornadoOfertasBadge">0</span>
-          🌪️ Tornado de Ofertas
-        </button>
-      </div>
+      <!-- Banner Tornado de Ofertas — reemplaza el botón fijo, mismo sistema
+           de banner que el de arriba (admin lo carga desde "Imágenes del home") -->
+      <div id="bannerTornadoOfertas"></div>
 
       <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
            dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
@@ -1344,26 +1385,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </button>
     </div>
 
-    <div class="link-back" style="text-align:center;margin:0 0 14px;" onclick="document.getElementById('registroManualBox').classList.toggle('hidden')">¿No tenés Gmail? Registrate sin Google</div>
 
-    <div class="hidden" id="registroManualBox">
-      <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:14px;">Este registro es manual (con verificación de teléfono) y es una cuenta aparte de la de Google.</div>
-      <div class="role-select-grid" style="margin-top:0;">
-        <button class="role-btn" disabled style="opacity:.5;cursor:not-allowed;position:relative;">
-          <span style="position:absolute;top:6px;right:6px;background:#1A1A1A;color:white;font-size:8.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:100px;">Próximamente</span>
-          <div class="ic" style="background:var(--green)">🔗</div>
-          <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
-        </button>
-        <button class="role-btn" onclick="goRegister('comercio')">
-          <div class="ic" style="background:var(--blue)">🏬</div>
-          <div><div class="tt">Comercio</div><div class="ss">Escaneo códigos y gestiono pedidos</div></div>
-        </button>
-        <button class="role-btn" onclick="goRegister('cliente')">
-          <div class="ic" style="background:var(--navy)">🙋</div>
-          <div><div class="tt">Cliente</div><div class="ss">Busco productos de mi ciudad</div></div>
-        </button>
-      </div>
-    </div>
   </div>
 
   <!-- ============ SCREEN: ELEGIR ROL PARA REGISTRARME (antes de tocar Google) ============ -->
@@ -1493,13 +1515,83 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ SCREEN: REGISTRO ============ -->
-  <div class="screen hidden" id="screen-register">
-    <div class="link-back" onclick="goHome()">← Volver</div>
-    <div class="kicker" id="regKicker">Registro</div>
-    <h1 class="page-title" id="regTitle">Registro</h1>
-    <p class="page-sub" id="regSub"></p>
-    <div id="regFields"></div>
-    <button class="btn btn-primary" onclick="submitRegister()">Continuar</button>
+  <!-- ============ SCREEN: LOGIN CLIENTE ============ -->
+  <div class="screen hidden" id="screen-login-cliente" style="padding:28px 20px 32px;">
+    <div class="link-back" onclick="showScreen('home')">← Volver</div>
+    <div class="kicker" style="margin-top:8px;">Cuenta de cliente</div>
+    <h1 class="page-title" style="margin-bottom:4px;">Entrá a tu cuenta</h1>
+    <p class="page-sub" style="margin-bottom:24px;">O registrate si sos nuevo — es gratis.</p>
+
+    <!-- Google -->
+    <button onclick="elegirRolParaRegistro('cliente')" style="width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid #DADCE0;background:white;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;color:#1A1A1A;cursor:pointer;margin-bottom:10px;">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.1 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.8 23.8 0 0 0 0 24c0 3.8.9 7.4 2.5 10.6l8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.1C6.5 42.5 14.6 48 24 48z"/></svg>
+      Continuar con Google
+    </button>
+
+    <!-- Facebook -->
+    <button onclick="loginConFacebook()" style="width:100%;padding:14px 16px;border-radius:14px;border:none;background:#1877F2;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;margin-bottom:18px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+      Continuar con Facebook
+    </button>
+
+    <!-- Divisor -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+      <div style="flex:1;height:1px;background:#EAEAEA;"></div>
+      <div style="font-size:12px;color:#AAA;font-weight:600;">o ingresá con tu correo</div>
+      <div style="flex:1;height:1px;background:#EAEAEA;"></div>
+    </div>
+
+    <!-- Email + contraseña -->
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:6px;">
+      <input id="loginClienteEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email"
+        style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+      <div style="position:relative;">
+        <input id="loginClientePass" type="password" placeholder="Contraseña" autocomplete="current-password"
+          style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+        <button onclick="togglePassVisibility('loginClientePass',this)" type="button"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#AAA;">👁</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-bottom:16px;">
+      <button onclick="recuperarContrasena()" style="background:none;border:none;font-size:12.5px;font-weight:600;color:#FF6600;cursor:pointer;">¿Olvidaste tu contraseña?</button>
+    </div>
+
+    <button onclick="loginConEmail()" style="width:100%;padding:15px;border-radius:14px;background:#FF6600;color:white;font-weight:800;font-size:15px;border:none;cursor:pointer;margin-bottom:12px;">
+      Iniciar sesión
+    </button>
+
+    <!-- Registrarse con email -->
+    <div style="text-align:center;font-size:13px;color:#888;">
+      ¿No tenés cuenta? <button onclick="showScreen('screen-registro-email')" style="background:none;border:none;font-size:13px;font-weight:800;color:#FF6600;cursor:pointer;">Registrate con tu correo</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: REGISTRO CON EMAIL (CLIENTE) ============ -->
+  <div class="screen hidden" id="screen-registro-email" style="padding:28px 20px 32px;">
+    <div class="link-back" onclick="showScreen('screen-login-cliente')">← Volver</div>
+    <div class="kicker" style="margin-top:8px;">Cuenta nueva</div>
+    <h1 class="page-title" style="margin-bottom:4px;">Creá tu cuenta</h1>
+    <p class="page-sub" style="margin-bottom:24px;">Solo necesitás un correo y una contraseña.</p>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <input id="regEmailNombre" type="text" placeholder="Tu nombre" autocomplete="given-name"
+        style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+      <input id="regEmailEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email"
+        style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+      <div style="position:relative;">
+        <input id="regEmailPass" type="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password"
+          style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+        <button onclick="togglePassVisibility('regEmailPass',this)" type="button"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#AAA;">👁</button>
+      </div>
+    </div>
+
+    <button onclick="registrarConEmail()" style="width:100%;padding:15px;border-radius:14px;background:#FF6600;color:white;font-weight:800;font-size:15px;border:none;cursor:pointer;margin-bottom:12px;">
+      Crear cuenta
+    </button>
+    <div style="font-size:11.5px;color:#AAA;text-align:center;line-height:1.5;">
+      Al registrarte aceptás los Términos y Condiciones de PuenT.
+    </div>
   </div>
 
   <!-- ============ VERIFICACION SMS ============ -->
@@ -1519,22 +1611,52 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   <!-- ============ CONECTORT: PANEL PRINCIPAL ============ -->
   <div class="screen hidden" id="screen-v-catalogo">
-    <button class="cerrar-sesion-btn" onclick="confirmarCierreSesion()">👤 Cerrar sesión</button>
     <div class="kicker">Panel ConectorT</div>
     <h1 class="page-title">Hola, <span id="vNombre">ConectorT</span></h1>
-    <div id="vMiValoracion" style="margin:-8px 0 14px;"></div>
-    <p class="page-sub">Elegí productos de la plataforma, arma tu catálogo y cuando un cliente quiera comprar, reservá por él y mandále el QR.</p>
+    <div id="vMiValoracion" style="margin:-8px 0 10px;"></div>
     <div id="actividadBox"></div>
-    <div id="vAlertasBox" style="margin-bottom:10px;"></div>
-    <div class="btn-grid" style="margin-bottom:16px">
-      <button class="btn-tile btn-tile-coral" onclick="showScreen('v-elegir-comercio'); renderVElegirComercio();"><i class="ti ti-plus ic" aria-hidden="true"></i>Agregar productos</button>
-      <button class="btn-tile btn-tile-rose" onclick="renderVReservas();showScreen('v-reservas')"><i class="ti ti-qrcode ic" aria-hidden="true"></i>Mis reservas</button>
-      <button class="btn-tile btn-tile-mint" onclick="showScreen('v-stats')"><i class="ti ti-chart-bar ic" aria-hidden="true"></i>Comisiones</button>
-      <button class="btn-tile btn-tile-neutral" onclick="abrirEditarVendedor()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
-      <button class="btn-tile btn-tile-sage" onclick="contactarAdminSumarComercio()"><i class="ti ti-building-store ic" aria-hidden="true"></i>Sumar comercio</button>
-      <button class="btn-tile" style="background:#EAF0FB;color:#3A5FA0;grid-column:1/-1;" onclick="abrirPedidoPersonalizado()"><i class="ti ti-shopping-cart-plus ic" aria-hidden="true"></i>Pedido personalizado</button>
+    <div id="vAlertasBox" style="margin-bottom:12px;"></div>
+
+    <div class="p-grid">
+
+      <button class="p-card" style="background:#fff0f0;color:#c23b3b;" onclick="confirmarCierreSesion()">
+        <i class="ti ti-logout p-card-ic"></i>
+        <div class="p-card-title">Cerrar sesión</div>
+      </button>
+
+      <button class="p-card" style="background:#F5F5F5;color:#444;" onclick="abrirEditarVendedor()">
+        <i class="ti ti-edit p-card-ic"></i>
+        <div class="p-card-title">Editar info</div>
+      </button>
+
+      <button class="p-card" style="background:#FFF0E8;color:#CC4400;" onclick="showScreen('v-elegir-comercio');renderVElegirComercio();">
+        <i class="ti ti-plus p-card-ic"></i>
+        <div class="p-card-title">Agregar productos</div>
+      </button>
+
+      <button class="p-card" style="background:#FCE4EC;color:#880E4F;" onclick="renderVReservas();showScreen('v-reservas')">
+        <i class="ti ti-qrcode p-card-ic"></i>
+        <div class="p-card-title">Mis reservas</div>
+      </button>
+
+      <button class="p-card" style="background:#E0F2F1;color:#00695C;" onclick="showScreen('v-stats')">
+        <i class="ti ti-chart-bar p-card-ic"></i>
+        <div class="p-card-title">Comisiones</div>
+      </button>
+
+      <button class="p-card" style="background:#E8F5E9;color:#2E7D32;" onclick="contactarAdminSumarComercio()">
+        <i class="ti ti-building-store p-card-ic"></i>
+        <div class="p-card-title">Sumar comercio</div>
+      </button>
+
+      <button class="p-card" style="background:#EAF0FB;color:#3A5FA0;grid-column:1/-1;flex-direction:row;gap:14px;justify-content:flex-start;" onclick="abrirPedidoPersonalizado()">
+        <i class="ti ti-shopping-cart-plus p-card-ic"></i>
+        <div class="p-card-title">Pedido personalizado</div>
+      </button>
+
     </div>
-    <div class="section-title" style="margin-bottom:10px;">Mi catálogo</div>
+
+    <div class="section-title" style="margin:16px 0 10px;">Mi catálogo</div>
     <div id="vProdList"></div>
   </div>
 
@@ -1855,45 +1977,170 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
   </div>
 
-  <!-- ============ COMERCIO: PANEL ============ -->
-  <div class="screen hidden" id="screen-c-panel">
-    <button class="cerrar-sesion-btn" onclick="confirmarCierreSesion()">👤 Cerrar sesión</button>
-    <div class="kicker">Panel de comercio</div>
-    <h1 class="page-title"><span id="cNombre">Tu comercio</span></h1>
-    <div id="cMiValoracion" style="margin:-8px 0 14px;"></div>
-    <div id="publicidadBox"></div>
-    <div class="btn-grid" style="margin-bottom:16px">
-      <button class="btn-tile btn-tile-coral" onclick="irNuevoProductoComercioSeguro()"><i class="ti ti-plus ic" aria-hidden="true"></i>Cargar producto</button>
-      <button class="btn-tile btn-tile-sage" onclick="showScreen('c-productos'); renderProductosPropios('cProductosPropiosPage');"><i class="ti ti-package ic" aria-hidden="true"></i>Productos</button>
-      <button class="btn-tile btn-tile-gold" onclick="mostrarMiQR('comercio')"><i class="ti ti-qrcode ic" aria-hidden="true"></i>Mi código QR</button>
-      <button class="btn-tile btn-tile-neutral" onclick="abrirEditarComercio()"><i class="ti ti-edit ic" aria-hidden="true"></i>Editar info</button>
-      <button class="btn-tile btn-tile-coral hidden" id="btnMenuDia" style="grid-column:1/-1;" onclick="abrirMenuDia()"><i class="ti ti-clipboard-list ic" aria-hidden="true"></i>📋 Menú del día</button>
-      <button class="btn-tile btn-tile-mint" style="grid-column:1/-1;position:relative;" id="btnOperacionesComercio" onclick="renderCOperaciones();showScreen('c-operaciones');limpiarBadgeContactos()"><i class="ti ti-list-check ic" aria-hidden="true"></i>Operaciones y comisiones<span id="badgeContactosDirect" style="display:none;position:absolute;top:8px;right:10px;background:#E05A5A;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;"></span></button>
-      <button class="btn-tile btn-tile-sky" style="grid-column:1/-1;" onclick="renderCPedidosEnvio();showScreen('c-pedidos-envio')"><i class="ti ti-truck ic" aria-hidden="true"></i>Pedidos de envío 🚚</button>
-    </div>
-    <div id="cPlanBox" style="margin-bottom:12px;"></div>
-    <div id="cAlertasBox" style="margin-bottom:10px;"></div>
-    <p class="page-sub">Cuando un cliente te presente un código, escribilo acá para confirmar la entrega.</p>
-    <div class="card">
-      <div class="field"><label>Código presentado por el cliente</label><input id="scanCodigo" placeholder="Ej: EP-1042" style="text-transform:uppercase"></div>
-      <div class="btn-block-row">
-        <button class="btn btn-primary" onclick="escanearCodigo()">Verificar código</button>
-        <button class="btn btn-ghost" style="width:auto; padding:14px 18px;" onclick="escanearCodigoConCamara()" aria-label="Escanear con cámara"><i class="ti ti-camera" style="font-size:18px;" aria-hidden="true"></i></button>
+  <!-- ============ COMERCIO: EN REVISIÓN ============ -->
+  <div class="screen hidden" id="screen-c-en-revision" style="padding:24px 20px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:#FFFFFF;">
+
+    <!-- Ícono animado -->
+    <div style="margin-top:32px;margin-bottom:24px;text-align:center;">
+      <div style="width:80px;height:80px;border-radius:50%;background:#FFF3E8;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 16px;">🏬</div>
+      <div style="font-family:'Bai Jamjuree',sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">¡Gracias por sumarte!</div>
+      <div style="font-size:14px;color:#666;line-height:1.6;max-width:300px;margin:0 auto;">
+        Tu comercio está registrado y ya podés explorar el panel mientras lo revisamos.
       </div>
     </div>
-    <div class="divider"></div>
-    <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">ConectorT vendiendo tus productos</div>
-    <div id="cConectorToggleBox" style="margin-bottom:12px;"></div>
-    <div id="cVendedoresList"></div>
-    <div class="divider"></div>
-    <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">📬 Pedidos de ConectorT</div>
-    <div id="cPedidosProducto" style="margin-bottom:8px;"></div>
-    <div class="divider"></div>
-    <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:10px;">Historial de ventas confirmadas</div>
-    <div id="cHistorial"></div>
-    <div class="divider"></div>
+
+    <!-- Card principal -->
+    <div style="background:#FFF8F0;border:1.5px solid #FFD9B0;border-radius:18px;padding:20px;width:100%;max-width:380px;margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="font-size:22px;flex-shrink:0;margin-top:2px;">⏳</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#1A1A1A;margin-bottom:4px;">En revisión</div>
+          <div style="font-size:13px;color:#555;line-height:1.6;">El equipo de PuenT va a revisar tu comercio y te va a contactar en las próximas <strong>48hs</strong> para activarlo y contarte cómo sacarle el máximo provecho.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 30 días gratis -->
+    <div style="background:#F0F7F2;border:1.5px solid #A8D5B5;border-radius:18px;padding:20px;width:100%;max-width:380px;margin-bottom:24px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="font-size:22px;flex-shrink:0;margin-top:2px;">🎁</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#1A1A1A;margin-bottom:4px;">30 días gratis, sin compromiso</div>
+          <div style="font-size:13px;color:#555;line-height:1.6;">Una vez activado, tenés un mes completo para probar PuenT sin ningún costo. Sin tarjeta, sin contrato. Si no te convence, nos avisás y listo.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón para ver el panel igual -->
+    <button onclick="showScreen('c-panel');renderComercioPanel();updateBottomNav('c-panel');" style="width:100%;max-width:380px;padding:15px;border-radius:14px;background:#FF6600;color:white;font-weight:800;font-size:15px;border:none;cursor:pointer;margin-bottom:12px;">
+      Ver mi panel
+    </button>
+    <div style="font-size:12px;color:#AAA;text-align:center;max-width:300px;line-height:1.5;">
+      Podés cargar tus productos ahora. Van a aparecer publicados una vez que activemos tu comercio.
+    </div>
+
+  </div>
+
+  <!-- ============ COMERCIO: PANEL ============ -->
+  <div class="screen hidden" id="screen-c-panel">
+
+    <div class="kicker">Panel de comercio</div>
+    <h1 class="page-title"><span id="cNombre">Tu comercio</span></h1>
+
+    <!-- Banner revisión pendiente (solo visible si aprobado === false) -->
+    <div id="cRevisionBanner" style="display:none;margin:0 0 12px;background:#FFF3E8;border:1.5px solid #FFD9B0;border-radius:14px;padding:14px 16px;cursor:pointer;" onclick="showScreen('c-en-revision')">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">⏳</span>
+        <div>
+          <div style="font-weight:800;font-size:13px;color:#CC4400;">Tu comercio está en revisión</div>
+          <div style="font-size:12px;color:#885522;margin-top:1px;">Te contactamos en 48hs para activarlo · 30 días gratis incluidos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Esta card queda fija arriba, no se mezcla con el resto -->
+    <div id="publicidadBox"></div>
+
+    <!-- De acá para abajo, todo el panel es una pila de cards -->
+    <div id="cAlertasBox"></div>
+
+    <div class="p-grid">
+
+      <button class="p-card" style="background:#fff0f0;color:#c23b3b;" onclick="confirmarCierreSesion()">
+        <i class="ti ti-logout p-card-ic"></i>
+        <div class="p-card-title">Cerrar sesión</div>
+      </button>
+
+      <button class="p-card" style="background:#F5F5F5;color:#444;" onclick="abrirEditarComercio()">
+        <i class="ti ti-edit p-card-ic"></i>
+        <div class="p-card-title">Editar info</div>
+      </button>
+
+      <button class="p-card" style="background:#FFF0E8;color:#CC4400;" onclick="irNuevoProductoComercioSeguro()">
+        <i class="ti ti-plus p-card-ic"></i>
+        <div class="p-card-title">Cargar producto</div>
+      </button>
+
+      <button class="p-card" style="background:#E8F5E9;color:#2E7D32;" onclick="showScreen('c-productos');renderProductosPropios('cProductosPropiosPage');">
+        <i class="ti ti-package p-card-ic"></i>
+        <div class="p-card-title">Productos</div>
+      </button>
+
+      <button class="p-card" style="background:#FFF8E1;color:#E65100;" onclick="mostrarMiQR('comercio')">
+        <i class="ti ti-qrcode p-card-ic"></i>
+        <div class="p-card-title">Mi código QR</div>
+      </button>
+
+      <button class="p-card hidden" id="btnMenuDia" style="background:#F3E8FF;color:#6A1B9A;" onclick="abrirMenuDia()">
+        <i class="ti ti-clipboard-list p-card-ic"></i>
+        <div class="p-card-title">Menú del día</div>
+      </button>
+
+      <button class="p-card" style="background:#FFF8E1;color:#8A6400;position:relative;" onclick="renderCOperaciones();showScreen('c-operaciones')">
+        <i class="ti ti-coin p-card-ic"></i>
+        <div class="p-card-title">Comisiones</div>
+        <span id="badgeComisionesPendientes" style="display:none;position:absolute;top:8px;right:8px;background:#E05A5A;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;"></span>
+      </button>
+
+      <button class="p-card" style="background:#E0F2F1;color:#00695C;position:relative;" id="btnOperacionesComercio" onclick="renderCOperaciones();showScreen('c-operaciones');limpiarBadgeContactos()">
+        <i class="ti ti-list-check p-card-ic"></i>
+        <div class="p-card-title">Operaciones</div>
+        <span id="badgeContactosDirect" style="display:none;position:absolute;top:8px;right:8px;background:#E05A5A;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;"></span>
+      </button>
+
+      <button class="p-card" style="background:#EAF0FB;color:#3A5FA0;" onclick="renderCPedidosEnvio();showScreen('c-pedidos-envio')">
+        <i class="ti ti-truck p-card-ic"></i>
+        <div class="p-card-title">Pedidos de envío</div>
+      </button>
+
+      <button class="p-card" style="background:#E8F5E9;color:#2E7D32;position:relative;" onclick="renderCActividadConector();renderCVendedores();showScreen('c-conector')">
+        <i class="ti ti-users p-card-ic"></i>
+        <div class="p-card-title">ConectorT</div>
+        <span id="badgeActividadConector" style="display:none;position:absolute;top:8px;right:8px;background:#E05A5A;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;"></span>
+      </button>
+
+      <button class="p-card" style="background:#FBF7EF;color:#5C4A1E;" onclick="renderCHistorial();showScreen('c-historial')">
+        <i class="ti ti-history p-card-ic"></i>
+        <div class="p-card-title">Historial</div>
+      </button>
+
+      <div class="p-card" style="background:#F5F5F5;color:#333;cursor:default;grid-column:1/-1;flex-direction:row;gap:12px;align-items:center;">
+        <i class="ti ti-scan" style="font-size:22px;flex-shrink:0;"></i>
+        <div style="flex:1;">
+          <div class="p-card-title" style="font-size:13px;">Verificar código</div>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <input id="scanCodigo" placeholder="Ej: EP-1042" style="text-transform:uppercase;flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #ddd;font-size:13px;font-weight:600;">
+            <button class="btn btn-primary" style="padding:10px 14px;font-size:13px;" onclick="escanearCodigo()">OK</button>
+            <button class="btn btn-ghost" style="padding:10px 12px;" onclick="escanearCodigoConCamara()"><i class="ti ti-camera" style="font-size:16px;"></i></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
     <div id="cBajaSolicitadaBox"></div>
-    <div style="height:16px;"></div>
+    <div id="cPlanBox"></div>
+    <div style="height:24px;"></div>
+  </div>
+
+  <!-- ============ COMERCIO: PANTALLA CONECTORT ============ -->
+  <div class="screen hidden" id="screen-c-conector">
+    <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
+    <div class="kicker">Panel de comercio</div>
+    <h1 class="page-title">ConectorT</h1>
+    <div id="cConectorToggleBox" style="margin-bottom:12px;"></div>
+    <div id="cActividadConectorBox" style="margin-bottom:8px;"></div>
+    <div id="cVendedoresList"></div>
+    <div style="height:24px;"></div>
+  </div>
+
+  <!-- ============ COMERCIO: PANTALLA HISTORIAL ============ -->
+  <div class="screen hidden" id="screen-c-historial">
+    <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
+    <div class="kicker">Panel de comercio</div>
+    <h1 class="page-title">Historial de ventas</h1>
+    <div id="cHistorial"></div>
+    <div style="height:24px;"></div>
   </div>
 
   <!-- ============ COMERCIO: MENÚ DEL DÍA ============ -->
@@ -2371,7 +2618,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-coral" onclick="showScreen('admin-clientes');adminCargarClientes()"><i class="ti ti-user ic"></i>Clientes</button>
         <button class="btn-tile btn-tile-gold" onclick="showScreen('admin-ventas');adminCargarVentas()"><i class="ti ti-receipt ic"></i>Ventas</button>
         <button class="btn-tile btn-tile-rose" onclick="showScreen('admin-mensajes');adminCargarMensajesEnviados()"><i class="ti ti-message-2 ic"></i>Mensajes</button>
-        <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-repartidores');adminCargarRepartidores()"><i class="ti ti-bike ic"></i>Repartidores</button>
+        <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-repartidores');adminCargarRepartidores();adminCargarEnviosPendientes()"><i class="ti ti-bike ic"></i>Repartidores</button>
         <button class="btn-tile btn-tile-neutral" onclick="adminReGeocodificarTodo()"><i class="ti ti-map-pin ic"></i>Re-geocodificar mapa</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio');setTimeout(()=>crearMapaPick('adMapaPickMobile', adminNuevoComLatLng?.lat, adminNuevoComLatLng?.lng, (lat,lng)=>{adminNuevoComLatLng={lat,lng};const est=document.getElementById('adUbicacionEstadoMobile');if(est)est.textContent='✅ Ubicación marcada correctamente.';}),50)"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
@@ -2789,6 +3036,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="btn btn-ghost btn-sm" onclick="adminFiltroRep('suspendido')" id="repFiltroSuspendido" style="flex:1;">Suspendidos</button>
     </div>
     <div id="adminRepList"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
+
+    <!-- Envíos pendientes de TODOS los comercios — va después del detalle de
+         cada repartidor para que, cuando haya varios, se vea claro qué tiene
+         pendiente cada uno antes de mirar la lista general -->
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 8px;">📦 Envíos pendientes</div>
+    <div id="adminEnviosPendientesList" style="margin-bottom:18px;"><p style="color:var(--muted);font-size:13px;">Cargando…</p></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN REPARTIDOR DETALLE ============ -->
@@ -3079,35 +3332,55 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     });
   }
 
-  // Probamos primero el CDN oficial de Google (gstatic). Si por lo que sea falla
-  // (bloqueo de red, adblocker, DNS, etc.) probamos con el mirror de jsDelivr antes de rendirnos.
+  // Carga Firebase desde gstatic (oficial). Si falla, intenta jsDelivr.
+  // Los archivos compat de jsDelivr están bajo /firebase-compat/ en v10+
   async function cargarFirebaseConFallback(){
-    const FIREBASE_VERSION = '10.13.2';
-    const cdns = [
-      (lib) => `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-${lib}-compat.js`,
-      (lib) => `https://cdn.jsdelivr.net/npm/firebase@${FIREBASE_VERSION}/firebase-${lib}-compat.js`,
+    const VER = '10.13.2';
+    const intentos = [
+      {
+        nombre: 'gstatic.com',
+        urls: [
+          `https://www.gstatic.com/firebasejs/${VER}/firebase-app-compat.js`,
+          `https://www.gstatic.com/firebasejs/${VER}/firebase-auth-compat.js`,
+          `https://www.gstatic.com/firebasejs/${VER}/firebase-firestore-compat.js`,
+        ]
+      },
+      {
+        nombre: 'jsDelivr (fallback)',
+        urls: [
+          `https://cdn.jsdelivr.net/npm/firebase@${VER}/firebase-app-compat.js`,
+          `https://cdn.jsdelivr.net/npm/firebase@${VER}/firebase-auth-compat.js`,
+          `https://cdn.jsdelivr.net/npm/firebase@${VER}/firebase-firestore-compat.js`,
+        ]
+      }
     ];
-    const libs = ['app', 'auth', 'firestore'];
 
-    for(let i=0; i<cdns.length; i++){
+    for(const intento of intentos){
       try{
-        for(const lib of libs){
-          await cargarScript(cdns[i](lib));
+        // Si firebase ya quedó definido de un intento parcial anterior, no recargar
+        if(typeof firebase === 'undefined'){
+          for(const url of intento.urls) await cargarScript(url);
         }
-        if(typeof firebase === 'undefined') throw new Error('firebase global no quedó definido tras cargar los scripts.');
-        firebase.initializeApp(firebaseConfig);
+        if(typeof firebase === 'undefined') throw new Error('firebase global no disponible');
+        // Inicializar solo si no fue inicializado antes
+        if(!firebase.apps || firebase.apps.length === 0){
+          firebase.initializeApp(firebaseConfig);
+        }
         firebaseAuth = firebase.auth();
         db = firebase.firestore();
+        // autoDetectLongPolling ayuda cuando Tracking Prevention bloquea WebSockets
+        try{ db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); }catch(e){}
         firebaseListo = true;
-        console.log(i===0 ? 'Firebase cargado desde gstatic.com' : 'Firebase cargado desde jsDelivr (fallback)');
+        console.log('Firebase cargado desde', intento.nombre);
         if(typeof _tryHideSplash === 'function') _tryHideSplash();
         if(typeof onFirebaseReady === 'function') onFirebaseReady();
         return;
       }catch(e){
-        console.error(`Falló la carga de Firebase desde ${i===0?'gstatic':'jsDelivr'}:`, e);
+        console.error(`Falló Firebase desde ${intento.nombre}:`, e.message);
       }
     }
-    console.error('Firebase no se pudo inicializar por ningún CDN. La app sigue funcionando sin login real.');
+    // Ningún CDN funcionó — app sin login
+    console.error('Firebase no se pudo inicializar. App en modo sin conexión.');
     if(typeof _tryHideSplash === 'function') _tryHideSplash();
   }
   cargarFirebaseConFallback();
@@ -3866,6 +4139,131 @@ function loginConGoogle(){
   });
 }
 
+// ── FACEBOOK LOGIN ──
+function loginConFacebook(){
+  if(!firebaseListo){ toast('No pudimos conectar ahora mismo. Revisá tu conexión.'); return; }
+  loginIniciadoPorUsuario = true;
+  rolPreElegido = 'cliente';
+  try{ localStorage.setItem('puente_rolPreElegido', 'cliente'); }catch(e){}
+  const provider = new firebase.auth.FacebookAuthProvider();
+  provider.addScope('public_profile');
+  const esMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(esMobile){
+    firebaseAuth.signInWithPopup(provider).then(result=>{
+      if(!result) return;
+      manejarUsuarioFacebook(result.user);
+    }).catch(err=>{
+      if(err.code==='auth/popup-closed-by-user') return;
+      firebaseAuth.signInWithRedirect(provider);
+    });
+  } else {
+    firebaseAuth.signInWithPopup(provider).then(result=>{
+      manejarUsuarioFacebook(result.user);
+    }).catch(err=>{
+      if(err.code==='auth/popup-closed-by-user') return;
+      toast('No pudimos completar el login con Facebook, probá de nuevo.');
+      console.error('Error FB login:', err);
+    });
+  }
+}
+
+async function manejarUsuarioFacebook(user){
+  if(state.currentUser && state.currentUser.uid === user.uid) return;
+  if(esAdmin(user)){ entrarComoAdmin(user); return; }
+  // Buscar cuenta existente
+  try{
+    for(const rol of Object.keys(COL_POR_ROL)){
+      const doc = await db.collection(COL_POR_ROL[rol]).doc(user.uid).get();
+      if(doc.exists){ rolPreElegido=null; entrarConDatosGuardados(rol, doc.data()); return; }
+    }
+  }catch(e){ console.error('Error buscando cuenta FB:', e); }
+  // Cuenta nueva — crear como cliente y disparar share
+  const nombre = user.displayName || 'Cliente';
+  const email  = user.email || '';
+  const c = { id: nextId('u'), uid: user.uid, nombre, email, foto:'🙋', ciudad:'La Paz', favoritos:[], historial:[], viaFacebook:true };
+  state.clientes = state.clientes||[];
+  state.clientes.push(c);
+  state.currentUser = c; state.role = 'cliente';
+  setRoleChip('🙋 Cliente', false);
+  guardarPerfilEnFirestore('clientes', c);
+  rolPreElegido = null;
+  showScreen('feed'); updateBottomNav('feed'); updateTopbarUser();
+  toast('¡Bienvenido/a a PuenT, '+nombre.split(' ')[0]+'! 🎉');
+  setTimeout(()=>{ compartirEnFacebook(); }, 1500);
+}
+
+function compartirEnFacebook(){
+  const texto = encodeURIComponent('¡Me sumé a PuenT, el marketplace de La Paz! 🛍️ Mirá las ofertas y productos de comercios locales.');
+  const url = 'https://www.facebook.com/sharer/sharer.php?u=https://puent.com.ar&quote='+texto;
+  window.open(url, '_blank', 'width=600,height=400,noopener');
+}
+
+// ── EMAIL / CONTRASEÑA ──
+function togglePassVisibility(inputId, btn){
+  const inp = document.getElementById(inputId);
+  if(!inp) return;
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  btn.textContent = inp.type==='password' ? '👁' : '🙈';
+}
+
+async function loginConEmail(){
+  const email = document.getElementById('loginClienteEmail')?.value.trim();
+  const pass  = document.getElementById('loginClientePass')?.value;
+  if(!email || !pass){ toast('Completá el correo y la contraseña.'); return; }
+  if(!firebaseListo){ toast('Sin conexión. Intentá de nuevo.'); return; }
+  loginIniciadoPorUsuario = true;
+  try{
+    const result = await firebaseAuth.signInWithEmailAndPassword(email, pass);
+    manejarUsuarioGoogle(result.user);
+  }catch(err){
+    if(err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential'){
+      toast('Correo o contraseña incorrectos.');
+    } else {
+      toast('No pudimos iniciar sesión. Probá de nuevo.'); console.error(err);
+    }
+  }
+}
+
+async function registrarConEmail(){
+  const nombre = document.getElementById('regEmailNombre')?.value.trim();
+  const email  = document.getElementById('regEmailEmail')?.value.trim();
+  const pass   = document.getElementById('regEmailPass')?.value;
+  if(!nombre){ toast('Ingresá tu nombre.'); return; }
+  if(!email){ toast('Ingresá tu correo.'); return; }
+  if(!pass||pass.length<6){ toast('La contraseña debe tener al menos 6 caracteres.'); return; }
+  if(!firebaseListo){ toast('Sin conexión. Intentá de nuevo.'); return; }
+  try{
+    const result = await firebaseAuth.createUserWithEmailAndPassword(email, pass);
+    const user = result.user;
+    const c = { id: nextId('u'), uid: user.uid, nombre, email, foto:'🙋', ciudad:'La Paz', favoritos:[], historial:[], viaEmail:true };
+    state.clientes = state.clientes||[];
+    state.clientes.push(c);
+    state.currentUser = c; state.role = 'cliente';
+    setRoleChip('🙋 Cliente', false);
+    guardarPerfilEnFirestore('clientes', c);
+    rolPreElegido = null;
+    showScreen('feed'); updateBottomNav('feed'); updateTopbarUser();
+    toast('¡Bienvenido/a a PuenT, '+nombre.split(' ')[0]+'! 🎉');
+  }catch(err){
+    if(err.code==='auth/email-already-in-use'){
+      toast('Ese correo ya tiene una cuenta. Iniciá sesión.'); showScreen('screen-login-cliente');
+    } else {
+      toast('No pudimos crear tu cuenta. Intentá de nuevo.'); console.error(err);
+    }
+  }
+}
+
+async function recuperarContrasena(){
+  const email = document.getElementById('loginClienteEmail')?.value.trim();
+  if(!email){ toast('Ingresá tu correo arriba para recuperar la contraseña.'); return; }
+  try{
+    await firebaseAuth.sendPasswordResetEmail(email);
+    toast('Te enviamos un correo para restablecer tu contraseña. ✉️');
+  }catch(err){
+    toast('No pudimos enviar el correo. Verificá que sea correcto.');
+  }
+}
+
 // Busca si ese UID ya tiene cuenta guardada en Firestore (en cualquiera de los 3 roles).
 // Si existe, entra directo a SU panel real (sin importar qué botón tocó esta vez).
 // Si es cuenta nueva: si ya había elegido un rol en la pantalla de inicio, la crea directo con ese rol;
@@ -3915,8 +4313,12 @@ async function manejarUsuarioGoogle(user){
         snapProds.forEach(pd=>{ batch.update(pd.ref, {ownerUid: user.uid}); });
         if(!snapProds.empty) await batch.commit();
         // 3. Actualizar state local
-        const idx = state.comercios.findIndex(x=>x.id===(c.id||docId) || x._docId===docId);
-        if(idx>=0) state.comercios[idx] = datosVinculados; else state.comercios.push(datosVinculados);
+        const idxAC = state.comercios.findIndex(x=>
+          (datosVinculados.id    && x.id    === datosVinculados.id)    ||
+          (datosVinculados._docId && x._docId === datosVinculados._docId) ||
+          (datosVinculados.uid   && x.uid   === datosVinculados.uid)
+        );
+        if(idxAC>=0) state.comercios[idxAC] = datosVinculados; else state.comercios.push(datosVinculados);
         rolPreElegido = null;
         toast('¡Tu comercio fue vinculado a esta cuenta! 🏬');
         entrarConDatosGuardados('comercio', datosVinculados);
@@ -3995,10 +4397,12 @@ function crearCuentaDesdeGoogle(rol, user){
     // Extraer respuestas específicas (todo lo que no sea nombre/rubro/tipo)
     const extras = {};
     if(wd){ Object.keys(wd).forEach(k=>{ if(!['nombre','rubro','tipo'].includes(k)) extras[k]=wd[k]; }); }
+    const _graciaGoogle = new Date(); _graciaGoogle.setDate(_graciaGoogle.getDate() + 30);
     data = {id: nextId('c'), uid:user.uid, nombre:nombreComercio, email, ciudad:'La Paz',
             rubro:rubroComercio, tipo:tipoComercio, ...extras,
             viaGoogle:true, adheridos:[], img: (foto.startsWith('http') ? foto : null),
-            publicidadActiva:true, publicidadVence:diasAtras(-30)};
+            publicidadActiva:true, publicidadVence:diasAtras(-30),
+            aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true};
     data.qrPersonal = 'CQR-' + data.id.split('-')[1].padStart(4,'0');
     wizardData = {}; // limpiar
   } else {
@@ -4063,7 +4467,11 @@ function entrarConDatosGuardados(rol, data){
       data.publicidadVence = diasAtras(-30);
       guardarPerfilEnFirestore('comercios', data);
     }
-    const idx = state.comercios.findIndex(x=>x.uid===data.uid);
+    const idx = state.comercios.findIndex(x=>
+      (data.id    && x.id    === data.id)    ||
+      (data._docId && x._docId === data._docId) ||
+      (data.uid   && x.uid   === data.uid)
+    );
     if(idx>=0) state.comercios[idx] = data; else state.comercios.push(data);
     state.currentUser = data; state.role='comercio';
     setRoleChip('🏬 Comercio', false);
@@ -4077,8 +4485,16 @@ function entrarConDatosGuardados(rol, data){
     cargarVendedoresParaComercio();
     iniciarListenerVentasComercio(data.id || data.uid);
     if(window._codigoPendienteDesdeURL) procesarCodigoPendienteDesdeURL();
-    if(loginIniciadoPorUsuario) toast('¡Bienvenido de nuevo!');
-    showScreen('c-panel'); updateBottomNav('c-panel'); updateTopbarUser();
+    if(loginIniciadoPorUsuario && data.aprobado) toast('¡Bienvenido de nuevo!');
+    // Corregir ventas que quedaron con comercioUid null (cargadas antes del primer login)
+    migrarComercioUidEnVentas();
+    // Cargar selecciones del catálogo de los conectores para este comercio
+    cargarCatalogoDeConectoresParaComercio(data.id || data._docId);
+    if(data.aprobado === false){
+      showScreen('c-en-revision'); updateBottomNav('c-panel'); updateTopbarUser();
+    } else {
+      showScreen('c-panel'); updateBottomNav('c-panel'); updateTopbarUser();
+    }
   } else {
     const idx = state.clientes.findIndex(x=>x.uid===data.uid);
     if(idx>=0) state.clientes[idx] = data; else state.clientes.push(data);
@@ -4168,12 +4584,14 @@ async function cargarDatosPublicosDeFirestore(){
   if(comerciosR.status==='fulfilled'){
     comerciosR.value.forEach(doc=>{
       const data = doc.data();
-      if(data.estado === 'papelera') return; // ignorar papelera
-      // Garantizar id y _docId siempre presentes para que los .find(x=>x.id===...) funcionen
+      if(data.estado === 'papelera') return;
       const c = {...data, id: data.id || doc.id, _docId: doc.id};
-      const idxExiste = c.uid
-        ? state.comercios.findIndex(x=>x.uid===c.uid)
-        : state.comercios.findIndex(x=>x.id===c.id);
+      // Buscar duplicado por cualquiera de los tres identificadores posibles
+      const idxExiste = state.comercios.findIndex(x=>
+        (c.id    && x.id    === c.id)    ||
+        (c._docId && x._docId === c._docId) ||
+        (c.uid   && x.uid   === c.uid)
+      );
       if(idxExiste>=0) state.comercios[idxExiste] = c;
       else state.comercios.push(c);
     });
@@ -4194,6 +4612,16 @@ async function cargarDatosPublicosDeFirestore(){
       if(!state.valoraciones.some(x=>x.id===v.id)) state.valoraciones.push(v);
     });
   } else console.error('No se pudieron cargar las valoraciones de Firestore:', valoracionesR.reason);
+
+  // Deduplicar state.comercios por si algún flujo de carga empujó el mismo doc dos veces
+  const _seenC = new Set();
+  state.comercios = state.comercios.filter(c=>{
+    const key = c._docId || c.id || c.uid;
+    if(!key || _seenC.has(key)) return false;
+    _seenC.add(key);
+    return true;
+  });
+
   renderFeed();
   renderFeedVendedores();
   renderExploraCiudad();
@@ -4201,6 +4629,9 @@ async function cargarDatosPublicosDeFirestore(){
   migrarCategorias();
   migrarConectorActivo();
   migrarIdFaltanteEnComercios();
+  // Geocodificar comercios sin coordenadas en cuanto carguen los datos,
+  // sin esperar a que el usuario abra el mapa
+  geocodearComerciosPendientes();
 }
 
 // Corrige comercios que fueron cargados por el admin sin el campo `id` dentro del documento.
@@ -4227,9 +4658,38 @@ async function migrarIdFaltanteEnComercios(){
 
 // Antes el checkbox "Activar ConectorT" era decorativo: un comercio con productos
 // con comisión funcionaba con ConectorT aunque nunca lo hubiera tildado. Ahora que
-// bloquea de verdad, esta migración prende el interruptor una sola vez para los
-// comercios que ya tenían productos con comisión cargados, así no pierden lo que
-// ya tenían funcionando. De acá en adelante, un comercio nuevo sí tiene que activarlo.
+// bloquea de verdad, esta migración prende el interruptor UNA SOLA VEZ para los
+// comercios que ya tenían productos con comisión y nunca tuvieron el campo seteado.
+// Si el admin lo desactivó explícitamente (conectorActivo === false), se respeta.
+// Corrige ventas que tienen comercioUid null o vacío usando el uid actual del comercio.
+// Solo corre cuando el comercio está logueado y tiene uid.
+async function migrarComercioUidEnVentas(){
+  if(!firebaseListo || !db) return;
+  const miUid = state.currentUser?.uid;
+  const miId  = state.currentUser?.id || state.currentUser?._docId;
+  if(!miUid || !miId) return;
+  try{
+    // Buscar ventas con este comercioId pero sin comercioUid (o con uid incorrecto)
+    const snap = await db.collection('ventas').where('comercioId','==', miId).get({ source: 'server' });
+    const batch = db.batch();
+    let count = 0;
+    snap.docs.forEach(doc=>{
+      const v = doc.data();
+      if(!v.comercioUid || v.comercioUid !== miUid){
+        batch.update(doc.ref, { comercioUid: miUid });
+        count++;
+        // Actualizar state local también
+        const idx = (state.ventas||[]).findIndex(x=>x.id===doc.id);
+        if(idx>=0) state.ventas[idx].comercioUid = miUid;
+      }
+    });
+    if(count > 0){
+      await batch.commit();
+      console.log(`Migradas ${count} ventas con comercioUid correcto`);
+    }
+  }catch(e){ console.warn('migrarComercioUidEnVentas:', e); }
+}
+
 async function migrarConectorActivo(){
   if(!firebaseListo || !db) return;
   try{
@@ -4240,7 +4700,9 @@ async function migrarConectorActivo(){
     let count = 0;
     snap.docs.forEach(doc=>{
       const c = doc.data();
-      if(idsConComision.has(doc.id) && c.conectorActivo!==true){
+      // Solo migrar si el campo nunca fue seteado (undefined).
+      // Si vale false, el admin lo desactivó a propósito → no tocar.
+      if(idsConComision.has(doc.id) && c.conectorActivo === undefined){
         batch.update(doc.ref, {conectorActivo: true});
         count++;
         const idxEnMemoria = state.comercios.findIndex(x=>x.id===doc.id);
@@ -4273,32 +4735,7 @@ function logoutFirebase(){
 let pendingRole = null;
 let registroLatLng = null;
 let adminNuevoComLatLng = null;
-function togglePlanUI(tipo){
-  const fijoLabel = document.getElementById('rPlanFijoLabel');
-  const comLabel  = document.getElementById('rPlanComLabel');
-  const fijoOpts  = document.getElementById('rPlanFijoOpts');
-  const comOpts   = document.getElementById('rPlanComOpts');
-  if(!fijoLabel) return;
-  const olive = 'var(--olive,#5C7355)';
-  const line  = 'var(--line)';
-  if(tipo === 'fijo'){
-    fijoLabel.style.borderColor = olive;
-    fijoLabel.style.background  = 'rgba(92,115,85,0.07)';
-    comLabel.style.borderColor  = line;
-    comLabel.style.background   = '';
-    fijoOpts.style.display = '';
-    comOpts.style.display  = 'none';
-    document.querySelector('input[name="rPlanTipo"][value="fijo"]').checked = true;
-  } else {
-    comLabel.style.borderColor  = olive;
-    comLabel.style.background   = 'rgba(92,115,85,0.07)';
-    fijoLabel.style.borderColor = line;
-    fijoLabel.style.background  = '';
-    comOpts.style.display  = '';
-    fijoOpts.style.display = 'none';
-    document.querySelector('input[name="rPlanTipo"][value="comision"]').checked = true;
-  }
-}
+function togglePlanUI(tipo){ /* eliminado — planes se definen post-aprobación */ }
 
 // Mini-mapa con pin arrastrable para marcar la ubicación EXACTA de un comercio
 // a mano — más confiable que la geocodificación automática por dirección,
@@ -4422,198 +4859,6 @@ function goRegister(role){
           <label style="font-weight:500; font-size:12.5px; color:var(--muted);" for="rTyc">Acepto los Términos y Condiciones y el tratamiento de mis datos.</label>
         </div>
       </div>`;
-  } else if(role==='comercio'){
-    kick.textContent='Registro de comercio';
-    title.textContent='Datos del comercio';
-    sub.textContent='Vos facturás como siempre. Completá los datos del local para que tus clientes y ConectorT confíen en vos.';
-    fields.innerHTML = `
-      <div class="card">
-
-        <div class="field">
-          <label>Logo o foto del comercio</label>
-          <div class="logo-upload-row">
-            <div class="logo-upload" id="rLogoFotoBox">
-              <div id="rLogoFotoPreview" class="logo-upload-empty"><div class="ic">📷</div></div>
-            </div>
-            <div class="logo-upload-info">
-              <div class="t">Subí el logo o una foto del local</div>
-              <div class="btn-block-row" style="margin:4px 0;">
-                <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('rLogoFotoInputCam').click()">📷 Foto</button>
-                <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('rLogoFotoInputGal').click()">🖼️ Galería</button>
-              </div>
-              <input type="file" id="rLogoFotoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this, 'rLogo')">
-              <input type="file" id="rLogoFotoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this, 'rLogo')">
-              <div class="foto-upload-estado" id="rLogoFotoEstado" style="margin-bottom:0;">Opcional, pero recomendado — aparece en tu ficha y en los productos.</div>
-            </div>
-          </div>
-        </div>
-
-        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:4px 0 10px;">📋 Identificación</div>
-        <div class="field"><label>Nombre del comercio <span style="color:#e05a5a;">*</span></label><input id="rNombre" placeholder="Ej: Ferretería Don Aldo"></div>
-        <div class="field"><label>Descripción breve</label><textarea id="rDescripcion" rows="2" placeholder="Contá brevemente qué ofrecés, tu especialidad o lo que te diferencia." style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;font-size:13.5px;resize:none;font-family:inherit;"></textarea></div>
-        <div class="field"><label>Razón social / Titular</label><input id="rRazonSocial" placeholder="Nombre del titular o razón social"></div>
-        <div class="field"><label>CUIT</label><input id="rCuit" inputmode="numeric" placeholder="Sin guiones — Ej: 20123456789"></div>
-
-        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">📍 Ubicación</div>
-        <div class="field"><label>Dirección del local <span style="color:#e05a5a;">*</span></label><input id="rDireccion" placeholder="Calle, número y ciudad"></div>
-        <div class="field">
-          <label>Ubicación exacta (para "Cómo llegar")</label>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="marcarUbicacion()" style="margin-bottom:8px;">📍 Usar mi ubicación actual</button>
-          <div id="registroMapaPick" style="height:220px;border-radius:12px;border:1.5px solid var(--line);overflow:hidden;"></div>
-          <div id="ubicacionEstado" style="font-size:12px;color:var(--muted);margin-top:6px;">Tocá el mapa o arrastrá el pin para marcar el local con precisión.</div>
-        </div>
-        <div class="two-col">
-          <div class="field"><label>Ciudad</label><input id="rCiudad" placeholder="Ej: La Paz" value="La Paz"></div>
-          <div class="field"><label>Rubro <span style="color:#e05a5a;">*</span></label><select id="rRubro" onchange="onRubroChange('rRubro','rTipo','rTipoField')"></select></div>
-        </div>
-        <div class="field" id="rTipoField" style="display:none;">
-          <label>Tipo de negocio <span style="color:#e05a5a;">*</span></label>
-          <select id="rTipo"></select>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:5px;">Elegí el tipo que mejor describe tu comercio — así los clientes te encuentran más fácil.</div>
-        </div>
-
-        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">📞 Contacto</div>
-        <div class="two-col">
-          <div class="field"><label>Teléfono del local</label><input id="rTelefono" type="tel" placeholder="Fijo o celular"></div>
-          <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="rWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:10px;">📲 El WhatsApp es obligatorio — los clientes envían sus pedidos ahí.</div>
-        <div class="field">
-          <label>Correo electrónico <span style="color:#e05a5a;">*</span></label>
-          <input id="rEmail" type="email" placeholder="local@ejemplo.com" onblur="verificarEmailComercioExistente(this.value)">
-          <div id="rEmailEstado" style="font-size:12px;margin-top:5px;display:none;"></div>
-        </div>
-        <div class="two-col">
-          <div class="field"><label>Instagram</label><input id="rInstagram" type="text" placeholder="@milocal"></div>
-          <div class="field"><label>Facebook</label><input id="rFacebook" type="text" placeholder="facebook.com/milocal"></div>
-        </div>
-
-        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">🕐 Horarios</div>
-        <div class="field">
-          <label>Días de atención</label>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
-            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Lun" style="width:auto;" checked> Lun</label>
-            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Mar" style="width:auto;" checked> Mar</label>
-            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Mié" style="width:auto;" checked> Mié</label>
-            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Jue" style="width:auto;" checked> Jue</label>
-            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Vie" style="width:auto;" checked> Vie</label>
-            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Sáb" style="width:auto;"> Sáb</label>
-            <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rDias" value="Dom" style="width:auto;"> Dom</label>
-          </div>
-        </div>
-        <div class="field">
-          <label>Turno mañana</label>
-          <div class="two-col">
-            <input id="rTurnoManDesde" type="time" value="08:00">
-            <input id="rTurnoManHasta" type="time" value="12:00">
-          </div>
-        </div>
-        <div class="field">
-          <label>Turno tarde <span style="font-weight:400;color:var(--muted);">(vacío si trabajás corrido o no abrís a la tarde)</span></label>
-          <div class="two-col">
-            <input id="rTurnoTarDesde" type="time" value="17:00">
-            <input id="rTurnoTarHasta" type="time" value="21:00">
-          </div>
-        </div>
-
-        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">💳 Métodos de pago</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
-          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="efectivo" style="width:auto;" checked> 💵 Efectivo</label>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="transferencia" style="width:auto;" checked> 🏦 Transferencia</label>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="debito" style="width:auto;"> 💳 Débito</label>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="credito" style="width:auto;"> 💳 Crédito</label>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="mercadopago" style="width:auto;"> 📲 MercadoPago</label>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;"><input type="checkbox" name="rPagos" value="qr" style="width:auto;"> 📷 QR / MODO</label>
-        </div>
-
-        <!-- PLAN -->
-        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 10px;">🏷️ Plan de suscripción</div>
-        <div style="background:var(--cream,#FBF7EF);border-radius:13px;padding:13px 14px;margin-bottom:6px;font-size:12.5px;color:var(--muted);line-height:1.5;">
-          Tus primeros <strong>20 días son gratis, con todo activo</strong>. Después elegís cómo seguir. Podés cambiar de plan en cualquier momento hablando con nosotros.
-        </div>
-
-        <!-- Selector tipo de plan -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-          <label id="rPlanFijoLabel" onclick="togglePlanUI('fijo')" style="cursor:pointer;border:2px solid var(--olive,#5C7355);border-radius:12px;padding:12px 10px;display:flex;flex-direction:column;gap:3px;background:rgba(92,115,85,0.07);">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <input type="radio" name="rPlanTipo" value="fijo" checked style="width:auto;accent-color:var(--olive,#5C7355);">
-              <span style="font-weight:800;font-size:13px;">Pago fijo</span>
-            </div>
-            <div style="font-size:11.5px;color:var(--muted);margin-left:20px;">Monto fijo por mes, sin importar cuánto vendés.</div>
-          </label>
-          <label id="rPlanComLabel" onclick="togglePlanUI('comision')" style="cursor:pointer;border:2px solid var(--line);border-radius:12px;padding:12px 10px;display:flex;flex-direction:column;gap:3px;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <input type="radio" name="rPlanTipo" value="comision" style="width:auto;accent-color:var(--olive,#5C7355);">
-              <span style="font-weight:800;font-size:13px;">Por comisión</span>
-            </div>
-            <div style="font-size:11.5px;color:var(--muted);margin-left:20px;">Pagás un % de lo vendido por mes. Si no vendés, no pagás.</div>
-          </label>
-        </div>
-
-        <!-- Opciones plan fijo -->
-        <div id="rPlanFijoOpts" style="margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:7px;">Elegí tu monto mensual:</div>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <label style="display:flex;align-items:center;gap:8px;padding:10px 13px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;">
-              <input type="radio" name="rPlanFijoMonto" value="20000" checked style="width:auto;accent-color:var(--olive,#5C7355);"> $20.000 / mes
-              <span style="margin-left:auto;font-size:11px;font-weight:500;color:var(--muted);">Acceso completo</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Opciones plan comisión -->
-        <div id="rPlanComOpts" style="display:none;margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:7px;">Elegí tu porcentaje de comisión:</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-            ${[['3','Ideal para arrancar'],['5','El más elegido'],['7','Mayor alcance'],['10','Máxima exposición']].map(([v,desc],i)=>`
-            <label style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <input type="radio" name="rPlanComPct" value="${v}" ${i===1?'checked':''} style="width:auto;accent-color:var(--olive,#5C7355);">
-                <span style="font-weight:800;font-size:14px;">${v}%</span>
-              </div>
-              <span style="font-size:10.5px;color:var(--muted);margin-left:20px;">${desc}</span>
-            </label>`).join('')}
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;">
-            💡 La comisión se calcula sobre las ventas que registrás en PuenT cada mes. El admin te envía el resumen y acordás el pago.
-          </div>
-        </div>
-
-        <!-- Beneficios incluidos -->
-        <div style="background:white;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:8px;">✅ Incluido en cualquier plan:</div>
-          <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);">
-            <div>🏪 Catálogo propio con productos ilimitados</div>
-            <div>🏠 Tus productos en el Home y el buscador</div>
-            <div>📍 Ficha del local con mapa y horarios</div>
-            <div>📷 QR personal del comercio</div>
-            <div>🌪️ Ofertas Tornado para liquidar stock</div>
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:6px;">🔶 Add-on extra (se contrata aparte):</div>
-          <div style="font-size:12px;color:var(--muted);">📣 Banner publicitario en el Home (precio a convenir)</div>
-        </div>
-
-        <!-- ¿Recibe pedidos por la app? -->
-        <div style="background:#FFF8E8;border:1.5px solid #FFE0B0;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
-          <div style="display:flex;align-items:flex-start;gap:10px;">
-            <input type="checkbox" id="rSinPedidos" style="width:auto;margin-top:3px;">
-            <label style="font-weight:600;font-size:12.5px;color:var(--ink);" for="rSinPedidos">No quiero recibir pedidos por la app — solo mostrar mi menú/catálogo como vidriera (el cliente consulta directo en el local o por WhatsApp).</label>
-          </div>
-        </div>
-
-        <div class="field" style="display:flex;align-items:flex-start;gap:10px;">
-          <input type="checkbox" id="rTyc" style="width:auto;margin-top:3px;">
-          <label style="font-weight:500;font-size:12.5px;color:var(--muted);" for="rTyc">Acepto los Términos y Condiciones y el tratamiento de mis datos.</label>
-        </div>
-      </div>`;
-    fillRubroSelect('rRubro');
-    setTimeout(()=>{
-      crearMapaPick('registroMapaPick', registroLatLng?.lat, registroLatLng?.lng, (lat,lng)=>{
-        registroLatLng = {lat, lng};
-        const est = document.getElementById('ubicacionEstado');
-        if(est) est.textContent = '✅ Ubicación marcada correctamente.';
-      });
-    }, 50);
   } else {
     kick.textContent='Registro de cliente';
     title.textContent='Completá tu registro';
@@ -4681,13 +4926,9 @@ async function submitRegister(){
     const metodosPago = [...document.querySelectorAll('input[name="rPagos"]:checked')].map(c=>c.value);
     const tyc = document.getElementById('rTyc').checked;
     const sinPedidos = document.getElementById('rSinPedidos')?.checked || false;
-    const planTipo = document.querySelector('input[name="rPlanTipo"]:checked')?.value || 'fijo';
-    const planMonto = planTipo === 'fijo'
-      ? parseInt(document.querySelector('input[name="rPlanFijoMonto"]:checked')?.value || '20000')
-      : null;
-    const planComPct = planTipo === 'comision'
-      ? parseInt(document.querySelector('input[name="rPlanComPct"]:checked')?.value || '5')
-      : null;
+    const planTipo = 'gracia';
+    const planMonto = null;
+    const planComPct = null;
     // Fecha de vencimiento del período de gracia (20 días)
     const gracia = new Date(); gracia.setDate(gracia.getDate() + 20);
     const planVence = gracia.toISOString().slice(0,10);
@@ -4747,21 +4988,24 @@ async function submitRegister(){
       }catch(e){ console.error('Error en auto-claim manual de comercio:', e); }
     }
 
+    const _graciaManual = new Date(); _graciaManual.setDate(_graciaManual.getDate() + 30);
     const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, tipo, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, sinPedidos,
-      plan: planTipo, planMonto, planComPct, planVence, planActivo: true,
+      plan: planTipo, planMonto, planComPct, planVence: _graciaManual.toISOString().slice(0,10), planActivo: true,
       bannerActivo: false, bannerVence: null, pagos: [],
       adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng,
-      img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30)};
+      img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30),
+      aprobado: false};
     c.qrPersonal = 'CQR-' + c.id.split('-')[1].padStart(4,'0');
     state.comercios.push(c);
     state.currentUser = c; state.role='comercio';
     setRoleChip('🏬 Comercio', false);
     document.getElementById('cNombre').textContent = nombre;
-    toast('¡Comercio registrado!');
     registroLatLng = null;
     delete fotosCargadas['rLogo'];
-    renderComercioPanel();
-    showScreen('c-panel');
+    guardarPerfilEnFirestore('comercios', c);
+    showScreen('c-en-revision');
+    updateBottomNav('c-panel');
+    return;
   } else {
     const telefono = document.getElementById('rTelefono').value.trim();
     const email = document.getElementById('rEmail').value.trim().toLowerCase();
@@ -4903,8 +5147,8 @@ function renderPublicidadBox(){
     const vence = new Date(c.publicidadVence).toLocaleDateString('es-AR');
     box.innerHTML = `
       <div class="pub-card activa">
-        <div class="pub-title">⭐ Venta directa activa</div>
-        <div class="pub-txt">Tenés tu propio catálogo activo, sumado al de tus ConectorT — no lo reemplaza. Y tu local se destaca en Locales. Vence el ${vence}.</div>
+        <div class="pub-title">🛒 Sumá más productos y vendé en tu ciudad</div>
+        <div class="pub-txt">Es la única manera de competir con los grandes imperios de compras online — juntos, comercio por comercio. Este es el camino. <strong>PuenT.</strong> Tu catálogo activo vence el ${vence}.</div>
       </div>`;
   } else {
     box.innerHTML = `
@@ -5012,6 +5256,56 @@ function comprimirImagen(file, maxBytes){
     reader.readAsDataURL(file);
   });
 }
+
+// Como comprimirImagen(), pero primero recorta al recuadro exacto donde se
+// va a mostrar (aspectRatio, ej 4 para 4:1) tipo object-fit:cover — así el
+// JPEG final solo tiene los píxeles que realmente se ven, y esos 70KB rinden
+// mucho más nítidos que comprimiendo la foto entera y recortándola después
+// con CSS. anchoDestino es el ancho final en px (el alto sale solo del ratio).
+function comprimirImagenRecortada(file, maxBytes, aspectRatio, anchoDestino){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error('No se pudo leer el archivo'));
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('No se pudo leer la imagen'));
+      img.onload = ()=>{
+        // Recorte centrado al aspect ratio pedido, sobre la imagen original
+        const ratioImg = img.width / img.height;
+        let sx, sy, sw, sh;
+        if(ratioImg > aspectRatio){
+          // La foto es más ancha que el recuadro: recorto los costados
+          sh = img.height; sw = sh * aspectRatio;
+          sx = (img.width - sw) / 2; sy = 0;
+        } else {
+          // La foto es más alta que el recuadro: recorto arriba/abajo
+          sw = img.width; sh = sw / aspectRatio;
+          sx = 0; sy = (img.height - sh) / 2;
+        }
+        const probar = (w, calidad)=>{
+          const h = Math.round(w / aspectRatio);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', calidad);
+          const bytes = Math.round(dataUrl.length * 0.75);
+
+          if(bytes <= maxBytes || (calidad <= 0.3 && w <= 320)){
+            resolve(dataUrl);
+          } else if(calidad > 0.3){
+            probar(w, calidad - 0.15);
+          } else {
+            probar(Math.max(320, w - 160), 0.65);
+          }
+        };
+        probar(anchoDestino, 0.9);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 
 // Placeholder: acá va la subida real a Firebase Storage cuando esté la cuenta creada.
 function subirFotoAFirebase(prefix, dataUrl){
@@ -5750,6 +6044,21 @@ async function cargarProductosGuardados(ownerUid){
   }
 }
 
+async function cargarCatalogoDeConectoresParaComercio(comercioId){
+  if(!firebaseListo || !db || !comercioId) return;
+  try{
+    const snap = await db.collection('catalogoVendedor').where('comercioId','==', comercioId).get({ source: 'server' });
+    snap.forEach(doc=>{
+      const s = {...doc.data(), id: doc.id};
+      const idx = state.catalogoVendedor.findIndex(x=>x.id===s.id);
+      if(idx>=0) state.catalogoVendedor[idx] = s;
+      else state.catalogoVendedor.push(s);
+    });
+    renderCActividadConector();
+    renderComercioPanel();
+  }catch(e){ console.warn('cargarCatalogoDeConectoresParaComercio:', e); }
+}
+
 async function cargarCatalogoVendedorGuardado(vendedorId){
   if(!firebaseListo || !db){
     toast('⚠️ Firebase no disponible — catálogo solo en memoria');
@@ -5881,7 +6190,17 @@ function agregarProductoAMiCatalogo(productoId){
   const yaExiste = state.catalogoVendedor.some(s=>s.vendedorId===vId && s.productoId===productoId);
   if(yaExiste){ toast('Ya tenías este producto en tu catálogo'); return; }
 
-  const sel = {id: 'sel-'+vId+'-'+productoId, vendedorId: vId, productoId};
+  const prod = state.productos.find(p=>p.id===productoId);
+  const sel = {
+    id: 'sel-'+vId+'-'+productoId,
+    vendedorId: vId,
+    vendedorNombre: state.currentUser?.nombre || '',
+    productoId,
+    productoNombre: prod?.nombre || '',
+    comercioId: prod?.comercioId || '',
+    fecha: new Date().toISOString(),
+    vistoPorComercio: false
+  };
   state.catalogoVendedor.push(sel);
 
   if(!firebaseListo || !db){
@@ -6048,9 +6367,18 @@ function renderVReservas(){
     list.innerHTML = '<div class="empty"><div class="ic">📋</div><div class="t">Sin reservas todavía</div><div class="s">Cuando reserves o armés un pedido para un cliente, aparece acá.</div></div>';
     return;
   }
+  var ahora = Date.now();
   list.innerHTML = reservas.map(function(r, idx){
     var esP = r.origen === 'personalizado';
     var fechaStr = new Date(r.fechaCreacion || r.fechaReserva).toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'2-digit'});
+
+    // Una reserva pendiente que superó el tiempo límite sin confirmarse
+    // (mismo criterio que la alerta del panel principal).
+    var fechaCreacion = new Date(r.fechaCreacion || r.fechaReserva || 0).getTime();
+    var limite = esP ? 24*3600000 : 12*3600000;
+    var esVencida = r.estado === 'pendiente' && (ahora - fechaCreacion) > limite;
+    var esCancelada = r.estado === 'cancelada';
+
     var resumen = esP
       ? (Array.isArray(r.productos) ? r.productos.map(function(p){ return p.nombre; }).join(', ') : 'Pedido personalizado')
       : (r.productoNombre || '—');
@@ -6065,12 +6393,49 @@ function renderVReservas(){
       var motLabel = { no_se_presento:'El cliente no se presentó', sin_stock:'Sin stock', precio_cambio:'El precio cambió', cliente_desistio:'El cliente desistió', otro:'Otro motivo' };
       var motTxt = r.textoCancelacion || (motLabel[r.motivoCancelacion] || 'Motivo no especificado');
       estadoNota = '<div style="font-size:10.5px;color:#C0392B;font-weight:700;margin-top:3px;">ℹ️ ' + motTxt + '</div>';
+    } else if(esVencida){
+      estadoPill = '<span class="pill" style="background:#E8C84A;color:#5A3E00;">⏰ Vencida</span>';
     } else {
       estadoPill = '<span class="pill pill-navy">🕒 Pendiente</span>';
     }
     var comisionStr = r.comisionMonto ? '$' + Number(r.comisionMonto).toLocaleString('es-AR') : '';
     var icono = esP ? '🛒' : '🔖';
-    return '<div class="list-row" style="align-items:flex-start;gap:12px;cursor:pointer;" onclick="reabrirReserva('+idx+')">'
+
+    // Para las vencidas: link para eliminarla (con motivo) en vez de reabrir el QR.
+    // Para las ya canceladas: ya tienen motivo cargado, así que se eliminan directo.
+    var accionEliminar = esVencida
+      ? '<span onclick="event.stopPropagation();vToggleEliminarVencida('+idx+')" style="font-size:11px;font-weight:700;background:#FDECEA;color:#C0392B;padding:3px 8px;border-radius:100px;cursor:pointer;">🗑️ Eliminar</span>'
+      : esCancelada
+      ? '<span onclick="event.stopPropagation();vEliminarReservaCancelada('+idx+')" style="font-size:11px;font-weight:700;background:#FDECEA;color:#C0392B;padding:3px 8px;border-radius:100px;cursor:pointer;">🗑️ Eliminar</span>'
+      : '<span style="font-size:11px;font-weight:700;background:#EAF0E6;color:var(--navy-2);padding:3px 8px;border-radius:100px;">Ver QR</span>';
+
+    var boxEliminar = esVencida ? (
+      '<div id="vEliminarBox-'+idx+'" style="display:none;margin-top:10px;padding:12px;border:1.5px solid #FDD;background:#FFF5F5;border-radius:12px;" onclick="event.stopPropagation();">'
+      +'<div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px;">Esta reserva venció. Elegí el motivo para eliminarla:</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px;" id="motivosVenc-'+idx+'">'
+      +'<label style="display:flex;align-items:flex-start;gap:8px;background:#FFF;border:1.5px solid #EEE;border-radius:10px;padding:9px 10px;cursor:pointer;font-size:12.5px;color:var(--ink);">'
+      +'<input type="radio" name="motivoVenc-'+idx+'" value="no_se_presento" style="margin-top:2px;width:auto;flex-shrink:0;"> 🙅 El cliente no se presentó</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:8px;background:#FFF;border:1.5px solid #EEE;border-radius:10px;padding:9px 10px;cursor:pointer;font-size:12.5px;color:var(--ink);">'
+      +'<input type="radio" name="motivoVenc-'+idx+'" value="sin_stock" style="margin-top:2px;width:auto;flex-shrink:0;"> 📦 Sin stock del producto</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:8px;background:#FFF;border:1.5px solid #EEE;border-radius:10px;padding:9px 10px;cursor:pointer;font-size:12.5px;color:var(--ink);">'
+      +'<input type="radio" name="motivoVenc-'+idx+'" value="precio_cambio" style="margin-top:2px;width:auto;flex-shrink:0;"> 💸 El precio cambió</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:8px;background:#FFF;border:1.5px solid #EEE;border-radius:10px;padding:9px 10px;cursor:pointer;font-size:12.5px;color:var(--ink);">'
+      +'<input type="radio" name="motivoVenc-'+idx+'" value="cliente_desistio" style="margin-top:2px;width:auto;flex-shrink:0;"> 🔙 El cliente desistió</label>'
+      +'<label style="display:flex;align-items:flex-start;gap:8px;background:#FFF;border:1.5px solid #EEE;border-radius:10px;padding:9px 10px;cursor:pointer;font-size:12.5px;color:var(--ink);">'
+      +'<input type="radio" name="motivoVenc-'+idx+'" value="otro" style="margin-top:2px;width:auto;flex-shrink:0;"> ✏️ Otro motivo</label>'
+      +'</div>'
+      +'<div class="field" id="campoOtroMotivoVenc-'+idx+'" style="display:none;margin-top:8px;">'
+      +'<textarea id="textoOtroMotivoVenc-'+idx+'" rows="2" style="resize:none;width:100%;" placeholder="Describí el motivo..."></textarea>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px;">'
+      +'<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="vToggleEliminarVencida('+idx+')">Volver</button>'
+      +'<button class="btn btn-sm" style="flex:1;background:#C0392B;color:#fff;" onclick="vConfirmarEliminarVencida('+idx+')">🗑️ Eliminar reserva</button>'
+      +'</div>'
+      +'</div>'
+    ) : '';
+
+    return '<div class="list-row" style="align-items:flex-start;gap:12px;flex-direction:column;'+((esVencida||esCancelada)?'':'cursor:pointer;')+'" '+((esVencida||esCancelada)?'':'onclick="reabrirReserva('+idx+')"')+'>'
+      +'<div style="display:flex;align-items:flex-start;gap:12px;width:100%;">'
       +'<div class="av" style="background:var(--navy);flex-shrink:0;">'+icono+'</div>'
       +'<div class="main" style="flex:1;min-width:0;">'
       +'<div class="t">'+r.clienteNombre+'</div>'
@@ -6080,9 +6445,102 @@ function renderVReservas(){
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">'
       +estadoPill
-      +'<span style="font-size:11px;font-weight:700;background:#EAF0E6;color:var(--navy-2);padding:3px 8px;border-radius:100px;">Ver QR</span>'
-      +'</div></div>';
+      +accionEliminar
+      +'</div></div>'
+      +boxEliminar
+      +'</div>';
   }).join('');
+
+  // Mostrar/ocultar el campo "otro motivo" al elegir esa opción, para cada
+  // reserva vencida que tenga el box de eliminar en el DOM.
+  setTimeout(function(){
+    document.querySelectorAll('[id^="motivosVenc-"]').forEach(function(cont){
+      var idx = cont.id.replace('motivosVenc-','');
+      cont.querySelectorAll('input[type="radio"]').forEach(function(r){
+        r.addEventListener('change', function(){
+          var campo = document.getElementById('campoOtroMotivoVenc-'+idx);
+          if(campo) campo.style.display = (r.value === 'otro' && r.checked) ? 'block' : 'none';
+          cont.querySelectorAll('label').forEach(function(l){ l.style.borderColor='#EEE'; l.style.background='#FFF'; });
+          if(r.checked){ r.closest('label').style.borderColor='#C0392B'; r.closest('label').style.background='#FFF0EE'; }
+        });
+      });
+    });
+  }, 0);
+}
+
+function vToggleEliminarVencida(idx){
+  var box = document.getElementById('vEliminarBox-'+idx);
+  if(box) box.style.display = (box.style.display === 'none') ? 'block' : 'none';
+}
+
+function vConfirmarEliminarVencida(idx){
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var r = reservas[idx];
+  if(!r){ toast('Reserva no encontrada'); return; }
+
+  var radioSel = document.querySelector('input[name="motivoVenc-'+idx+'"]:checked');
+  if(!radioSel){ toast('Seleccioná un motivo antes de eliminar'); return; }
+
+  var motivoClave = radioSel.value;
+  var motivoLabels = {
+    no_se_presento: 'El cliente no se presentó',
+    sin_stock: 'Sin stock del producto',
+    precio_cambio: 'El precio cambió',
+    cliente_desistio: 'El cliente desistió',
+    otro: 'Otro motivo'
+  };
+  var motivoTexto = motivoLabels[motivoClave] || motivoClave;
+  if(motivoClave === 'otro'){
+    var extra = (document.getElementById('textoOtroMotivoVenc-'+idx)||{}).value || '';
+    if(!extra.trim()){ toast('Describí el motivo antes de continuar'); return; }
+    motivoTexto = extra.trim();
+  }
+
+  // Dejar registrada la cancelación en la venta real (por si el comercio la
+  // llega a ver), y recién ahí sacarla de "Mis reservas".
+  var v = state.ventas.find(function(x){ return x.id === r.id; });
+  if(v){
+    v.estado = 'cancelada';
+    v.motivoCancelacion = motivoClave;
+    v.textoCancelacion = motivoTexto;
+    v.fechaCancelacion = new Date().toISOString();
+    actualizarEstadoVentaFirestore(r.id, {
+      estado: 'cancelada',
+      motivoCancelacion: motivoClave,
+      textoCancelacion: motivoTexto,
+      fechaCancelacion: v.fechaCancelacion
+    });
+  }
+
+  reservas.splice(idx, 1);
+  localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas));
+
+  // Archivar para que quede en el Historial de comisiones (Estadísticas),
+  // aunque ya no aparezca en "Mis reservas".
+  var archivadas = JSON.parse(localStorage.getItem('puente_historial_conector') || '[]');
+  archivadas.unshift(Object.assign({}, r, { estado:'cancelada', motivoCancelacion:motivoClave, textoCancelacion:motivoTexto, fechaCancelacion: new Date().toISOString() }));
+  localStorage.setItem('puente_historial_conector', JSON.stringify(archivadas.slice(0,200)));
+
+  toast('🗑️ Reserva eliminada');
+  renderVReservas();
+}
+
+function vEliminarReservaCancelada(idx){
+  var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var r = reservas[idx];
+  if(!r){ toast('Reserva no encontrada'); return; }
+  // Ya tiene motivo de cancelación cargado — no hace falta pedirlo de nuevo,
+  // solo sacarla de la lista de "Mis reservas".
+  reservas.splice(idx, 1);
+  localStorage.setItem('puente_reservas_conector', JSON.stringify(reservas));
+
+  // Archivar igual que las vencidas, para que quede en el Historial.
+  var archivadas = JSON.parse(localStorage.getItem('puente_historial_conector') || '[]');
+  archivadas.unshift(r);
+  localStorage.setItem('puente_historial_conector', JSON.stringify(archivadas.slice(0,200)));
+
+  toast('🗑️ Reserva eliminada');
+  renderVReservas();
 }
 
 function reabrirReserva(idx){
@@ -6324,7 +6782,12 @@ async function cargarCalificaciones(){
   try{
     const [snapDe, snapPara] = await Promise.all([
       db.collection('calificaciones').where('deUid','==', miUid).get(),
-      db.collection('calificaciones').where('paraUid','==', miUid).get(),
+      // Las reglas de Firestore solo dejan leer, por paraUid, las que ya están
+      // reveladas (las que hiciste vos se traen con la query de arriba, por
+      // deUid). Si esta query no filtra también por revelada==true, Firestore
+      // no puede garantizar la regla de antemano y rechaza la consulta entera
+      // con "Missing or insufficient permissions".
+      db.collection('calificaciones').where('paraUid','==', miUid).where('revelada','==', true).get(),
     ]);
     if(!state.calificaciones) state.calificaciones = [];
     [...snapDe.docs, ...snapPara.docs].forEach(doc=>{
@@ -6578,6 +7041,12 @@ function _sincronizarReservaEnLocalStorage(v){
       _pcActualizarCierreBoxSiAbierto(v);
     }
   } else {
+    // No está en la lista local. Si ya la eliminaste a mano (quedó archivada
+    // en el Historial), no la resucitamos al volver a sincronizar — si no,
+    // reaparece sola después de cada refresh.
+    var archivadas = JSON.parse(localStorage.getItem('puente_historial_conector') || '[]');
+    if(archivadas.some(function(a){ return a.id===v.id; })) return;
+
     var prod = state.productos.find(function(p){ return p.id===v.productoId; });
     var com  = state.comercios.find(function(c){ return c.id===v.comercioId; });
     reservas.unshift(Object.assign({}, v, {
@@ -6694,11 +7163,14 @@ function renderVendedorStats(){
   const ventaGoal = Math.min(misVentas.length,1);
   document.getElementById('desafioVentaTxt').textContent = ventaGoal+'/1';
   document.getElementById('desafioVentaBar').style.width = (ventaGoal/1*100)+'%';
-  // Historial de comisiones
+  // Historial de comisiones — junta las reservas activas (localStorage) más
+  // las que ya se archivaron al eliminarlas (canceladas/vencidas), así queda
+  // un registro único de cobradas, a cobrar, canceladas y eliminadas.
   var reservas = JSON.parse(localStorage.getItem('puente_reservas_conector') || '[]');
+  var archivadas = JSON.parse(localStorage.getItem('puente_historial_conector') || '[]');
   var hc = document.getElementById('vComisionesHistorial');
   if(!hc) return;
-  var conEstado = reservas.filter(function(r){ return r.comisionMonto; });
+  var conEstado = reservas.concat(archivadas).filter(function(r){ return r.comisionMonto; });
   conEstado.sort(function(a,b){ return new Date(b.fechaCreacion||b.fechaReserva||0) - new Date(a.fechaCreacion||a.fechaReserva||0); });
   if(conEstado.length === 0){
     hc.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0;">Todavía no tenés comisiones registradas.</div>';
@@ -6717,6 +7189,11 @@ function renderVendedorStats(){
     } else if(r.estado === 'confirmada' || r.estado === 'confirmado'){
       estadoHtml = '<span style="font-size:11px;background:#FFF8EC;color:#8A6400;padding:2px 8px;border-radius:20px;font-weight:700;">⏳ A cobrar</span>';
       bgColor = '#FFFDF5';
+    } else if(r.estado === 'cancelada'){
+      var motLabel = { no_se_presento:'No se presentó', sin_stock:'Sin stock', precio_cambio:'Cambió el precio', cliente_desistio:'Desistió', otro:r.textoCancelacion||'Otro motivo' };
+      var motTxt = motLabel[r.motivoCancelacion] || r.textoCancelacion || 'Sin motivo';
+      estadoHtml = '<span style="font-size:11px;background:#FDECEA;color:#C0392B;padding:2px 8px;border-radius:20px;font-weight:700;" title="'+motTxt+'">❌ Cancelada</span>';
+      bgColor = '#FFFAFA';
     } else {
       estadoHtml = '<span style="font-size:11px;background:#F0F4FA;color:var(--navy);padding:2px 8px;border-radius:20px;font-weight:700;">🕒 Pendiente</span>';
       bgColor = '#fff';
@@ -7007,21 +7484,21 @@ function renderCPlanBox(){
     badge = '🆓 Modo Free';
     diasTexto = 'Se venció tu gracia sin elegir plan pago: tu perfil y catálogo siguen guardados, pero solo se muestra tu logo y dirección — sin productos ni ubicación en el mapa hasta que pases a un plan pago.';
     subtexto = 'Contactá a PuenT para pasar a Fijo o Comisión.';
-  } else if(dias <= 5){
+  } else if(dias !== null && dias <= 5){
     colorBg = '#fffbea'; colorBorde = '#C99A3E';
     badge = `⚠️ Vence en ${dias} día${dias===1?'':'s'}`;
     diasTexto = 'Renová pronto para no perder visibilidad.';
     subtexto = 'Contactá a PuenT para renovar.';
   } else if(esGracia){
     colorBg = '#f0f7ee'; colorBorde = 'var(--olive,#5C7355)';
-    badge = `🎁 Período de gracia — ${dias} días restantes`;
+    badge = dias !== null ? `🎁 Período de gracia — ${dias} días restantes` : '🎁 Período de gracia';
     diasTexto = 'Estás en prueba gratuita. ¡Aprovechá para cargar tus productos!';
     subtexto = c.plan === 'fijo'
       ? `Tu plan elegido: Fijo $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
       : `Tu plan elegido: Comisión ${c.planComPct||5}% sobre ventas`;
   } else {
     colorBg = '#f0f7ee'; colorBorde = 'var(--olive,#5C7355)';
-    badge = `✅ Plan activo — ${dias} días restantes`;
+    badge = dias !== null ? `✅ Plan activo — ${dias} días restantes` : '✅ Plan activo';
     diasTexto = c.plan === 'fijo'
       ? `Plan Fijo: $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
       : `Plan Comisión: ${c.planComPct||5}% sobre ventas`;
@@ -7037,7 +7514,7 @@ function renderCPlanBox(){
   }
 
   box.innerHTML = `
-    <div style="background:${colorBg};border:1.5px solid ${colorBorde};border-radius:13px;padding:13px 14px;">
+    <div class="card" style="background:${colorBg};border:1.5px solid ${colorBorde};">
       <div style="font-weight:800;font-size:13px;color:var(--ink);margin-bottom:3px;">${badge}</div>
       <div style="font-size:12.5px;color:var(--ink);margin-bottom:2px;">${diasTexto}</div>
       ${subtexto ? `<div style="font-size:11.5px;color:var(--muted);">${subtexto}</div>` : ''}
@@ -7085,6 +7562,9 @@ function guardarConectorActivoComercio(valor){
 }
 
 function renderComercioPanel(){
+  // Banner de revisión pendiente
+  const _bannerRev = document.getElementById('cRevisionBanner');
+  if(_bannerRev) _bannerRev.style.display = (state.currentUser?.aprobado === false) ? 'block' : 'none';
   renderPublicidadBox();
   actualizarBadgeContactos();
   renderCPlanBox();
@@ -7093,15 +7573,14 @@ function renderComercioPanel(){
   renderPedidosProducto();
   renderCAlertasComercio();
   renderCBajaSolicitadaBox();
+  renderCActividadConector();
   // Mostrar botón de Menú del día solo a comercios gastronómicos
   const btnMenu = document.getElementById('btnMenuDia');
   if(btnMenu){
     const esGastro = typeof esComercioGastronomico !== 'undefined' && esComercioGastronomico(state.currentUser);
     btnMenu.classList.toggle('hidden', !esGastro);
   }
-  if(state.currentUser?.uid){
-    document.getElementById('cMiValoracion').innerHTML = estrellasHtml(...Object.values(promedioDe(state.currentUser.uid)));
-  }
+  // Nota: ya no se muestra la valoración (cMiValoracion) en el panel de comercio.
   const misProds = state.productos.filter(p=>p.comercioId===state.currentUser.id);
   const misProdIds = new Set(misProds.map(p=>p.id));
 
@@ -7126,6 +7605,77 @@ function renderComercioPanel(){
     }).join('');
   }
   renderComercioHistorial();
+}
+
+function renderCActividadConector(){
+  const cont = document.getElementById('cActividadConectorBox');
+  if(!cont) return;
+  const miId = state.currentUser?.id || state.currentUser?._docId;
+  const misProds = new Set(state.productos.filter(p=>p.comercioId===miId).map(p=>p.id));
+
+  // Selecciones de mi catálogo que tienen fecha (las nuevas) ordenadas por fecha desc
+  const recientes = state.catalogoVendedor
+    .filter(s => misProds.has(s.productoId) && s.fecha)
+    .sort((a,b)=> new Date(b.fecha) - new Date(a.fecha))
+    .slice(0, 10);
+
+  const noVistas = recientes.filter(s => !s.vistoPorComercio);
+
+  // Badge en el botón del panel
+  const badge = document.getElementById('badgeActividadConector');
+  if(badge) badge.style.display = noVistas.length ? 'inline-block' : 'none';
+  if(badge) badge.textContent = noVistas.length;
+
+  if(!recientes.length){
+    cont.innerHTML = '';
+    return;
+  }
+
+  const formatFecha = iso => {
+    const d = new Date(iso);
+    const hoy = new Date();
+    const diff = Math.floor((hoy - d) / 60000); // minutos
+    if(diff < 60) return `hace ${diff} min`;
+    if(diff < 1440) return `hace ${Math.floor(diff/60)} h`;
+    return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
+  };
+
+  cont.innerHTML = `
+    <div style="background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:4px;">
+      <div style="font-weight:800;font-size:13px;color:var(--navy);margin-bottom:8px;">
+        🔔 Actividad reciente de ConectorT
+        ${noVistas.length ? `<span style="background:#E05A5A;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;">${noVistas.length} nueva${noVistas.length>1?'s':''}</span>` : ''}
+      </div>
+      ${recientes.map(s=>{
+        const nombreV = s.vendedorNombre || (state.vendedores.find(v=>v.id===s.vendedorId||v.uid===s.vendedorId)?.nombre) || 'ConectorT';
+        const nombreP = s.productoNombre || (state.productos.find(p=>p.id===s.productoId)?.nombre) || 'un producto';
+        const esNueva = !s.vistoPorComercio;
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);${esNueva?'':'opacity:.7'}">
+          <div style="width:32px;height:32px;border-radius:50%;background:${esNueva?'#5C7355':'#bbb'};display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🛍️</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:12.5px;color:var(--ink);">${nombreV} ${esNueva?'<span style="color:#5C7355;font-size:10px;font-weight:800;">● NUEVO</span>':''}</div>
+            <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">sumó <b>${nombreP}</b> a su catálogo</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);white-space:nowrap;">${s.fecha ? formatFecha(s.fecha) : ''}</div>
+        </div>`;
+      }).join('')}
+      <button onclick="marcarActividadVista()" style="margin-top:8px;background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;padding:0;">Marcar todo como visto</button>
+    </div>`;
+
+  // Marcar como vistas al abrir el panel
+  setTimeout(()=> marcarActividadVista(), 3000);
+}
+
+function marcarActividadVista(){
+  const miId = state.currentUser?.id || state.currentUser?._docId;
+  const misProds = new Set(state.productos.filter(p=>p.comercioId===miId).map(p=>p.id));
+  const noVistas = state.catalogoVendedor.filter(s => misProds.has(s.productoId) && s.fecha && !s.vistoPorComercio);
+  if(!noVistas.length) return;
+  noVistas.forEach(s=>{
+    s.vistoPorComercio = true;
+    if(firebaseListo && db) db.collection('catalogoVendedor').doc(s.id).update({ vistoPorComercio: true }).catch(()=>{});
+  });
+  renderCActividadConector();
 }
 
 function renderPedidosProducto(){
@@ -7170,6 +7720,37 @@ function volverDeQR(){
   showScreen(window._qrVolverA || 'home');
 }
 
+function renderCHistorial(){
+  renderComercioHistorial();
+}
+
+function renderCVendedores(){
+  // Renderiza la lista de conectores en cVendedoresList (ya existe la lógica en renderComercioPanel)
+  const list = document.getElementById('cVendedoresList');
+  if(!list) return;
+  const miId = state.currentUser?.id || state.currentUser?._docId;
+  const misProds = new Set((state.productos||[]).filter(p=>p.comercioId===miId).map(p=>p.id));
+  const conectoresActivos = [...new Set(
+    (state.catalogoVendedor||[]).filter(s=>misProds.has(s.productoId)).map(s=>s.vendedorId)
+  )];
+  if(!conectoresActivos.length){
+    list.innerHTML = '<div class="empty" style="padding:16px;"><div class="s">Todavía ningún ConectorT eligió tus productos.</div></div>';
+    return;
+  }
+  list.innerHTML = conectoresActivos.map(vId=>{
+    const v = state.vendedores.find(x=>x.id===vId||x.uid===vId);
+    const nombre = v?.nombre || 'ConectorT';
+    const prods = (state.catalogoVendedor||[]).filter(s=>s.vendedorId===vId && misProds.has(s.productoId));
+    return `<div class="list-row">
+      <div class="av" style="background:var(--green);">${nombre[0]||'C'}</div>
+      <div class="list-row-info">
+        <div class="t">${nombre}</div>
+        <div class="s">${prods.length} producto${prods.length!==1?'s':''} en su catálogo</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function renderComercioHistorial(){
   var estados = ['confirmada','comision_recibida'];
   var _cIds = [state.currentUser.id, state.currentUser.uid, state.currentUser._docId].filter(Boolean);
@@ -7178,6 +7759,7 @@ function renderComercioHistorial(){
   });
   hist.sort(function(a,b){ return new Date(b.fechaConfirmacion||0) - new Date(a.fechaConfirmacion||0); });
   var el = document.getElementById('cHistorial');
+  if(!el) return; // pantalla no visible aún
   if(hist.length===0){
     el.innerHTML = '<div class="empty" style="padding:24px;"><div class="s">Todavía no confirmaste ninguna venta.</div></div>';
     return;
@@ -7557,15 +8139,17 @@ function hideSplash(){
   // Si el admin ya autenticó antes de que termine el splash, activar layout ahora
   if(state && state.role === 'admin') setTimeout(adminIniciarLayout, 520);
   cargarRubrosHome();
+  cargarBannerPublicidadHome();
+  cargarBannerTornadoOfertas();
 }
 
-// Mostrar el spinner si Firebase no cargó en 1.5s (red lenta / adblocker / fallback CDN)
+// Mostrar el spinner si Firebase no cargó en 1s (red lenta / adblocker / fallback CDN)
 setTimeout(function(){
   if(!_splashYaOculto){
     var loader = document.getElementById('splashLoader');
     if(loader) loader.classList.add('visible');
   }
-}, 1500);
+}, 1000);
 
 // Ocultar el splash en cuanto Firebase esté listo (con mínimo visual de 1.2s)
 var _splashMinTime = Date.now() + 1200;
@@ -7574,12 +8158,12 @@ function _tryHideSplash(){
   setTimeout(hideSplash, wait);
 }
 
-// Safety net: ocultar el splash a los 6s pase lo que pase (Firebase muy lento o bloqueado)
+// Safety net: ocultar el splash a los 4s pase lo que pase (Firebase muy lento o bloqueado)
 setTimeout(function(){
   var txt = document.getElementById('splashLoaderTxt');
   if(txt && !_splashYaOculto) txt.textContent = 'Entrando sin conexión…';
   hideSplash();
-}, 6000);
+}, 4000);
 // Mostrar el menú inferior desde el inicio (modo invitado)
 updateBottomNav('feed');
 
@@ -8088,6 +8672,63 @@ let CAT_IMGS = {};      // id -> imagen (dataURL <70KB)
 let FEED_CATEGORIAS = RUBROS_HOME_DEFAULT.map(r=>r.id);
 let _feedCategoriaActual = 'todos'; // 'todos' = mostrar todas las secciones
 
+// ── Banner de publicidad — arriba del home, entre las solapas y "En PuenT" ──
+// Un solo banner por ahora (doc 'principal' en la colección bannersHome).
+// Mismo sistema de fotos que los rubros del home: <70KB, admin lo cambia
+// cuando quiere desde "🖼️ Imágenes del home".
+let BANNER_PUBLICIDAD_HOME = null; // {imagen, activo} en memoria
+let BANNER_TORNADO_OFERTAS = null; // {imagen, activo} en memoria — reemplaza el botón fijo cuando hay imagen cargada
+
+async function cargarBannerPublicidadHome(){
+  const cont = document.getElementById('bannerPublicidadHome');
+  if(!firebaseListo || !db){ if(cont) cont.innerHTML=''; return; }
+  try{
+    const doc = await db.collection('bannersHome').doc('principal').get();
+    BANNER_PUBLICIDAD_HOME = doc.exists ? doc.data() : null;
+  }catch(e){ console.error('No se pudo cargar el banner de publicidad:', e); BANNER_PUBLICIDAD_HOME = null; }
+  renderBannerPublicidadHome();
+}
+function renderBannerPublicidadHome(){
+  const cont = document.getElementById('bannerPublicidadHome');
+  if(!cont) return;
+  const b = BANNER_PUBLICIDAD_HOME;
+  cont.innerHTML = (b && b.imagen && b.activo !== false)
+    ? `<div class="banner-publicidad-home"><img src="${b.imagen}" alt="Publicidad"></div>`
+    : '';
+}
+
+// Banner "Tornado de Ofertas": si el admin cargó una imagen, reemplaza al
+// botón fijo de siempre (que queda como respaldo si todavía no hay imagen,
+// para no perder el acceso a la sección). El badge con la cantidad de
+// ofertas activas se conserva en los dos casos.
+async function cargarBannerTornadoOfertas(){
+  if(!firebaseListo || !db){ renderBannerTornadoOfertas(); return; }
+  try{
+    const doc = await db.collection('bannersHome').doc('tornado').get();
+    BANNER_TORNADO_OFERTAS = doc.exists ? doc.data() : null;
+  }catch(e){ console.error('No se pudo cargar el banner de tornado:', e); BANNER_TORNADO_OFERTAS = null; }
+  renderBannerTornadoOfertas();
+}
+function renderBannerTornadoOfertas(){
+  const cont = document.getElementById('bannerTornadoOfertas');
+  if(!cont) return;
+  const b = BANNER_TORNADO_OFERTAS;
+  if(b && b.imagen && b.activo !== false){
+    cont.innerHTML = `<div class="banner-tornado-ofertas" onclick="renderTornadoOfertas();showScreen('tornado-ofertas')">
+        <span class="tornado-badge hidden" id="tornadoOfertasBadge">0</span>
+        <img src="${b.imagen}" alt="Tornado de Ofertas">
+      </div>`;
+  } else {
+    cont.innerHTML = `<div style="padding:4px 16px 0;">
+        <button class="tornado-ofertas-btn" id="tornadoOfertasBtn" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">
+          <span class="tornado-badge hidden" id="tornadoOfertasBadge">0</span>
+          🌪️ Tornado de Ofertas
+        </button>
+      </div>`;
+  }
+  actualizarBadgeTornado();
+}
+
 // Trae los rubros del home desde Firestore (una sola lectura de colección,
 // no una por rubro) y arma los chips + secciones dinámicamente.
 async function cargarRubrosHome(){
@@ -8234,16 +8875,85 @@ async function adminCargarRubrosHome(desktop){
         </div>
       </div>`;
   }).join('');
+
+  const bannerHtml = formBannerHTML('principal', '📢 Banner publicitario (arriba del home)', '📢', 'bph', BANNER_PUBLICIDAD_HOME)
+    + formBannerHTML('tornado', '🌪️ Banner Tornado de Ofertas (reemplaza el botón)', '🌪️', 'bto', BANNER_TORNADO_OFERTAS);
+
   if(desktop){
     const cont = document.getElementById('admDesktopContent');
-    if(cont) cont.innerHTML = `<div style="max-width:640px;">${html}
+    if(cont) cont.innerHTML = `<div style="max-width:640px;">${bannerHtml}
+      <div class="divider" style="margin:18px 0;"></div>
+      ${html}
       <div class="divider" style="margin:18px 0;"></div>
       ${formAgregarRubroHTML('nrd')}
     </div>`;
   } else {
     const cont = document.getElementById('rubrosHomeLista');
-    if(cont) cont.innerHTML = html;
+    if(cont) cont.innerHTML = bannerHtml + html;
   }
+}
+
+// Bloque genérico de banner (📢 principal / 🌪️ tornado / los que se agreguen
+// después) — mismo patrón que "Cambiar foto" de rubros: recorta al 4:1,
+// comprime a <70KB y se puede activar/desactivar sin volver a subir la foto.
+// docId: doc en la colección bannersHome. inputId: prefijo único del <input>
+// para no pisarse entre banners. banner: el objeto {imagen,activo} en memoria.
+function formBannerHTML(docId, titulo, iconoVacio, inputId, banner){
+  const b = banner;
+  const prev = (b && b.imagen)
+    ? `<img src="${b.imagen}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<span style="font-size:22px;">${iconoVacio}</span>`;
+  const activo = !b || b.activo !== false;
+  return `<div class="card" style="margin-bottom:14px;">
+      <div style="font-weight:800;font-size:14.5px;margin-bottom:10px;">${titulo}</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:120px;height:30px;border-radius:8px;overflow:hidden;background:#F0F0EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${prev}</div>
+        <div style="flex:1;min-width:0;font-size:11.5px;color:var(--muted);">Se comprime sola a menos de 70KB. Recomendado: imagen apaisada, ~800x200px (4:1).</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input type="file" accept="image/*" id="${inputId}-input" style="display:none;" onchange="onFotoBannerSeleccionada(this,'${docId}')">
+        <button class="adm-btn" style="flex:1;" onclick="document.getElementById('${inputId}-input').click()">${b&&b.imagen?'Cambiar foto':'Subir foto'}</button>
+        ${b && b.imagen ? `<button class="adm-btn" onclick="toggleBannerActivo('${docId}')">${activo?'⏸️ Desactivar':'▶️ Activar'}</button>` : ''}
+      </div>
+    </div>`;
+}
+
+// Recarga y repinta el banner correspondiente (en el home y en el propio
+// panel admin) después de subir foto o cambiar activo/inactivo.
+function _recargarBanner(docId){
+  if(docId==='principal'){ cargarBannerPublicidadHome(); }
+  else if(docId==='tornado'){ cargarBannerTornadoOfertas(); }
+  adminCargarRubrosHome(_admRubrosHomeDesktop);
+}
+
+// Se llama cuando eligen una foto nueva para cualquiera de los banners.
+// Usa comprimirImagenRecortada (recorta al 4:1 antes de comprimir) para que
+// quede lo más nítido posible dentro de las 70KB.
+function onFotoBannerSeleccionada(input, docId){
+  const file = input.files[0];
+  if(!file) return;
+  comprimirImagenRecortada(file, LIMITE_FOTO_BYTES, 4, 800).then(dataUrl=>{
+    if(!firebaseListo || !db){ toast('⚠️ Sin conexión a Firestore'); return; }
+    db.collection('bannersHome').doc(docId).set({imagen:dataUrl, activo:true}, {merge:true})
+      .then(()=>{ toast('✅ Banner actualizado'); _recargarBanner(docId); })
+      .catch(e=>{ console.error(e); toast('No se pudo guardar el banner'); });
+  }).catch(()=>{ toast('No pudimos procesar esa foto, probá con otra.'); });
+}
+
+// Activa/desactiva un banner sin borrar la imagen guardada — para poder
+// sacarlo un tiempo y volver a ponerlo sin subir la foto de nuevo. Cuando el
+// de "tornado" se desactiva, vuelve a mostrarse el botón fijo de siempre.
+function toggleBannerActivo(docId){
+  if(!firebaseListo || !db) return;
+  const actual = docId==='principal' ? BANNER_PUBLICIDAD_HOME : BANNER_TORNADO_OFERTAS;
+  const activoActual = !actual || actual.activo !== false;
+  const nuevoActivo = !activoActual;
+  db.collection('bannersHome').doc(docId).set({activo:nuevoActivo}, {merge:true})
+    .then(()=>{
+      toast(nuevoActivo ? '▶️ Banner activado' : '⏸️ Banner desactivado');
+      _recargarBanner(docId);
+    })
+    .catch(e=>{ console.error(e); toast('No se pudo actualizar el banner'); });
 }
 
 // Arma el bloque "➕ Agregar rubro nuevo" — se usa tanto en mobile (dentro del
@@ -10096,12 +10806,15 @@ function mostrarMapa(){
     mapa.style.height = '50vh';
     mapa.style.zIndex = '1';
 
+    const esDesktop = window.innerWidth >= 900;
     mapaCityInstance = L.map('mapaCityFull', {
       center: [CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng],
       zoom: CIUDAD_ZOOM,
       zoomControl: true,
       attributionControl: true,
-      scrollWheelZoom: false
+      scrollWheelZoom: esDesktop,
+      dragging: true,
+      tap: !esDesktop
     });
 
     // OpenStreetMap — más actualizado que Esri para calles nuevas
@@ -10202,6 +10915,28 @@ function iconoPin(activo, c){
     popupAnchor:[0, -18],
     className:  ''
   });
+}
+
+// Pin especial para comercios que aún no tienen coordenadas exactas
+function iconoPinSinUbicar(c){
+  const rubroImg = c ? ICONOS_RUBRO[c.rubro] : null;
+  let contenidoInterno;
+  if(c?.img){
+    contenidoInterno = `<image href="${c.img}" x="4" y="4" width="18" height="18" clip-path="circle(9px at 9px 9px)" preserveAspectRatio="xMidYMid slice" opacity=".55"/>`;
+  } else if(rubroImg){
+    contenidoInterno = `<image href="${FLUENT_BASE}${rubroImg}" x="5.5" y="5.5" width="15" height="15" opacity=".55"/>`;
+  } else {
+    contenidoInterno = `<circle cx="13" cy="13" r="3.5" fill="white" opacity=".6"/>`;
+  }
+  // Pin con borde punteado y signo "?" para indicar ubicación aproximada
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 26 26">
+    <filter id="sg"><feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="rgba(0,0,0,0.18)"/></filter>
+    <circle cx="13" cy="13" r="11" fill="white" filter="url(#sg)"/>
+    <circle cx="13" cy="13" r="10" fill="#B0B0B0" stroke="white" stroke-width="2" stroke-dasharray="3 2"/>
+    ${contenidoInterno}
+    <text x="20" y="8" font-size="9" font-weight="800" fill="#C99A3E" font-family="sans-serif">?</text>
+  </svg>`;
+  return L.divIcon({ html: svg, iconSize:[32,32], iconAnchor:[16,16], popupAnchor:[0,-18], className:'' });
 }
 
 function setMapaRubroFiltro(rubro){
@@ -10330,54 +11065,101 @@ function renderMarcadoresMap(){
   // Intentar completar coordenadas de comercios que solo tienen la dirección cargada
   geocodearComerciosPendientes();
 
-  let comerciosVisibles = state.comercios.filter(c => {
+  // Comercios con coordenadas precisas
+  let comerciosConCoords = state.comercios.filter(c => {
     if(!c.lat || !c.lng) return false;
     if(c.ciudad && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
     if(mapaRubroFiltro !== 'Todos' && c.rubro !== mapaRubroFiltro) return false;
     return true;
   });
 
-  if(comerciosVisibles.length === 0) return;
+  // Comercios sin coordenadas (todavía geocodificando o sin dirección)
+  let comerciosSinCoords = state.comercios.filter(c => {
+    if(c.lat && c.lng) return false;
+    if(c.ciudad && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
+    if(mapaRubroFiltro !== 'Todos' && c.rubro !== mapaRubroFiltro) return false;
+    return true;
+  });
 
-  comerciosVisibles.forEach(c => {
+  const todosVisibles = [...comerciosConCoords, ...comerciosSinCoords];
+  if(todosVisibles.length === 0) return;
+
+  // Pines con coordenadas exactas
+  comerciosConCoords.forEach(c => {
     const dias   = planDiasRestantes(c);
     const activo = c.plan && c.planVence && dias !== null && dias >= 0 && (c.pagos?.length > 0);
     const icono  = iconoPin(activo, c);
 
     const horarioTexto = c.horario || (c.turnos ? textoTurnos(c.turnos) : 'Consultar horario');
-    const diasTexto    = c.dias?.length ? c.dias.join(' · ') : '';
+    const diasTexto    = Array.isArray(c.dias) && c.dias.length ? c.dias.join(' · ') : (typeof c.dias === 'string' && c.dias ? c.dias : '');
 
     const popupHtml = `
-      <div style="font-family:'Manrope',sans-serif;min-width:190px;max-width:230px;">
-        ${c.img ? `<img src="${c.img}" style="width:100%;height:70px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : ''}
-        <div style="font-weight:800;font-size:14px;color:#1a2340;margin-bottom:2px;line-height:1.2;">${c.nombre}</div>
-        <div style="font-size:11.5px;color:#7a7a8a;margin-bottom:5px;">${c.rubro||''}${activo ? ' · <span style="color:#5C7355;font-weight:700;">✅ Activo</span>' : ''}</div>
-        ${horarioTexto ? `<div style="font-size:11px;color:#555;margin-bottom:2px;">🕐 ${horarioTexto}</div>` : ''}
-        ${diasTexto    ? `<div style="font-size:11px;color:#555;margin-bottom:6px;">📅 ${diasTexto}</div>` : ''}
-        <div style="display:flex;gap:6px;margin-top:6px;">
-          <button onclick="verLocalDesdeMap('${c.id}')"
-            style="flex:1;padding:8px;background:#5C7355;color:white;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;">
-            Ver local →
-          </button>
-          <button onclick="comoLlegar('${c.id}')"
-            style="padding:8px 10px;background:#f0f0f0;border:none;border-radius:9px;font-size:13px;cursor:pointer;">
-            📍
-          </button>
+      <div style="font-family:'Manrope',sans-serif;width:220px;position:relative;">
+        <button onclick="if(window._mapPopupRef) window._mapPopupRef.closePopup();"
+          style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:white;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;line-height:1;">✕</button>
+        ${c.img ? `<div style="width:100%;height:110px;overflow:hidden;border-radius:14px 14px 0 0;background:#e8e4dc;">
+          <img src="${c.img}" style="width:100%;height:100%;object-fit:contain;object-position:center;display:block;">
+        </div>` : `<div style="width:100%;height:48px;border-radius:14px 14px 0 0;background:linear-gradient(135deg,#5C7355,#8aab82);"></div>`}
+        <div style="padding:10px 12px 12px;">
+          <div style="font-weight:800;font-size:14px;color:#1a2340;margin-bottom:2px;line-height:1.25;">${c.nombre}</div>
+          <div style="font-size:11.5px;color:#7a7a8a;margin-bottom:6px;">${c.rubro||''}${activo ? ' · <span style="color:#5C7355;font-weight:700;">✅ Activo</span>' : ''}</div>
+          ${horarioTexto ? `<div style="font-size:11px;color:#555;margin-bottom:2px;">🕐 ${horarioTexto}</div>` : ''}
+          ${diasTexto    ? `<div style="font-size:11px;color:#555;margin-bottom:6px;">📅 ${diasTexto}</div>` : ''}
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button onclick="verLocalDesdeMap('${c.id}')"
+              style="flex:1;padding:8px;background:#5C7355;color:white;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;">
+              Ver local →
+            </button>
+            <button onclick="comoLlegar('${c.id}')"
+              style="padding:8px 10px;background:#f0f0f0;border:none;border-radius:9px;font-size:13px;cursor:pointer;">
+              📍
+            </button>
+          </div>
         </div>
       </div>`;
 
-    L.marker([c.lat, c.lng], { icon: icono })
-      .bindPopup(popupHtml, { maxWidth: 240, closeButton: false, className: 'puent-popup' })
-      .addTo(mapaMarkersLayer);
+    const marker = L.marker([c.lat, c.lng], { icon: icono })
+      .bindPopup(popupHtml, { maxWidth: 240, closeButton: false, className: 'puent-popup' });
+    marker.on('popupopen', ()=>{ window._mapPopupRef = marker; });
+    marker.addTo(mapaMarkersLayer);
   });
 
-  // Ajustar vista
+  // Pines sin coordenadas — agrupados cerca del centro de la ciudad con pequeño offset
+  if(comerciosSinCoords.length > 0){
+    const BASE_LAT = CIUDAD_CENTRO.lat, BASE_LNG = CIUDAD_CENTRO.lng;
+    const PASO = 0.00035; // ~35m entre pines
+    comerciosSinCoords.forEach((c, i) => {
+      const fila = Math.floor(i / 5), col = i % 5;
+      const lat = BASE_LAT + fila * PASO;
+      const lng = BASE_LNG + (col - 2) * PASO;
+      const icono = iconoPinSinUbicar(c);
+      const popupHtml = `
+        <div style="font-family:'Manrope',sans-serif;min-width:190px;max-width:230px;">
+          ${c.img ? `<img src="${c.img}" style="width:100%;height:70px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : ''}
+          <div style="font-weight:800;font-size:14px;color:#1a2340;margin-bottom:2px;">${c.nombre}</div>
+          <div style="font-size:11px;color:#C99A3E;margin-bottom:6px;">📍 Ubicación exacta no disponible aún</div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="verLocalDesdeMap('${c.id}')"
+              style="flex:1;padding:8px;background:#5C7355;color:white;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;">
+              Ver local →
+            </button>
+          </div>
+        </div>`;
+      L.marker([lat, lng], { icon: icono })
+        .bindPopup(popupHtml, { maxWidth: 240, closeButton: false, className: 'puent-popup' })
+        .addTo(mapaMarkersLayer);
+    });
+  }
+
+  // Ajustar vista a los que tienen coords exactas; si no hay ninguno, centrar en la ciudad
   try {
-    if(comerciosVisibles.length === 1){
-      mapaCityInstance.setView([comerciosVisibles[0].lat, comerciosVisibles[0].lng], CIUDAD_ZOOM);
-    } else {
-      const bounds = L.latLngBounds(comerciosVisibles.map(c => [c.lat, c.lng]));
+    if(comerciosConCoords.length === 1){
+      mapaCityInstance.setView([comerciosConCoords[0].lat, comerciosConCoords[0].lng], CIUDAD_ZOOM);
+    } else if(comerciosConCoords.length > 1){
+      const bounds = L.latLngBounds(comerciosConCoords.map(c => [c.lat, c.lng]));
       mapaCityInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+    } else {
+      mapaCityInstance.setView([CIUDAD_CENTRO.lat, CIUDAD_CENTRO.lng], CIUDAD_ZOOM);
     }
   } catch(e){}
 }
@@ -10391,28 +11173,9 @@ function verLocalDesdeMap(comercioId){
 (function(){
   const st = document.createElement('style');
   st.textContent = `
-    .puent-popup .leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:0;}
-    .puent-popup .leaflet-popup-content{margin:12px 12px 10px;}
+    .puent-popup .leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,0.18);padding:0;overflow:hidden;}
+    .puent-popup .leaflet-popup-content{margin:0;padding:0;}
     .puent-popup .leaflet-popup-tip-container{display:none;}
-  `;
-  document.head.appendChild(st);
-})();
-
-// Estilos del popup de Leaflet personalizados
-(function(){
-  const st = document.createElement('style');
-  st.textContent = `
-    .puent-popup .leaflet-popup-content-wrapper {
-      border-radius: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      padding: 0;
-    }
-    .puent-popup .leaflet-popup-content {
-      margin: 14px 14px 12px;
-    }
-    .puent-popup .leaflet-popup-tip-container {
-      display: none;
-    }
   `;
   document.head.appendChild(st);
 })();
@@ -10546,7 +11309,7 @@ function adminDesktopTab(tab){
 async function admRenderDashboard(){
   const cont=document.getElementById('admDesktopContent');
   try{
-    const [cs,vs,vts,cls,msgs]=await Promise.all([db.collection('comercios').get(),db.collection('vendedores').get(),db.collection('ventas').get(),db.collection('clientes').get(),db.collection('mensajes_admin').get()]);
+    const [cs,vs,vts,cls,msgs]=await Promise.all([db.collection('comercios').get({ source: 'server' }),db.collection('vendedores').get({ source: 'server' }),db.collection('ventas').get({ source: 'server' }),db.collection('clientes').get({ source: 'server' }),db.collection('mensajes_admin').get({ source: 'server' })]);
     const comercios=cs.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera');
     const ventas=vts.docs.map(d=>({...d.data(),_docId:d.id}));
     const ahora=new Date(),inicioMes=new Date(ahora.getFullYear(),ahora.getMonth(),1);
@@ -10815,7 +11578,7 @@ async function admRenderProductosDesktop(){
 async function admRenderComerciosDesktop(){
   const cont=document.getElementById('admDesktopContent');
   try{
-    const snap=await db.collection('comercios').get();
+    const snap=await db.collection('comercios').get({ source: 'server' });
     _adminComercios=snap.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera');
     cont.innerHTML=`
       <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
@@ -11150,7 +11913,7 @@ async function admRenderRepartidoresDesktop(){
     _adminReps = lista;
     const REP_ESTADO = { activo:{label:'Activo',bg:'#E3F3EA',color:'#2F7A55'}, inactivo:{label:'Inactivo',bg:'#F0F0EE',color:'#666'}, suspendido:{label:'Suspendido',bg:'#FDE8E8',color:'#A32020'} };
     cont.innerHTML = `
-      <div class="adm-section">
+      <div class="adm-section" style="margin-bottom:18px;">
         <table class="adm-table">
           <thead><tr><th>Nombre</th><th>Teléfono</th><th>Vehículo</th><th>Alta</th><th>Entregas</th><th>Estado</th><th></th></tr></thead>
           <tbody>${lista.length ? lista.map(r=>{
@@ -11169,8 +11932,120 @@ async function admRenderRepartidoresDesktop(){
           }).join('') : '<tr><td colspan="7" style="color:#AAA;text-align:center;padding:24px;">Sin repartidores registrados</td></tr>'}
           </tbody>
         </table>
+      </div>
+      <div class="adm-section">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:10px;">📦 Envíos pendientes</div>
+        <div id="adminEnviosPendientesDesktop"><p style="color:#AAA;font-size:13px;">Cargando…</p></div>
       </div>`;
+    adminCargarEnviosPendientes('adminEnviosPendientesDesktop');
   }catch(e){ cont.innerHTML=`<p style="color:red;">Error al cargar: ${e.message}</p>`; }
+}
+
+// ── Envíos pendientes de TODOS los comercios, en un solo lugar ──────────
+// Hasta que exista un login propio para el repartidor, esto es lo que le
+// permite al admin ver y asignar manualmente cualquier solicitud de envío,
+// venga del comercio que venga. targetId es el id del contenedor donde
+// se pinta (difiere entre la pantalla mobile y la de escritorio).
+async function adminCargarEnviosPendientes(targetId){
+  const el = document.getElementById(targetId || 'adminEnviosPendientesList');
+  if(!el) return;
+  try{
+    if(!firebaseListo || !db){ el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Sin conexión a Firestore.</p>'; return; }
+    const snap = await db.collection('pedidosEnvio')
+      .where('estado','in',['pendiente','confirmado','pagado','asignado','en_camino'])
+      .get();
+    const pedidos = snap.docs.map(d=>({...d.data(), id:d.id}))
+      .sort((a,b)=> new Date(b.fechaCreacion||0) - new Date(a.fechaCreacion||0));
+
+    if(!pedidos.length){
+      el.innerHTML = '<div class="empty" style="padding:18px;"><div class="s">No hay envíos pendientes en este momento.</div></div>';
+      return;
+    }
+
+    const estadoLabel = {
+      pendiente:  {txt:'🆕 Nuevo',              bg:'#e8f4fd',col:'#1a6b9a'},
+      confirmado: {txt:'💬 Pago en trámite',     bg:'#fff8e6',col:'#7a5a00'},
+      pagado:     {txt:'✅ Pago confirmado',     bg:'#eaf5ea',col:'#1a6b3a'},
+      asignado:   {txt:'📦 Repartidor asignado', bg:'#f0e8f8',col:'#5a1a9a'},
+      en_camino:  {txt:'🚴 En camino',           bg:'#fff0e0',col:'#a05a00'},
+    };
+    const reps = (_adminReps||[]).filter(r=>r.estado==='activo');
+
+    el.innerHTML = pedidos.map(p=>{
+      const est = estadoLabel[p.estado] || {txt:p.estado,bg:'#eee',col:'#333'};
+      const puedeAsignar   = (p.estado==='pagado' || p.estado==='confirmado' || p.estado==='pendiente') && !p.repartidorId;
+      const puedeEnCamino  = p.estado==='asignado';
+      const puedeEntregado = p.estado==='asignado' || p.estado==='en_camino';
+
+      const selectorRep = puedeAsignar
+        ? (reps.length ? `
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <select id="adminRepSel-${p.id}" style="flex:1;min-width:160px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;">
+              <option value="">— Elegir repartidor —</option>
+              ${reps.map(r=>`<option value="${r._docId}" data-nombre="${r.nombre}" data-tel="${r.tel||''}">${r.vehiculo==='bici'?'🚴':r.vehiculo==='auto'?'🚗':'🛵'} ${r.nombre}</option>`).join('')}
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="adminAsignarRepartidorAEnvio('${p.id}','${targetId||'adminEnviosPendientesList'}')">📦 Asignar</button>
+          </div>`
+          : `<div style="font-size:12px;color:var(--muted);background:#fafafa;border-radius:8px;padding:8px;margin-top:8px;">No hay repartidores activos.</div>`)
+        : '';
+
+      // Marcar "en camino" o "entregado" no requiere ninguna confirmación del
+      // cliente ni del repartidor — el admin lo puede avanzar directamente
+      // mientras no exista un login propio para el repartidor.
+      const botonesEstado = (puedeEnCamino || puedeEntregado) ? `
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          ${puedeEnCamino  ? `<button class="btn btn-primary btn-sm" style="flex:1;" onclick="adminCambiarEstadoEnvio('${p.id}','en_camino','${targetId||'adminEnviosPendientesList'}')">🚴 Marcar en camino</button>` : ''}
+          ${puedeEntregado ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminCambiarEstadoEnvio('${p.id}','entregado','${targetId||'adminEnviosPendientesList'}')">✔️ Marcar entregado</button>` : ''}
+        </div>` : '';
+
+      return `
+        <div class="card" style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+            <div>
+              <div style="font-size:13px;font-weight:800;color:var(--ink);">${p.comercioNombre||'Comercio'} → ${p.clienteNombre||'Cliente'}</div>
+              <div style="font-size:11.5px;color:var(--muted);">${p.productoNombre||'—'}</div>
+            </div>
+            <span style="font-size:10.5px;font-weight:700;background:${est.bg};color:${est.col};padding:3px 10px;border-radius:100px;white-space:nowrap;flex-shrink:0;">${est.txt}</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);">📍 ${p.direccion||'—'}${p.clienteTel?` · 📞 ${p.clienteTel}`:''}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">💰 $${(p.total||0).toLocaleString('es-AR')} + envío $${(p.costoEnvio||0).toLocaleString('es-AR')}</div>
+          ${p.repartidorNombre ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">🛵 Asignado a: <strong>${p.repartidorNombre}</strong></div>` : ''}
+          ${selectorRep}
+          ${botonesEstado}
+        </div>`;
+    }).join('');
+  }catch(e){
+    console.error('Error cargando envíos pendientes:', e);
+    el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar envíos pendientes: '+e.message+'</p>';
+  }
+}
+
+function adminAsignarRepartidorAEnvio(pedidoId, targetId){
+  const sel = document.getElementById('adminRepSel-'+pedidoId);
+  if(!sel || !sel.value){ toast('Elegí un repartidor primero'); return; }
+  const opt = sel.selectedOptions[0];
+  const repNombre = opt.dataset.nombre, repTel = opt.dataset.tel;
+  if(firebaseListo && db){
+    db.collection('pedidosEnvio').doc(pedidoId).update({
+      estado:'asignado', repartidorId:sel.value, repartidorNombre:repNombre, repartidorTel:repTel
+    }).then(()=>{
+      toast('✅ Repartidor asignado');
+      adminCargarEnviosPendientes(targetId);
+    }).catch(e=>toast('Error: '+e.message));
+  }
+}
+
+// Avanza el estado de un envío (en_camino / entregado) directamente desde el
+// admin. No depende de que el cliente ni el repartidor confirmen nada — es
+// la gestión manual mientras no exista login propio del repartidor.
+function adminCambiarEstadoEnvio(pedidoId, nuevoEstado, targetId){
+  if(!firebaseListo || !db) return;
+  db.collection('pedidosEnvio').doc(pedidoId).update({ estado: nuevoEstado })
+    .then(()=>{
+      toast(nuevoEstado==='entregado' ? '✔️ Marcado como entregado' : '🚴 Marcado en camino');
+      adminCargarEnviosPendientes(targetId);
+    })
+    .catch(e=>toast('Error: '+e.message));
 }
 
 async function admRenderMensajesDesktop(){
@@ -11342,7 +12217,7 @@ async function adminCargarComercios(){
   const el = document.getElementById('adminComerciosList');
   if(el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
-    const snap = await db.collection('comercios').get();
+    const snap = await db.collection('comercios').get({ source: 'server' });
     _adminComercios = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(c=>c.estado!=='papelera');
     if(el) adminRenderComercios(_adminComercios);
   }catch(e){ if(el) el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
@@ -11474,7 +12349,7 @@ async function adminVerComercio(docId){
     const _idParaBuscar = c.id || c._docId || docId;
     const [snapVentas, snapVal] = await Promise.all([
       (firebaseListo && _idParaBuscar) ? db.collection('ventas').where('comercioId','==', _idParaBuscar).get() : null,
-      (firebaseListo && _idParaBuscar) ? db.collection('valoraciones').where('hacia','==', _idParaBuscar).get() : null
+      (firebaseListo && c.uid) ? db.collection('valoraciones').where('paraUid','==', c.uid).get() : null
     ]);
 
     if(snapVentas && !snapVentas.empty){
@@ -11503,7 +12378,7 @@ async function adminVerComercio(docId){
       valoracionesHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">⭐ ${prom} promedio · ${vals.length} valoración(es)</div>` +
         vals.map(v=>`
           <div style="padding:8px 0;border-bottom:.5px solid var(--line);">
-            <div style="font-size:12px;">⭐ ${'★'.repeat(v.estrellas||0)}${'☆'.repeat(5-(v.estrellas||0))} — <span style="font-weight:700;">${v.nombreDe||'Anónimo'}</span></div>
+            <div style="font-size:12px;">⭐ ${'★'.repeat(v.estrellas||0)}${'☆'.repeat(5-(v.estrellas||0))} — <span style="font-weight:700;">${v.deNombre||'Anónimo'}</span></div>
             ${v.comentario ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">"${v.comentario}"</div>` : ''}
           </div>`).join('');
     }
@@ -11756,11 +12631,21 @@ async function adminGuardarEdicionComercio(){
   }
   try{
     await db.collection('comercios').doc(docId).set(cambios, {merge:true});
-    // Actualizar state local
-    const idx = state.comercios.findIndex(c=>c.id===docId || (c._docId && c._docId===docId));
-    if(idx>=0) Object.assign(state.comercios[idx], cambios);
-    const idxA = _adminComercios.findIndex(c=>(c._docId||c.id)===docId);
-    if(idxA>=0) Object.assign(_adminComercios[idxA], cambios);
+    // Leer desde servidor para confirmar que el cambio persistió
+    const docFresh = await db.collection('comercios').doc(docId).get({ source: 'server' });
+    const dataFresh = docFresh.exists ? { ...docFresh.data(), id: docId, _docId: docId } : null;
+    if(dataFresh){
+      const idx = state.comercios.findIndex(c=>c.id===docId || (c._docId && c._docId===docId));
+      if(idx>=0) state.comercios[idx] = dataFresh; else state.comercios.push(dataFresh);
+      const idxA = _adminComercios.findIndex(c=>(c._docId||c.id)===docId);
+      if(idxA>=0) _adminComercios[idxA] = dataFresh; else _adminComercios.push(dataFresh);
+    } else {
+      // fallback: actualizar con los cambios locales
+      const idx = state.comercios.findIndex(c=>c.id===docId || (c._docId && c._docId===docId));
+      if(idx>=0) Object.assign(state.comercios[idx], cambios);
+      const idxA = _adminComercios.findIndex(c=>(c._docId||c.id)===docId);
+      if(idxA>=0) Object.assign(_adminComercios[idxA], cambios);
+    }
     toast('✅ Comercio actualizado');
     renderLocales(); renderFeed();
     if(window.innerWidth>=900) admAbrirComercioDetalle(docId);
@@ -14471,7 +15356,15 @@ function renderCAlertasComercio(){
     return misIds.indexOf(v.comercioId) >= 0 && v.estado === 'pendiente';
   });
   var porPagar = state.ventas.filter(function(v){
-    return misIds.indexOf(v.comercioId) >= 0 && (v.estado === 'confirmada' || v.estado === 'confirmado');
+    // Solo cuenta como "comisión pendiente" si hubo un ConectorT de por medio
+    // y realmente se generó una comisión a pagar (comisionMonto > 0). Las
+    // ventas directas cliente-PuenT-comercio (pedidos personalizados, ofertas
+    // sin conector, etc.) quedan con comisionMonto:0 y vendedorUid:null — son
+    // solo informativas, no comisiones que el comercio le deba a nadie.
+    return misIds.indexOf(v.comercioId) >= 0
+      && (v.estado === 'confirmada' || v.estado === 'confirmado')
+      && !!v.vendedorUid
+      && Number(v.comisionMonto || 0) > 0;
   });
 
   var html = '';
@@ -14491,30 +15384,21 @@ function renderCAlertasComercio(){
         +'</div>';
     }).join('');
     if(sinConfirmar.length > 3) items += '<div style="font-size:11px;opacity:.7;padding-top:4px;">y '+(sinConfirmar.length-3)+' más...</div>';
-    html += '<div style="background:#3A5FA0;color:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;cursor:pointer;" onclick="renderCOperaciones();showScreen(\'c-operaciones\')">'
+    html += '<div class="card" style="background:#3A5FA0;color:#fff;border:none;cursor:pointer;" onclick="renderCOperaciones();showScreen(\'c-operaciones\')">'
       +'<div style="font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;opacity:.85;">🕒 Reservas pendientes ('+sinConfirmar.length+')</div>'
       +items
       +'<div style="margin-top:10px;font-size:12px;font-weight:700;opacity:.9;">Tap para gestionar →</div>'
       +'</div>';
   }
 
+  // La card "Comisiones pendientes" ya no se muestra en el panel — solo queda
+  // el badge numérico sobre el botón "Comisiones" de la grilla.
   if(porPagar.length > 0){
-    var items2 = porPagar.slice(0,3).map(function(v){
-      var vend = v.vendedorId ? state.vendedores.find(function(x){ return x.id===v.vendedorId||x.uid===v.vendedorId; }) : null;
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(200,160,0,.2);">'
-        +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(v.clienteNombre||'—')+'</div>'
-        +'<div style="font-size:11px;color:#8A6400;">Conector: '+(vend ? vend.nombre : '—')+'</div>'
-        +'</div>'
-        +'<strong style="font-size:14px;color:#2F7A55;margin-left:8px;">$'+Number(v.comisionMonto||0).toLocaleString('es-AR')+'</strong>'
-        +'</div>';
-    }).join('');
-    if(porPagar.length > 3) items2 += '<div style="font-size:11px;color:#8A6400;padding-top:4px;">y '+(porPagar.length-3)+' más...</div>';
-    html += '<div style="background:#FFF8EC;border:1.5px solid #E8C84A;border-radius:14px;padding:14px 16px;margin-bottom:8px;cursor:pointer;" onclick="renderCOperaciones();showScreen(\'c-operaciones\')">'
-      +'<div style="font-size:12px;font-weight:800;color:#8A6400;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">⏳ Comisiones pendientes ('+porPagar.length+')</div>'
-      +items2
-      +'<div style="margin-top:10px;font-size:12px;font-weight:700;color:#8A6400;">Tap para transferir →</div>'
-      +'</div>';
+    const badgeEl = document.getElementById('badgeComisionesPendientes');
+    if(badgeEl){ badgeEl.textContent = porPagar.length; badgeEl.style.display = 'inline-block'; }
+  } else {
+    const badgeEl = document.getElementById('badgeComisionesPendientes');
+    if(badgeEl) badgeEl.style.display = 'none';
   }
 
   box.innerHTML = html;
@@ -14995,7 +15879,7 @@ function cCancelarVentaPendiente(ventaId){
     if(!c) return;
     if(c.estado === 'baja_solicitada'){
       el.innerHTML = `
-        <div style="background:#F5E6E6;border:1.5px solid #d4a0a0;border-radius:12px;padding:14px 16px;">
+        <div class="card" style="background:#F5E6E6;border:1.5px solid #d4a0a0;">
           <div style="font-size:13px;font-weight:800;color:#7A1A1A;margin-bottom:4px;">🔴 Solicitud de baja enviada</div>
           <div style="font-size:12px;color:#7A1A1A;line-height:1.5;">Tu solicitud fue recibida. El equipo de PuenT la va a procesar en los próximos días y te va a contactar para confirmar.</div>
         </div>`;
@@ -15036,6 +15920,18 @@ function cCancelarVentaPendiente(ventaId){
     if(localStorage.getItem('srTMinimizado')==='1'){
       document.getElementById('srTFloatBig').style.display = 'none';
       document.getElementById('srTMiniBtn').style.display = 'block';
+    }
+  </script>
+
+  <!-- PWA: registra el service worker para que la app sea instalable.
+       sw.js tiene que estar subido en la MISMA carpeta que este index.html. -->
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('/sw.js').catch(function(e){
+          console.warn('No se pudo registrar el service worker:', e);
+        });
+      });
     }
   </script>
 
