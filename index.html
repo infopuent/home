@@ -823,7 +823,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <!-- Pregunta + chips de rol -->
     <div style="padding:0 16px 24px; display:flex; flex-direction:column; gap:10px; flex:1;">
 
-      <div style="font-size:15px; font-weight:800; color:#1A1A1A; text-align:center; margin-bottom:4px;">¿Cómo usás PuenT?</div>
+      <div style="text-align:center;margin-bottom:6px;">
+        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:4px;">Bienvenido a PuenT 👋</div>
+        <div style="font-size:13px;font-weight:500;color:#888;line-height:1.5;">Tu ciudad tiene todo lo que buscás.<br>Descubrilo acá primero.</div>
+      </div>
 
       <!-- Chip 1: Compradores -->
       <button onclick="showScreen('feed')"
@@ -833,7 +836,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="width:44px;height:44px;border-radius:13px;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🛒</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Ver ofertas y locales</div>
-          <div style="font-size:11.5px;font-weight:600;color:#5A4A00;">Ofertas, locales y productos</div>
+          <div style="font-size:11.5px;font-weight:600;color:#5A4A00;">Descubrí productos y ofertas de los comercios de tu ciudad</div>
         </div>
         <div style="font-size:18px;color:#5A4A00;flex-shrink:0;">›</div>
       </button>
@@ -846,14 +849,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
 
       <!-- Chip Registro: Cliente -->
-      <button onclick="showScreen('screen-login-cliente')"
+      <button onclick="showScreen('login-cliente')"
         style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:transform .1s,border-color .15s;"
         onmousedown="this.style.transform='scale(0.98)';this.style.borderColor='#FFD400';" onmouseup="this.style.transform='';this.style.borderColor='#EAEAEA';"
         ontouchstart="this.style.transform='scale(0.98)';this.style.borderColor='#FFD400';" ontouchend="this.style.transform='';this.style.borderColor='#EAEAEA';">
         <div style="width:44px;height:44px;border-radius:13px;background:#FFF9E0;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🙋</div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Registrarse como cliente</div>
-          <div style="font-size:11.5px;font-weight:500;color:#888;">Reservá, guardá tus códigos y calificá</div>
+          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Registrarme como cliente</div>
+          <div style="font-size:11.5px;font-weight:500;color:#888;">Guardá tus favoritos, reservá y retirá en el local</div>
         </div>
         <div style="font-size:18px;color:#CCC;flex-shrink:0;">›</div>
       </button>
@@ -861,27 +864,35 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <!-- Chip 2: Comercios -->
       <button onclick="showScreen('bienvenida-comercio')"
         style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:transform .1s,border-color .15s;"
-        onmousedown="this.style.transform='scale(0.98)';this.style.borderColor='#E890A6';" onmouseup="this.style.transform='';this.style.borderColor='#EAEAEA';"
-        ontouchstart="this.style.transform='scale(0.98)';this.style.borderColor='#E890A6';" ontouchend="this.style.transform='';this.style.borderColor='#EAEAEA';">
-        <div style="width:44px;height:44px;border-radius:13px;background:#FCEDF1;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏬</div>
+        onmousedown="this.style.transform='scale(0.98)';this.style.borderColor='#FF6600';" onmouseup="this.style.transform='';this.style.borderColor='#EAEAEA';"
+        ontouchstart="this.style.transform='scale(0.98)';this.style.borderColor='#FF6600';" ontouchend="this.style.transform='';this.style.borderColor='#EAEAEA';">
+        <div style="width:44px;height:44px;border-radius:13px;background:#FFF0E8;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏬</div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Tengo un comercio</div>
-          <div style="font-size:11.5px;font-weight:500;color:#888;">Sumar mi local a PuenT</div>
+          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Sumar mi negocio a PuenT</div>
+          <div style="font-size:11.5px;font-weight:500;color:#888;margin-bottom:3px;">Los primeros 30 días son gratis para probarlo</div>
+          <div style="font-size:10.5px;font-weight:600;color:#BBB;">Tiendas · Profesionales · Servicios</div>
         </div>
         <div style="font-size:18px;color:#CCC;flex-shrink:0;">›</div>
       </button>
 
       <!-- Chip 3: ConectorT -->
-      <button onclick="elegirRolParaRegistro('vendedor')"
-        style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:transform .1s,border-color .15s;"
-        onmousedown="this.style.transform='scale(0.98)';this.style.borderColor='#4A90D9';" onmouseup="this.style.transform='';this.style.borderColor='#EAEAEA';"
-        ontouchstart="this.style.transform='scale(0.98)';this.style.borderColor='#4A90D9';" ontouchend="this.style.transform='';this.style.borderColor='#EAEAEA';">
+      <button disabled
+        style="width:100%;background:white;border:1.5px solid #EAEAEA;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:not-allowed;text-align:left;opacity:.85;position:relative;">
         <div style="width:44px;height:44px;border-radius:13px;background:#E8F3FD;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🔗</div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:800;color:#1A1A1A;margin-bottom:2px;">Ser ConectorT</div>
-          <div style="font-size:11.5px;font-weight:500;color:#888;">Ganar comisión vendiendo</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+            <div style="font-size:14px;font-weight:800;color:#1A1A1A;">Ser ConectorT</div>
+            <span style="background:#E53935;color:white;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:100px;white-space:nowrap;">Próximamente</span>
+          </div>
+          <div style="font-size:11.5px;font-weight:500;color:#888;">Vendé productos de los comercios de tu ciudad y ganá comisión</div>
         </div>
-        <div style="font-size:18px;color:#CCC;flex-shrink:0;">›</div>
+      </button>
+
+      <!-- Ya tenés cuenta: login único, entra directo a tu panel según tu rol -->
+      <button onclick="showScreen('login-cliente')"
+        style="width:100%;background:#FAFAFA;border:1px dashed #DDD;border-radius:14px;padding:11px 14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;margin-top:2px;">
+        <span style="font-size:16px;">🔑</span>
+        <span style="font-size:12.5px;font-weight:700;color:#666;">¿Ya tenés cuenta? Iniciá sesión</span>
       </button>
 
       <!-- Footer -->
@@ -1086,7 +1097,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <p style="text-align:center; font-size:14px; font-weight:700; color:var(--ink); margin:18px 0 4px;">Sumate a PuenT.</p>
     <p style="text-align:center; font-size:13px; color:var(--muted); margin:0 0 14px;">Tu comercio tiene algo para mostrar.</p>
 
-    <button class="btn btn-primary" onclick="iniciarWizardComercio()">Registrar mi comercio</button>
+    <button class="btn btn-primary" onclick="showScreen('registro-comercio')">Registrar mi comercio</button>
     <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Es gratis empezar. Te lleva un par de minutos.</p>
   </div>
 
@@ -1401,7 +1412,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="ic" style="background:var(--green)">🔗</div>
         <div><div class="tt">ConectorT</div><div class="ss">Trabajo independiente y comisiono</div></div>
       </button>
-      <button class="role-btn" onclick="iniciarWizardComercio()">
+      <button class="role-btn" onclick="showScreen('bienvenida-comercio')">
         <div class="ic" style="background:var(--blue)">🏬</div>
         <div><div class="tt">Comercio</div><div class="ss">Escaneo códigos y gestiono pedidos</div></div>
       </button>
@@ -1436,103 +1447,114 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ SCREEN: WIZARD REGISTRO COMERCIO ============ -->
-  <div class="screen hidden" id="screen-wizard-comercio" style="padding:0;min-height:100vh;background:#FFFFFF;">
+  <!-- ============ SCREEN: REGISTRO ============ -->
+  <!-- ============ SCREEN: REGISTRO COMERCIO SIMPLE ============ -->
+  <div class="screen hidden" id="screen-registro-comercio" style="padding:28px 20px 32px;">
+    <div class="link-back" onclick="showScreen('bienvenida-comercio')">← Volver</div>
+    <div class="kicker" style="margin-top:8px;">Registro de comercio</div>
+    <h1 class="page-title" style="margin-bottom:4px;">Creá tu cuenta</h1>
+    <p class="page-sub" style="margin-bottom:20px;">Solo necesitamos tres datos para empezar. El resto lo configurás en tu panel.</p>
 
-    <!-- Barra de progreso -->
-    <div style="position:sticky;top:0;z-index:10;background:#fff;padding:12px 20px 0;border-bottom:1px solid #F0F0F0;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <button onclick="wizardAtras()" style="background:none;border:none;font-size:13px;font-weight:700;color:#888;cursor:pointer;padding:0;">← Volver</button>
-        <div style="flex:1;height:4px;background:#F0F0F0;border-radius:4px;overflow:hidden;">
-          <div id="wizardProgressBar" style="height:100%;background:linear-gradient(90deg,#FF6600,#FFB300);border-radius:4px;transition:width .3s ease;width:25%;"></div>
-        </div>
-        <span id="wizardStepLabel" style="font-size:11px;font-weight:800;color:#AAA;white-space:nowrap;">1 de 4</span>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+
+      <input id="rcNombre" type="text" placeholder="Nombre del comercio o negocio" autocomplete="organization"
+        style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+
+      <input id="rcEmail" type="email" placeholder="Correo electrónico" autocomplete="email"
+        style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+
+      <div style="position:relative;">
+        <input id="rcPass" type="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password"
+          style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+        <button onclick="togglePassVisibility('rcPass',this)" type="button"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#AAA;">👁</button>
+      </div>
+
+      <div style="position:relative;">
+        <input id="rcPass2" type="password" placeholder="Repetí la contraseña" autocomplete="new-password"
+          style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+        <button onclick="togglePassVisibility('rcPass2',this)" type="button"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#AAA;">👁</button>
+      </div>
+
+    </div>
+
+    <!-- Recordatorio 30 días -->
+    <div style="background:#F0F7F2;border:1.5px solid #A8D5B5;border-radius:13px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;margin-bottom:18px;">
+      <span style="font-size:18px;flex-shrink:0;">🎁</span>
+      <div style="font-size:12.5px;color:#2F5C3F;line-height:1.6;">
+        <strong>30 días gratis, sin compromiso.</strong> Una vez que activemos tu comercio, tenés un mes para probarlo con todo incluido.
       </div>
     </div>
 
-    <!-- Contenedor de pasos -->
-    <div style="padding:20px 20px 32px;">
+    <button onclick="registrarComercioSimple()" style="width:100%;padding:15px;border-radius:14px;background:#FF6600;color:white;font-weight:800;font-size:15px;border:none;cursor:pointer;margin-bottom:12px;">
+      Crear mi cuenta →
+    </button>
 
-      <!-- PASO 1: Nombre del comercio -->
-      <div id="wizardPaso1">
-        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 1</div>
-        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;">¿Cómo se llama tu comercio?</div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px;">El nombre que tus clientes ya conocen.</div>
-        <input id="wizardNombre" type="text" placeholder="Ej: Rotisería Don Jorge" maxlength="60"
-          style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-weight:600;color:#1A1A1A;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#FF6600'" onblur="this.style.borderColor='#EAEAEA'"
-          oninput="document.getElementById('wizardNombreCounter').textContent=this.value.length+'/60'">
-        <div style="text-align:right;font-size:11px;color:#BBB;margin-top:4px;" id="wizardNombreCounter">0/60</div>
-        <button onclick="wizardSiguiente(1)" style="width:100%;margin-top:20px;padding:15px;border-radius:14px;border:none;background:#FF6600;color:white;font-size:15px;font-weight:800;cursor:pointer;">Siguiente →</button>
-      </div>
+    <div style="text-align:center;font-size:12px;color:#AAA;line-height:1.5;">
+      Al registrarte aceptás los Términos y Condiciones de PuenT.
+    </div>
 
-      <!-- PASO 2: Tipo de negocio -->
-      <div id="wizardPaso2" style="display:none;">
-        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 2</div>
-        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;">¿Qué tipo de negocio tenés?</div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px;">Elegí el que mejor te describe.</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('gastronomia',this)"
-            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
-            <div style="width:44px;height:44px;border-radius:12px;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🍽️</div>
-            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Gastronomía</div><div style="font-size:11.5px;color:#888;">Restó, rotisería, panadería, delivery...</div></div>
-          </button>
-          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('productos',this)"
-            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
-            <div style="width:44px;height:44px;border-radius:12px;background:#E8F4FD;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🛍️</div>
-            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Productos</div><div style="font-size:11.5px;color:#888;">Ropa, ferretería, librería, deportes...</div></div>
-          </button>
-          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('servicios',this)"
-            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
-            <div style="width:44px;height:44px;border-radius:12px;background:#F0FBF0;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">✂️</div>
-            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Servicios</div><div style="font-size:11.5px;color:#888;">Peluquería, taller, salud, contador...</div></div>
-          </button>
-          <button class="wizard-tipo-btn" onclick="wizardElegirTipo('mixto',this)"
-            style="width:100%;padding:14px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;gap:14px;background:white;text-align:left;cursor:pointer;transition:border-color .15s,background .15s;">
-            <div style="width:44px;height:44px;border-radius:12px;background:#F5F0FF;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏪</div>
-            <div><div style="font-size:14px;font-weight:800;color:#1A1A1A;">Mixto</div><div style="font-size:11.5px;color:#888;">Productos y servicios a la vez</div></div>
-          </button>
-        </div>
-      </div>
-
-      <!-- PASO 3: Rubro (se renderiza dinámicamente) -->
-      <div id="wizardPaso3" style="display:none;">
-        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 3</div>
-        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;">¿Cuál es tu rubro?</div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px;">Elegí el que más se acerca a tu negocio.</div>
-        <div id="wizardRubroOpciones" style="display:flex;flex-direction:column;gap:10px;"></div>
-      </div>
-
-      <!-- PASO 4: Preguntas específicas (se renderiza dinámicamente) -->
-      <div id="wizardPaso4" style="display:none;">
-        <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#FF6600;margin-bottom:6px;">Paso 4</div>
-        <div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:6px;font-family:'Bai Jamjuree',sans-serif;" id="wizardPaso4Titulo">Contanos un poco más</div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px;">Esto nos ayuda a darte las herramientas correctas.</div>
-        <div id="wizardPreguntasEspecificas" style="display:flex;flex-direction:column;gap:14px;"></div>
-        <button onclick="wizardFinalizar()" style="width:100%;margin-top:24px;padding:15px;border-radius:14px;border:none;background:#FF6600;color:white;font-size:15px;font-weight:800;cursor:pointer;">Continuar con Google →</button>
-      </div>
-
+    <!-- Ya tenés cuenta -->
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:#888;">
+      ¿Ya tenés cuenta? <button onclick="showScreen('login-comercio')" style="background:none;border:none;font-size:13px;font-weight:800;color:#FF6600;cursor:pointer;">Iniciá sesión</button>
     </div>
   </div>
 
-  <!-- ============ SCREEN: REGISTRO ============ -->
-  <!-- ============ SCREEN: LOGIN CLIENTE ============ -->
-  <div class="screen hidden" id="screen-login-cliente" style="padding:28px 20px 32px;">
-    <div class="link-back" onclick="showScreen('home')">← Volver</div>
-    <div class="kicker" style="margin-top:8px;">Cuenta de cliente</div>
-    <h1 class="page-title" style="margin-bottom:4px;">Entrá a tu cuenta</h1>
-    <p class="page-sub" style="margin-bottom:24px;">O registrate si sos nuevo — es gratis.</p>
+  <!-- ============ SCREEN: LOGIN COMERCIO ============ -->
+  <div class="screen hidden" id="screen-login-comercio" style="padding:28px 20px 32px;">
+    <div class="link-back" onclick="showScreen('bienvenida-comercio')">← Volver</div>
+    <div class="kicker" style="margin-top:8px;">Comercio</div>
+    <h1 class="page-title" style="margin-bottom:4px;">Iniciá sesión</h1>
+    <p class="page-sub" style="margin-bottom:24px;">Entrá a tu panel de comercio.</p>
 
-    <!-- Google -->
-    <button onclick="elegirRolParaRegistro('cliente')" style="width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid #DADCE0;background:white;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;color:#1A1A1A;cursor:pointer;margin-bottom:10px;">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;">
+      <input id="lcEmail" type="email" placeholder="Correo electrónico" autocomplete="email"
+        style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+      <div style="position:relative;">
+        <input id="lcPass" type="password" placeholder="Contraseña" autocomplete="current-password"
+          style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+        <button onclick="togglePassVisibility('lcPass',this)" type="button"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#AAA;">👁</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-bottom:16px;">
+      <button onclick="recuperarContrasenaComercio()" style="background:none;border:none;font-size:12.5px;font-weight:600;color:#FF6600;cursor:pointer;">¿Olvidaste tu contraseña?</button>
+    </div>
+
+    <button onclick="loginComercioConEmail()" style="width:100%;padding:15px;border-radius:14px;background:#FF6600;color:white;font-weight:800;font-size:15px;border:none;cursor:pointer;margin-bottom:16px;">
+      Entrar al panel
+    </button>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="flex:1;height:1px;background:#EAEAEA;"></div>
+      <div style="font-size:12px;color:#AAA;font-weight:600;">o</div>
+      <div style="flex:1;height:1px;background:#EAEAEA;"></div>
+    </div>
+
+    <button onclick="loginComercioConGoogle()" style="width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid #DADCE0;background:white;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;color:#1A1A1A;cursor:pointer;">
       <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.1 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.8 23.8 0 0 0 0 24c0 3.8.9 7.4 2.5 10.6l8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.1C6.5 42.5 14.6 48 24 48z"/></svg>
       Continuar con Google
     </button>
 
-    <!-- Facebook -->
-    <button onclick="loginConFacebook()" style="width:100%;padding:14px 16px;border-radius:14px;border:none;background:#1877F2;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;margin-bottom:18px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
-      Continuar con Facebook
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:#888;">
+      ¿No tenés cuenta? <button onclick="showScreen('registro-comercio')" style="background:none;border:none;font-size:13px;font-weight:800;color:#FF6600;cursor:pointer;">Registrá tu comercio</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: LOGIN CLIENTE ============ -->
+  <div class="screen hidden" id="screen-login-cliente" style="padding:28px 20px 32px;">
+    <div class="link-back" onclick="showScreen('bienvenida')">← Volver</div>
+    <div class="kicker" style="margin-top:8px;">PuenT</div>
+    <h1 class="page-title" style="margin-bottom:4px;">Iniciá sesión</h1>
+    <p class="page-sub" style="margin-bottom:24px;">Entrá con la cuenta que ya tenés en PuenT — te llevamos directo a tu panel.</p>
+
+    <!-- Google -->
+    <button onclick="loginConGoogle()" style="width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid #DADCE0;background:white;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;color:#1A1A1A;cursor:pointer;margin-bottom:10px;">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.1 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.8 23.8 0 0 0 0 24c0 3.8.9 7.4 2.5 10.6l8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.1C6.5 42.5 14.6 48 24 48z"/></svg>
+      Continuar con Google
     </button>
+
 
     <!-- Divisor -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
@@ -1562,28 +1584,48 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <!-- Registrarse con email -->
     <div style="text-align:center;font-size:13px;color:#888;">
-      ¿No tenés cuenta? <button onclick="showScreen('screen-registro-email')" style="background:none;border:none;font-size:13px;font-weight:800;color:#FF6600;cursor:pointer;">Registrate con tu correo</button>
+      ¿No tenés cuenta? <button onclick="showScreen('registro-email')" style="background:none;border:none;font-size:13px;font-weight:800;color:#FF6600;cursor:pointer;">Registrate con tu correo</button>
     </div>
   </div>
 
   <!-- ============ SCREEN: REGISTRO CON EMAIL (CLIENTE) ============ -->
   <div class="screen hidden" id="screen-registro-email" style="padding:28px 20px 32px;">
-    <div class="link-back" onclick="showScreen('screen-login-cliente')">← Volver</div>
+    <div class="link-back" onclick="showScreen('login-cliente')">← Volver</div>
     <div class="kicker" style="margin-top:8px;">Cuenta nueva</div>
     <h1 class="page-title" style="margin-bottom:4px;">Creá tu cuenta</h1>
-    <p class="page-sub" style="margin-bottom:24px;">Solo necesitás un correo y una contraseña.</p>
+    <p class="page-sub" style="margin-bottom:20px;">Completá tus datos para registrarte.</p>
 
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-      <input id="regEmailNombre" type="text" placeholder="Tu nombre" autocomplete="given-name"
+
+      <input id="regEmailNombre" type="text" placeholder="Tu nombre completo" autocomplete="name"
         style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
-      <input id="regEmailEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email"
+
+      <input id="regEmailEmail" type="email" placeholder="Correo electrónico" autocomplete="email"
         style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+
       <div style="position:relative;">
         <input id="regEmailPass" type="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password"
           style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
         <button onclick="togglePassVisibility('regEmailPass',this)" type="button"
           style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#AAA;">👁</button>
       </div>
+
+      <div style="position:relative;">
+        <input id="regEmailPass2" type="password" placeholder="Repetí la contraseña" autocomplete="new-password"
+          style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+        <button onclick="togglePassVisibility('regEmailPass2',this)" type="button"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#AAA;">👁</button>
+      </div>
+
+      <div style="position:relative;">
+        <input id="regEmailWsp" type="tel" inputmode="numeric" placeholder="WhatsApp (ej: 3454123456)" autocomplete="tel"
+          style="width:100%;padding:13px 14px 13px 42px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;">📲</span>
+      </div>
+
+      <input id="regEmailDir" type="text" placeholder="Dirección (calle y número)" autocomplete="street-address"
+        style="width:100%;padding:13px 14px;border:1.5px solid #EAEAEA;border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+
     </div>
 
     <button onclick="registrarConEmail()" style="width:100%;padding:15px;border-radius:14px;background:#FF6600;color:white;font-weight:800;font-size:15px;border:none;cursor:pointer;margin-bottom:12px;">
@@ -2360,9 +2402,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div class="two-col">
         <div class="field"><label>Teléfono del local</label><input id="editCTelefono" type="tel" placeholder="Fijo o WhatsApp"></div>
-        <div class="field"><label>Teléfono alternativo</label><input id="editCTelefonoAlt" type="tel" placeholder="Opcional"></div>
+        <div class="field"><label>WhatsApp</label><input id="editCWhatsapp" type="tel" placeholder="Ej: 3454 123456"></div>
       </div>
-      <div class="field"><label>Correo electrónico</label><input id="editCEmail" type="email" placeholder="local@ejemplo.com"></div>
+      <div class="two-col">
+        <div class="field"><label>Teléfono alternativo</label><input id="editCTelefonoAlt" type="tel" placeholder="Opcional"></div>
+        <div class="field"><label>Correo electrónico</label><input id="editCEmail" type="email" placeholder="local@ejemplo.com"></div>
+      </div>
       <div class="field">
         <label>Turno mañana</label>
         <div class="two-col">
@@ -2377,7 +2422,38 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <input id="editCTurnoTarHasta" type="time">
         </div>
       </div>
+      <div class="field"><label>Días de atención</label>
+        <div id="editCDiasBox" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
+      </div>
     </div>
+
+    <div class="card" style="margin-top:0;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">📍 Ubicación exacta</div>
+      <div class="field">
+        <label>Marcá el punto en el mapa <span style="font-weight:400; color:var(--muted);">(para que "Cómo llegar" funcione bien)</span></label>
+        <div id="editCMapaPick" style="width:100%;height:220px;border-radius:12px;border:1.5px solid var(--line);overflow:hidden;"></div>
+        <button type="button" onclick="marcarUbicacionEditComercio()" style="font-size:12px;color:#FF6600;background:none;border:none;cursor:pointer;padding:8px 0 0;">📍 Usar mi ubicación actual</button>
+        <div id="editCCoordsEstado" style="font-size:11.5px;color:var(--muted);margin-top:2px;"></div>
+        <input id="editCLat" type="hidden">
+        <input id="editCLng" type="hidden">
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:0;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">📝 Descripción y redes</div>
+      <div class="field"><label>Descripción breve</label><input id="editCDescripcion" placeholder="Ej: Ferretería y materiales de construcción"></div>
+      <div class="two-col">
+        <div class="field"><label>Instagram (opcional)</label><input id="editCInstagram" placeholder="@tunegocio"></div>
+        <div class="field"><label>Facebook (opcional)</label><input id="editCFacebook" placeholder="facebook.com/tunegocio"></div>
+      </div>
+      <div class="field"><label>Sitio web (opcional)</label><input id="editCWeb" placeholder="www.tunegocio.com"></div>
+    </div>
+
+    <div class="card" style="margin-top:0;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">💳 Métodos de pago</div>
+      <div id="editCMetodosPagoBox" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
     <div class="card" style="background:var(--cream); margin-top:0;">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🚚 Envío a domicilio</div>
       <div class="field" style="margin-bottom:10px;">
@@ -3947,152 +4023,82 @@ const PREGUNTAS_POR_TIPO = {
   ]
 };
 
-function iniciarWizardComercio(){
-  wizardData = {};
-  wizardPasoActual = 1;
-  // Resetear todos los pasos
-  [1,2,3,4].forEach(n => {
-    const el = document.getElementById('wizardPaso'+n);
-    if(el) el.style.display = n===1 ? 'block' : 'none';
-  });
-  document.getElementById('wizardNombre').value = '';
-  document.getElementById('wizardNombreCounter').textContent = '0/60';
-  wizardActualizarProgreso();
-  showScreen('wizard-comercio');
-}
-
-function wizardActualizarProgreso(){
-  const pct = (wizardPasoActual / 4) * 100;
-  document.getElementById('wizardProgressBar').style.width = pct + '%';
-  document.getElementById('wizardStepLabel').textContent = wizardPasoActual + ' de 4';
-}
-
-function wizardAtras(){
-  if(wizardPasoActual <= 1){
-    showScreen('bienvenida');
-    return;
-  }
-  document.getElementById('wizardPaso'+wizardPasoActual).style.display = 'none';
-  wizardPasoActual--;
-  document.getElementById('wizardPaso'+wizardPasoActual).style.display = 'block';
-  wizardActualizarProgreso();
-  window.scrollTo(0,0);
-}
-
-function wizardSiguiente(pasoActual){
-  if(pasoActual === 1){
-    const nombre = document.getElementById('wizardNombre').value.trim();
-    if(!nombre){ toast('Ingresá el nombre de tu comercio'); return; }
-    wizardData.nombre = nombre;
-    document.getElementById('wizardPaso1').style.display = 'none';
-    document.getElementById('wizardPaso2').style.display = 'block';
-    wizardPasoActual = 2;
-    wizardActualizarProgreso();
-    window.scrollTo(0,0);
-  }
-}
-
-function wizardElegirTipo(tipo, btn){
-  // Highlight visual
-  document.querySelectorAll('.wizard-tipo-btn').forEach(b=>{
-    b.style.borderColor = '#EAEAEA';
-    b.style.background = 'white';
-  });
-  btn.style.borderColor = '#FF6600';
-  btn.style.background = '#FFF8F3';
-
-  wizardData.tipo = tipo;
-
-  // Pequeña pausa para que se vea el highlight
-  setTimeout(()=>{
-    // Renderizar rubros del paso 3
-    const rubros = RUBROS_POR_TIPO[tipo] || [];
-    const cont = document.getElementById('wizardRubroOpciones');
-    cont.innerHTML = rubros.map(r => `
-      <button class="wizard-rubro-btn" onclick="wizardElegirRubro('${r.replace(/'/g,"\\'")}',this)"
-        style="width:100%;padding:13px 16px;border:1.5px solid #EAEAEA;border-radius:14px;display:flex;align-items:center;justify-content:space-between;background:white;text-align:left;cursor:pointer;font-size:14px;font-weight:700;color:#1A1A1A;transition:border-color .15s,background .15s;">
-        <span>${r}</span>
-        <span style="color:#DDD;font-size:18px;">›</span>
-      </button>`).join('');
-
-    document.getElementById('wizardPaso2').style.display = 'none';
-    document.getElementById('wizardPaso3').style.display = 'block';
-    wizardPasoActual = 3;
-    wizardActualizarProgreso();
-    window.scrollTo(0,0);
-  }, 180);
-}
-
-function wizardElegirRubro(rubro, btn){
-  document.querySelectorAll('.wizard-rubro-btn').forEach(b=>{
-    b.style.borderColor = '#EAEAEA';
-    b.style.background = 'white';
-  });
-  btn.style.borderColor = '#FF6600';
-  btn.style.background = '#FFF8F3';
-
-  wizardData.rubro = rubro;
-
-  setTimeout(()=>{
-    // Renderizar preguntas específicas del paso 4
-    const tipo = wizardData.tipo;
-    const preguntas = PREGUNTAS_POR_TIPO[tipo] || [];
-    const cont = document.getElementById('wizardPreguntasEspecificas');
-    cont.innerHTML = preguntas.map(p => `
-      <div>
-        <div style="font-size:13.5px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">${p.label}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          ${p.opts.map(o => `
-            <button class="wizard-opt-btn" data-pregunta="${p.id}" data-valor="${o}"
-              onclick="wizardElegirOpcion('${p.id}','${o.replace(/'/g,"\\'")}',this)"
-              style="padding:9px 14px;border:1.5px solid #EAEAEA;border-radius:100px;background:white;font-size:12.5px;font-weight:700;color:#555;cursor:pointer;transition:all .15s;">
-              ${o}
-            </button>`).join('')}
-        </div>
-      </div>`).join('');
-
-    // Título del paso 4 personalizado por rubro
-    document.getElementById('wizardPaso4Titulo').textContent =
-      tipo === 'gastronomia' ? 'Contanos cómo trabajás' :
-      tipo === 'productos'   ? 'Cómo manejás tus productos' :
-      tipo === 'servicios'   ? 'Cómo ofrecés tus servicios' : 'Un poco más sobre tu negocio';
-
-    document.getElementById('wizardPaso3').style.display = 'none';
-    document.getElementById('wizardPaso4').style.display = 'block';
-    wizardPasoActual = 4;
-    wizardActualizarProgreso();
-    window.scrollTo(0,0);
-  }, 180);
-}
-
-function wizardElegirOpcion(preguntaId, valor, btn){
-  // Solo una selección por pregunta
-  document.querySelectorAll(`.wizard-opt-btn[data-pregunta="${preguntaId}"]`).forEach(b=>{
-    b.style.borderColor = '#EAEAEA';
-    b.style.background = 'white';
-    b.style.color = '#555';
-  });
-  btn.style.borderColor = '#FF6600';
-  btn.style.background = '#FF6600';
-  btn.style.color = 'white';
-  wizardData[preguntaId] = valor;
-}
-
-function wizardFinalizar(){
-  // Verificar que contestó todas las preguntas
-  const preguntas = PREGUNTAS_POR_TIPO[wizardData.tipo] || [];
-  for(const p of preguntas){
-    if(!wizardData[p.id]){
-      toast('Respondé todas las preguntas para continuar');
-      return;
+// ── REGISTRO SIMPLE COMERCIO ──
+async function registrarComercioSimple(){
+  const nombre = document.getElementById('rcNombre')?.value.trim();
+  const email  = document.getElementById('rcEmail')?.value.trim();
+  const pass   = document.getElementById('rcPass')?.value;
+  const pass2  = document.getElementById('rcPass2')?.value;
+  if(!nombre){ toast('Ingresá el nombre de tu comercio.'); return; }
+  if(!email){ toast('Ingresá tu correo.'); return; }
+  if(!pass || pass.length < 6){ toast('La contraseña debe tener al menos 6 caracteres.'); return; }
+  if(pass !== pass2){ toast('Las contraseñas no coinciden.'); return; }
+  if(!firebaseListo){ toast('Sin conexión. Intentá de nuevo.'); return; }
+  try{
+    const result = await firebaseAuth.createUserWithEmailAndPassword(email, pass);
+    const user = result.user;
+    const _gracia = new Date(); _gracia.setDate(_gracia.getDate() + 30);
+    const c = {
+      id: nextId('c'), uid: user.uid, nombre, email, ciudad:'La Paz',
+      rubro:'', tipo:'', descripcion:'', direccion:'', telefono:'', whatsapp:'',
+      instagram:'', facebook:'', horario:'', dias:[], metodosPago:[],
+      adheridos:[], img: null, imgGaleria: null,
+      publicidadActiva:true, publicidadVence:diasAtras(-30),
+      plan:'gracia', planMonto:null, planComPct:null,
+      planVence: _gracia.toISOString().slice(0,10), planActivo:true,
+      bannerActivo:false, bannerVence:null, pagos:[],
+      aprobado:false, viaEmail:true, perfilCompleto:false
+    };
+    c.qrPersonal = 'CQR-' + c.id.split('-')[1].padStart(4,'0');
+    state.comercios = state.comercios||[];
+    state.comercios.push(c);
+    state.currentUser = c; state.role = 'comercio';
+    setRoleChip('🏬 Comercio', false);
+    document.getElementById('cNombre').textContent = nombre;
+    guardarPerfilEnFirestore('comercios', c);
+    showScreen('c-en-revision'); updateBottomNav('c-panel'); updateTopbarUser();
+  }catch(err){
+    if(err.code==='auth/email-already-in-use'){
+      toast('Ese correo ya tiene una cuenta. Iniciá sesión.'); showScreen('login-comercio');
+    } else {
+      toast('No pudimos crear tu cuenta. Intentá de nuevo.'); console.error(err);
     }
   }
-  // Guardar en localStorage para recuperar después del redirect de Google
-  try{ localStorage.setItem('puente_wizardData', JSON.stringify(wizardData)); }catch(e){}
-  // Marcar rol y lanzar login
+}
+
+async function loginComercioConEmail(){
+  const email = document.getElementById('lcEmail')?.value.trim();
+  const pass  = document.getElementById('lcPass')?.value;
+  if(!email || !pass){ toast('Completá el correo y la contraseña.'); return; }
+  if(!firebaseListo){ toast('Sin conexión. Intentá de nuevo.'); return; }
+  loginIniciadoPorUsuario = true;
+  try{
+    const result = await firebaseAuth.signInWithEmailAndPassword(email, pass);
+    manejarUsuarioGoogle(result.user);
+  }catch(err){
+    if(err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential'){
+      toast('Correo o contraseña incorrectos.');
+    } else {
+      toast('No pudimos iniciar sesión. Probá de nuevo.'); console.error(err);
+    }
+  }
+}
+
+function loginComercioConGoogle(){
   rolPreElegido = 'comercio';
   try{ localStorage.setItem('puente_rolPreElegido', 'comercio'); }catch(e){}
   loginConGoogle();
+}
+
+async function recuperarContrasenaComercio(){
+  const email = document.getElementById('lcEmail')?.value.trim();
+  if(!email){ toast('Ingresá tu correo arriba para recuperar la contraseña.'); return; }
+  try{
+    await firebaseAuth.sendPasswordResetEmail(email);
+    toast('Te enviamos un correo para restablecer tu contraseña. ✉️');
+  }catch(err){
+    toast('No pudimos enviar el correo. Verificá que sea correcto.');
+  }
 }
 
 function elegirRolParaRegistro(rol){
@@ -4139,64 +4145,6 @@ function loginConGoogle(){
   });
 }
 
-// ── FACEBOOK LOGIN ──
-function loginConFacebook(){
-  if(!firebaseListo){ toast('No pudimos conectar ahora mismo. Revisá tu conexión.'); return; }
-  loginIniciadoPorUsuario = true;
-  rolPreElegido = 'cliente';
-  try{ localStorage.setItem('puente_rolPreElegido', 'cliente'); }catch(e){}
-  const provider = new firebase.auth.FacebookAuthProvider();
-  provider.addScope('public_profile');
-  const esMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if(esMobile){
-    firebaseAuth.signInWithPopup(provider).then(result=>{
-      if(!result) return;
-      manejarUsuarioFacebook(result.user);
-    }).catch(err=>{
-      if(err.code==='auth/popup-closed-by-user') return;
-      firebaseAuth.signInWithRedirect(provider);
-    });
-  } else {
-    firebaseAuth.signInWithPopup(provider).then(result=>{
-      manejarUsuarioFacebook(result.user);
-    }).catch(err=>{
-      if(err.code==='auth/popup-closed-by-user') return;
-      toast('No pudimos completar el login con Facebook, probá de nuevo.');
-      console.error('Error FB login:', err);
-    });
-  }
-}
-
-async function manejarUsuarioFacebook(user){
-  if(state.currentUser && state.currentUser.uid === user.uid) return;
-  if(esAdmin(user)){ entrarComoAdmin(user); return; }
-  // Buscar cuenta existente
-  try{
-    for(const rol of Object.keys(COL_POR_ROL)){
-      const doc = await db.collection(COL_POR_ROL[rol]).doc(user.uid).get();
-      if(doc.exists){ rolPreElegido=null; entrarConDatosGuardados(rol, doc.data()); return; }
-    }
-  }catch(e){ console.error('Error buscando cuenta FB:', e); }
-  // Cuenta nueva — crear como cliente y disparar share
-  const nombre = user.displayName || 'Cliente';
-  const email  = user.email || '';
-  const c = { id: nextId('u'), uid: user.uid, nombre, email, foto:'🙋', ciudad:'La Paz', favoritos:[], historial:[], viaFacebook:true };
-  state.clientes = state.clientes||[];
-  state.clientes.push(c);
-  state.currentUser = c; state.role = 'cliente';
-  setRoleChip('🙋 Cliente', false);
-  guardarPerfilEnFirestore('clientes', c);
-  rolPreElegido = null;
-  showScreen('feed'); updateBottomNav('feed'); updateTopbarUser();
-  toast('¡Bienvenido/a a PuenT, '+nombre.split(' ')[0]+'! 🎉');
-  setTimeout(()=>{ compartirEnFacebook(); }, 1500);
-}
-
-function compartirEnFacebook(){
-  const texto = encodeURIComponent('¡Me sumé a PuenT, el marketplace de La Paz! 🛍️ Mirá las ofertas y productos de comercios locales.');
-  const url = 'https://www.facebook.com/sharer/sharer.php?u=https://puent.com.ar&quote='+texto;
-  window.open(url, '_blank', 'width=600,height=400,noopener');
-}
 
 // ── EMAIL / CONTRASEÑA ──
 function togglePassVisibility(inputId, btn){
@@ -4228,14 +4176,19 @@ async function registrarConEmail(){
   const nombre = document.getElementById('regEmailNombre')?.value.trim();
   const email  = document.getElementById('regEmailEmail')?.value.trim();
   const pass   = document.getElementById('regEmailPass')?.value;
+  const pass2  = document.getElementById('regEmailPass2')?.value;
+  const wsp    = document.getElementById('regEmailWsp')?.value.trim();
+  const dir    = document.getElementById('regEmailDir')?.value.trim();
   if(!nombre){ toast('Ingresá tu nombre.'); return; }
   if(!email){ toast('Ingresá tu correo.'); return; }
   if(!pass||pass.length<6){ toast('La contraseña debe tener al menos 6 caracteres.'); return; }
+  if(pass !== pass2){ toast('Las contraseñas no coinciden.'); return; }
+  if(!wsp){ toast('Ingresá tu WhatsApp.'); return; }
   if(!firebaseListo){ toast('Sin conexión. Intentá de nuevo.'); return; }
   try{
     const result = await firebaseAuth.createUserWithEmailAndPassword(email, pass);
     const user = result.user;
-    const c = { id: nextId('u'), uid: user.uid, nombre, email, foto:'🙋', ciudad:'La Paz', favoritos:[], historial:[], viaEmail:true };
+    const c = { id: nextId('u'), uid: user.uid, nombre, email, whatsapp: wsp, direccion: dir||'', foto:'🙋', ciudad:'La Paz', favoritos:[], historial:[], viaEmail:true };
     state.clientes = state.clientes||[];
     state.clientes.push(c);
     state.currentUser = c; state.role = 'cliente';
@@ -4246,7 +4199,7 @@ async function registrarConEmail(){
     toast('¡Bienvenido/a a PuenT, '+nombre.split(' ')[0]+'! 🎉');
   }catch(err){
     if(err.code==='auth/email-already-in-use'){
-      toast('Ese correo ya tiene una cuenta. Iniciá sesión.'); showScreen('screen-login-cliente');
+      toast('Ese correo ya tiene una cuenta. Iniciá sesión.'); showScreen('login-cliente');
     } else {
       toast('No pudimos crear tu cuenta. Intentá de nuevo.'); console.error(err);
     }
@@ -4385,26 +4338,14 @@ function crearCuentaDesdeGoogle(rol, user){
       fechaAlta: new Date().toISOString(), ultimaVenta:null, diasExtra:0};
     data.qrPersonal = 'VQR-' + data.id.split('-')[1].padStart(4,'0');
   } else if(rol==='comercio'){
-    // Recuperar datos del wizard (en memoria o desde localStorage si hubo redirect)
-    let wd = wizardData && wizardData.nombre ? wizardData : null;
-    if(!wd){
-      try{ const s = localStorage.getItem('puente_wizardData'); if(s) wd = JSON.parse(s); }catch(e){}
-    }
-    try{ localStorage.removeItem('puente_wizardData'); }catch(e){}
-    const nombreComercio = (wd && wd.nombre) ? wd.nombre : nombre;
-    const rubroComercio  = (wd && wd.rubro)  ? wd.rubro  : 'Otros';
-    const tipoComercio   = (wd && wd.tipo)   ? wd.tipo   : null;
-    // Extraer respuestas específicas (todo lo que no sea nombre/rubro/tipo)
-    const extras = {};
-    if(wd){ Object.keys(wd).forEach(k=>{ if(!['nombre','rubro','tipo'].includes(k)) extras[k]=wd[k]; }); }
     const _graciaGoogle = new Date(); _graciaGoogle.setDate(_graciaGoogle.getDate() + 30);
-    data = {id: nextId('c'), uid:user.uid, nombre:nombreComercio, email, ciudad:'La Paz',
-            rubro:rubroComercio, tipo:tipoComercio, ...extras,
+    data = {id: nextId('c'), uid:user.uid, nombre, email, ciudad:'La Paz',
+            rubro:'', tipo:'', descripcion:'',
             viaGoogle:true, adheridos:[], img: (foto.startsWith('http') ? foto : null),
             publicidadActiva:true, publicidadVence:diasAtras(-30),
-            aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true};
+            aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true,
+            plan:'gracia', perfilCompleto:false};
     data.qrPersonal = 'CQR-' + data.id.split('-')[1].padStart(4,'0');
-    wizardData = {}; // limpiar
   } else {
     data = {id: nextId('cl'), uid:user.uid, nombre, email, ciudad:'La Paz', viaGoogle:true};
   }
@@ -4735,6 +4676,7 @@ function logoutFirebase(){
 let pendingRole = null;
 let registroLatLng = null;
 let adminNuevoComLatLng = null;
+let editCLatLng = null; // ubicación editada por el comercio en su propio panel
 function togglePlanUI(tipo){ /* eliminado — planes se definen post-aprobación */ }
 
 // Mini-mapa con pin arrastrable para marcar la ubicación EXACTA de un comercio
@@ -4796,6 +4738,25 @@ function marcarUbicacion(){
   );
 }
 
+function marcarUbicacionEditComercio(){
+  const estado = document.getElementById('editCCoordsEstado');
+  if(!estado) return;
+  if(!navigator.geolocation){ estado.textContent = 'Tu navegador no soporta geolocalización — marcá el punto en el mapa manualmente.'; return; }
+  estado.textContent = 'Buscando tu ubicación…';
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      editCLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+      document.getElementById('editCLat').value = editCLatLng.lat;
+      document.getElementById('editCLng').value = editCLatLng.lng;
+      estado.textContent = '✅ Ubicación marcada: '+editCLatLng.lat.toFixed(5)+', '+editCLatLng.lng.toFixed(5);
+      const inst = _mapasPickInstancias['editCMapaPick'];
+      if(inst){ inst.marker.setLatLng([editCLatLng.lat, editCLatLng.lng]); inst.mapa.setView([editCLatLng.lat, editCLatLng.lng], 16); }
+    },
+    ()=>{ estado.textContent = 'No pudimos acceder a tu ubicación — marcá el punto en el mapa manualmente.'; },
+    {timeout:8000}
+  );
+}
+
 async function verificarEmailComercioExistente(email){
   const estado = document.getElementById('rEmailEstado');
   if(!estado) return;
@@ -4829,7 +4790,83 @@ function goRegister(role){
   const sub = document.getElementById('regSub');
   const fields = document.getElementById('regFields');
 
-  if(role==='vendedor'){
+  if(role==='comercio'){
+    kick.textContent='Registro de comercio';
+    title.textContent='Datos de tu negocio';
+    sub.textContent='Completá la información de tu comercio o servicio para sumarte a PuenT.';
+    const nombreWizard = wizardData?.nombre || '';
+    const rubroWizard  = wizardData?.rubro  || '';
+    const tipoWizard   = wizardData?.tipo   || '';
+    fields.innerHTML = `
+      <div class="card">
+        <div class="field"><label>Nombre del comercio / negocio</label><input id="rNombreComercio" placeholder="Ej: Ferretería El Clavo" value="${nombreWizard}"></div>
+        <div class="field"><label>Razón social (opcional)</label><input id="rRazonSocial" placeholder="Ej: Juan Pérez"></div>
+        <div class="field"><label>CUIT / CUIL (opcional)</label><input id="rCuit" type="text" inputmode="numeric" placeholder="Sin guiones"></div>
+        <div class="field"><label>Descripción breve</label><input id="rDescripcion" placeholder="Ej: Ferretería y materiales de construcción"></div>
+        <div class="field"><label>Dirección</label><input id="rDireccion" placeholder="Calle y número" oninput="verificarEmailComercioExistente()"></div>
+        <div class="field"><label>Ciudad</label><input id="rCiudad" value="La Paz" placeholder="La Paz"></div>
+        <div class="field"><label>Rubro</label><input id="rRubro" value="${rubroWizard}" placeholder="Ej: Gastronomía" readonly style="background:#f5f5f5;"></div>
+        <div class="field"><label>Tipo</label><input id="rTipo" value="${tipoWizard}" placeholder="Ej: Restaurante" readonly style="background:#f5f5f5;"></div>
+        <div class="two-col">
+          <div class="field"><label>Teléfono</label><input id="rTelefono" type="tel" placeholder="Ej: 3454 123456"></div>
+          <div class="field"><label>WhatsApp</label><input id="rWhatsapp" type="tel" placeholder="Ej: 3454 123456"></div>
+        </div>
+        <div class="field"><label>Email de contacto</label>
+          <input id="rEmail" type="email" placeholder="tucorreo@ejemplo.com" oninput="verificarEmailComercioExistente(this.value)">
+          <div id="rEmailEstado" style="display:none;font-size:12px;margin-top:4px;"></div>
+        </div>
+        <div class="field"><label>Instagram (opcional)</label><input id="rInstagram" placeholder="@tunegocio"></div>
+        <div class="field"><label>Facebook (opcional)</label><input id="rFacebook" placeholder="facebook.com/tunegocio"></div>
+        <div class="field"><label>Horario de atención</label><input id="rHorario" placeholder="Ej: Lun a Vie 9:00 a 18:00"></div>
+        <div class="two-col">
+          <div class="field"><label>Abre</label><input id="rTurnoDesde" type="time" value="09:00"></div>
+          <div class="field"><label>Cierra</label><input id="rTurnoHasta" type="time" value="18:00"></div>
+        </div>
+        <div class="field"><label>Días de atención</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+            ${['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`
+              <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;">
+                <input type="checkbox" name="rDias" value="${d}" style="width:auto;"> ${d}
+              </label>`).join('')}
+          </div>
+        </div>
+        <div class="field"><label>Métodos de pago</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+            ${['Efectivo','Transferencia','Tarjeta débito','Tarjeta crédito','MercadoPago'].map(m=>`
+              <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;">
+                <input type="checkbox" name="rMetodosPago" value="${m}" style="width:auto;"> ${m}
+              </label>`).join('')}
+          </div>
+        </div>
+        <div class="field">
+          <label>Logo del comercio</label>
+          <div class="foto-upload-box" id="rLogoFotoBox" style="width:100px;height:100px;border-radius:12px;border:2px dashed #DDD;display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;overflow:hidden;background:#FAFAFA;" onclick="document.getElementById('rLogoInput').click()">🏬</div>
+          <input type="file" id="rLogoInput" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this,'rLogo')">
+          <div id="rLogoFotoEstado" class="foto-upload-estado" style="font-size:11.5px;color:#888;margin-top:4px;"></div>
+          <div style="font-size:11px;color:#AAA;margin-top:2px;">Comprimido automáticamente a menos de 70KB</div>
+        </div>
+        <div class="field">
+          <label>Foto secundaria (galería, interior, etc.)</label>
+          <div class="foto-upload-box" id="rGaleriaFotoBox" style="width:100%;height:120px;border-radius:12px;border:2px dashed #DDD;display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;overflow:hidden;background:#FAFAFA;" onclick="document.getElementById('rGaleriaInput').click()">🖼️</div>
+          <input type="file" id="rGaleriaInput" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this,'rGaleria')">
+          <div id="rGaleriaFotoEstado" class="foto-upload-estado" style="font-size:11.5px;color:#888;margin-top:4px;"></div>
+          <div style="font-size:11px;color:#AAA;margin-top:2px;">Comprimido automáticamente a menos de 70KB</div>
+        </div>
+        <div class="field">
+          <label>Ubicación en el mapa</label>
+          <div id="registroMapaPick" style="width:100%;height:220px;border-radius:10px;margin:8px 0;border:1px solid #eee;"></div>
+          <button type="button" onclick="marcarUbicacion()" style="font-size:12px;color:#FF6600;background:none;border:none;cursor:pointer;padding:0;">📍 Usar mi ubicación actual</button>
+          <div id="ubicacionEstado" style="font-size:11.5px;color:#888;margin-top:4px;"></div>
+        </div>
+        <div class="field" style="display:flex;align-items:flex-start;gap:10px;">
+          <input type="checkbox" id="rTyc" style="width:auto;margin-top:3px;">
+          <label style="font-weight:500;font-size:12.5px;color:var(--muted);" for="rTyc">Acepto los Términos y Condiciones y el tratamiento de mis datos.</label>
+        </div>
+      </div>`;
+    setTimeout(()=>{
+      crearMapaPick('registroMapaPick', -30.7597, -59.6497, (lat, lng)=>{ registroLatLng = {lat, lng}; });
+    }, 300);
+  } else if(role==='vendedor'){
     kick.textContent='Registro de ConectorT';
     title.textContent='Contanos sobre vos';
     sub.textContent='Sin inscripción fiscal por ahora — pero sí necesitamos tus datos completos para que comercios y clientes confíen en vos como ConectorT.';
@@ -4993,7 +5030,9 @@ async function submitRegister(){
       plan: planTipo, planMonto, planComPct, planVence: _graciaManual.toISOString().slice(0,10), planActivo: true,
       bannerActivo: false, bannerVence: null, pagos: [],
       adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng,
-      img: fotosCargadas['rLogo'] || null, publicidadActiva:true, publicidadVence:diasAtras(-30),
+      img: fotosCargadas['rLogo'] || null,
+      imgGaleria: fotosCargadas['rGaleria'] || null,
+      publicidadActiva:true, publicidadVence:diasAtras(-30),
       aprobado: false};
     c.qrPersonal = 'CQR-' + c.id.split('-')[1].padStart(4,'0');
     state.comercios.push(c);
@@ -5002,6 +5041,7 @@ async function submitRegister(){
     document.getElementById('cNombre').textContent = nombre;
     registroLatLng = null;
     delete fotosCargadas['rLogo'];
+    delete fotosCargadas['rGaleria'];
     guardarPerfilEnFirestore('comercios', c);
     showScreen('c-en-revision');
     updateBottomNav('c-panel');
@@ -7229,6 +7269,7 @@ function abrirEditarComercio(){
     if(tipoField) tipoField.style.display = '';
   }
   document.getElementById('editCTelefono').value = c.telefono || '';
+  document.getElementById('editCWhatsapp').value = c.whatsapp || '';
   document.getElementById('editCTelefonoAlt').value = c.telefonoAlt || '';
   document.getElementById('editCEmail').value = c.email || '';
   const t = c.turnos || {};
@@ -7236,13 +7277,52 @@ function abrirEditarComercio(){
   document.getElementById('editCTurnoManHasta').value = t.manHasta || '';
   document.getElementById('editCTurnoTarDesde').value = t.tarDesde || '';
   document.getElementById('editCTurnoTarHasta').value = t.tarHasta || '';
+
+  // Días de atención
+  const diasGuardados = c.dias || [];
+  document.getElementById('editCDiasBox').innerHTML = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`
+    <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;">
+      <input type="checkbox" name="editCDias" value="${d}" style="width:auto;" ${diasGuardados.includes(d)?'checked':''}> ${d}
+    </label>`).join('');
+
+  // Descripción y redes
+  document.getElementById('editCDescripcion').value = c.descripcion || '';
+  document.getElementById('editCInstagram').value = c.instagram || '';
+  document.getElementById('editCFacebook').value = c.facebook || '';
+  document.getElementById('editCWeb').value = c.web || '';
+
+  // Métodos de pago
+  const metodosGuardados = c.metodosPago || [];
+  document.getElementById('editCMetodosPagoBox').innerHTML = ['Efectivo','Transferencia','Tarjeta débito','Tarjeta crédito','MercadoPago'].map(m=>`
+    <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;">
+      <input type="checkbox" name="editCMetodosPago" value="${m}" style="width:auto;" ${metodosGuardados.includes(m)?'checked':''}> ${m}
+    </label>`).join('');
+
   document.getElementById('editLogoFotoBox').innerHTML = c.img
     ? `<img src="${c.img}" alt="">`
     : `<div id="editLogoFotoPreview" class="logo-upload-empty"><div class="ic">📷</div></div>`;
   document.getElementById('editLogoFotoEstado').textContent = 'Tocá la foto para cambiarla.';
   document.getElementById('editLogoFotoEstado').className = 'foto-upload-estado';
   delete fotosCargadas['editLogo'];
+
+  // Ubicación en el mapa
+  editCLatLng = (c.lat && c.lng) ? {lat:c.lat, lng:c.lng} : null;
+  document.getElementById('editCLat').value = c.lat || '';
+  document.getElementById('editCLng').value = c.lng || '';
+  document.getElementById('editCCoordsEstado').textContent = (c.lat && c.lng)
+    ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.'
+    : '⚠️ Todavía no marcaste tu ubicación exacta — tocá el mapa o usá el botón de GPS.';
+
   showScreen('editar-comercio');
+  // Esperar a que la pantalla se muestre (el contenedor necesita tamaño real) antes de crear el mapa
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    crearMapaPick('editCMapaPick', c.lat||null, c.lng||null, (lat,lng)=>{
+      editCLatLng = {lat, lng};
+      document.getElementById('editCLat').value = lat;
+      document.getElementById('editCLng').value = lng;
+      document.getElementById('editCCoordsEstado').textContent = '✅ Ubicación marcada: '+lat.toFixed(5)+', '+lng.toFixed(5);
+    });
+  }));
 }
 
 function hoyISO(){ return new Date().toISOString().slice(0,10); }
@@ -7295,10 +7375,20 @@ function guardarEdicionComercio(){
   c.rubro = document.getElementById('editCRubro').value;
   c.tipo  = document.getElementById('editCTipo').value || '';
   c.telefono = document.getElementById('editCTelefono').value.trim();
+  c.whatsapp = document.getElementById('editCWhatsapp').value.trim();
   c.telefonoAlt = document.getElementById('editCTelefonoAlt').value.trim();
   c.email = document.getElementById('editCEmail').value.trim();
   c.turnos = leerTurnosForm('editC');
   c.horario = textoTurnos(c.turnos);
+  c.dias = [...document.querySelectorAll('input[name="editCDias"]:checked')].map(el=>el.value);
+  c.descripcion = document.getElementById('editCDescripcion').value.trim();
+  c.instagram = document.getElementById('editCInstagram').value.trim();
+  c.facebook = document.getElementById('editCFacebook').value.trim();
+  c.web = document.getElementById('editCWeb').value.trim();
+  c.metodosPago = [...document.querySelectorAll('input[name="editCMetodosPago"]:checked')].map(el=>el.value);
+  const latVal = parseFloat(document.getElementById('editCLat').value);
+  const lngVal = parseFloat(document.getElementById('editCLng').value);
+  if(!isNaN(latVal) && !isNaN(lngVal)){ c.lat = latVal; c.lng = lngVal; }
   if(fotosCargadas['editLogo']) c.img = fotosCargadas['editLogo'];
 
   c.envioActivo = document.getElementById('editCEnvioActivo').value === 'si';
