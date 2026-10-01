@@ -2718,6 +2718,19 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="font-size:12px; color:var(--muted); margin-top:6px; padding-left:28px;">Aparecerá en la sección "¿Qué se te antoja?" del home junto al menú publicado.</div>
       </div>
     </div>
+    <!-- Características libres (Opción C: extras sobre los atributos del rubro) -->
+    <div class="card" id="cnpCaracteristicasCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">✏️ Características adicionales</div>
+        <span style="font-size:11px;color:var(--muted);font-weight:500;">opcional</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.4;">Agregá detalles extras del producto: color, peso, medida, garantía, lo que quieras. Hasta 8.</div>
+      <div id="cnpCaracteristicasLista"></div>
+      <button type="button" onclick="agregarCaracteristica()" id="cnpBtnAgregarCaract" style="display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--line);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;width:100%;justify-content:center;margin-top:4px;">
+        ＋ Agregar característica
+      </button>
+    </div>
+
     <!-- STANDBY_ENVIO: reactivar quitando opacity/pointer-events del wrapper y el disabled del select -->
     <div class="card" style="background:var(--cream);position:relative;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
@@ -6489,6 +6502,7 @@ function abrirNuevoProducto(){
   document.getElementById('cnpBtnEliminar').classList.add('hidden');
   document.getElementById('cnpNombre').value=''; document.getElementById('cnpPrecio').value='';
   const _descEl = document.getElementById('cnpDescripcion'); if(_descEl) _descEl.value='';
+  limpiarCaracteristicas();
   document.getElementById('cnpComision').value=''; document.getElementById('cnpStock').value='';
   document.getElementById('cnpSinPrecio').checked = false; onSinPrecioChange();
   document.getElementById('cnpConector').checked = false; prepararTildeConectorProducto();
@@ -6550,6 +6564,7 @@ function abrirEditarProducto(prodId){
   const esGastro = comercioOfreceMenuDia(state.currentUser);
   const menuDiaBox = document.getElementById('cnpMenuDiaBox');
   if(menuDiaBox) menuDiaBox.style.display = esGastro ? 'block' : 'none';
+  cargarCaracteristicas(p.caracteristicas || []);
   const cbMenuDia = document.getElementById('cnpMenuDia');
   if(cbMenuDia) cbMenuDia.checked = !!p.enMenuDia;
   const cbMayores18 = document.getElementById('cnpMayores18');
@@ -7018,6 +7033,68 @@ function actualizarCheckboxRestriccionesSegunRubro(rubro){
   if(!mostrarReceta && cbReceta) cbReceta.checked = false;
 }
 
+/* ── CARACTERÍSTICAS LIBRES (pares nombre/valor) ────────────────────── */
+const MAX_CARACTERISTICAS = 8;
+
+function agregarCaracteristica(nombre='', valor=''){
+  const lista = document.getElementById('cnpCaracteristicasLista');
+  const btnAgregar = document.getElementById('cnpBtnAgregarCaract');
+  if(!lista) return;
+  const filas = lista.querySelectorAll('.caract-fila');
+  if(filas.length >= MAX_CARACTERISTICAS){
+    toast(`Máximo ${MAX_CARACTERISTICAS} características por producto`);
+    return;
+  }
+  const idx = Date.now();
+  const fila = document.createElement('div');
+  fila.className = 'caract-fila';
+  fila.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+  fila.innerHTML = `
+    <input type="text" class="caract-nombre" placeholder="Nombre  Ej: Color" value="${nombre}"
+      style="flex:1;min-width:0;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;">
+    <input type="text" class="caract-valor" placeholder="Valor  Ej: Rojo" value="${valor}"
+      style="flex:1;min-width:0;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;">
+    <button type="button" onclick="this.closest('.caract-fila').remove(); actualizarBtnAgregarCaract();"
+      style="background:none;border:none;font-size:20px;color:#CCC;cursor:pointer;flex-shrink:0;padding:0 2px;line-height:1;">×</button>`;
+  lista.appendChild(fila);
+  actualizarBtnAgregarCaract();
+}
+
+function actualizarBtnAgregarCaract(){
+  const lista = document.getElementById('cnpCaracteristicasLista');
+  const btn   = document.getElementById('cnpBtnAgregarCaract');
+  if(!lista || !btn) return;
+  const cant = lista.querySelectorAll('.caract-fila').length;
+  btn.style.display = cant >= MAX_CARACTERISTICAS ? 'none' : 'flex';
+}
+
+function leerCaracteristicas(){
+  const lista = document.getElementById('cnpCaracteristicasLista');
+  if(!lista) return [];
+  const result = [];
+  lista.querySelectorAll('.caract-fila').forEach(fila => {
+    const n = fila.querySelector('.caract-nombre')?.value.trim();
+    const v = fila.querySelector('.caract-valor')?.value.trim();
+    if(n && v) result.push({n, v});
+  });
+  return result;
+}
+
+function cargarCaracteristicas(lista){
+  const cont = document.getElementById('cnpCaracteristicasLista');
+  if(!cont) return;
+  cont.innerHTML = '';
+  (lista||[]).forEach(item => agregarCaracteristica(item.n, item.v));
+}
+
+function limpiarCaracteristicas(){
+  const cont = document.getElementById('cnpCaracteristicasLista');
+  if(cont) cont.innerHTML = '';
+  actualizarBtnAgregarCaract();
+}
+
+/* ── FIN CARACTERÍSTICAS LIBRES ─────────────────────────────────────── */
+
 /* Lee los atributos cargados en el formulario y los devuelve como objeto */
 function leerAtributos(){
   const rubro  = document.getElementById('cnpRubro')?.value || '';
@@ -7096,16 +7173,16 @@ function crearProductoComercio(){
   const envio = cnpEnvioVal === 'si_gratis' || cnpEnvioVal === 'si_costo';
   const envioPolitica = cnpEnvioVal;
   const caja = null;
-  const enMenuDia = !!(document.getElementById('cnpMenuDia')?.checked);
-  const mayores18 = !!(document.getElementById('cnpMayores18')?.checked);
-  const receta    = !!(document.getElementById('cnpReceta')?.checked);
-
-  const atributos = leerAtributos();
+  const enMenuDia      = !!(document.getElementById('cnpMenuDia')?.checked);
+  const mayores18      = !!(document.getElementById('cnpMayores18')?.checked);
+  const receta         = !!(document.getElementById('cnpReceta')?.checked);
+  const atributos      = leerAtributos();
+  const caracteristicas = leerCaracteristicas();
 
   if(productoEditandoId){
     const p = state.productos.find(x=>x.id===productoEditandoId);
     if(!p){ toast('No se encontró el producto'); return; }
-    Object.assign(p, {nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia, mayores18, receta});
+    Object.assign(p, {nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, caracteristicas, enMenuDia, mayores18, receta});
     guardarProductoEnFirestore(p, c.uid);
     toast('Cambios guardados ✅');
     productoEditandoId = null;
@@ -7116,7 +7193,7 @@ function crearProductoComercio(){
   }
 
   const _comercioId = c.id || c._docId || c.uid;
-  const p = {id: nextId('p'), comercioId:_comercioId, nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia, mayores18, receta};
+  const p = {id: nextId('p'), comercioId:_comercioId, nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, caracteristicas, enMenuDia, mayores18, receta};
   state.productos.push(p);
   guardarProductoEnFirestore(p, c.uid);
   toast('Producto publicado en tu ficha y en el feed de La Paz ✅');
@@ -11987,31 +12064,43 @@ function abrirOferta(prodId){
     }
   }
 
-  // --- Atributos del producto (marca, talle, modelo, etc.) ---
+  // --- Atributos del producto (marca, talle, modelo, etc. + características libres) ---
   const ofAtrBloque = document.getElementById('ofAtributosBloque');
   const ofAtrTabla  = document.getElementById('ofAtributosTabla');
   if(ofAtrBloque && ofAtrTabla){
+    const LABELS_ATR = {
+      genero:'Género', talles:'Talles', colores:'Colores', material:'Material',
+      marca:'Marca', modelo:'Modelo', color:'Color', estado:'Estado',
+      medida:'Medida', capacidad:'Capacidad', garantia:'Garantía',
+      marcaVehiculo:'Vehículo', modeloVehiculo:'Modelo', anioVehiculo:'Año',
+      nroParte:'N° de parte', laboratorio:'Laboratorio',
+      presentacion:'Presentación', principioActivo:'Principio activo',
+      tipo:'Tipo', talle:'Talle', peso:'Peso', volumen:'Volumen',
+      servicio:'Servicio', duracion:'Duración', modalidad:'Modalidad',
+      deporte:'Deporte', rodado:'Rodado', cilindrada:'Cilindrada',
+      km:'Kilometraje', combustible:'Combustible', transmision:'Transmisión',
+      operacion:'Operación', superficie:'Superficie', ambientes:'Ambientes',
+      barrio:'Barrio', extras:'Extras', disciplina:'Disciplina',
+    };
+    // Atributos del rubro (campos fijos)
     const atrs = p.atributos ? Object.entries(p.atributos).filter(([k,v])=>v && String(v).trim()) : [];
-    if(atrs.length){
-      const LABELS_ATR = {
-        genero:'Género', talles:'Talles', colores:'Colores', material:'Material',
-        marca:'Marca', modelo:'Modelo', color:'Color', estado:'Estado',
-        medida:'Medida', capacidad:'Capacidad', garantia:'Garantía',
-        marcaVehiculo:'Vehículo', modeloVehiculo:'Modelo', anioVehiculo:'Año',
-        nroParte:'N° de parte', laboratorio:'Laboratorio',
-        presentacion:'Presentación', principioActivo:'Principio activo',
-        tipo:'Tipo', talle:'Talle', peso:'Peso', volumen:'Volumen',
-        servicio:'Servicio', duracion:'Duración', modalidad:'Modalidad',
-        deporte:'Deporte', rodado:'Rodado', cilindrada:'Cilindrada',
-        km:'Kilometraje', combustible:'Combustible', transmision:'Transmisión',
-        operacion:'Operación', superficie:'Superficie', ambientes:'Ambientes',
-        barrio:'Barrio', extras:'Extras', disciplina:'Disciplina',
-      };
-      ofAtrTabla.innerHTML = atrs.map(([k,v])=>`
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);gap:12px;">
-          <span style="font-size:12.5px;color:var(--muted);font-weight:600;flex-shrink:0;">${LABELS_ATR[k]||k}</span>
-          <span style="font-size:13px;font-weight:700;color:var(--ink);text-align:right;">${v}</span>
-        </div>`).join('');
+    const filasFijas = atrs.map(([k,v])=>`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);gap:12px;">
+        <span style="font-size:12.5px;color:var(--muted);font-weight:600;flex-shrink:0;">${LABELS_ATR[k]||k}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--ink);text-align:right;">${v}</span>
+      </div>`).join('');
+
+    // Características libres
+    const caracts = (p.caracteristicas||[]).filter(c=>c.n && c.v);
+    const filasLibres = caracts.map(c=>`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);gap:12px;">
+        <span style="font-size:12.5px;color:var(--muted);font-weight:600;flex-shrink:0;">${c.n}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--ink);text-align:right;">${c.v}</span>
+      </div>`).join('');
+
+    const todo = filasFijas + filasLibres;
+    if(todo){
+      ofAtrTabla.innerHTML = todo;
       ofAtrBloque.style.display = 'block';
     } else {
       ofAtrBloque.style.display = 'none';
