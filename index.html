@@ -1305,6 +1305,18 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div id="ofStockInfo" style="margin-bottom:8px;"></div>
       <div id="ofRestricciones" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
 
+      <!-- Descripción libre del producto -->
+      <div id="ofDescripcionBloque" style="display:none;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;">📋 Descripción</div>
+        <div id="ofDescripcionTexto" style="font-size:13.5px;color:var(--ink);line-height:1.6;white-space:pre-wrap;"></div>
+      </div>
+
+      <!-- Atributos del producto (marca, talle, modelo, etc.) -->
+      <div id="ofAtributosBloque" style="display:none;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:8px;">🔍 Características</div>
+        <div id="ofAtributosTabla"></div>
+      </div>
+
       <!-- Bloque local: visible solo para registrados -->
       <div id="ofLocalBloque" style="background:var(--cream); border-radius:14px; padding:12px 14px; margin-bottom:14px;">
         <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px;">📍 Retirás en</div>
@@ -2604,6 +2616,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div id="cnpFotoEstado" class="foto-upload-estado"></div>
       </div>
       <div class="field"><label>Nombre del producto</label><input id="cnpNombre" placeholder="Ej: Combo desayuno x2"></div>
+      <div class="field">
+        <label>Descripción <span style="font-weight:500;color:var(--muted);font-size:11.5px;">(opcional)</span></label>
+        <textarea id="cnpDescripcion" placeholder="Describí el producto: qué incluye, para qué sirve, condiciones, detalles importantes..." style="width:100%;min-height:90px;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;font-size:13.5px;font-family:inherit;resize:vertical;line-height:1.5;color:var(--ink);background:#fff;box-sizing:border-box;"></textarea>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Aparece en la ficha del producto cuando el cliente toca "Ver más".</div>
+      </div>
       <div class="field">
         <label>Precio</label>
         <input id="cnpPrecio" type="number" placeholder="Ej: 8500">
@@ -6471,6 +6488,7 @@ function abrirNuevoProducto(){
   document.getElementById('cnpBtnGuardar').textContent = 'Publicar producto';
   document.getElementById('cnpBtnEliminar').classList.add('hidden');
   document.getElementById('cnpNombre').value=''; document.getElementById('cnpPrecio').value='';
+  const _descEl = document.getElementById('cnpDescripcion'); if(_descEl) _descEl.value='';
   document.getElementById('cnpComision').value=''; document.getElementById('cnpStock').value='';
   document.getElementById('cnpSinPrecio').checked = false; onSinPrecioChange();
   document.getElementById('cnpConector').checked = false; prepararTildeConectorProducto();
@@ -6505,6 +6523,8 @@ function abrirEditarProducto(prodId){
   document.getElementById('cnpBtnGuardar').textContent = 'Guardar cambios';
   document.getElementById('cnpBtnEliminar').classList.remove('hidden');
   document.getElementById('cnpNombre').value = p.nombre;
+  const descEl = document.getElementById('cnpDescripcion');
+  if(descEl) descEl.value = p.descripcion || '';
   document.getElementById('cnpSinPrecio').checked = productoSinPrecio(p);
   document.getElementById('cnpPrecio').value = productoSinPrecio(p) ? '' : p.precio;
   onSinPrecioChange();
@@ -7023,8 +7043,9 @@ function cargarAtributosEnForm(atributos){
 function crearProductoComercio(){
   const c = state.currentUser;
   if(!publicidadActiva(c)){ toast('Necesitás tener la publicidad mensual activa para cargar productos propios'); return; }
-  const nombre = document.getElementById('cnpNombre').value.trim();
-  const sinPrecio = !!document.getElementById('cnpSinPrecio')?.checked;
+  const nombre      = document.getElementById('cnpNombre').value.trim();
+  const descripcion = document.getElementById('cnpDescripcion')?.value.trim() || '';
+  const sinPrecio   = !!document.getElementById('cnpSinPrecio')?.checked;
   const precio = sinPrecio ? 0 : parseFloat(document.getElementById('cnpPrecio').value);
   const comisionInput = document.getElementById('cnpComision').value;
   const rubro = document.getElementById('cnpRubro').value;
@@ -7084,7 +7105,7 @@ function crearProductoComercio(){
   if(productoEditandoId){
     const p = state.productos.find(x=>x.id===productoEditandoId);
     if(!p){ toast('No se encontró el producto'); return; }
-    Object.assign(p, {nombre, precio, sinPrecio, comision, conector, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia, mayores18, receta});
+    Object.assign(p, {nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen: p.origen || 'comercio', tipoOferta, descuento, stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia, mayores18, receta});
     guardarProductoEnFirestore(p, c.uid);
     toast('Cambios guardados ✅');
     productoEditandoId = null;
@@ -7095,7 +7116,7 @@ function crearProductoComercio(){
   }
 
   const _comercioId = c.id || c._docId || c.uid;
-  const p = {id: nextId('p'), comercioId:_comercioId, nombre, precio, sinPrecio, comision, conector, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia, mayores18, receta};
+  const p = {id: nextId('p'), comercioId:_comercioId, nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, enMenuDia, mayores18, receta};
   state.productos.push(p);
   guardarProductoEnFirestore(p, c.uid);
   toast('Producto publicado en tu ficha y en el feed de La Paz ✅');
@@ -11953,6 +11974,49 @@ function abrirOferta(prodId){
   const badge = etiquetaOferta(p);
   document.getElementById('ofPrecio').innerHTML = precioTexto(p) + (badge ? ` <span class="oferta-badge" style="position:static; display:inline-block; margin-left:8px; vertical-align:middle;">${badge}</span>` : '');
   document.getElementById('ofStockInfo').innerHTML = stockBadge(p);
+
+  // --- Descripción libre ---
+  const ofDescBloque = document.getElementById('ofDescripcionBloque');
+  const ofDescTexto  = document.getElementById('ofDescripcionTexto');
+  if(ofDescBloque && ofDescTexto){
+    if(p.descripcion){
+      ofDescTexto.textContent = p.descripcion;
+      ofDescBloque.style.display = 'block';
+    } else {
+      ofDescBloque.style.display = 'none';
+    }
+  }
+
+  // --- Atributos del producto (marca, talle, modelo, etc.) ---
+  const ofAtrBloque = document.getElementById('ofAtributosBloque');
+  const ofAtrTabla  = document.getElementById('ofAtributosTabla');
+  if(ofAtrBloque && ofAtrTabla){
+    const atrs = p.atributos ? Object.entries(p.atributos).filter(([k,v])=>v && String(v).trim()) : [];
+    if(atrs.length){
+      const LABELS_ATR = {
+        genero:'Género', talles:'Talles', colores:'Colores', material:'Material',
+        marca:'Marca', modelo:'Modelo', color:'Color', estado:'Estado',
+        medida:'Medida', capacidad:'Capacidad', garantia:'Garantía',
+        marcaVehiculo:'Vehículo', modeloVehiculo:'Modelo', anioVehiculo:'Año',
+        nroParte:'N° de parte', laboratorio:'Laboratorio',
+        presentacion:'Presentación', principioActivo:'Principio activo',
+        tipo:'Tipo', talle:'Talle', peso:'Peso', volumen:'Volumen',
+        servicio:'Servicio', duracion:'Duración', modalidad:'Modalidad',
+        deporte:'Deporte', rodado:'Rodado', cilindrada:'Cilindrada',
+        km:'Kilometraje', combustible:'Combustible', transmision:'Transmisión',
+        operacion:'Operación', superficie:'Superficie', ambientes:'Ambientes',
+        barrio:'Barrio', extras:'Extras', disciplina:'Disciplina',
+      };
+      ofAtrTabla.innerHTML = atrs.map(([k,v])=>`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);gap:12px;">
+          <span style="font-size:12.5px;color:var(--muted);font-weight:600;flex-shrink:0;">${LABELS_ATR[k]||k}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--ink);text-align:right;">${v}</span>
+        </div>`).join('');
+      ofAtrBloque.style.display = 'block';
+    } else {
+      ofAtrBloque.style.display = 'none';
+    }
+  }
 
   // --- Badges de restricción ---
   const restriccionesEl = document.getElementById('ofRestricciones');
