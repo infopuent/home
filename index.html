@@ -1487,6 +1487,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <span style="font-size:15px;">📸</span>
           <div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;">Instagram</div><div id="lpInstagram" style="font-size:13.5px; font-weight:600; color:var(--navy);"></div></div>
         </div>
+        <div id="lpDatosExtra"></div>
       </div>
 
       <!-- Menú del día -->
@@ -1500,6 +1501,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="comoLlegar(window._lpComercioId)">📍 Cómo llegar</button>
         <button class="btn btn-ghost btn-sm" style="flex:1;" id="lpBtnWsp" style="display:none;" onclick="abrirWhatsappLocal()">💬 WhatsApp</button>
       </div>
+
+      <!-- Vitrina: galería al final -->
+      <div id="lpVitrinaGaleria" style="display:none; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;"></div>
     </div>
 
     <div class="section-title" style="margin-bottom:12px;" id="lpProdTitulo">Productos del local</div>
@@ -8655,19 +8659,22 @@ function vitUrl(u){ u = String(u||'').trim(); if(!u) return ''; return /^https?:
 
 function renderVitrinaFicha(c){
   const bloque = document.getElementById('lpVitrinaBloque');
+  const datos = document.getElementById('lpDatosExtra');
+  const galBox = document.getElementById('lpVitrinaGaleria');
   const titulo = document.getElementById('lpProdTitulo');
   const grid = document.getElementById('lpGrid');
   const esVit = (c.modo==='vitrina' || c.modo==='mixto');
   if(titulo) titulo.style.display = (c.modo==='vitrina') ? 'none' : '';
   if(grid) grid.style.display = (c.modo==='vitrina') ? 'none' : '';
-  if(!bloque) return;
-  if(!esVit){ bloque.style.display='none'; bloque.innerHTML=''; return; }
+  if(datos) datos.innerHTML = '';
+  if(!esVit){
+    if(bloque){ bloque.style.display='none'; bloque.innerHTML=''; }
+    if(galBox){ galBox.style.display='none'; galBox.innerHTML=''; }
+    return;
+  }
   const lbl = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;';
-  let h = '';
-  if(c.descripcion) h += `<div style="font-size:13.5px;color:var(--navy);font-weight:600;margin-bottom:10px;">${vitEsc(c.descripcion)}</div>`;
-  if(c.sobreNosotros) h += `<div style="margin-bottom:14px;"><div style="${lbl}">Sobre nosotros</div><div style="font-size:13.5px;color:var(--ink);line-height:1.55;white-space:pre-line;">${vitEsc(c.sobreNosotros)}</div></div>`;
-  if((c.caracVitrina||[]).length) h += `<div style="margin-bottom:14px;"><div style="${lbl}">Características</div>${c.caracVitrina.map(t=>`<span class="vit-ficha-chip">${vitEsc(t)}</span>`).join('')}</div>`;
-  if((c.galeria||[]).length) h += `<div style="margin-bottom:14px;"><div style="${lbl}">Galería</div><div class="vit-ficha-gal">${c.galeria.map((g,i)=>`<div class="vit-ficha-foto" onclick="vitVerFoto(${i})"><img src="${g.img}" alt="">${g.desc?`<div>${vitEsc(g.desc)}</div>`:''}</div>`).join('')}</div></div>`;
+
+  // 1) Todos los datos del comercio juntos (se suman a dirección, WhatsApp e Instagram)
   const filas = [];
   if(c.email) filas.push(['✉️','Correo',`<a href="mailto:${vitEsc(c.email)}" style="color:var(--navy);">${vitEsc(c.email)}</a>`]);
   if(c.telefonoAlt) filas.push(['📞','Teléfono alternativo',vitEsc(c.telefonoAlt)]);
@@ -8675,9 +8682,22 @@ function renderVitrinaFicha(c){
   if(c.web) filas.push(['🌐','Sitio web',`<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" style="color:var(--navy);">${vitEsc(c.web)}</a>`]);
   if((c.dias||[]).length) filas.push(['📅','Días de atención',vitEsc(c.dias.join(', '))]);
   if((c.metodosPago||[]).length) filas.push(['💳','Medios de pago',vitEsc(c.metodosPago.join(', '))]);
-  h += filas.map(([ic,l,v])=>`<div style="padding:8px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;"><span style="font-size:15px;">${ic}</span><div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;">${l}</div><div style="font-size:13.5px;font-weight:600;color:var(--navy);">${v}</div></div></div>`).join('');
-  bloque.innerHTML = h;
-  bloque.style.display = h ? 'block' : 'none';
+  if(datos) datos.innerHTML = filas.map(([ic,l,v])=>`<div style="padding:8px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;"><span style="font-size:15px;">${ic}</span><div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;">${l}</div><div style="font-size:13.5px;font-weight:600;color:var(--navy);">${v}</div></div></div>`).join('');
+
+  // 2) Textos: descripción, sobre nosotros y características
+  let h = '';
+  if(c.descripcion) h += `<div style="font-size:13.5px;color:var(--navy);font-weight:600;margin-bottom:10px;">${vitEsc(c.descripcion)}</div>`;
+  if(c.sobreNosotros) h += `<div style="margin-bottom:14px;"><div style="${lbl}">Sobre nosotros</div><div style="font-size:13.5px;color:var(--ink);line-height:1.55;white-space:pre-line;">${vitEsc(c.sobreNosotros)}</div></div>`;
+  if((c.caracVitrina||[]).length) h += `<div style="margin-bottom:6px;"><div style="${lbl}">Características</div>${c.caracVitrina.map(t=>`<span class="vit-ficha-chip">${vitEsc(t)}</span>`).join('')}</div>`;
+  if(bloque){ bloque.innerHTML = h; bloque.style.display = h ? 'block' : 'none'; }
+
+  // 3) Galería al final de la ficha
+  if(galBox){
+    if((c.galeria||[]).length){
+      galBox.innerHTML = `<div style="${lbl}">Galería</div><div class="vit-ficha-gal">${c.galeria.map((g,i)=>`<div class="vit-ficha-foto" onclick="vitVerFoto(${i})"><img src="${g.img}" alt="">${g.desc?`<div>${vitEsc(g.desc)}</div>`:''}</div>`).join('')}</div>`;
+      galBox.style.display = 'block';
+    } else { galBox.innerHTML=''; galBox.style.display='none'; }
+  }
 }
 
 function vitVerFoto(i){
