@@ -8670,10 +8670,13 @@ function renderVitrinaSecciones(){
       <div class="vit-rubro">${vitEsc(c.rubro||'')}</div>
     </div>`;
   }).join('');
+  // Si todavía no hay vitrinas, la sección igual se ve para comercios y admin (con un aviso)
+  const verVacia = !lista.length && (state.role==='comercio' || state.role==='admin');
+  const vacio = `<div style="flex:1;border:1.5px dashed var(--line);border-radius:16px;padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5;">🪟 Todavía no hay comercios en modo vitrina. Desde el panel del comercio, entrá a <b>Mi vitrina</b> y elegí "Solo vitrina" o "Vitrina + productos".</div>`;
   [['vitrinaHomeSection','vitrinaHomeRow'],['vitrinaLocalesSection','vitrinaLocalesRow']].forEach(([sec,row])=>{
     const s = document.getElementById(sec), r = document.getElementById(row);
-    if(s) s.style.display = lista.length ? '' : 'none';
-    if(r) r.innerHTML = html;
+    if(s) s.style.display = (lista.length || verVacia) ? '' : 'none';
+    if(r) r.innerHTML = lista.length ? html : (verVacia ? vacio : '');
   });
 }
 
