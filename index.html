@@ -696,28 +696,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
 .cerca-item{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); cursor:pointer;}
 .cerca-item:last-child{border-bottom:none;}
-/* Solo Vidriera — carrusel del home */
-.vidriera-card{width:140px;flex-shrink:0;border-radius:16px;overflow:hidden;background:#fff;border:1.5px solid var(--line);cursor:pointer;transition:transform .15s;}
-.vidriera-card:active{transform:scale(.95);}
-.vidriera-card-cover{width:100%;height:90px;background:var(--cream);overflow:hidden;position:relative;}
-.vidriera-card-cover img{width:100%;height:100%;object-fit:cover;}
-.vidriera-card-logo{width:36px;height:36px;border-radius:10px;border:2px solid #fff;background:#F2F2F2;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:16px;position:absolute;bottom:-14px;left:10px;box-shadow:0 2px 6px rgba(0,0,0,.12);}
-.vidriera-card-logo img{width:100%;height:100%;object-fit:cover;}
-.vidriera-card-body{padding:18px 10px 10px;}
-.vidriera-card-nombre{font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.vidriera-card-rubro{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-/* Fila de foto en la pantalla de gestión */
-.vidriera-foto-fila{background:#F8F8F8;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;}
-.vidriera-foto-preview{width:60px;height:50px;border-radius:8px;overflow:hidden;background:var(--cream);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;}
-.vidriera-foto-preview img{width:100%;height:100%;object-fit:cover;}
-/* Galería en la ficha pública */
-.vidriera-galeria-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
-.vidriera-galeria-item{border-radius:12px;overflow:hidden;background:var(--cream);position:relative;}
-.vidriera-galeria-item img{width:100%;height:110px;object-fit:cover;display:block;}
-.vidriera-galeria-desc{font-size:11.5px;color:var(--muted);padding:5px 8px;line-height:1.3;}
-/* Tarjeta de servicio en la ficha pública */
-.vidriera-servicio-card{background:#F8F8F8;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-
 .cerca-avatar{width:44px; height:44px; border-radius:12px; background:var(--cream); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; overflow:hidden;}
 .cerca-avatar img{width:100%; height:100%; object-fit:cover;}
 .cerca-info{flex:1; min-width:0;}
@@ -834,6 +812,32 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .pub-card.inactiva .pub-txt{color:rgba(255,255,255,0.78);}
 .pub-card.activa .pub-txt{color:#9C6B6B;}
 .pub-price{font-family:'Bai Jamjuree',sans-serif; font-size:13px; font-weight:600; margin-bottom:12px; opacity:.85;}
+
+/* ---- VITRINA (comercios en modo ficha / vitrina) ---- */
+.vit-row{display:flex;gap:12px;overflow-x:auto;padding:8px 16px 6px;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.vit-row::-webkit-scrollbar{display:none;}
+.vit-card{flex:0 0 220px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;position:relative;padding-bottom:12px;}
+.vit-cover{height:104px;background:linear-gradient(135deg,#EDF1EA,#FBF7EF);display:flex;align-items:center;justify-content:center;font-size:34px;overflow:hidden;}
+.vit-cover img{width:100%;height:100%;object-fit:cover;}
+.vit-logo{position:absolute;top:74px;left:12px;width:56px;height:56px;border-radius:14px;border:3px solid #fff;background:#fff;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#5C7355;}
+.vit-logo img{width:100%;height:100%;object-fit:contain;padding:3px;}
+.vit-nombre{margin:34px 12px 0;font-weight:800;font-size:14px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vit-rubro{margin:2px 12px 0;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vit-modo-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;}
+.vit-modo-opt input{width:auto;margin-top:3px;}
+.vit-modo-opt.sel{border-color:#5C7355;background:#F2F6EF;}
+.vit-gal-item{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
+.vit-gal-item img{width:72px;height:72px;object-fit:cover;border-radius:10px;flex-shrink:0;}
+.vit-gal-item input{flex:1;min-width:0;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;}
+.vit-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid var(--line);border-radius:100px;font-size:12.5px;font-weight:600;cursor:pointer;background:#fff;}
+.vit-chip input{width:auto;margin:0;}
+.vit-chip.on{border-color:#5C7355;background:#F2F6EF;color:#5C7355;}
+.vit-ficha-chip{display:inline-block;padding:6px 12px;border-radius:100px;background:#F2F6EF;color:#5C7355;font-size:12.5px;font-weight:700;margin:0 6px 6px 0;}
+.vit-ficha-gal{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -2px;}
+.vit-ficha-gal::-webkit-scrollbar{display:none;}
+.vit-ficha-foto{flex:0 0 78%;max-width:300px;scroll-snap-align:start;cursor:pointer;}
+.vit-ficha-foto img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;display:block;}
+.vit-ficha-foto div{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.35;}
 </style>
 </head>
 <body>
@@ -1025,15 +1029,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
       <div id="catBannerList" style="padding:6px 16px 4px;display:flex;flex-direction:column;gap:0;"></div>
 
-      <!-- Sección Solo Vidriera -->
-      <div id="secVidriera" style="display:none;padding:14px 0 4px;">
-        <div style="padding:0 16px;">
-          <div class="section-title-row">
-            <div class="section-title">🏪 Solo Vidriera</div>
-            <span style="font-size:11.5px;color:var(--muted);font-weight:600;">Comercios sin productos</span>
-          </div>
+      <!-- Vitrina: comercios que están en PuenT con su ficha (con o sin productos) -->
+      <div id="vitrinaHomeSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">🪟 Vidriera</div>
+          <span class="ver-todo" onclick="setFeedTab('locales')">Ver todos →</span>
         </div>
-        <div id="vidrieraRow" style="display:flex;gap:12px;overflow-x:auto;padding:8px 16px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;"></div>
+        <div id="vitrinaHomeRow" class="vit-row"></div>
       </div>
 
       <!-- CTA ingreso (solo si no está logueado) -->
@@ -1058,6 +1060,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
          TAB: LOCALES
     ================================================================ -->
     <div id="feedLocalesView" class="hidden" style="padding:0 16px; margin-top:12px;">
+      <div id="vitrinaLocalesSection" style="display:none;margin:0 -16px 6px;">
+        <div class="section-title" style="margin:4px 16px 0;">🪟 Vidriera</div>
+        <div id="vitrinaLocalesRow" class="vit-row"></div>
+      </div>
       <div class="section-title" style="margin-top:4px;">Comercios destacados</div>
       <div class="destacados-row" id="destacadosRow"></div>
       <div class="section-title-row">
@@ -1481,22 +1487,26 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <span style="font-size:15px;">📸</span>
           <div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;">Instagram</div><div id="lpInstagram" style="font-size:13.5px; font-weight:600; color:var(--navy);"></div></div>
         </div>
+        <div id="lpDatosExtra"></div>
       </div>
 
       <!-- Menú del día -->
       <div id="lpMenuDiaBloque" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:12px;"></div>
+
+      <!-- Vitrina: sobre nosotros, características, galería y contacto extra -->
+      <div id="lpVitrinaBloque" style="display:none; margin-top:12px;"></div>
 
       <!-- Botones de acción -->
       <div style="display:flex; gap:8px; margin-top:14px;">
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="comoLlegar(window._lpComercioId)">📍 Cómo llegar</button>
         <button class="btn btn-ghost btn-sm" style="flex:1;" id="lpBtnWsp" style="display:none;" onclick="abrirWhatsappLocal()">💬 WhatsApp</button>
       </div>
+
+      <!-- Vitrina: galería al final -->
+      <div id="lpVitrinaGaleria" style="display:none; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;"></div>
     </div>
 
-    <!-- Galería y servicios (Solo Vidriera) -->
-    <div id="lpVidreiraBloque" style="margin-bottom:16px;"></div>
-
-    <div class="section-title" id="lpProductosTitulo" style="margin-bottom:12px;">Productos del local</div>
+    <div class="section-title" style="margin-bottom:12px;" id="lpProdTitulo">Productos del local</div>
     <div class="prod-grid" id="lpGrid"></div>
   </div>
 
@@ -2481,7 +2491,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="p-card-title">Editar info</div>
       </button>
 
-      <button class="p-card" style="background:#FFF0E8;color:#CC4400;" onclick="irNuevoProductoComercioSeguro()">
+      <button class="p-card" id="btnCargarProdPanel" style="background:#FFF0E8;color:#CC4400;" onclick="irNuevoProductoComercioSeguro()">
         <i class="ti ti-plus p-card-ic"></i>
         <div class="p-card-title">Cargar producto</div>
       </button>
@@ -2491,7 +2501,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="p-card-title">Estadísticas</div>
       </button>
 
-      <button class="p-card" style="background:#E8F5E9;color:#2E7D32;" onclick="showScreen('c-productos');renderProductosPropios('cProductosPropiosPage');">
+      <button class="p-card" id="btnProductosPanel" style="background:#E8F5E9;color:#2E7D32;" onclick="showScreen('c-productos');renderProductosPropios('cProductosPropiosPage');">
         <i class="ti ti-package p-card-ic"></i>
         <div class="p-card-title">Productos</div>
       </button>
@@ -2536,8 +2546,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="p-card-title">Historial</div>
       </button>
 
-
-
       <div class="p-card" style="background:#F5F5F5;color:#333;cursor:default;grid-column:1/-1;flex-direction:row;gap:12px;align-items:center;">
         <i class="ti ti-scan" style="font-size:22px;flex-shrink:0;"></i>
         <div style="flex:1;">
@@ -2555,44 +2563,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div id="cBajaSolicitadaBox"></div>
     <div id="cPlanBox"></div>
     <div style="height:24px;"></div>
-  </div>
-
-  <!-- ============ COMERCIO: SOLO VIDRIERA ============ -->
-  <div class="screen hidden" id="screen-c-vidriera">
-    <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
-    <div class="kicker">Panel de comercio</div>
-    <h1 class="page-title">Solo Vidriera</h1>
-    <p class="page-sub">Activá este modo si solo querés mostrarte en PuenT sin vender productos. Aparecés en el carrusel "Solo Vidriera" del home con tus fotos y servicios.</p>
-
-    <!-- Toggle ON/OFF -->
-    <div style="background:#F0F4FF;border:1.5px solid #BDD2FF;border-radius:16px;padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <div>
-        <div style="font-weight:800;font-size:14px;color:#1A3A8A;">Modo Solo Vidriera</div>
-        <div id="vidreiraEstadoTexto" style="font-size:12px;color:#3A5AAA;margin-top:2px;">Desactivado — tu comercio funciona normalmente</div>
-      </div>
-      <label style="position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0;">
-        <input type="checkbox" id="vidrieraToggle" onchange="toggleVidriera(this.checked)" style="opacity:0;width:0;height:0;">
-        <span id="vidrieraToggleSlider" style="position:absolute;cursor:pointer;inset:0;background:#CCC;border-radius:26px;transition:.3s;"></span>
-        <span id="vidrieraToggleKnob" style="position:absolute;content:'';height:20px;width:20px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);"></span>
-      </label>
-    </div>
-
-    <!-- Fotos de la vidriera -->
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🖼️ Fotos de la vidriera <span style="font-weight:500;font-size:10px;">(hasta 6)</span></div>
-    <div id="vidrieraFotosLista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
-    <button type="button" onclick="agregarFotoVidriera()" id="btnAgregarFotoVidriera" style="display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--line);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;width:100%;justify-content:center;margin-bottom:20px;">
-      ＋ Agregar foto
-    </button>
-
-    <!-- Servicios -->
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">🛎️ Servicios que ofrecés <span style="font-weight:500;font-size:10px;">(hasta 10)</span></div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4;">Los clientes los ven en tu ficha con un botón para consultar por WhatsApp.</div>
-    <div id="vidrieraServiciosLista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
-    <button type="button" onclick="agregarServicioVidriera()" id="btnAgregarServicioVidriera" style="display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--line);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;width:100%;justify-content:center;margin-bottom:20px;">
-      ＋ Agregar servicio
-    </button>
-
-    <button onclick="guardarVidriera()" style="width:100%;padding:15px;border-radius:14px;background:#FF6600;color:white;font-weight:800;font-size:15px;border:none;cursor:pointer;margin-bottom:24px;">Guardar vidriera</button>
   </div>
 
   <!-- ============ COMERCIO: PANTALLA CONECTORT ============ -->
@@ -2961,6 +2931,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
 
     <div class="card" style="margin-top:0;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🪟 Modo de tu comercio en PuenT</div>
+      <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos. También podés sumar galería y características.</div></div></label>
+      <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟 Solo vidriera</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Para locales, profesionales y talleres que quieren estar en PuenT con su ficha, galería y características, sin vender productos.</div></div></label>
+          </div>
+
+
+    <div class="card" style="margin-top:0;">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">📍 Ubicación exacta</div>
       <div class="field">
         <label>Marcá el punto en el mapa <span style="font-weight:400; color:var(--muted);">(para que "Cómo llegar" funcione bien)</span></label>
@@ -3015,17 +2992,34 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
       </div>
     </div>
-    <!-- Solo Vidriera -->
-    <div class="card" style="margin-top:0;background:#F0F4FF;border:1.5px solid #BDD2FF;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-        <div>
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#1A3A8A;margin-bottom:4px;">🏪 Solo Vidriera</div>
-          <div style="font-size:12.5px;color:#3A5AAA;line-height:1.4;">Mostrarte sin vender productos: fotos del local, servicios y botón de contacto.</div>
-          <div id="editCVidreiraEstado" style="font-size:11.5px;font-weight:700;margin-top:4px;color:#2A3A8A;"></div>
+    <div id="vitBloquesExtra">
+      <div class="card" style="margin-top:0;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">📝 Sobre nosotros</div>
+        <textarea id="vitSobre" maxlength="800" rows="4" placeholder="Contá en pocas líneas qué hacés, desde cuándo, qué te distingue…" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;font-family:inherit;resize:vertical;"></textarea>
+      </div>
+
+      <div class="card" style="margin-top:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">🖼️ Galería de fotos</div>
+          <div id="vitGaleriaContador" style="font-size:11.5px;color:var(--muted);"></div>
         </div>
-        <button type="button" onclick="abrirVidriera()" style="flex-shrink:0;background:#2A3A8A;color:white;border:none;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;">
-          Configurar →
-        </button>
+        <div id="vitGaleriaLista"></div>
+        <div class="btn-block-row" id="vitGaleriaBtns" style="margin:4px 0;">
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('vitFotoCam').click()">📷 Foto</button>
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('vitFotoGal').click()">🖼️ Galería</button>
+        </div>
+        <input type="file" id="vitFotoCam" accept="image/*" capture="environment" style="display:none" onchange="vitAgregarFoto(this)">
+        <input type="file" id="vitFotoGal" accept="image/*" style="display:none" onchange="vitAgregarFoto(this)">
+        <div class="foto-upload-estado" id="vitGaleriaEstado" style="margin-bottom:0;">Cada foto puede llevar una breve descripción.</div>
+      </div>
+
+      <div class="card" style="margin-top:0;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">✨ Características</div>
+        <div id="vitCaractLista" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="vitCaractNueva" maxlength="40" placeholder="Agregar otra (ej: Atendemos con turno)" style="flex:1;min-width:0;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;" onkeydown="if(event.key==='Enter'){event.preventDefault();vitAgregarCaract();}">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="vitAgregarCaract()">＋ Agregar</button>
+        </div>
       </div>
     </div>
 
@@ -8521,6 +8515,194 @@ function renderVendedorStats(){
 
 /* ================= COMERCIO ================= */
 /* ================= EDITAR MI INFORMACIÓN ================= */
+/* ============================================================
+   VIDRIERA — comercios en modo ficha (modo 'vitrina' = Solo vidriera; 'tienda' = con productos)
+   Campos del comercio: modo ('tienda' | 'vitrina'; 'mixto' viejo se trata como 'tienda'), sobreNosotros,
+   galeria [{img, desc}], caracVitrina [texto]
+   ============================================================ */
+const MAX_GALERIA_VITRINA = 6;
+const MAX_CARACT_VITRINA = 14;
+const LIMITE_FOTO_GALERIA_BYTES = 50 * 1024;
+const CARACT_VITRINA_SUGERIDAS = ['Estacionamiento','Acepta tarjetas','Mercado Pago / QR','Wi-Fi','Accesible','Aire acondicionado','Atención con turno','Atención a domicilio','Atención online'];
+let _vitGaleria = [];
+let _vitCaract = [];
+
+function vitEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function comercioEnVitrina(c){ return !!c && c.modo==='vitrina' && !(c.viaEmail && c.emailVerificado===false); }
+
+function cargarVitrinaEnEditar(){
+  const c = state.currentUser;
+  if(!c) return;
+  const modo = (c.modo==='vitrina') ? 'vitrina' : 'tienda';
+  document.querySelectorAll('input[name="vitModo"]').forEach(r=>{ r.checked = (r.value===modo); });
+  document.getElementById('vitSobre').value = c.sobreNosotros || '';
+  _vitGaleria = (c.galeria||[]).map(g=>({img:g.img, desc:g.desc||''}));
+  _vitCaract = (c.caracVitrina||[]).slice();
+  vitMarcarModo();
+  vitRenderGaleria();
+  vitRenderCaract();
+}
+
+function vitMarcarModo(){
+  const sel = (document.querySelector('input[name="vitModo"]:checked')||{}).value || 'tienda';
+  ['tienda','vitrina'].forEach(m=>{
+    const el = document.getElementById('vitOpt-'+m);
+    if(el) el.classList.toggle('sel', m===sel);
+  });
+}
+
+function vitRenderGaleria(){
+  const cont = document.getElementById('vitGaleriaLista');
+  if(!cont) return;
+  cont.innerHTML = _vitGaleria.map((g,i)=>`
+    <div class="vit-gal-item">
+      <img src="${g.img}" alt="">
+      <input type="text" maxlength="80" placeholder="Breve descripción (opcional)" value="${vitEsc(g.desc)}" oninput="_vitGaleria[${i}].desc=this.value">
+      <button type="button" onclick="vitQuitarFoto(${i})" style="background:none;border:none;font-size:22px;color:#BBB;cursor:pointer;padding:0 2px;">×</button>
+    </div>`).join('');
+  document.getElementById('vitGaleriaContador').textContent = _vitGaleria.length+'/'+MAX_GALERIA_VITRINA;
+  document.getElementById('vitGaleriaBtns').style.display = _vitGaleria.length>=MAX_GALERIA_VITRINA ? 'none' : 'flex';
+}
+
+function vitAgregarFoto(input){
+  const file = input.files[0];
+  input.value = '';
+  if(!file) return;
+  if(_vitGaleria.length>=MAX_GALERIA_VITRINA){ toast('Máximo '+MAX_GALERIA_VITRINA+' fotos'); return; }
+  const estado = document.getElementById('vitGaleriaEstado');
+  estado.textContent = 'Comprimiendo imagen…';
+  comprimirImagen(file, LIMITE_FOTO_GALERIA_BYTES).then(dataUrl=>{
+    _vitGaleria.push({img:dataUrl, desc:''});
+    estado.textContent = 'Cada foto puede llevar una breve descripción.';
+    vitRenderGaleria();
+  }).catch(err=>{
+    console.error('Error procesando imagen:', err);
+    estado.textContent = '⚠️ No pudimos procesar esa foto. Probá con otra.';
+  });
+}
+
+function vitQuitarFoto(i){ _vitGaleria.splice(i,1); vitRenderGaleria(); }
+
+function vitRenderCaract(){
+  const cont = document.getElementById('vitCaractLista');
+  if(!cont) return;
+  const todas = CARACT_VITRINA_SUGERIDAS.concat(_vitCaract.filter(x=>!CARACT_VITRINA_SUGERIDAS.includes(x)));
+  cont.innerHTML = todas.map(t=>{
+    const on = _vitCaract.includes(t);
+    return `<label class="vit-chip${on?' on':''}"><input type="checkbox" data-v="${vitEsc(t)}" ${on?'checked':''} onchange="vitToggleCaract(this)">${vitEsc(t)}</label>`;
+  }).join('');
+}
+
+function vitToggleCaract(inp){
+  const t = inp.dataset.v;
+  if(inp.checked){
+    if(_vitCaract.length>=MAX_CARACT_VITRINA){ inp.checked=false; toast('Máximo '+MAX_CARACT_VITRINA+' características'); return; }
+    if(!_vitCaract.includes(t)) _vitCaract.push(t);
+  } else {
+    _vitCaract = _vitCaract.filter(x=>x!==t);
+  }
+  vitRenderCaract();
+}
+
+function vitAgregarCaract(){
+  const inp = document.getElementById('vitCaractNueva');
+  const t = (inp.value||'').trim();
+  if(!t) return;
+  if(_vitCaract.length>=MAX_CARACT_VITRINA){ toast('Máximo '+MAX_CARACT_VITRINA+' características'); return; }
+  if(!_vitCaract.some(x=>x.toLowerCase()===t.toLowerCase())) _vitCaract.push(t);
+  inp.value = '';
+  vitRenderCaract();
+}
+
+function leerVitrinaDeEditar(c){
+  c.modo = (document.querySelector('input[name="vitModo"]:checked')||{}).value || 'tienda';
+  c.sobreNosotros = (document.getElementById('vitSobre').value||'').trim().slice(0,800);
+  c.galeria = _vitGaleria.filter(g=>g.img).map(g=>({img:g.img, desc:(g.desc||'').trim().slice(0,80)}));
+  c.caracVitrina = _vitCaract.slice();
+}
+
+// En modo "solo vitrina" el panel no ofrece cargar ni ver productos
+function aplicarModoPanelComercio(){
+  const c = state.currentUser;
+  const soloVitrina = !!c && c.modo==='vitrina';
+  ['btnCargarProdPanel','btnProductosPanel'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = soloVitrina ? 'none' : '';
+  });
+}
+
+function renderVitrinaSecciones(){
+  const lista = (state.comercios||[]).filter(c=> comercioEnVitrina(c) && (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)));
+  const html = lista.map(c=>{
+    const portada = c.img2 || c.img;
+    return `
+    <div class="vit-card" onclick="verProductosDeLocal('${c.id}')">
+      <div class="vit-cover">${portada ? `<img src="${portada}" alt="">` : '🏬'}</div>
+      <div class="vit-logo">${c.img ? `<img src="${c.img}" alt="">` : vitEsc((c.nombre||'?').charAt(0).toUpperCase())}</div>
+      <div class="vit-nombre">${vitEsc(c.nombre)}</div>
+      <div class="vit-rubro">${vitEsc(c.rubro||'')}</div>
+    </div>`;
+  }).join('');
+  // Si todavía no hay vitrinas, la sección igual se ve para comercios y admin (con un aviso)
+  const verVacia = !lista.length && (state.role==='comercio' || state.role==='admin');
+  const vacio = `<div style="flex:1;border:1.5px dashed var(--line);border-radius:16px;padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5;">🪟 Todavía no hay comercios en modo vidriera. Desde el panel del comercio, entrá a <b>Editar info</b> y elegí el modo "Solo vidriera" o "Vidriera + productos".</div>`;
+  [['vitrinaHomeSection','vitrinaHomeRow'],['vitrinaLocalesSection','vitrinaLocalesRow']].forEach(([sec,row])=>{
+    const s = document.getElementById(sec), r = document.getElementById(row);
+    if(s) s.style.display = (lista.length || verVacia) ? '' : 'none';
+    if(r) r.innerHTML = lista.length ? html : (verVacia ? vacio : '');
+  });
+}
+
+function vitUrl(u){ u = String(u||'').trim(); if(!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://'+u.replace(/^\/+/, ''); }
+
+function renderVitrinaFicha(c){
+  const bloque = document.getElementById('lpVitrinaBloque');
+  const datos = document.getElementById('lpDatosExtra');
+  const galBox = document.getElementById('lpVitrinaGaleria');
+  const titulo = document.getElementById('lpProdTitulo');
+  const grid = document.getElementById('lpGrid');
+  if(titulo) titulo.style.display = (c.modo==='vitrina') ? 'none' : '';
+  if(grid) grid.style.display = (c.modo==='vitrina') ? 'none' : '';
+  if(datos) datos.innerHTML = '';
+  const lbl = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;';
+
+  // 1) Todos los datos del comercio juntos (se suman a dirección, WhatsApp e Instagram)
+  const filas = [];
+  if(c.email) filas.push(['✉️','Correo',`<a href="mailto:${vitEsc(c.email)}" style="color:var(--navy);">${vitEsc(c.email)}</a>`]);
+  if(c.telefonoAlt) filas.push(['📞','Teléfono alternativo',vitEsc(c.telefonoAlt)]);
+  if(c.facebook) filas.push(['👍','Facebook',`<a href="${vitEsc(vitUrl(c.facebook))}" target="_blank" rel="noopener" style="color:var(--navy);">${vitEsc(c.facebook)}</a>`]);
+  if(c.web) filas.push(['🌐','Sitio web',`<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" style="color:var(--navy);">${vitEsc(c.web)}</a>`]);
+  if((c.dias||[]).length) filas.push(['📅','Días de atención',vitEsc(c.dias.join(', '))]);
+  if((c.metodosPago||[]).length) filas.push(['💳','Medios de pago',vitEsc(c.metodosPago.join(', '))]);
+  if(datos) datos.innerHTML = filas.map(([ic,l,v])=>`<div style="padding:8px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;"><span style="font-size:15px;">${ic}</span><div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;">${l}</div><div style="font-size:13.5px;font-weight:600;color:var(--navy);">${v}</div></div></div>`).join('');
+
+  // 2) Textos: descripción, sobre nosotros y características
+  let h = '';
+  if(c.descripcion) h += `<div style="font-size:13.5px;color:var(--navy);font-weight:600;margin-bottom:10px;">${vitEsc(c.descripcion)}</div>`;
+  if(c.sobreNosotros) h += `<div style="margin-bottom:14px;"><div style="${lbl}">Sobre nosotros</div><div style="font-size:13.5px;color:var(--ink);line-height:1.55;white-space:pre-line;">${vitEsc(c.sobreNosotros)}</div></div>`;
+  if((c.caracVitrina||[]).length) h += `<div style="margin-bottom:6px;"><div style="${lbl}">Características</div>${c.caracVitrina.map(t=>`<span class="vit-ficha-chip">${vitEsc(t)}</span>`).join('')}</div>`;
+  if(bloque){ bloque.innerHTML = h; bloque.style.display = h ? 'block' : 'none'; }
+
+  // 3) Galería al final de la ficha
+  if(galBox){
+    if((c.galeria||[]).length){
+      galBox.innerHTML = `<div style="${lbl}">Galería</div><div class="vit-ficha-gal">${c.galeria.map((g,i)=>`<div class="vit-ficha-foto" onclick="vitVerFoto(${i})"><img src="${g.img}" alt="">${g.desc?`<div>${vitEsc(g.desc)}</div>`:''}</div>`).join('')}</div>`;
+      galBox.style.display = 'block';
+    } else { galBox.innerHTML=''; galBox.style.display='none'; }
+  }
+}
+
+function vitVerFoto(i){
+  const c = window._lpComercio;
+  const g = c && c.galeria && c.galeria[i];
+  if(!g) return;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;cursor:pointer;';
+  ov.innerHTML = `<img src="${g.img}" alt="" style="max-width:100%;max-height:78vh;border-radius:12px;">${g.desc?`<div style="color:#fff;font-size:14px;margin-top:12px;text-align:center;max-width:420px;">${vitEsc(g.desc)}</div>`:''}`;
+  ov.onclick = ()=>ov.remove();
+  document.body.appendChild(ov);
+}
+
 function abrirEditarComercio(){
   const c = state.currentUser;
   renderConectorToggleEn('cEditConectorBox');
@@ -8584,12 +8766,6 @@ function abrirEditarComercio(){
   document.getElementById('editImg2FotoEstado').textContent = c.img2 ? 'Tocá para cambiar la portada.' : 'Recomendado: foto horizontal del local o del negocio.';
   delete fotosCargadas['editImg2'];
 
-  // Estado Solo Vidriera
-  const vidreiraEstadoEl = document.getElementById('editCVidreiraEstado');
-  if(vidreiraEstadoEl) vidreiraEstadoEl.textContent = c.soloVidriera
-    ? '✅ Activado — aparecés en el carrusel Solo Vidriera'
-    : 'Desactivado — modo normal con productos';
-
   // Ubicación en el mapa
   editCLatLng = (c.lat && c.lng) ? {lat:c.lat, lng:c.lng} : null;
   document.getElementById('editCLat').value = c.lat || '';
@@ -8598,6 +8774,7 @@ function abrirEditarComercio(){
     ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.'
     : '⚠️ Todavía no marcaste tu ubicación exacta — tocá el mapa o usá el botón de GPS.';
 
+  cargarVitrinaEnEditar();
   showScreen('editar-comercio');
   // Esperar a que la pantalla se muestre (el contenedor necesita tamaño real) antes de crear el mapa
   requestAnimationFrame(()=> requestAnimationFrame(()=>{
@@ -8683,6 +8860,7 @@ function guardarEdicionComercio(){
 
   c.envioActivo = document.getElementById('editCEnvioActivo').value === 'si';
   c.envioPolitica = document.getElementById('editCEnvioPolitica').value;
+  leerVitrinaDeEditar(c);
   document.getElementById('cNombre').textContent = c.nombre;
   guardarPerfilEnFirestore('comercios', c, { logoNuevo, img2Nuevo });
   delete fotosCargadas['editLogo'];
@@ -8692,259 +8870,8 @@ function guardarEdicionComercio(){
     propagarCambioRubroComercio(c, _rubroViejoC, c.rubro).then(function(){ renderFeed(); });
   }
   renderComercioPanel();
+  renderFeed();
   showScreen('c-panel');
-}
-
-/* ══════════════════════════════════════════════════════
-   SOLO VIDRIERA
-══════════════════════════════════════════════════════ */
-function abrirVidriera(){
-  const c = state.currentUser;
-  // Toggle
-  const toggle = document.getElementById('vidrieraToggle');
-  const slider = document.getElementById('vidrieraToggleSlider');
-  const knob   = document.getElementById('vidrieraToggleKnob');
-  const badge  = document.getElementById('badgeVidriera');
-  const textoEl= document.getElementById('vidreiraEstadoTexto');
-  if(toggle){
-    toggle.checked = !!c.soloVidriera;
-    _actualizarToggleVidrieraUI(!!c.soloVidriera);
-  }
-  if(badge) badge.style.display = c.soloVidriera ? 'block' : 'none';
-  // Fotos
-  _renderVidrieraFotosGestion(c.fotosVidriera||[]);
-  // Servicios
-  _renderVidrieraServiciosGestion(c.serviciosVidriera||[]);
-  showScreen('c-vidriera');
-}
-
-function _actualizarToggleVidrieraUI(activo){
-  const slider = document.getElementById('vidrieraToggleSlider');
-  const knob   = document.getElementById('vidrieraToggleKnob');
-  const textoEl= document.getElementById('vidreiraEstadoTexto');
-  if(slider) slider.style.background = activo ? '#2A3A8A' : '#CCC';
-  if(knob)   knob.style.transform    = activo ? 'translateX(22px)' : 'translateX(0)';
-  if(textoEl) textoEl.textContent    = activo
-    ? 'Activado — aparecés en el carrusel "Solo Vidriera" del home'
-    : 'Desactivado — tu comercio funciona normalmente';
-}
-
-function toggleVidriera(activo){
-  _actualizarToggleVidrieraUI(activo);
-}
-
-// ── Fotos ──────────────────────────────────────────────
-const MAX_FOTOS_VIDRIERA = 6;
-
-function _renderVidrieraFotosGestion(fotos){
-  const lista = document.getElementById('vidrieraFotosLista');
-  const btn   = document.getElementById('btnAgregarFotoVidriera');
-  if(!lista) return;
-  lista.innerHTML = fotos.map((f,i)=>`
-    <div class="vidriera-foto-fila">
-      <div class="vidriera-foto-preview" id="vfPreview_${i}">
-        ${f.img ? `<img src="${f.img}" alt="">` : '🖼️'}
-      </div>
-      <div style="flex:1;min-width:0;">
-        <input type="text" class="vf-desc" data-idx="${i}" placeholder="Descripción de la foto…"
-          value="${(f.desc||'').replace(/"/g,'&quot;')}"
-          style="width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:12.5px;font-family:inherit;box-sizing:border-box;margin-bottom:6px;">
-        <div style="display:flex;gap:6px;">
-          <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:none;border:1.5px solid var(--line);border-radius:8px;padding:6px;font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;">
-            📷 Cambiar
-            <input type="file" accept="image/*" style="display:none" onchange="onVFotoSeleccionada(this,${i})">
-          </label>
-          <button type="button" onclick="eliminarFotoVidriera(${i})" style="background:none;border:1.5px solid #FDDCAA;border-radius:8px;padding:6px 10px;font-size:12px;color:#c23b3b;cursor:pointer;">🗑️</button>
-        </div>
-      </div>
-    </div>`).join('');
-  if(btn) btn.style.display = fotos.length >= MAX_FOTOS_VIDRIERA ? 'none' : 'flex';
-}
-
-function onVFotoSeleccionada(input, idx){
-  const file = input.files[0]; if(!file) return;
-  comprimirImagen(file, LIMITE_FOTO_BYTES).then(dataUrl=>{
-    const prev = document.getElementById(`vfPreview_${idx}`);
-    if(prev) prev.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%;height:100%;object-fit:cover;">`;
-    if(!window._vidrieraFotosTemp) window._vidrieraFotosTemp = {};
-    window._vidrieraFotosTemp[idx] = dataUrl;
-  }).catch(()=>toast('No pudimos procesar esa foto.'));
-}
-
-function agregarFotoVidriera(){
-  const c = state.currentUser;
-  const fotos = [...(c.fotosVidriera||[])];
-  if(fotos.length >= MAX_FOTOS_VIDRIERA){ toast(`Máximo ${MAX_FOTOS_VIDRIERA} fotos`); return; }
-  fotos.push({img:'', desc:''});
-  c.fotosVidriera = fotos;
-  _renderVidrieraFotosGestion(fotos);
-}
-
-function eliminarFotoVidriera(idx){
-  const c = state.currentUser;
-  const fotos = [...(c.fotosVidriera||[])];
-  fotos.splice(idx,1);
-  c.fotosVidriera = fotos;
-  if(window._vidrieraFotosTemp) delete window._vidrieraFotosTemp[idx];
-  _renderVidrieraFotosGestion(fotos);
-}
-
-// ── Servicios ──────────────────────────────────────────
-const MAX_SERVICIOS_VIDRIERA = 10;
-
-function _renderVidrieraServiciosGestion(servicios){
-  const lista = document.getElementById('vidrieraServiciosLista');
-  const btn   = document.getElementById('btnAgregarServicioVidriera');
-  if(!lista) return;
-  lista.innerHTML = servicios.map((s,i)=>`
-    <div style="background:#F8F8F8;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-        <input type="text" class="vs-nombre" data-idx="${i}" placeholder="Nombre del servicio  Ej: Corte de cabello"
-          value="${(s.nombre||'').replace(/"/g,'&quot;')}"
-          style="flex:1;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;">
-        <button type="button" onclick="eliminarServicioVidriera(${i})" style="background:none;border:none;font-size:20px;color:#CCC;cursor:pointer;flex-shrink:0;padding:0;">×</button>
-      </div>
-      <textarea class="vs-desc" data-idx="${i}" placeholder="Descripción breve…"
-        style="width:100%;min-height:60px;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:12.5px;font-family:inherit;resize:vertical;line-height:1.4;box-sizing:border-box;">${s.desc||''}</textarea>
-    </div>`).join('');
-  if(btn) btn.style.display = servicios.length >= MAX_SERVICIOS_VIDRIERA ? 'none' : 'flex';
-}
-
-function agregarServicioVidriera(){
-  const c = state.currentUser;
-  const servicios = [...(c.serviciosVidriera||[])];
-  if(servicios.length >= MAX_SERVICIOS_VIDRIERA){ toast(`Máximo ${MAX_SERVICIOS_VIDRIERA} servicios`); return; }
-  servicios.push({nombre:'', desc:''});
-  c.serviciosVidriera = servicios;
-  _renderVidrieraServiciosGestion(servicios);
-}
-
-function eliminarServicioVidriera(idx){
-  const c = state.currentUser;
-  const servicios = [...(c.serviciosVidriera||[])];
-  servicios.splice(idx,1);
-  c.serviciosVidriera = servicios;
-  _renderVidrieraServiciosGestion(servicios);
-}
-
-// ── Guardar todo ───────────────────────────────────────
-async function guardarVidriera(){
-  const c = state.currentUser;
-  if(!c || !c.uid) return;
-
-  // Leer toggle
-  c.soloVidriera = !!(document.getElementById('vidrieraToggle')?.checked);
-
-  // Leer fotos — aplicar imágenes nuevas y descripciones
-  const fotosBase = c.fotosVidriera || [];
-  const fotos = document.querySelectorAll('.vf-desc');
-  const fotosGuardar = fotosBase.map((f,i)=>({
-    img: (window._vidrieraFotosTemp?.[i]) || f.img || '',
-    desc: fotos[i]?.value.trim() || f.desc || ''
-  })).filter(f=>f.img);
-  c.fotosVidriera = fotosGuardar;
-  window._vidrieraFotosTemp = {};
-
-  // Leer servicios
-  const nombresEls = document.querySelectorAll('.vs-nombre');
-  const descsEls   = document.querySelectorAll('.vs-desc');
-  const servicios  = [];
-  nombresEls.forEach((el,i)=>{
-    const n = el.value.trim();
-    const d = descsEls[i]?.value.trim() || '';
-    if(n) servicios.push({nombre:n, desc:d});
-  });
-  c.serviciosVidriera = servicios;
-
-  // Guardar en Firestore
-  try{
-    await db.collection('comercios').doc(c.uid).update({
-      soloVidriera:      c.soloVidriera,
-      fotosVidriera:     c.fotosVidriera,
-      serviciosVidriera: c.serviciosVidriera
-    });
-    // Actualizar en state.comercios también
-    const idx = state.comercios.findIndex(x=>x.id===c.uid || x._docId===c.uid);
-    if(idx>=0) Object.assign(state.comercios[idx], {soloVidriera:c.soloVidriera, fotosVidriera:c.fotosVidriera, serviciosVidriera:c.serviciosVidriera});
-    // Badge en el panel
-    const badge = document.getElementById('badgeVidriera');
-    if(badge) badge.style.display = c.soloVidriera ? 'block' : 'none';
-    renderVidrieraHome();
-    toast('Vidriera guardada ✅');
-    showScreen('c-panel');
-  }catch(e){
-    toast('Error al guardar: '+e.message);
-  }
-}
-
-// ── Carrusel en el home ────────────────────────────────
-function renderVidrieraHome(){
-  const sec = document.getElementById('secVidriera');
-  const row = document.getElementById('vidrieraRow');
-  if(!sec || !row) return;
-  const comerciosVidriera = state.comercios.filter(c=>
-    c.soloVidriera && mismaCiudad(c.ciudad, ciudadSeleccionada)
-  );
-  if(!comerciosVidriera.length){ sec.style.display='none'; return; }
-  sec.style.display = 'block';
-  row.innerHTML = comerciosVidriera.map(c=>{
-    const portada = c.fotosVidriera?.[0]?.img || c.img2 || '';
-    const logo    = c.img || '';
-    const idSafe  = (c.id||'').replace(/'/g,"\\'");
-    return `<div class="vidriera-card" onclick="verProductosDeLocal('${idSafe}')">
-      <div class="vidriera-card-cover">
-        ${portada ? `<img src="${portada}" alt="${c.nombre}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;">🏪</div>`}
-        <div class="vidriera-card-logo">
-          ${logo ? `<img src="${logo}" alt="">` : '🏬'}
-        </div>
-      </div>
-      <div class="vidriera-card-body">
-        <div class="vidriera-card-nombre">${c.nombre}</div>
-        <div class="vidriera-card-rubro">${c.tipo||c.rubro||''}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ── Galería en la ficha pública del comercio ──────────
-function renderVidrieraEnFicha(c, contenedor){
-  if(!contenedor) return;
-  const fotos    = (c.fotosVidriera||[]).filter(f=>f.img);
-  const servicios= (c.serviciosVidriera||[]).filter(s=>s.nombre);
-  if(!fotos.length && !servicios.length){ contenedor.innerHTML=''; return; }
-
-  let html = '';
-
-  // Galería de fotos
-  if(fotos.length){
-    html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:8px;">🖼️ Galería</div>`;
-    html += `<div class="vidriera-galeria-grid" style="margin-bottom:16px;">`;
-    html += fotos.map(f=>`
-      <div class="vidriera-galeria-item">
-        <img src="${f.img}" alt="${f.desc||''}">
-        ${f.desc ? `<div class="vidriera-galeria-desc">${f.desc}</div>` : ''}
-      </div>`).join('');
-    html += `</div>`;
-  }
-
-  // Servicios
-  if(servicios.length){
-    const wsp = c.whatsapp || c.telefono || '';
-    html += `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:8px;">🛎️ Servicios</div>`;
-    html += `<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">`;
-    html += servicios.map(s=>`
-      <div class="vidriera-servicio-card">
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:800;font-size:13.5px;color:var(--ink);">${s.nombre}</div>
-          ${s.desc ? `<div style="font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4;">${s.desc}</div>` : ''}
-        </div>
-        ${wsp ? `<a href="https://wa.me/54${wsp.replace(/\D/g,'')}?text=Hola%2C%20consulto%20por%20${encodeURIComponent(s.nombre)}" target="_blank"
-          style="flex-shrink:0;background:#25D366;color:white;font-size:12px;font-weight:800;padding:7px 12px;border-radius:10px;text-decoration:none;white-space:nowrap;">Consultar</a>` : ''}
-      </div>`).join('');
-    html += `</div>`;
-  }
-
-  contenedor.innerHTML = html;
 }
 
 function eliminarPortadaComercio(){
@@ -9249,6 +9176,7 @@ function guardarConectorActivoComercio(valor){
 }
 
 function renderComercioPanel(){
+  try{ aplicarModoPanelComercio(); }catch(e){ console.error(e); }
   // Banner de revisión pendiente
   const _bannerRev = document.getElementById('cRevisionBanner');
   if(_bannerRev) _bannerRev.style.display = (state.currentUser?.aprobado === false) ? 'block' : 'none';
@@ -10421,7 +10349,6 @@ function onRubroChange(rubroSelectId, tipoSelectId, tipoFieldId){
 }
 function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
 function renderExploraCiudad(){
-  renderVidrieraHome();
   const el = document.getElementById('exploraRow');
   if(!el) return;
   const rubros = Object.keys(ICONOS_RUBRO);
@@ -11717,6 +11644,7 @@ function farmaciaDeTurnoHoy(){
 }
 
 function renderAdheridosGrid(){
+  renderVitrinaSecciones();
   const grid = document.getElementById('adheridosGrid');
   if(!grid) return;
   const comercios = (state.comercios||[]).filter(c=>
@@ -12979,6 +12907,7 @@ function verProductosDeLocal(comercioId){
   showRow('lpTelefonoRow',  'lpTelefono',  c.telefono);
   showRow('lpWhatsappRow',  'lpWhatsapp',  c.whatsapp);
   showRow('lpInstagramRow', 'lpInstagram', c.instagram ? '@'+c.instagram.replace('@','') : '');
+  renderVitrinaFicha(c);
 
   // Botón WhatsApp
   const btnWsp = document.getElementById('lpBtnWsp');
@@ -13010,18 +12939,12 @@ function verProductosDeLocal(comercioId){
     menuBloque.style.display = 'none';
   }
 
-  // Galería y servicios Vidriera
-  renderVidrieraEnFicha(c, document.getElementById('lpVidreiraBloque'));
-
   const prods = state.productos.filter(p=>p.comercioId===comercioId);
-  const tituloProds = document.getElementById('lpProductosTitulo');
   const comercioConector = state.comercios.find(x=>x.id===comercioId)?.conectorActivo;
   const grid = document.getElementById('lpGrid');
   if(prods.length===0){
-    if(tituloProds) tituloProds.style.display = 'none';
-    grid.innerHTML = c.soloVidriera ? '' : `<div class="empty" style="grid-column:1/-1;"><div class="ic">📦</div><div class="t">Este local todavía no cargó productos</div></div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="ic">📦</div><div class="t">Este local todavía no cargó productos</div></div>`;
   } else {
-    if(tituloProds) tituloProds.style.display = 'block';
     grid.innerHTML = prods.map(p=>{
       const foto = p.img ? `<img src="${p.img}" alt="${p.nombre}">` : (p.foto||'📦');
       const badge = etiquetaOferta(p);
@@ -13047,6 +12970,7 @@ function verProductosDeLocal(comercioId){
 }
 
 function renderLocales(){
+  renderVitrinaSecciones();
   renderDestacadosYCerca();
   const grid = document.getElementById('localesGrid');
 
@@ -13090,8 +13014,8 @@ function renderLocales(){
           <div class="local-name">${c.nombre}</div>
           <div class="local-meta">${c.rubro||''}${c.direccion ? ' · '+c.direccion : ''}</div>
           <div class="local-stats">
-            <div class="local-stat">📦 ${productos}</div>
-            <div class="local-stat">🛍️ ${vendedores} ConectorT</div>
+            ${c.modo==='vitrina' ? `<div class="local-stat">🪟 Vidriera</div>` : `<div class="local-stat">📦 ${productos}</div>`}
+            ${c.modo==='vitrina' ? '' : `<div class="local-stat">🛍️ ${vendedores} ConectorT</div>`}
           </div>
           <button class="btn btn-primary btn-sm" style="width:100%; margin-bottom:6px;" onclick="verProductosDeLocal('${c.id}')">Ver productos</button>
           <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>
