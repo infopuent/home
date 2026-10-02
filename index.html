@@ -2487,11 +2487,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="p-card-title">Editar info</div>
       </button>
 
-      <button class="p-card" id="btnVitrinaPanel" style="background:#EAF2E6;color:#5C7355;" onclick="abrirVitrinaComercio()">
-        <i class="ti ti-building-store p-card-ic"></i>
-        <div class="p-card-title">Mi vitrina</div>
-      </button>
-
       <button class="p-card" id="btnCargarProdPanel" style="background:#FFF0E8;color:#CC4400;" onclick="irNuevoProductoComercioSeguro()">
         <i class="ti ti-plus p-card-ic"></i>
         <div class="p-card-title">Cargar producto</div>
@@ -2844,59 +2839,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div id="cOperacionesList"></div>
   </div>
 
-  <!-- ============ COMERCIO: MI VITRINA ============ -->
-  <div class="screen hidden" id="screen-c-vitrina">
-    <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
-    <div class="kicker">Mi comercio</div>
-    <h1 class="page-title">Mi vitrina</h1>
-    <p class="page-sub">Mostrá tu comercio en PuenT con fotos y características, con o sin productos.</p>
-
-    <div class="card">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">¿Cómo querés aparecer?</div>
-      <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos, como hasta ahora.</div></div></label>
-      <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟 Solo vitrina</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Solo tu ficha: datos, galería y características. Sin productos.</div></div></label>
-      <label class="vit-modo-opt" id="vitOpt-mixto"><input type="radio" name="vitModo" value="mixto" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟🛍️ Vitrina + productos</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Tu ficha completa y, además, tus productos cuando quieras cargarlos.</div></div></label>
-    </div>
-
-    <div id="vitBloquesExtra">
-      <div class="card" style="margin-top:0;">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">📝 Sobre nosotros</div>
-        <textarea id="vitSobre" maxlength="800" rows="4" placeholder="Contá en pocas líneas qué hacés, desde cuándo, qué te distingue…" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;font-family:inherit;resize:vertical;"></textarea>
-      </div>
-
-      <div class="card" style="margin-top:0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">🖼️ Galería de fotos</div>
-          <div id="vitGaleriaContador" style="font-size:11.5px;color:var(--muted);"></div>
-        </div>
-        <div id="vitGaleriaLista"></div>
-        <div class="btn-block-row" id="vitGaleriaBtns" style="margin:4px 0;">
-          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('vitFotoCam').click()">📷 Foto</button>
-          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('vitFotoGal').click()">🖼️ Galería</button>
-        </div>
-        <input type="file" id="vitFotoCam" accept="image/*" capture="environment" style="display:none" onchange="vitAgregarFoto(this)">
-        <input type="file" id="vitFotoGal" accept="image/*" style="display:none" onchange="vitAgregarFoto(this)">
-        <div class="foto-upload-estado" id="vitGaleriaEstado" style="margin-bottom:0;">Cada foto puede llevar una breve descripción.</div>
-      </div>
-
-      <div class="card" style="margin-top:0;">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">✨ Características</div>
-        <div id="vitCaractLista" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
-        <div style="display:flex;gap:8px;">
-          <input id="vitCaractNueva" maxlength="40" placeholder="Agregar otra (ej: Atendemos con turno)" style="flex:1;min-width:0;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;" onkeydown="if(event.key==='Enter'){event.preventDefault();vitAgregarCaract();}">
-          <button type="button" class="btn btn-ghost btn-sm" onclick="vitAgregarCaract()">＋ Agregar</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="background:var(--cream);margin-top:0;">
-      <div style="font-size:12.5px;line-height:1.5;color:var(--muted);">📍 Ubicación, teléfono, WhatsApp, correo, redes sociales y horarios se cargan en <b>Editar info</b> y aparecen también en tu vitrina.</div>
-      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="abrirEditarComercio()">Ir a Editar info</button>
-    </div>
-
-    <button class="btn btn-primary" onclick="guardarVitrina()">Guardar vitrina</button>
-  </div>
-
   <!-- ============ COMERCIO: EDITAR MI INFORMACIÓN ============ -->
   <div class="screen hidden" id="screen-editar-comercio">
     <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
@@ -3039,6 +2981,44 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
       </div>
     </div>
+    <div class="card" style="margin-top:0;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🪟 Modo de tu comercio en PuenT</div>
+      <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos, como hasta ahora.</div></div></label>
+      <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟 Solo vitrina</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Solo tu ficha: datos, galería y características. Sin productos.</div></div></label>
+      <label class="vit-modo-opt" id="vitOpt-mixto"><input type="radio" name="vitModo" value="mixto" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟🛍️ Vitrina + productos</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Tu ficha completa y, además, tus productos cuando quieras cargarlos.</div></div></label>
+    </div>
+
+    <div id="vitBloquesExtra">
+      <div class="card" style="margin-top:0;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">📝 Sobre nosotros</div>
+        <textarea id="vitSobre" maxlength="800" rows="4" placeholder="Contá en pocas líneas qué hacés, desde cuándo, qué te distingue…" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;font-family:inherit;resize:vertical;"></textarea>
+      </div>
+
+      <div class="card" style="margin-top:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">🖼️ Galería de fotos</div>
+          <div id="vitGaleriaContador" style="font-size:11.5px;color:var(--muted);"></div>
+        </div>
+        <div id="vitGaleriaLista"></div>
+        <div class="btn-block-row" id="vitGaleriaBtns" style="margin:4px 0;">
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('vitFotoCam').click()">📷 Foto</button>
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('vitFotoGal').click()">🖼️ Galería</button>
+        </div>
+        <input type="file" id="vitFotoCam" accept="image/*" capture="environment" style="display:none" onchange="vitAgregarFoto(this)">
+        <input type="file" id="vitFotoGal" accept="image/*" style="display:none" onchange="vitAgregarFoto(this)">
+        <div class="foto-upload-estado" id="vitGaleriaEstado" style="margin-bottom:0;">Cada foto puede llevar una breve descripción.</div>
+      </div>
+
+      <div class="card" style="margin-top:0;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">✨ Características</div>
+        <div id="vitCaractLista" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="vitCaractNueva" maxlength="40" placeholder="Agregar otra (ej: Atendemos con turno)" style="flex:1;min-width:0;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;" onkeydown="if(event.key==='Enter'){event.preventDefault();vitAgregarCaract();}">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="vitAgregarCaract()">＋ Agregar</button>
+        </div>
+      </div>
+    </div>
+
     <button class="btn btn-primary" onclick="guardarEdicionComercio()">Guardar cambios</button>
   </div>
 
@@ -8546,7 +8526,7 @@ let _vitCaract = [];
 function vitEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function comercioEnVitrina(c){ return !!c && (c.modo==='vitrina' || c.modo==='mixto') && !(c.viaEmail && c.emailVerificado===false); }
 
-function abrirVitrinaComercio(){
+function cargarVitrinaEnEditar(){
   const c = state.currentUser;
   if(!c) return;
   const modo = c.modo || 'tienda';
@@ -8557,7 +8537,6 @@ function abrirVitrinaComercio(){
   vitMarcarModo();
   vitRenderGaleria();
   vitRenderCaract();
-  showScreen('c-vitrina');
 }
 
 function vitMarcarModo(){
@@ -8633,19 +8612,11 @@ function vitAgregarCaract(){
   vitRenderCaract();
 }
 
-function guardarVitrina(){
-  const c = state.currentUser;
-  if(!c) return;
-  const modo = (document.querySelector('input[name="vitModo"]:checked')||{}).value || 'tienda';
-  c.modo = modo;
+function leerVitrinaDeEditar(c){
+  c.modo = (document.querySelector('input[name="vitModo"]:checked')||{}).value || 'tienda';
   c.sobreNosotros = (document.getElementById('vitSobre').value||'').trim().slice(0,800);
   c.galeria = _vitGaleria.filter(g=>g.img).map(g=>({img:g.img, desc:(g.desc||'').trim().slice(0,80)}));
   c.caracVitrina = _vitCaract.slice();
-  guardarPerfilEnFirestore('comercios', c);
-  toast('Vitrina guardada ✅');
-  renderComercioPanel();
-  renderFeed();
-  showScreen('c-panel');
 }
 
 // En modo "solo vitrina" el panel no ofrece cargar ni ver productos
@@ -8672,7 +8643,7 @@ function renderVitrinaSecciones(){
   }).join('');
   // Si todavía no hay vitrinas, la sección igual se ve para comercios y admin (con un aviso)
   const verVacia = !lista.length && (state.role==='comercio' || state.role==='admin');
-  const vacio = `<div style="flex:1;border:1.5px dashed var(--line);border-radius:16px;padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5;">🪟 Todavía no hay comercios en modo vitrina. Desde el panel del comercio, entrá a <b>Mi vitrina</b> y elegí "Solo vitrina" o "Vitrina + productos".</div>`;
+  const vacio = `<div style="flex:1;border:1.5px dashed var(--line);border-radius:16px;padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5;">🪟 Todavía no hay comercios en modo vitrina. Desde el panel del comercio, entrá a <b>Editar info</b> y elegí el modo "Solo vitrina" o "Vitrina + productos".</div>`;
   [['vitrinaHomeSection','vitrinaHomeRow'],['vitrinaLocalesSection','vitrinaLocalesRow']].forEach(([sec,row])=>{
     const s = document.getElementById(sec), r = document.getElementById(row);
     if(s) s.style.display = (lista.length || verVacia) ? '' : 'none';
@@ -8791,6 +8762,7 @@ function abrirEditarComercio(){
     ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.'
     : '⚠️ Todavía no marcaste tu ubicación exacta — tocá el mapa o usá el botón de GPS.';
 
+  cargarVitrinaEnEditar();
   showScreen('editar-comercio');
   // Esperar a que la pantalla se muestre (el contenedor necesita tamaño real) antes de crear el mapa
   requestAnimationFrame(()=> requestAnimationFrame(()=>{
@@ -8876,6 +8848,7 @@ function guardarEdicionComercio(){
 
   c.envioActivo = document.getElementById('editCEnvioActivo').value === 'si';
   c.envioPolitica = document.getElementById('editCEnvioPolitica').value;
+  leerVitrinaDeEditar(c);
   document.getElementById('cNombre').textContent = c.nombre;
   guardarPerfilEnFirestore('comercios', c, { logoNuevo, img2Nuevo });
   delete fotosCargadas['editLogo'];
@@ -8885,6 +8858,7 @@ function guardarEdicionComercio(){
     propagarCambioRubroComercio(c, _rubroViejoC, c.rubro).then(function(){ renderFeed(); });
   }
   renderComercioPanel();
+  renderFeed();
   showScreen('c-panel');
 }
 
