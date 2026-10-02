@@ -1032,7 +1032,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <!-- Vitrina: comercios que están en PuenT con su ficha (con o sin productos) -->
       <div id="vitrinaHomeSection" style="display:none;padding:14px 0 0;">
         <div class="section-title-row" style="padding:0 16px;">
-          <div class="section-title">🪟 Vitrina</div>
+          <div class="section-title">🪟 Vidriera</div>
           <span class="ver-todo" onclick="setFeedTab('locales')">Ver todos →</span>
         </div>
         <div id="vitrinaHomeRow" class="vit-row"></div>
@@ -1061,7 +1061,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     ================================================================ -->
     <div id="feedLocalesView" class="hidden" style="padding:0 16px; margin-top:12px;">
       <div id="vitrinaLocalesSection" style="display:none;margin:0 -16px 6px;">
-        <div class="section-title" style="margin:4px 16px 0;">🪟 Vitrina</div>
+        <div class="section-title" style="margin:4px 16px 0;">🪟 Vidriera</div>
         <div id="vitrinaLocalesRow" class="vit-row"></div>
       </div>
       <div class="section-title" style="margin-top:4px;">Comercios destacados</div>
@@ -2932,10 +2932,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <div class="card" style="margin-top:0;">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🪟 Modo de tu comercio en PuenT</div>
-      <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos, como hasta ahora.</div></div></label>
-      <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟 Solo vitrina</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Solo tu ficha: datos, galería y características. Sin productos.</div></div></label>
-      <label class="vit-modo-opt" id="vitOpt-mixto"><input type="radio" name="vitModo" value="mixto" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟🛍️ Vitrina + productos</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Tu ficha completa y, además, tus productos cuando quieras cargarlos.</div></div></label>
-    </div>
+      <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos. También podés sumar galería y características.</div></div></label>
+      <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🪟 Solo vidriera</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Para locales, profesionales y talleres que quieren estar en PuenT con su ficha, galería y características, sin vender productos.</div></div></label>
+          </div>
 
 
     <div class="card" style="margin-top:0;">
@@ -8517,8 +8516,8 @@ function renderVendedorStats(){
 /* ================= COMERCIO ================= */
 /* ================= EDITAR MI INFORMACIÓN ================= */
 /* ============================================================
-   VITRINA — comercios en modo ficha (solo vitrina / vitrina + productos)
-   Campos del comercio: modo ('tienda' | 'vitrina' | 'mixto'), sobreNosotros,
+   VIDRIERA — comercios en modo ficha (modo 'vitrina' = Solo vidriera; 'tienda' = con productos)
+   Campos del comercio: modo ('tienda' | 'vitrina'; 'mixto' viejo se trata como 'tienda'), sobreNosotros,
    galeria [{img, desc}], caracVitrina [texto]
    ============================================================ */
 const MAX_GALERIA_VITRINA = 6;
@@ -8529,12 +8528,12 @@ let _vitGaleria = [];
 let _vitCaract = [];
 
 function vitEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function comercioEnVitrina(c){ return !!c && (c.modo==='vitrina' || c.modo==='mixto') && !(c.viaEmail && c.emailVerificado===false); }
+function comercioEnVitrina(c){ return !!c && c.modo==='vitrina' && !(c.viaEmail && c.emailVerificado===false); }
 
 function cargarVitrinaEnEditar(){
   const c = state.currentUser;
   if(!c) return;
-  const modo = c.modo || 'tienda';
+  const modo = (c.modo==='vitrina') ? 'vitrina' : 'tienda';
   document.querySelectorAll('input[name="vitModo"]').forEach(r=>{ r.checked = (r.value===modo); });
   document.getElementById('vitSobre').value = c.sobreNosotros || '';
   _vitGaleria = (c.galeria||[]).map(g=>({img:g.img, desc:g.desc||''}));
@@ -8546,12 +8545,10 @@ function cargarVitrinaEnEditar(){
 
 function vitMarcarModo(){
   const sel = (document.querySelector('input[name="vitModo"]:checked')||{}).value || 'tienda';
-  ['tienda','vitrina','mixto'].forEach(m=>{
+  ['tienda','vitrina'].forEach(m=>{
     const el = document.getElementById('vitOpt-'+m);
     if(el) el.classList.toggle('sel', m===sel);
   });
-  const extra = document.getElementById('vitBloquesExtra');
-  if(extra) extra.style.display = (sel==='tienda') ? 'none' : '';
 }
 
 function vitRenderGaleria(){
@@ -8648,7 +8645,7 @@ function renderVitrinaSecciones(){
   }).join('');
   // Si todavía no hay vitrinas, la sección igual se ve para comercios y admin (con un aviso)
   const verVacia = !lista.length && (state.role==='comercio' || state.role==='admin');
-  const vacio = `<div style="flex:1;border:1.5px dashed var(--line);border-radius:16px;padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5;">🪟 Todavía no hay comercios en modo vitrina. Desde el panel del comercio, entrá a <b>Editar info</b> y elegí el modo "Solo vitrina" o "Vitrina + productos".</div>`;
+  const vacio = `<div style="flex:1;border:1.5px dashed var(--line);border-radius:16px;padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5;">🪟 Todavía no hay comercios en modo vidriera. Desde el panel del comercio, entrá a <b>Editar info</b> y elegí el modo "Solo vidriera" o "Vidriera + productos".</div>`;
   [['vitrinaHomeSection','vitrinaHomeRow'],['vitrinaLocalesSection','vitrinaLocalesRow']].forEach(([sec,row])=>{
     const s = document.getElementById(sec), r = document.getElementById(row);
     if(s) s.style.display = (lista.length || verVacia) ? '' : 'none';
@@ -8664,15 +8661,9 @@ function renderVitrinaFicha(c){
   const galBox = document.getElementById('lpVitrinaGaleria');
   const titulo = document.getElementById('lpProdTitulo');
   const grid = document.getElementById('lpGrid');
-  const esVit = (c.modo==='vitrina' || c.modo==='mixto');
   if(titulo) titulo.style.display = (c.modo==='vitrina') ? 'none' : '';
   if(grid) grid.style.display = (c.modo==='vitrina') ? 'none' : '';
   if(datos) datos.innerHTML = '';
-  if(!esVit){
-    if(bloque){ bloque.style.display='none'; bloque.innerHTML=''; }
-    if(galBox){ galBox.style.display='none'; galBox.innerHTML=''; }
-    return;
-  }
   const lbl = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;';
 
   // 1) Todos los datos del comercio juntos (se suman a dirección, WhatsApp e Instagram)
@@ -13023,7 +13014,7 @@ function renderLocales(){
           <div class="local-name">${c.nombre}</div>
           <div class="local-meta">${c.rubro||''}${c.direccion ? ' · '+c.direccion : ''}</div>
           <div class="local-stats">
-            ${c.modo==='vitrina' ? `<div class="local-stat">🪟 Vitrina</div>` : `<div class="local-stat">📦 ${productos}</div>`}
+            ${c.modo==='vitrina' ? `<div class="local-stat">🪟 Vidriera</div>` : `<div class="local-stat">📦 ${productos}</div>`}
             ${c.modo==='vitrina' ? '' : `<div class="local-stat">🛍️ ${vendedores} ConectorT</div>`}
           </div>
           <button class="btn btn-primary btn-sm" style="width:100%; margin-bottom:6px;" onclick="verProductosDeLocal('${c.id}')">Ver productos</button>
