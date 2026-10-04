@@ -1024,14 +1024,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
            de banner que el de arriba (admin lo carga desde "Imágenes del home") -->
       <div id="bannerTornadoOfertas"></div>
 
-      <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
-           dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
-      <div style="padding:14px 16px 0;">
-        <div class="section-title-row">
-          <div class="section-title">🏙️ Rubros de la ciudad</div>
-        </div>
-      </div>
-      <div id="catBannerList" style="padding:6px 16px 4px;display:flex;flex-direction:column;gap:0;"></div>
 
       <!-- Vitrina: comercios que están en PuenT con su ficha (con o sin productos) -->
       <div id="vitrinaHomeSection" style="display:none;padding:14px 0 0;">
@@ -1041,6 +1033,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div id="vitrinaHomeRow" class="vit-row"></div>
       </div>
+      <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
+           dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
+      <div style="padding:14px 16px 0;">
+        <div class="section-title-row">
+          <div class="section-title">🏙️ Rubros de la ciudad</div>
+        </div>
+      </div>
+      <div id="catBannerList" style="padding:6px 16px 4px;display:flex;flex-direction:column;gap:0;"></div>
+
 
       <!-- CTA ingreso (solo si no está logueado) -->
       <div id="feedCtaIngreso" style="padding:18px 16px 8px;">
@@ -2903,9 +2904,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <select id="editCRubro" onchange="onRubroChange('editCRubro','editCTipo','editCTipoField')"></select>
         </div>
       </div>
+      <div id="editCTipoHint" style="font-size:12px;color:var(--muted);margin:-4px 0 6px;padding:0 2px;">
+        ☝️ Elegí el rubro para ver las categorías disponibles.
+      </div>
       <div class="field" id="editCTipoField" style="display:none;">
-        <label>Tipo de negocio</label>
+        <label>Tipo / categoría del negocio</label>
         <select id="editCTipo"></select>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Elegí la categoría que mejor describe tu comercio.</div>
       </div>
       <div class="two-col">
         <div class="field"><label>Teléfono del local</label><input id="editCTelefono" type="tel" placeholder="Fijo o WhatsApp"></div>
@@ -8646,8 +8651,19 @@ function aplicarModoPanelComercio(){
   });
 }
 
+
+// Shuffle con semilla diaria: mismo orden para todos ese día, cambia cada día
+function shuffleConSemillaDiaria(arr){
+  const hoy = new Date();
+  let seed = hoy.getFullYear()*10000 + (hoy.getMonth()+1)*100 + hoy.getDate();
+  const rng = () => { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return (seed >>> 0) / 0xffffffff; };
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rng() * (i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
 function renderVitrinaSecciones(){
-  const lista = (state.comercios||[]).filter(c=> comercioEnVitrina(c) && (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)));
+  const lista = shuffleConSemillaDiaria((state.comercios||[]).filter(c=> comercioEnVitrina(c) && (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada))));
   const html = lista.map(c=>{
     const portada = c.img2 || c.img;
     return `
@@ -8731,6 +8747,7 @@ function abrirEditarComercio(){
     const tipoSel   = document.getElementById('editCTipo');
     tipoSel.innerHTML = buildTipoOptions(c.rubro, c.tipo || '');
     if(tipoField) tipoField.style.display = '';
+    const _hh = document.getElementById('editCTipoHint'); if(_hh) _hh.style.display='none';
   }
   document.getElementById('editCTelefono').value = c.telefono || '';
   document.getElementById('editCWhatsapp').value = c.whatsapp || '';
@@ -10354,12 +10371,15 @@ function onRubroChange(rubroSelectId, tipoSelectId, tipoFieldId){
   const rubro = document.getElementById(rubroSelectId)?.value || '';
   const tipoField = document.getElementById(tipoFieldId);
   const tipoSel   = document.getElementById(tipoSelectId);
+  const _h = tipoFieldId==='editCTipoField' ? document.getElementById('editCTipoHint') : null;
   if(!tipoField || !tipoSel) return;
   if(rubro && TIPOS_POR_RUBRO[rubro]){
     tipoSel.innerHTML = buildTipoOptions(rubro, '');
     tipoField.style.display = '';
+    if(_h) _h.style.display='none';
   } else {
     tipoField.style.display = 'none';
+    if(_h) _h.style.display = rubro ? 'none' : '';
   }
 }
 function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
@@ -11658,10 +11678,11 @@ function renderAdheridosGrid(){
   renderVitrinaSecciones();
   const grid = document.getElementById('adheridosGrid');
   if(!grid) return;
-  const comercios = (state.comercios||[]).filter(c=>
+  const comerciosFiltrados = (state.comercios||[]).filter(c=>
     (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)) &&
     !(c.viaEmail && c.emailVerificado === false)
   );
+  const comercios = shuffleConSemillaDiaria(comerciosFiltrados);
   if(!comercios.length){
     grid.innerHTML = '';
     return;
@@ -15269,6 +15290,7 @@ function adminRenderComercios(lista){
       <div style="display:flex;gap:6px;width:100%;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminVerComercio('${docId}')">👁️ Ver</button>
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="admEditarComercio('${docId}')">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;background:#EAF2E6;color:#5C7355;" onclick="admExtenderGracia('${docId}')">📆 Gracia</button>
         ${btnAprobar}
         <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="admEliminarComercio('${docId}','${nombreSafe}')">🗑️ Eliminar</button>
         <button class="btn btn-ghost btn-sm" style="flex:1;color:#7A1A1A;border-color:#d4a0a0;background:#fdf4f4;" onclick="admEliminarDefinitivo('${docId}','${nombreSafe}')">💀 Eliminar def.</button>
@@ -15413,6 +15435,7 @@ async function adminVerComercio(docId){
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="admEditarComercio('${docId}')">✏️ Editar datos</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="admCambiarModoComercio('${docId}')">${c.modo==='vitrina'?'🛍️ Pasar a Tienda':'🏬 Pasar a Solo vidriera'}</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="adminRenovarPublicidad('${docId}')">📅 Renovar publicidad</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1;background:#EAF2E6;color:#5C7355;" onclick="admExtenderGracia('${docId}')">📆 Extender gracia</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;color:#c23b3b;border-color:#f0d0d0;" onclick="admEliminarComercio('${docId}','${(c.nombre||'').replace(/'/g,"&#39;")}')">🗑️ Eliminar</button>
       <button class="btn btn-ghost btn-sm" style="flex:1;color:#7A1A1A;border-color:#d4a0a0;background:#fdf4f4;" onclick="admEliminarDefinitivo('${docId}','${(c.nombre||'').replace(/'/g,"&#39;")}')">💀 Eliminar definitivamente</button>
     </div>
@@ -15584,8 +15607,30 @@ function adminEnlazarMenuDiaBox(c){
 }
 
 /* ============================================================
-   ADMIN — opciones de Vidriera (modo, sobre nosotros, galería, características)
-   Se usa tanto en el formulario móvil como en el de desktop.
+
+/* -- Extender periodo de gracia sin registrar pago -- */
+async function admExtenderGracia(docId){
+  const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
+  if(!c) return;
+  const dias = parseInt(prompt(`¿Cuántos días de gracia agregás a "${c.nombre||docId}"?\n(Se suman desde hoy si ya venció, o desde la fecha vigente si aún no venció)`, '30'));
+  if(!dias || isNaN(dias) || dias <= 0) return;
+  const base = c.planVence && new Date(c.planVence) > new Date() ? new Date(c.planVence) : new Date();
+  base.setDate(base.getDate() + dias);
+  const nuevaFecha = base.toISOString().slice(0,10);
+  try {
+    await db.collection('comercios').doc(docId).update({ planVence: nuevaFecha, planActivo: true, plan: c.plan || 'gracia' });
+    c.planVence = nuevaFecha; c.planActivo = true; if(!c.plan) c.plan = 'gracia';
+    const loc = state.comercios.find(x=>x.id===docId||(x._docId&&x._docId===docId));
+    if(loc){ loc.planVence = nuevaFecha; loc.planActivo = true; }
+    toast(`✅ Gracia extendida hasta ${nuevaFecha}`);
+    renderFeed();
+    if(window.innerWidth >= 900) admAbrirComercioDetalle(docId); else adminVerComercio(docId);
+  } catch(e){ toast('Error: ' + e.message); }
+}
+
+/* ============================================================
+   ADMIN - opciones de Vidriera (modo, sobre nosotros, galeria, caracteristicas)
+   Se usa tanto en el formulario movil como en el de desktop.
    ============================================================ */
 let _admVitGaleria = [];
 let _admVitCaract = [];
@@ -15877,7 +15922,7 @@ function adminEliminarFotoComercio(docId, campo){
   db.collection('comercios').doc(docId).update({[campo]: null}).then(()=>{
     const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
     if(c) c[campo] = null;
-    const idx = state.comercios.findIndex(x=>x.id===docId);
+    const idx = state.comercios.findIndex(x=>x.id===docId || (x._docId && x._docId===docId));
     if(idx>=0) state.comercios[idx][campo] = null;
     toast('Foto eliminada');
     adminVerComercio(docId); // refrescar detalle
@@ -15891,8 +15936,23 @@ function adminReemplazarFotoComercio(docId, campo, input){
       await db.collection('comercios').doc(docId).update({[campo]: dataUrl});
       const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
       if(c) c[campo] = dataUrl;
-      const idx = state.comercios.findIndex(x=>x.id===docId);
-      if(idx>=0) state.comercios[idx][campo] = dataUrl;
+      // Buscar por id O por _docId (el comercio puede usar cualquiera como clave)
+      const idx = state.comercios.findIndex(x=>x.id===docId || (x._docId && x._docId===docId));
+      if(idx>=0){
+        state.comercios[idx][campo] = dataUrl;
+      } else {
+        // El comercio no estaba en state (p.ej. estaba pendiente al cargar la página).
+        // Si ya fue aprobado, traerlo del servidor y agregarlo ahora.
+        const snap = await db.collection('comercios').doc(docId).get({ source: 'server' });
+        if(snap.exists){
+          const data = snap.data();
+          if(data.aprobado !== false && data.estado !== 'papelera'){
+            const nuevo = {...data, id: data.id || snap.id, _docId: snap.id};
+            state.comercios.push(nuevo);
+            renderLocales(); renderFeed(); renderAdheridosGrid();
+          }
+        }
+      }
       toast('Foto actualizada ✅');
       adminVerComercio(docId);
     }catch(err){ toast('Error al guardar: '+err.message); }
