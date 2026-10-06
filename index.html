@@ -843,7 +843,60 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 </style>
 <style>
 /* Google Fonts no disponible en este entorno — se carga en producción desde Cloudflare */
-</style></head>
+</style>
+<!-- SEO: Structured Data estático — Google lo lee sin ejecutar JS -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "PuenT",
+  "url": "https://www.puent.com.ar",
+  "description": "La plataforma de compras más completa de tu ciudad. Comercios locales, productos y ofertas en La Paz, Entre Ríos y Argentina.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.puent.com.ar/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "PuenT",
+  "url": "https://www.puent.com.ar",
+  "logo": "https://www.puent.com.ar/icon-192.png",
+  "description": "PuenT conecta comercios locales con clientes de su ciudad. Tiendas, productos, ofertas y servicios en La Paz, Entre Ríos.",
+  "foundingLocation": {
+    "@type": "Place",
+    "name": "La Paz, Entre Ríos, Argentina"
+  },
+  "sameAs": [
+    "https://infopuent.github.io"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "PuenT — Comercios de La Paz",
+  "url": "https://www.puent.com.ar",
+  "description": "Encontrá comercios, productos y ofertas de La Paz, Entre Ríos. Kioscos, almacenes, carnicerías, servicios y más.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "La Paz",
+    "addressRegion": "Entre Ríos",
+    "addressCountry": "AR"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": -30.749,
+    "longitude": -59.645
+  }
+}
+</script>
+</head>
 <body>
 
 <div id="splash" onclick="hideSplash()">
@@ -5688,6 +5741,80 @@ async function cargarDatosPublicosDeFirestore(){
   // Geocodificar comercios sin coordenadas en cuanto carguen los datos,
   // sin esperar a que el usuario abra el mapa
   geocodearComerciosPendientes();
+  inyectarStructuredData();
+}
+
+// ── SEO: Structured Data (JSON-LD) ───────────────────────────────────────────
+// Genera schema.org/LocalBusiness para cada comercio aprobado y los inyecta
+// en el <head> para que Google los indexe aunque el contenido sea JS dinámico.
+function inyectarStructuredData(){
+  try{
+    // Limpiar cualquier structured data previo
+    document.querySelectorAll('script[data-sd="puent"]').forEach(el => el.remove());
+
+    // Schema de la plataforma
+    const siteSchema = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "PuenT",
+      "url": "https://www.puent.com.ar",
+      "description": "La plataforma de compras más completa de tu ciudad. Comercios locales, productos y ofertas.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.puent.com.ar/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    };
+    const siteEl = document.createElement('script');
+    siteEl.type = 'application/ld+json';
+    siteEl.dataset.sd = 'puent';
+    siteEl.textContent = JSON.stringify(siteSchema);
+    document.head.appendChild(siteEl);
+
+    // Schema por cada comercio aprobado
+    const ciudad = ciudadSeleccionada || '';
+    const comercios = state.comercios.filter(c =>
+      c.aprobado !== false &&
+      c.emailVerificado !== false &&
+      c.estado !== 'papelera' &&
+      (!ciudad || c.ciudad === ciudad)
+    );
+
+    comercios.forEach(c => {
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": c.nombre || '',
+        "description": c.descripcion || c.sobreNosotros || '',
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": c.direccion || '',
+          "addressLocality": c.ciudad || '',
+          "addressRegion": c.provincia || 'Entre Ríos',
+          "addressCountry": "AR"
+        }
+      };
+      if(c.lat && c.lng){
+        schema.geo = { "@type": "GeoCoordinates", "latitude": c.lat, "longitude": c.lng };
+      }
+      if(c.telefono){ schema.telephone = c.telefono; }
+      if(c.whatsapp){ schema.telephone = schema.telephone || c.whatsapp; }
+      if(c.web){ schema.url = c.web; }
+      if(c.img){ schema.image = c.img.startsWith('data:') ? undefined : c.img; }
+      if(c.rubro){ schema.servesCuisine = c.rubro; }
+      if(c.horario){ schema.openingHours = c.horario; }
+
+      const el = document.createElement('script');
+      el.type = 'application/ld+json';
+      el.dataset.sd = 'puent';
+      el.textContent = JSON.stringify(schema);
+      document.head.appendChild(el);
+    });
+
+    console.log(`SEO: ${comercios.length} comercios con structured data inyectados`);
+  } catch(e){
+    console.warn('inyectarStructuredData error:', e);
+  }
 }
 
 // Corrige comercios que fueron cargados por el admin sin el campo `id` dentro del documento.
