@@ -3355,6 +3355,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Operaciones</div>
           <button class="adm-nav" id="admNav-ventas" onclick="adminDesktopTab('ventas')"><i class="ti ti-receipt" style="font-size:16px;"></i>Ventas</button>
           <button class="adm-nav" id="admNav-planes" onclick="adminDesktopTab('planes')"><i class="ti ti-credit-card" style="font-size:16px;"></i>Planes y pagos</button>
+          <button class="adm-nav" id="admNav-cobranzas" onclick="adminDesktopTab('cobranzas')"><i class="ti ti-cash" style="font-size:16px;"></i>Cobranzas</button>
           <button class="adm-nav" id="admNav-repartidores" onclick="adminDesktopTab('repartidores')"><i class="ti ti-bike" style="font-size:16px;"></i>Repartidores</button>
           <button class="adm-nav" id="admNav-zonasenvio" onclick="adminDesktopTab('zonasenvio')"><i class="ti ti-map-2" style="font-size:16px;"></i>Zonas de envío</button>
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Más</div>
@@ -14661,7 +14662,7 @@ function adminDesktopTab(tab){
   document.querySelectorAll('.adm-nav').forEach(b=>b.classList.remove('active'));
   const navBtn = document.getElementById('admNav-'+tab);
   if(navBtn) navBtn.classList.add('active');
-  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',zonasenvio:'Zonas de envío',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home',ciudadhoy:'🏙️ La Ciudad Hoy',papelera:'🗑️ Papelera'};
+  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',cobranzas:'💰 Cobranzas',repartidores:'Repartidores',zonasenvio:'Zonas de envío',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home',ciudadhoy:'🏙️ La Ciudad Hoy',papelera:'🗑️ Papelera'};
   document.getElementById('admDesktopTitle').textContent = titles[tab]||tab;
   document.getElementById('admDesktopBadge').innerHTML = '';
   const cont = document.getElementById('admDesktopContent');
@@ -14674,6 +14675,7 @@ function adminDesktopTab(tab){
   else if(tab==='vendedores')   admRenderVendedoresDesktop();
   else if(tab==='ventas')       admRenderVentasDesktop();
   else if(tab==='planes')       admRenderPlanesDesktop();
+  else if(tab==='cobranzas')    admRenderCobranzasDesktop();
   else if(tab==='repartidores') admRenderRepartidoresDesktop();
   else if(tab==='zonasenvio')   admRenderZonasEnvioDesktop();
   else if(tab==='mensajes')     admRenderMensajesDesktop();
