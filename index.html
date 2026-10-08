@@ -870,10 +870,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   "foundingLocation": {
     "@type": "Place",
     "name": "La Paz, Entre Ríos, Argentina"
-  },
-  "sameAs": [
-    "https://infopuent.github.io"
-  ]
+  }
 }
 </script>
 <script type="application/ld+json">
@@ -883,6 +880,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   "name": "PuenT — Comercios de La Paz",
   "url": "https://www.puent.com.ar",
   "description": "Encontrá comercios, productos y ofertas de La Paz, Entre Ríos. Kioscos, almacenes, carnicerías, servicios y más.",
+  "telephone": "+543437000000",
+  "priceRange": "$",
+  "image": "https://www.puent.com.ar/icon-192.png",
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "La Paz",
@@ -2626,6 +2626,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <div id="cBajaSolicitadaBox"></div>
     <div id="cPlanBox"></div>
+
+    <!-- Historial de pagos del comercio -->
+    <div id="cPagosBox" style="margin-top:8px;"></div>
+
     <div style="height:24px;"></div>
   </div>
 
@@ -3326,7 +3330,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
         <button class="btn-tile btn-tile-sage" style="grid-column:1/-1;" onclick="adminAbrirCiudadHoy();showScreen('admin-ciudad-hoy')"><i class="ti ti-building-community ic"></i>🏙️ La Ciudad Hoy</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-papelera');admCargarPapelera()"><i class="ti ti-trash ic"></i>🗑️ Papelera</button>
-        <button class="btn-tile btn-tile-gold" style="grid-column:1/-1;" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
+        <button class="btn-tile btn-tile-gold" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
+        <button class="btn-tile btn-tile-gold" onclick="cobranzasCargar();showScreen('admin-cobranzas')"><i class="ti ti-cash ic"></i>💰 Cobranzas</button>
 
       </div>
     </div>
@@ -3717,6 +3722,60 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen('admin-planes')">← Planes</div>
     <div class="page-title" id="adminPlanNombre">Plan del comercio</div>
     <div id="adminPlanContenido"></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN COBRANZAS ============ -->
+  <div class="screen hidden" id="screen-admin-cobranzas">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="page-title">💰 Cobranzas</div>
+
+    <!-- Selector de mes -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <button class="btn btn-ghost btn-sm" onclick="cobranzasCambiarMes(-1)">‹ Anterior</button>
+      <div id="cobranzasMesLabel" style="font-size:15px;font-weight:700;color:var(--ink);"></div>
+      <button class="btn btn-ghost btn-sm" onclick="cobranzasCambiarMes(1)">Siguiente ›</button>
+    </div>
+
+    <!-- Stats resumen -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div class="card" style="padding:12px 14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Pagados</div>
+        <div id="cobranzasStatPagados" style="font-size:22px;font-weight:800;color:#2F7A55;">0</div>
+      </div>
+      <div class="card" style="padding:12px 14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Pendientes</div>
+        <div id="cobranzasStatPendientes" style="font-size:22px;font-weight:800;color:#C99A3E;">0</div>
+      </div>
+      <div class="card" style="padding:12px 14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Vencidos</div>
+        <div id="cobranzasStatVencidos" style="font-size:22px;font-weight:800;color:#e05a5a;">0</div>
+      </div>
+      <div class="card" style="padding:12px 14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">En gracia</div>
+        <div id="cobranzasStatGracia" style="font-size:22px;font-weight:800;color:#7B5EA7;">0</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;">
+      <button class="btn btn-primary btn-sm" id="cobranzasFiltro-todos" onclick="cobranzasSetFiltro('todos')">Todos</button>
+      <button class="btn btn-ghost btn-sm" id="cobranzasFiltro-pagados" onclick="cobranzasSetFiltro('pagados')">✅ Pagados</button>
+      <button class="btn btn-ghost btn-sm" id="cobranzasFiltro-revision" onclick="cobranzasSetFiltro('revision')">⏳ En revisión</button>
+      <button class="btn btn-ghost btn-sm" id="cobranzasFiltro-pendientes" onclick="cobranzasSetFiltro('pendientes')">⚠️ Pendientes</button>
+      <button class="btn btn-ghost btn-sm" id="cobranzasFiltro-vencidos" onclick="cobranzasSetFiltro('vencidos')">🔴 Vencidos</button>
+      <button class="btn btn-ghost btn-sm" id="cobranzasFiltro-gracia" onclick="cobranzasSetFiltro('gracia')">🎁 Gracia</button>
+    </div>
+
+    <div id="cobranzasLista"></div>
+    <div style="height:24px;"></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN COBRANZA DETALLE ============ -->
+  <div class="screen hidden" id="screen-admin-cobranza-detalle">
+    <div class="link-back" onclick="showScreen('admin-cobranzas')">← Cobranzas</div>
+    <div class="page-title" id="cobranzaDetalleNombre">Comercio</div>
+    <div id="cobranzaDetalleContenido"></div>
+    <div style="height:24px;"></div>
   </div>
 
   <!-- ============ SCREEN: ADMIN DETALLE OPERACION ============ -->
@@ -9297,8 +9356,306 @@ function renderCPlanBox(){
 }
 
 function contactarPuenT(){
-  const wa = '5493437430240'; // WA real de admin PuenT
+  const wa = '5493437430240';
   window.open(`https://wa.me/${wa}?text=Hola%2C%20soy%20${encodeURIComponent(state.currentUser?.nombre||'un comercio')}%20y%20quiero%20renovar%20o%20cambiar%20mi%20plan%20en%20PuenT.`, '_blank');
+}
+
+// ── HISTORIAL DE PAGOS DEL COMERCIO ─────────────────────────────────────────
+const MESES_NOMBRES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function renderCPagosBox(){
+  const box = document.getElementById('cPagosBox');
+  if(!box) return;
+  const c = state.currentUser;
+  if(!c) return;
+
+  const anioActual = new Date().getFullYear();
+  const mesActual  = new Date().getMonth(); // 0-based
+  const pagos      = c.pagos || [];
+
+  const mesesHtml = MESES_NOMBRES.map((m, i) => {
+    const clave = `${anioActual}-${String(i+1).padStart(2,'0')}`;
+    const pago  = pagos.find(p => p.mes === clave);
+    let bg = '#f5f5f3', ico = '—', color = '#aaa';
+    if(pago){
+      if(pago.estado === 'pagado'){   bg='#e8f5e9'; ico='✓'; color='#2F7A55'; }
+      else if(pago.estado === 'revision'){ bg='#fffbea'; ico='…'; color='#C99A3E'; }
+      else if(pago.estado === 'vencido'){  bg='#fff0f0'; ico='✗'; color='#e05a5a'; }
+    }
+    return `<div style="background:${bg};border-radius:8px;padding:9px 4px;text-align:center;border:0.5px solid rgba(0,0,0,0.06);">
+      <div style="font-size:11px;color:var(--muted);">${m}</div>
+      <div style="font-size:13px;font-weight:700;color:${color};margin-top:2px;">${ico}</div>
+    </div>`;
+  }).join('');
+
+  // Estado del mes actual
+  const claveHoy = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
+  const pagoHoy  = pagos.find(p => p.mes === claveHoy);
+  let estadoMesHtml = '';
+  if(pagoHoy?.estado === 'revision'){
+    estadoMesHtml = `<div style="background:#fffbea;border:1px solid #C99A3E;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="font-size:18px;">⏳</span>
+      <div style="font-size:12.5px;color:#7A5A00;">Comprobante enviado — esperando confirmación de PuenT</div>
+    </div>`;
+  } else if(pagoHoy?.estado === 'pagado'){
+    estadoMesHtml = `<div style="background:#e8f5e9;border:1px solid #2F7A55;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="font-size:18px;">✅</span>
+      <div style="font-size:12.5px;color:#1A5C38;">Pago de ${MESES_NOMBRES[mesActual]} confirmado</div>
+    </div>`;
+  }
+
+  box.innerHTML = `
+    <div class="card">
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;">📅 Mis pagos ${anioActual}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">${mesesHtml}</div>
+      <div style="height:1px;background:var(--line);margin-bottom:12px;"></div>
+      ${estadoMesHtml}
+      <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;">Subir comprobante de pago</div>
+      <label style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--orange,#FF6600);color:white;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;width:100%;box-sizing:border-box;">
+        <i class="ti ti-upload" style="font-size:18px;"></i> Subir comprobante
+        <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="cSubirComprobante(this)">
+      </label>
+      <div style="margin-top:10px;background:#f5f5f3;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start;">
+        <span style="font-size:15px;flex-shrink:0;">💡</span>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">Transferí al alias <strong style="color:var(--ink);">puent.pagos</strong> e ingresá el comprobante. Una vez confirmado por PuenT, tu mes queda registrado.</div>
+      </div>
+    </div>`;
+}
+
+async function cSubirComprobante(input){
+  const file = input.files[0]; if(!file) return;
+  const c = state.currentUser; if(!c) return;
+  toast('Procesando imagen…');
+  try{
+    const dataUrl = await comprimirImagen(file, 200*1024); // 200KB para comprobantes
+    const anio    = new Date().getFullYear();
+    const mes     = new Date().getMonth()+1;
+    const clave   = `${anio}-${String(mes).padStart(2,'0')}`;
+    const pagos   = c.pagos ? [...c.pagos] : [];
+    const idx     = pagos.findIndex(p => p.mes === clave);
+    const entrada = { mes: clave, estado: 'revision', comprobante: dataUrl, fechaEnvio: new Date().toISOString() };
+    if(idx >= 0) pagos[idx] = entrada; else pagos.push(entrada);
+    c.pagos = pagos;
+    const docId = c._docId || c.id;
+    await db.collection('comercios').doc(docId).update({ pagos });
+    toast('✅ Comprobante enviado — PuenT lo revisará pronto');
+    renderCPagosBox();
+  }catch(e){ toast('Error al subir: '+e.message); }
+}
+
+// ── PANEL DE COBRANZAS ADMIN ─────────────────────────────────────────────────
+let cobranzasMesActual  = new Date().getMonth();   // 0-based
+let cobranzasAnio       = new Date().getFullYear();
+let cobranzasFiltroActual = 'todos';
+
+function cobranzasCargar(){
+  renderCPlanBox(); // por si acaso
+  cobranzasRender();
+}
+
+function cobranzasCambiarMes(delta){
+  cobranzasMesActual += delta;
+  if(cobranzasMesActual < 0){ cobranzasMesActual = 11; cobranzasAnio--; }
+  if(cobranzasMesActual > 11){ cobranzasMesActual = 0; cobranzasAnio++; }
+  cobranzasRender();
+}
+
+function cobranzasSetFiltro(f){
+  cobranzasFiltroActual = f;
+  ['todos','pagados','revision','pendientes','vencidos','gracia'].forEach(x => {
+    const btn = document.getElementById('cobranzasFiltro-'+x);
+    if(btn){ btn.className = x===f ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'; }
+  });
+  cobranzasRender();
+}
+
+function cobranzasRender(){
+  const label = document.getElementById('cobranzasMesLabel');
+  if(label) label.textContent = `${MESES_NOMBRES[cobranzasMesActual]} ${cobranzasAnio}`;
+
+  const clave = `${cobranzasAnio}-${String(cobranzasMesActual+1).padStart(2,'0')}`;
+  const comercios = state.comercios.filter(c => c.aprobado !== false && c.estado !== 'papelera');
+
+  // Stats
+  let nPagados=0, nRevision=0, nPendientes=0, nVencidos=0, nGracia=0;
+  comercios.forEach(c => {
+    const pago = (c.pagos||[]).find(p => p.mes === clave);
+    const dias = planDiasRestantes(c);
+    const esGracia = !c.planNuevo || c.planNuevo === 'gracia';
+    if(pago?.estado === 'pagado') nPagados++;
+    else if(pago?.estado === 'revision') nRevision++;
+    else if(esGracia) nGracia++;
+    else if(dias !== null && dias < 0) nVencidos++;
+    else nPendientes++;
+  });
+  const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('cobranzasStatPagados', nPagados);
+  set('cobranzasStatPendientes', nPendientes+nRevision);
+  set('cobranzasStatVencidos', nVencidos);
+  set('cobranzasStatGracia', nGracia);
+
+  // Lista filtrada
+  let lista = comercios.filter(c => {
+    const pago  = (c.pagos||[]).find(p => p.mes === clave);
+    const dias  = planDiasRestantes(c);
+    const esGracia = !c.planNuevo || c.planNuevo === 'gracia';
+    if(cobranzasFiltroActual === 'pagados')    return pago?.estado === 'pagado';
+    if(cobranzasFiltroActual === 'revision')   return pago?.estado === 'revision';
+    if(cobranzasFiltroActual === 'gracia')     return esGracia && pago?.estado !== 'pagado';
+    if(cobranzasFiltroActual === 'vencidos')   return !esGracia && dias !== null && dias < 0 && pago?.estado !== 'pagado';
+    if(cobranzasFiltroActual === 'pendientes') return !pago && !esGracia && (dias === null || dias >= 0);
+    return true;
+  });
+
+  const cont = document.getElementById('cobranzasLista');
+  if(!cont) return;
+  if(!lista.length){ cont.innerHTML = `<div class="empty"><div class="ic">💰</div><div class="t">No hay comercios con ese estado</div></div>`; return; }
+
+  cont.innerHTML = lista.map(c => {
+    const pago  = (c.pagos||[]).find(p => p.mes === clave);
+    const dias  = planDiasRestantes(c);
+    const esGracia = !c.planNuevo || c.planNuevo === 'gracia';
+    let badgeColor, badgeText;
+    if(pago?.estado === 'pagado'){        badgeColor='#2F7A55'; badgeText='✅ Pagado'; }
+    else if(pago?.estado === 'revision'){ badgeColor='#C99A3E'; badgeText='⏳ En revisión'; }
+    else if(esGracia){                    badgeColor='#7B5EA7'; badgeText='🎁 Gracia'; }
+    else if(dias !== null && dias < 0){   badgeColor='#e05a5a'; badgeText='🔴 Vencido'; }
+    else{                                 badgeColor='#888';    badgeText='⚠️ Pendiente'; }
+    const iniciales = (c.nombre||'?').split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+    return `<div class="list-row" onclick="cobranzaAbrirDetalle('${c.id}')" style="cursor:pointer;">
+      <div class="av" style="background:${badgeColor};color:white;font-size:11px;font-weight:800;">${iniciales}</div>
+      <div class="main">
+        <div class="t">${c.nombre}</div>
+        <div class="s">${c.whatsapp||c.telefono||'Sin contacto'}</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:${badgeColor};flex-shrink:0;text-align:right;">${badgeText}</div>
+    </div>`;
+  }).join('');
+}
+
+function cobranzaAbrirDetalle(comercioId){
+  const c = state.comercios.find(x => x.id === comercioId);
+  if(!c) return;
+  const el = document.getElementById('cobranzaDetalleNombre');
+  if(el) el.textContent = c.nombre;
+  cobranzaRenderDetalle(c);
+  showScreen('admin-cobranza-detalle');
+}
+
+function cobranzaRenderDetalle(c){
+  const cont = document.getElementById('cobranzaDetalleContenido');
+  if(!cont) return;
+  const anio   = cobranzasAnio;
+  const clave  = `${anio}-${String(cobranzasMesActual+1).padStart(2,'0')}`;
+  const pagos  = c.pagos || [];
+  const pagoMes = pagos.find(p => p.mes === clave);
+  const dias   = planDiasRestantes(c);
+  const docId  = c._docId || c.id;
+  const wa     = c.whatsapp||c.telefono||'';
+
+  // Historial 12 meses del año
+  const mesesHtml = MESES_NOMBRES.map((m, i) => {
+    const k    = `${anio}-${String(i+1).padStart(2,'0')}`;
+    const p    = pagos.find(x => x.mes === k);
+    let bg='#f5f5f3', ico='—', color='#aaa';
+    if(p?.estado==='pagado'){   bg='#e8f5e9'; ico='✓'; color='#2F7A55'; }
+    if(p?.estado==='revision'){ bg='#fffbea'; ico='…'; color='#C99A3E'; }
+    if(p?.estado==='vencido'){  bg='#fff0f0'; ico='✗'; color='#e05a5a'; }
+    return `<div style="background:${bg};border-radius:8px;padding:9px 4px;text-align:center;border:0.5px solid rgba(0,0,0,0.06);">
+      <div style="font-size:11px;color:var(--muted);">${m}</div>
+      <div style="font-size:13px;font-weight:700;color:${color};margin-top:2px;">${ico}</div>
+    </div>`;
+  }).join('');
+
+  // Comprobante enviado por el comercio
+  const compHtml = pagoMes?.comprobante
+    ? `<div style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;">📎 Comprobante del comercio</div>
+        <img src="${pagoMes.comprobante}" style="width:100%;border-radius:10px;border:1px solid var(--line);" onclick="this.style.maxHeight=this.style.maxHeight?'':'none';">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Enviado: ${pagoMes.fechaEnvio ? new Date(pagoMes.fechaEnvio).toLocaleString('es-AR') : '—'}</div>
+       </div>`
+    : `<div style="padding:10px 12px;background:#f5f5f3;border-radius:10px;font-size:12.5px;color:var(--muted);margin-bottom:12px;">Sin comprobante del comercio este mes</div>`;
+
+  // Subir comprobante desde admin
+  const subirAdminHtml = `
+    <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;">Subir comprobante (admin)</div>
+    <label style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--line);color:var(--ink);border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;width:100%;box-sizing:border-box;margin-bottom:12px;">
+      <i class="ti ti-upload" style="font-size:16px;"></i> Cargar imagen
+      <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="cobranzaAdminSubirComp(this,'${docId}')">
+    </label>`;
+
+  cont.innerHTML = `
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">📱 ${wa||'Sin WhatsApp'}</div>
+      <div style="font-size:12px;color:var(--muted);">Plan: ${c.planNuevo||'gracia'} · Vence: ${c.planVence||'—'} · ${dias !== null ? (dias < 0 ? '🔴 Vencido' : `${dias}d restantes`) : '—'}</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;">📅 Historial ${anio}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px;">${mesesHtml}</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;">${MESES_NOMBRES[cobranzasMesActual]} ${anio}</div>
+      ${compHtml}
+      ${subirAdminHtml}
+
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="cobranzaConfirmarPago('${docId}','${clave}','${c.id}')">
+        ✅ Confirmar pago recibido
+      </button>
+      <button class="btn btn-ghost" style="width:100%;margin-bottom:8px;" onclick="cobranzaEnviarRecordatorio('${wa}','${encodeURIComponent(c.nombre||'')}','${c.planVence||''}')">
+        📲 Recordatorio por WhatsApp
+      </button>
+      <button class="btn btn-ghost" style="width:100%;background:#EAF2E6;color:#5C7355;" onclick="admExtenderGracia('${docId}')">
+        📆 Extender gracia 30 días
+      </button>
+    </div>`;
+}
+
+async function cobranzaAdminSubirComp(input, docId){
+  const file = input.files[0]; if(!file) return;
+  toast('Procesando imagen…');
+  try{
+    const dataUrl = await comprimirImagen(file, 200*1024);
+    const anio = cobranzasAnio;
+    const clave = `${anio}-${String(cobranzasMesActual+1).padStart(2,'0')}`;
+    const snap  = await db.collection('comercios').doc(docId).get({ source:'server' });
+    if(!snap.exists){ toast('Error: comercio no encontrado'); return; }
+    const pagos = snap.data().pagos || [];
+    const idx   = pagos.findIndex(p => p.mes === clave);
+    const entrada = { mes: clave, estado: pagos[idx]?.estado||'revision', comprobante: dataUrl, fechaSubidaAdmin: new Date().toISOString(), ...(pagos[idx]||{}) };
+    entrada.comprobante = dataUrl;
+    if(idx>=0) pagos[idx]=entrada; else pagos.push(entrada);
+    await db.collection('comercios').doc(docId).update({ pagos });
+    const cLocal = state.comercios.find(x=>(x._docId||x.id)===docId||x.id===docId);
+    if(cLocal) cLocal.pagos = pagos;
+    toast('✅ Comprobante guardado');
+    cobranzaRenderDetalle(cLocal||snap.data());
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+async function cobranzaConfirmarPago(docId, clave, comercioId){
+  if(!confirm('¿Confirmar pago recibido para este mes?')) return;
+  try{
+    const snap  = await db.collection('comercios').doc(docId).get({ source:'server' });
+    const pagos = snap.data()?.pagos || [];
+    const idx   = pagos.findIndex(p => p.mes === clave);
+    const entrada = { mes: clave, estado:'pagado', fechaPago: new Date().toISOString(), ...(pagos[idx]||{}) };
+    entrada.estado = 'pagado';
+    if(idx>=0) pagos[idx]=entrada; else pagos.push(entrada);
+    await db.collection('comercios').doc(docId).update({ pagos });
+    const cLocal = state.comercios.find(x=>(x._docId||x.id)===docId||x.id===comercioId);
+    if(cLocal) cLocal.pagos = pagos;
+    toast('✅ Pago confirmado');
+    cobranzaRenderDetalle(cLocal||snap.data());
+    cobranzasRender();
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+function cobranzaEnviarRecordatorio(wa, nombre, planVence){
+  if(!wa){ toast('Este comercio no tiene WhatsApp cargado'); return; }
+  const texto = `Hola ${decodeURIComponent(nombre)}, te contactamos desde PuenT 👋. Tu suscripción vence el ${planVence||'próximamente'}. Podés transferir al alias *puent.pagos* y subir el comprobante desde tu panel. ¡Gracias!`;
+  window.open(`https://wa.me/54${wa.replace(/\D/g,'')}?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
 // El comercio decide si quiere que los ConectorT (vendedores independientes) puedan
@@ -9348,6 +9705,7 @@ function renderComercioPanel(){
   renderPublicidadBox();
   actualizarBadgeContactos();
   renderCPlanBox();
+  renderCPagosBox();
   renderCConectorToggle();
   renderProductosPropios();
   renderPedidosProducto();
