@@ -2665,10 +2665,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
 
     <div id="cBajaSolicitadaBox"></div>
-    <div id="cPlanBox"></div>
-
-    <!-- Historial de pagos del comercio -->
-    <div id="cPagosBox" style="margin-top:8px;"></div>
+    <!-- Suscripción y pagos (plan + historial + comprobante + cambio de plan) -->
+    <div id="cSuscripcionBox"></div>
+    <!-- (cPlanBox / cPagosBox: reemplazados por cSuscripcionBox; renderCPlanBox y renderCPagosBox quedan inertes) -->
 
     <div style="height:24px;"></div>
   </div>
@@ -9573,7 +9572,227 @@ async function cSubirComprobante(input){
     await db.collection('comercios').doc(docId).update({ pagos });
     toast('✅ Comprobante enviado — PuenT lo revisará pronto');
     renderCPagosBox();
+    renderCSuscripcionBox();
   }catch(e){ toast('Error al subir: '+e.message); }
+}
+
+// ── CARD "SUSCRIPCIÓN Y PAGOS" (panel de comercio) ───────────────────────────
+// Junta en una sola card: estado del plan, cambio de plan (aplica el mes
+// siguiente), historial de pagos del año y subida de comprobante.
+// Datos nuevos en el doc del comercio: cambioPlan = {desde, hacia, aplicaDesde:'AAAA-MM', fecha}
+const MESES_LARGOS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let _suscCambioAbierto = false;
+let _suscPlanElegido = null;
+
+function suscClaveMes(offset){
+  const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + (offset||0));
+  return { clave: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, nombre: MESES_LARGOS[d.getMonth()], anio: d.getFullYear() };
+}
+
+// Plan vigente del comercio, normalizado: {id, label, precio|null, detalle}
+function suscPlanActual(c){
+  const planes = (typeof tarifarioState === 'function' ? tarifarioState().planes : []) || [];
+  if(c.planNuevo && c.planNuevo !== 'gracia'){
+    const t = planes.find(x => x.id === c.planNuevo);
+    if(t) return { id:t.id, label:`${t.emoji||''} ${t.nombre}`.trim(), precio:t.precio, detalle:`${tfmt(t.precio)}/mes · ${t.productos} productos` };
+    return { id:c.planNuevo, label:(PLANES_LABEL[c.planNuevo]||c.planNuevo), precio:null, detalle:'' };
+  }
+  if(c.plan === 'fijo')     return { id:'fijo', label:'Fijo', precio:c.planMonto||20000, detalle:`$${(c.planMonto||20000).toLocaleString('es-AR')}/mes` };
+  if(c.plan === 'comision') return { id:'comision', label:'Comisión', precio:null, detalle:`${c.planComPct||5}% sobre ventas` };
+  return { id:'gracia', label:'🎁 Gracia', precio:0, detalle:'Prueba gratuita' };
+}
+
+function suscAplicarCambioPendiente(c){
+  // Si ya llegó el mes del cambio, pasa a ser el plan vigente.
+  const cp = c.cambioPlan;
+  if(!cp || !cp.hacia || !cp.aplicaDesde) return;
+  if(state.role !== 'comercio') return;
+  if(cp.aplicaDesde > suscClaveMes(0).clave) return;
+  c.planNuevo = cp.hacia;
+  delete c.cambioPlan;
+  db.collection('comercios').doc(c._docId || c.id).update({
+    planNuevo: cp.hacia,
+    cambioPlan: firebase.firestore.FieldValue.delete()
+  }).catch(e => console.error('No se pudo aplicar el cambio de plan:', e));
+}
+
+function renderCSuscripcionBox(){
+  const box = document.getElementById('cSuscripcionBox');
+  if(!box) return;
+  const c = state.currentUser;
+  if(!c) return;
+  try{ suscAplicarCambioPendiente(c); }catch(e){ console.error(e); }
+
+  const dias    = planDiasRestantes(c);
+  const activo  = c.planActivo !== false;
+  const esGracia = !c.pagos?.length;
+  const actual  = suscPlanActual(c);
+  const pagos   = c.pagos || [];
+  const anio    = new Date().getFullYear();
+  const mesIdx  = new Date().getMonth();
+  const sig     = suscClaveMes(1);
+
+  // ── Estado del plan (mismos criterios que la card anterior)
+  let bg, borde, badge, texto, sub;
+  if(!activo || (dias !== null && dias < 0)){
+    bg='#fff5f5'; borde='#e05a5a'; badge='🆓 Modo Free';
+    texto='Se venció tu gracia sin elegir plan pago: tu perfil y catálogo siguen guardados, pero solo se muestra tu logo y dirección hasta que pases a un plan pago.';
+    sub='Contactá a PuenT para activar tu plan.';
+  } else if(dias !== null && dias <= 5){
+    bg='#fffbea'; borde='#C99A3E'; badge=`⚠️ Vence en ${dias} día${dias===1?'':'s'}`;
+    texto='Renová pronto para no perder visibilidad.'; sub=`Tu plan: ${actual.label} · ${actual.detalle}`;
+  } else if(esGracia){
+    bg='#f0f7ee'; borde='var(--olive,#5C7355)';
+    badge = dias !== null ? `🎁 Período de gracia — ${dias} días restantes` : '🎁 Período de gracia';
+    texto='Estás en prueba gratuita. ¡Aprovechá para cargar tus productos!';
+    sub = actual.id==='gracia' ? '' : `Tu plan elegido: ${actual.label} · ${actual.detalle}`;
+  } else {
+    bg='#f0f7ee'; borde='var(--olive,#5C7355)';
+    badge = dias !== null ? `✅ Plan activo — ${dias} días restantes` : '✅ Plan activo';
+    texto=`Plan ${actual.label} · ${actual.detalle}`;
+    const u = pagos.filter(p=>p.estado==='pagado').slice(-1)[0] || pagos.slice(-1)[0];
+    sub = u && u.monto ? `Último pago: ${u.fecha||''} — $${parseInt(u.monto).toLocaleString('es-AR')}` : '';
+  }
+
+  // ── Cambio pendiente / selector de cambio
+  const cp = c.cambioPlan;
+  let cambioHtml = '';
+  if(cp && cp.hacia){
+    const planes = tarifarioState().planes;
+    const t = planes.find(x=>x.id===cp.hacia);
+    const nom = t ? `${t.emoji||''} ${t.nombre}` : (PLANES_LABEL[cp.hacia]||cp.hacia);
+    const [ay, am] = cp.aplicaDesde.split('-');
+    cambioHtml = `<div style="margin-top:10px;background:#f4effa;border:1px solid #7B5EA7;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12.5px;font-weight:800;color:#4B2E83;">🔄 Cambio de plan programado</div>
+      <div style="font-size:12px;color:#4B2E83;margin-top:2px;line-height:1.5;">Pasás a <strong>${nom}</strong> desde ${MESES_LARGOS[parseInt(am)-1]} ${ay}. Hasta entonces seguís con ${actual.label}.</div>
+      <button onclick="suscCancelarCambio()" style="margin-top:8px;background:none;border:none;padding:0;font-size:12px;font-weight:700;color:#7B5EA7;text-decoration:underline;cursor:pointer;">Cancelar cambio</button>
+    </div>`;
+  } else if(_suscCambioAbierto){
+    const planes = tarifarioState().planes;
+    const opciones = planes.map(t=>{
+      const esActual = t.id === actual.id;
+      let tag = '';
+      if(esActual) tag = '<span style="font-size:10.5px;font-weight:800;color:#2F7A55;">PLAN ACTUAL</span>';
+      else if(actual.precio !== null) tag = t.precio > actual.precio
+        ? '<span style="font-size:10.5px;font-weight:800;color:#2563EB;">⬆ SUBIR</span>'
+        : '<span style="font-size:10.5px;font-weight:800;color:#C99A3E;">⬇ BAJAR</span>';
+      const sel = _suscPlanElegido === t.id;
+      return `<button ${esActual?'disabled':''} onclick="suscElegirPlan('${t.id}')" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;background:${sel?'#fff':'#f5f5f3'};border:1.5px solid ${sel?'var(--orange,#FC1820)':'rgba(0,0,0,0.08)'};border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:${esActual?'default':'pointer'};opacity:${esActual?0.65:1};">
+        <span style="font-size:20px;">${t.emoji||'📦'}</span>
+        <span style="flex:1;"><span style="display:block;font-size:13px;font-weight:800;color:var(--ink);">${t.nombre}</span>
+          <span style="display:block;font-size:11.5px;color:var(--muted);">${tfmt(t.precio)}/mes · ${t.productos} productos</span></span>
+        ${tag}
+      </button>`;
+    }).join('');
+    cambioHtml = `<div style="margin-top:10px;">
+      <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:6px;">Elegí tu nuevo plan</div>
+      ${opciones}
+      <div style="font-size:11.5px;color:var(--muted);margin:2px 0 8px;line-height:1.5;">El cambio rige desde <strong>${sig.nombre} ${sig.anio}</strong>. Este mes seguís con tu plan actual.</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="suscToggleCambio(false)" style="flex:1;background:none;border:1.5px solid rgba(0,0,0,0.15);border-radius:10px;padding:9px;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;">Cancelar</button>
+        <button onclick="suscConfirmarCambio()" ${_suscPlanElegido?'':'disabled'} style="flex:1.4;background:var(--orange,#FC1820);border:none;border-radius:10px;padding:9px;font-size:12.5px;font-weight:700;color:#fff;cursor:pointer;opacity:${_suscPlanElegido?1:0.45};">Confirmar cambio</button>
+      </div>
+    </div>`;
+  } else {
+    cambioHtml = `<button onclick="suscToggleCambio(true)" style="margin-top:10px;background:none;border:1.5px solid ${borde};border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;width:100%;">🔄 Cambiar de plan (subir o bajar)</button>`;
+  }
+
+  // ── Banner publicitario activo
+  let bannerHtml = '';
+  if(c.bannerActivo && c.bannerVence){
+    const dB = planDiasRestantes({planVence: c.bannerVence});
+    bannerHtml = `<div style="margin-top:8px;padding:7px 10px;background:rgba(201,154,62,0.12);border-radius:8px;font-size:11.5px;font-weight:700;color:var(--gold,#C99A3E);">📣 Banner activo — vence en ${dB} día${dB===1?'':'s'}</div>`;
+  }
+
+  // ── Grilla de meses
+  const mesesHtml = MESES_NOMBRES.map((m,i)=>{
+    const clave = `${anio}-${String(i+1).padStart(2,'0')}`;
+    const pago  = pagos.find(p=>p.mes===clave);
+    let fondo='#f5f5f3', ico='—', col='#aaa';
+    if(pago){
+      if(pago.estado==='pagado'){ fondo='#e8f5e9'; ico='✓'; col='#2F7A55'; }
+      else if(pago.estado==='revision'){ fondo='#fffbea'; ico='…'; col='#C99A3E'; }
+      else if(pago.estado==='vencido'){ fondo='#fff0f0'; ico='✗'; col='#e05a5a'; }
+    }
+    return `<div style="background:${fondo};border-radius:8px;padding:9px 4px;text-align:center;border:0.5px solid rgba(0,0,0,0.06);">
+      <div style="font-size:11px;color:var(--muted);">${m}</div>
+      <div style="font-size:13px;font-weight:700;color:${col};margin-top:2px;">${ico}</div></div>`;
+  }).join('');
+
+  const pagoHoy = pagos.find(p=>p.mes===`${anio}-${String(mesIdx+1).padStart(2,'0')}`);
+  let estadoMes = '';
+  if(pagoHoy?.estado==='revision'){
+    estadoMes = `<div style="background:#fffbea;border:1px solid #C99A3E;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;"><span style="font-size:18px;">⏳</span><div style="font-size:12.5px;color:#7A5A00;">Comprobante enviado — esperando confirmación de PuenT</div></div>`;
+  } else if(pagoHoy?.estado==='pagado'){
+    estadoMes = `<div style="background:#e8f5e9;border:1px solid #2F7A55;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;"><span style="font-size:18px;">✅</span><div style="font-size:12.5px;color:#1A5C38;">Pago de ${MESES_NOMBRES[mesIdx]} confirmado</div></div>`;
+  }
+
+  box.innerHTML = `
+    <div class="card" style="margin-top:8px;">
+      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px;">💳 Suscripción y pagos</div>
+
+      <div style="background:${bg};border:1.5px solid ${borde};border-radius:12px;padding:12px;">
+        <div style="font-weight:800;font-size:13px;color:var(--ink);margin-bottom:3px;">${badge}</div>
+        <div style="font-size:12.5px;color:var(--ink);margin-bottom:2px;">${texto}</div>
+        ${sub ? `<div style="font-size:11.5px;color:var(--muted);">${sub}</div>` : ''}
+        ${bannerHtml}
+        ${cambioHtml}
+        <button onclick="contactarPuenT()" style="margin-top:8px;background:none;border:none;padding:4px 0;font-size:12px;font-weight:700;color:var(--muted);text-decoration:underline;cursor:pointer;width:100%;">💬 Hablar con PuenT</button>
+      </div>
+
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin:16px 0 10px;">📅 Mis pagos ${anio}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">${mesesHtml}</div>
+      <div style="height:1px;background:var(--line);margin-bottom:12px;"></div>
+      ${estadoMes}
+      <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;">Subir comprobante de pago</div>
+      <label style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--orange,#FC1820);color:white;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;width:100%;box-sizing:border-box;">
+        <i class="ti ti-upload" style="font-size:18px;"></i> Subir comprobante
+        <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="cSubirComprobante(this)">
+      </label>
+      <div style="margin-top:10px;background:#f5f5f3;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start;">
+        <span style="font-size:15px;flex-shrink:0;">💡</span>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">Transferí al alias <strong style="color:var(--ink);">puent.pagos</strong> e ingresá el comprobante. Una vez confirmado por PuenT, tu mes queda registrado.</div>
+      </div>
+    </div>`;
+}
+
+function suscToggleCambio(abrir){
+  _suscCambioAbierto = !!abrir;
+  _suscPlanElegido = null;
+  renderCSuscripcionBox();
+}
+function suscElegirPlan(id){
+  _suscPlanElegido = id;
+  renderCSuscripcionBox();
+}
+
+async function suscConfirmarCambio(){
+  const c = state.currentUser;
+  if(!c || !_suscPlanElegido) return;
+  const t = tarifarioState().planes.find(x=>x.id===_suscPlanElegido);
+  if(!t) return;
+  const sig = suscClaveMes(1);
+  if(!confirm(`¿Cambiar tu plan a ${t.nombre} (${tfmt(t.precio)}/mes)?\n\nEl cambio rige desde ${sig.nombre} ${sig.anio}. Este mes seguís con tu plan actual.`)) return;
+  const cambioPlan = { desde: suscPlanActual(c).id, hacia: t.id, aplicaDesde: sig.clave, fecha: new Date().toISOString() };
+  try{
+    await db.collection('comercios').doc(c._docId || c.id).update({ cambioPlan });
+    c.cambioPlan = cambioPlan;
+    _suscCambioAbierto = false; _suscPlanElegido = null;
+    toast(`✅ Listo: pasás a ${t.nombre} en ${sig.nombre}`);
+    renderCSuscripcionBox();
+  }catch(e){ console.error(e); toast('No se pudo guardar el cambio: '+e.message); }
+}
+
+async function suscCancelarCambio(){
+  const c = state.currentUser;
+  if(!c || !c.cambioPlan) return;
+  if(!confirm('¿Cancelar el cambio de plan programado?')) return;
+  try{
+    await db.collection('comercios').doc(c._docId || c.id).update({ cambioPlan: firebase.firestore.FieldValue.delete() });
+    delete c.cambioPlan;
+    toast('Cambio de plan cancelado');
+    renderCSuscripcionBox();
+  }catch(e){ console.error(e); toast('No se pudo cancelar: '+e.message); }
 }
 
 // ── PANEL DE COBRANZAS ADMIN ─────────────────────────────────────────────────
@@ -9680,7 +9899,7 @@ function cobranzasDeskRender(){
     return `<tr id="cobRow-${c.id}" style="cursor:pointer;" onclick="cobranzaDeskToggle('${c.id}')">
       <td style="font-weight:700;">${c.nombre||'Sin nombre'}</td>
       <td>${c.whatsapp||c.telefono||'—'}</td>
-      <td>${c.planNuevo||'gracia'}</td>
+      <td>${c.planNuevo||'gracia'}${c.cambioPlan?.hacia?` <span style="font-size:10.5px;color:#7B5EA7;font-weight:700;">→ ${c.cambioPlan.hacia} (${c.cambioPlan.aplicaDesde})</span>`:''}</td>
       <td>${c.planVence||'—'}</td>
       <td>${diasStr}</td>
       <td><span style="font-size:11px;font-weight:700;color:${badgeColor};">${badgeText}</span></td>
@@ -10028,6 +10247,7 @@ function renderComercioPanel(){
   actualizarBadgeContactos();
   renderCPlanBox();
   renderCPagosBox();
+  renderCSuscripcionBox();
   renderCConectorToggle();
   renderProductosPropios();
   renderPedidosProducto();
