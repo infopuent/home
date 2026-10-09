@@ -1458,7 +1458,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px;">📍 Retirás en</div>
         <div id="ofComercio" style="font-weight:700; color:var(--navy); font-size:15px; margin-bottom:1px;">Comercio</div>
         <div id="ofDireccion" style="font-size:13px; color:var(--muted);">Dirección</div>
-        <div id="ofLocalExtra"></div>
       </div>
       <!-- Bloque para NO registrados -->
       <div id="ofBloqueNoRegistrado" class="hidden" style="margin-bottom:14px;">
@@ -13576,55 +13575,55 @@ function sincronizarEstadoPedidoCliente(pedidoId, nuevoEstado){
   if(mp){ mp.estado=nuevoEstado; guardarMisPedidosFirestore(); }
 }
 
-// ── Ficha de producto: info completa del comercio + acceso a su tienda ───────
-function renderOfertaLocalExtra(c, p){
-  const box = document.getElementById('ofLocalExtra');
-  if(!box) return;
-  if(!c){ box.innerHTML = ''; return; }
+// ── Solapa "Info del comercio" (ficha de producto): datos completos + acceso a la tienda ──
+function ofertaLocalFilasHtml(c, esFree){
   const E = vitEsc;
+  const fila = (l, v) => `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">${l}:</span> ${v}</div>`;
   const lnk = (href, txt) => `<a href="${E(href)}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;word-break:break-all;">${E(txt)}</a>`;
-  const filas = [];
-  if(c.rubro) filas.push(['🏷️','Rubro', E(c.rubro)]);
-  if(c.horario) filas.push(['🕒','Horario', E(c.horario)]);
-  if((c.dias||[]).length) filas.push(['📅','Días de atención', E(c.dias.join(', '))]);
-  if(c.telefono) filas.push(['📞','Teléfono', `<a href="tel:${E(String(c.telefono).replace(/[^\d+]/g,''))}" style="color:var(--navy);font-weight:700;">${E(c.telefono)}</a>`]);
-  if(c.telefonoAlt) filas.push(['📞','Teléfono alternativo', E(c.telefonoAlt)]);
-  if(c.whatsapp) filas.push(['💬','WhatsApp', E(c.whatsapp)]);
-  if(c.email) filas.push(['✉️','Correo', lnk('mailto:'+c.email, c.email)]);
-  if(c.instagram && instagramUrl(c.instagram)) filas.push(['📸','Instagram', lnk(instagramUrl(c.instagram), '@'+String(c.instagram).replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/\/+$/,''))]);
-  if(c.facebook) filas.push(['👍','Facebook', lnk(vitUrl(c.facebook), c.facebook)]);
-  if(c.web) filas.push(['🌐','Sitio web', lnk(vitUrl(c.web), c.web)]);
-  if((c.metodosPago||[]).length) filas.push(['💳','Medios de pago', E(c.metodosPago.join(', '))]);
+  let h = fila('Dirección', E(c.direccion || 'La Paz, Entre Ríos'));
+  if(esFree) return h; // comercio en modo Free: se mantiene solo la dirección
+  if(c.horario) h += fila('Horario', E(c.horario));
+  if((c.dias||[]).length) h += fila('Días de atención', E(c.dias.join(', ')));
+  if(c.telefono) h += fila('Teléfono', `<a href="tel:${E(String(c.telefono).replace(/[^\d+]/g,''))}" style="color:var(--navy);font-weight:700;">${E(c.telefono)}</a>`);
+  if(c.telefonoAlt) h += fila('Teléfono alternativo', E(c.telefonoAlt));
+  if(c.whatsapp) h += fila('WhatsApp', E(c.whatsapp));
+  if(c.email) h += fila('Correo', lnk('mailto:'+c.email, c.email));
+  if(c.instagram && instagramUrl(c.instagram)) h += fila('Instagram', lnk(instagramUrl(c.instagram), '@'+String(c.instagram).replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/^@/,'').replace(/\/+$/,'')));
+  if(c.facebook) h += fila('Facebook', lnk(vitUrl(c.facebook), c.facebook));
+  if(c.web) h += fila('Sitio web', lnk(vitUrl(c.web), c.web));
+  if((c.metodosPago||[]).length) h += fila('Medios de pago', E(c.metodosPago.join(', ')));
+  return h;
+}
 
-  const filasHtml = filas.map(([ic,l,v])=>`<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);">
-      <span style="font-size:14px;line-height:1.4;">${ic}</span>
-      <div style="min-width:0;"><div style="font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;">${l}</div>
-      <div style="font-size:13px;color:var(--ink);">${v}</div></div></div>`).join('');
-
-  // Más productos del mismo comercio
+function ofertaLocalBotonesHtml(c, p){
   const otros = (state.productos||[]).filter(x => x.comercioId === c.id && x.id !== p.id && (x.origen === 'comercio' || !x.origen) && x.stock !== 0);
+  const tieneWsp = (c.whatsapp||'').replace(/\D/g,'');
+  return `
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+      <button class="btn btn-primary" style="width:100%;" onclick="verProductosDeLocal('${c.id}')">🏬 Ver la tienda${otros.length ? ` · ${otros.length} producto${otros.length!==1?'s':''} más` : ''}</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>
+        ${tieneWsp ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="ofLocalWhatsapp('${c.id}')">💬 WhatsApp</button>` : ''}
+      </div>
+    </div>`;
+}
+
+function ofertaLocalTiraHtml(c, p){
+  const E = vitEsc;
+  const otros = (state.productos||[]).filter(x => x.comercioId === c.id && x.id !== p.id && (x.origen === 'comercio' || !x.origen) && x.stock !== 0);
+  if(!otros.length) return '';
   const tira = otros.slice(0, 8).map(x => `
     <div onclick="abrirOferta('${x.id}');window.scrollTo(0,0);" style="flex:0 0 104px;cursor:pointer;">
       <div style="width:104px;height:104px;border-radius:12px;background:#f3f3f3;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:30px;">
         ${x.img ? `<img src="${x.img}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` : (x.foto || '🛍️')}
       </div>
-      <div style="font-size:11.5px;font-weight:700;color:var(--ink);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${E(x.nombre)}</div>
-      <div style="font-size:11.5px;color:var(--navy);font-weight:800;">${precioTexto(x)}</div>
+      <div style="font-size:11.5px;font-weight:700;color:var(--ink);margin-top:4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${E(x.nombre)}</div>
+      <div style="font-size:11.5px;color:var(--navy);font-weight:800;line-height:1.3;">${precioTexto(x)}</div>
     </div>`).join('');
-
-  box.innerHTML = `
-    <div style="margin-top:10px;">${filasHtml}</div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
-      <button class="btn btn-primary" style="width:100%;" onclick="verProductosDeLocal('${c.id}')">🏬 Ver la tienda${otros.length ? ` · ${otros.length} producto${otros.length!==1?'s':''} más` : ''}</button>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>
-        ${(c.whatsapp||'').replace(/\D/g,'') ? `<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="ofLocalWhatsapp('${c.id}')">💬 WhatsApp</button>` : ''}
-      </div>
-    </div>
-    ${tira ? `<div style="margin-top:14px;">
-      <div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">Más productos de ${E(c.nombre)}</div>
-      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;">${tira}</div>
-    </div>` : ''}`;
+  return `<div style="margin-top:14px;">
+    <div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">Más productos de ${E(c.nombre)}</div>
+    <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;">${tira}</div>
+  </div>`;
 }
 
 function ofLocalWhatsapp(comercioId){
@@ -13740,7 +13739,6 @@ function abrirOferta(prodId){
   if(estaRegistrado){
     document.getElementById('ofComercio').textContent = c ? c.nombre : 'Comercio';
     document.getElementById('ofDireccion').textContent = c ? (c.direccion || 'La Paz, Entre Ríos') : '';
-    try{ renderOfertaLocalExtra(c, p); }catch(e){ console.error('renderOfertaLocalExtra:', e); }
     localBloque.classList.remove('hidden');
     noRegistradoBloque.classList.add('hidden');
     ofAntes.classList.remove('hidden');
@@ -13913,10 +13911,8 @@ function renderOfertaTabs(p, c){
       <div style="font-weight:800; font-size:15px; color:var(--navy); margin-bottom:2px;">${estaRegistrado ? c.nombre : '🔒 Comercio verificado'}</div>
       <div style="color:var(--muted); margin-bottom:10px;">${c.rubro || ''}${prom && !esFree ? ' · ⭐ '+prom : ''}</div>
       ${estaRegistrado ? `
-        <div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Dirección:</span> ${c.direccion || 'La Paz, Entre Ríos'}</div>
-        ${(c.horario && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Horario:</span> ${c.horario}</div>` : ''}
-        ${(c.telefono && !esFree) ? `<div style="padding:8px 0; border-top:1px solid var(--line);"><span style="color:var(--muted);">Teléfono:</span> ${c.telefono}</div>` : ''}
-        ${esFree ? '' : `<button class="btn btn-ghost btn-sm" style="width:100%; margin-top:12px;" onclick="comoLlegar('${c.id}')">📍 Cómo llegar</button>`}
+        ${ofertaLocalFilasHtml(c, esFree)}
+        ${esFree ? '' : ofertaLocalBotonesHtml(c, p)}
         ${(()=>{
           const esGastroMenu = esComercioGastronomico(c);
           const tieneMenuDia = esGastroMenu && comercioOfreceMenuDia(c, c.wizardData?.menuDelDia !== 'No' || c.menuDelDia);
@@ -13947,6 +13943,7 @@ function renderOfertaTabs(p, c){
 
           return html;
         })()}
+        ${esFree ? '' : ofertaLocalTiraHtml(c, p)}
       ` : `<p style="color:var(--muted);">Registrate para ver la dirección, el horario y cómo llegar a este comercio.</p>`}
     `;
   } else {
