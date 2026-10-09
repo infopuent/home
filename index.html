@@ -2650,6 +2650,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="p-card-title">Historial</div>
       </button>
 
+      <button class="p-card" style="background:#F3E8FF;color:#6A1B9A;position:relative;" onclick="renderCSuscripcionBox();showScreen('c-suscripcion')">
+        <i class="ti ti-credit-card p-card-ic"></i>
+        <div class="p-card-title">Suscripción y pagos</div>
+      </button>
+
       <div class="p-card" style="background:#F5F5F5;color:#333;cursor:default;grid-column:1/-1;flex-direction:row;gap:12px;align-items:center;">
         <i class="ti ti-scan" style="font-size:22px;flex-shrink:0;"></i>
         <div style="flex:1;">
@@ -2665,9 +2670,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
 
     <div id="cBajaSolicitadaBox"></div>
-    <!-- Suscripción y pagos (plan + historial + comprobante + cambio de plan) -->
-    <div id="cSuscripcionBox"></div>
-    <!-- (cPlanBox / cPagosBox: reemplazados por cSuscripcionBox; renderCPlanBox y renderCPagosBox quedan inertes) -->
+    <!-- (cPlanBox / cPagosBox: ahora viven en la pantalla "Suscripción y pagos"; renderCPlanBox y renderCPagosBox quedan inertes) -->
 
     <div style="height:24px;"></div>
   </div>
@@ -2698,6 +2701,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="kicker">Panel de comercio</div>
     <h1 class="page-title">Historial de ventas</h1>
     <div id="cHistorial"></div>
+    <div style="height:24px;"></div>
+  </div>
+
+  <!-- ============ COMERCIO: SUSCRIPCIÓN Y PAGOS ============ -->
+  <div class="screen hidden" id="screen-c-suscripcion">
+    <div class="link-back" onclick="showScreen('c-panel')">← Volver al panel</div>
+    <div class="kicker">Panel de comercio</div>
+    <h1 class="page-title">Suscripción y pagos</h1>
+    <div id="cSuscripcionBox"></div>
     <div style="height:24px;"></div>
   </div>
 
@@ -9602,18 +9614,44 @@ function suscPlanActual(c){
   return { id:'gracia', label:'🎁 Gracia', precio:0, detalle:'Prueba gratuita' };
 }
 
+// Cuándo rige un cambio de plan:
+//  - en período de gracia (sin pagos): cuando termina la gracia (planVence)
+//  - con plan pago: el día 1 del mes siguiente
+function suscFechaAplicacion(c){
+  const enGracia = !(c.pagos && c.pagos.length);
+  if(enGracia && c.planVence) return { fecha: String(c.planVence).slice(0,10), gracia:true };
+  const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()+1);
+  return { fecha: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`, gracia:false };
+}
+function suscTextoFecha(fecha, gracia){
+  const [y,m,d] = fecha.split('-');
+  return gracia ? `cuando termine tu gracia (${d}/${m}/${y})` : `${MESES_LARGOS[parseInt(m)-1]} ${y}`;
+}
+function suscHoyISO(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 function suscAplicarCambioPendiente(c){
-  // Si ya llegó el mes del cambio, pasa a ser el plan vigente.
-  const cp = c.cambioPlan;
-  if(!cp || !cp.hacia || !cp.aplicaDesde) return;
   if(state.role !== 'comercio') return;
-  if(cp.aplicaDesde > suscClaveMes(0).clave) return;
-  c.planNuevo = cp.hacia;
-  delete c.cambioPlan;
-  db.collection('comercios').doc(c._docId || c.id).update({
-    planNuevo: cp.hacia,
-    cambioPlan: firebase.firestore.FieldValue.delete()
-  }).catch(e => console.error('No se pudo aplicar el cambio de plan:', e));
+  const docRef = () => db.collection('comercios').doc(c._docId || c.id);
+  const cp = c.cambioPlan;
+  // 1) Cambio programado que ya llegó a su fecha → pasa a ser el plan vigente.
+  if(cp && cp.hacia && cp.aplicaDesde){
+    if(cp.aplicaDesde > suscHoyISO()) return;
+    c.planNuevo = cp.hacia;
+    delete c.cambioPlan;
+    docRef().update({ planNuevo: cp.hacia, cambioPlan: firebase.firestore.FieldValue.delete() })
+      .catch(e => console.error('No se pudo aplicar el cambio de plan:', e));
+    return;
+  }
+  // 2) Terminó la gracia y nunca eligió plan → plan Base automático.
+  const dias = planDiasRestantes(c);
+  const sinPagos = !(c.pagos && c.pagos.length);
+  if(sinPagos && dias !== null && dias < 0 && (!c.planNuevo || c.planNuevo === 'gracia')){
+    c.planNuevo = 'base';
+    docRef().update({ planNuevo: 'base' }).catch(e => console.error('No se pudo asignar plan Base:', e));
+  }
 }
 
 function renderCSuscripcionBox(){
@@ -9630,7 +9668,8 @@ function renderCSuscripcionBox(){
   const pagos   = c.pagos || [];
   const anio    = new Date().getFullYear();
   const mesIdx  = new Date().getMonth();
-  const sig     = suscClaveMes(1);
+  const apl     = suscFechaAplicacion(c);
+  const aplTxt  = suscTextoFecha(apl.fecha, apl.gracia);
 
   // ── Estado del plan (mismos criterios que la card anterior)
   let bg, borde, badge, texto, sub;
@@ -9645,7 +9684,7 @@ function renderCSuscripcionBox(){
     bg='#f0f7ee'; borde='var(--olive,#5C7355)';
     badge = dias !== null ? `🎁 Período de gracia — ${dias} días restantes` : '🎁 Período de gracia';
     texto='Estás en prueba gratuita. ¡Aprovechá para cargar tus productos!';
-    sub = actual.id==='gracia' ? '' : `Tu plan elegido: ${actual.label} · ${actual.detalle}`;
+    sub = actual.id==='gracia' ? 'Si no elegís plan, al terminar la gracia pasás al plan Base.' : `Tu plan elegido: ${actual.label} · ${actual.detalle}`;
   } else {
     bg='#f0f7ee'; borde='var(--olive,#5C7355)';
     badge = dias !== null ? `✅ Plan activo — ${dias} días restantes` : '✅ Plan activo';
@@ -9661,10 +9700,9 @@ function renderCSuscripcionBox(){
     const planes = tarifarioState().planes;
     const t = planes.find(x=>x.id===cp.hacia);
     const nom = t ? `${t.emoji||''} ${t.nombre}` : (PLANES_LABEL[cp.hacia]||cp.hacia);
-    const [ay, am] = cp.aplicaDesde.split('-');
     cambioHtml = `<div style="margin-top:10px;background:#f4effa;border:1px solid #7B5EA7;border-radius:10px;padding:10px 12px;">
       <div style="font-size:12.5px;font-weight:800;color:#4B2E83;">🔄 Cambio de plan programado</div>
-      <div style="font-size:12px;color:#4B2E83;margin-top:2px;line-height:1.5;">Pasás a <strong>${nom}</strong> desde ${MESES_LARGOS[parseInt(am)-1]} ${ay}. Hasta entonces seguís con ${actual.label}.</div>
+      <div style="font-size:12px;color:#4B2E83;margin-top:2px;line-height:1.5;">Pasás a <strong>${nom}</strong> ${apl.gracia ? '' : 'desde '}${suscTextoFecha(cp.aplicaDesde, apl.gracia)}. Hasta entonces seguís con ${actual.label}.</div>
       <button onclick="suscCancelarCambio()" style="margin-top:8px;background:none;border:none;padding:0;font-size:12px;font-weight:700;color:#7B5EA7;text-decoration:underline;cursor:pointer;">Cancelar cambio</button>
     </div>`;
   } else if(_suscCambioAbierto){
@@ -9687,7 +9725,7 @@ function renderCSuscripcionBox(){
     cambioHtml = `<div style="margin-top:10px;">
       <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:6px;">Elegí tu nuevo plan</div>
       ${opciones}
-      <div style="font-size:11.5px;color:var(--muted);margin:2px 0 8px;line-height:1.5;">El cambio rige desde <strong>${sig.nombre} ${sig.anio}</strong>. Este mes seguís con tu plan actual.</div>
+      <div style="font-size:11.5px;color:var(--muted);margin:2px 0 8px;line-height:1.5;">${apl.gracia ? `El plan que elijas arranca <strong>${aplTxt}</strong>. Si no elegís, pasás al plan Base.` : `El cambio rige desde <strong>${aplTxt}</strong>. Este mes seguís con tu plan actual.`}</div>
       <div style="display:flex;gap:8px;">
         <button onclick="suscToggleCambio(false)" style="flex:1;background:none;border:1.5px solid rgba(0,0,0,0.15);border-radius:10px;padding:9px;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;">Cancelar</button>
         <button onclick="suscConfirmarCambio()" ${_suscPlanElegido?'':'disabled'} style="flex:1.4;background:var(--orange,#FC1820);border:none;border-radius:10px;padding:9px;font-size:12.5px;font-weight:700;color:#fff;cursor:pointer;opacity:${_suscPlanElegido?1:0.45};">Confirmar cambio</button>
@@ -9729,8 +9767,6 @@ function renderCSuscripcionBox(){
 
   box.innerHTML = `
     <div class="card" style="margin-top:8px;">
-      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px;">💳 Suscripción y pagos</div>
-
       <div style="background:${bg};border:1.5px solid ${borde};border-radius:12px;padding:12px;">
         <div style="font-weight:800;font-size:13px;color:var(--ink);margin-bottom:3px;">${badge}</div>
         <div style="font-size:12.5px;color:var(--ink);margin-bottom:2px;">${texto}</div>
@@ -9771,14 +9807,15 @@ async function suscConfirmarCambio(){
   if(!c || !_suscPlanElegido) return;
   const t = tarifarioState().planes.find(x=>x.id===_suscPlanElegido);
   if(!t) return;
-  const sig = suscClaveMes(1);
-  if(!confirm(`¿Cambiar tu plan a ${t.nombre} (${tfmt(t.precio)}/mes)?\n\nEl cambio rige desde ${sig.nombre} ${sig.anio}. Este mes seguís con tu plan actual.`)) return;
-  const cambioPlan = { desde: suscPlanActual(c).id, hacia: t.id, aplicaDesde: sig.clave, fecha: new Date().toISOString() };
+  const apl = suscFechaAplicacion(c);
+  const aplTxt = suscTextoFecha(apl.fecha, apl.gracia);
+  if(!confirm(`¿Cambiar tu plan a ${t.nombre} (${tfmt(t.precio)}/mes)?\n\nRige ${apl.gracia ? aplTxt : 'desde '+aplTxt}. Hasta entonces seguís con tu plan actual.`)) return;
+  const cambioPlan = { desde: suscPlanActual(c).id, hacia: t.id, aplicaDesde: apl.fecha, fecha: new Date().toISOString() };
   try{
     await db.collection('comercios').doc(c._docId || c.id).update({ cambioPlan });
     c.cambioPlan = cambioPlan;
     _suscCambioAbierto = false; _suscPlanElegido = null;
-    toast(`✅ Listo: pasás a ${t.nombre} en ${sig.nombre}`);
+    toast(`✅ Listo: pasás a ${t.nombre} ${apl.gracia ? aplTxt : 'en '+aplTxt}`);
     renderCSuscripcionBox();
   }catch(e){ console.error(e); toast('No se pudo guardar el cambio: '+e.message); }
 }
