@@ -3355,6 +3355,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Operaciones</div>
           <button class="adm-nav" id="admNav-ventas" onclick="adminDesktopTab('ventas')"><i class="ti ti-receipt" style="font-size:16px;"></i>Ventas</button>
           <button class="adm-nav" id="admNav-planes" onclick="adminDesktopTab('planes')"><i class="ti ti-credit-card" style="font-size:16px;"></i>Planes y pagos</button>
+          <button class="adm-nav" id="admNav-cobranzas" onclick="adminDesktopTab('cobranzas')"><i class="ti ti-cash" style="font-size:16px;"></i>Cobranzas</button>
           <button class="adm-nav" id="admNav-repartidores" onclick="adminDesktopTab('repartidores')"><i class="ti ti-bike" style="font-size:16px;"></i>Repartidores</button>
           <button class="adm-nav" id="admNav-zonasenvio" onclick="adminDesktopTab('zonasenvio')"><i class="ti ti-map-2" style="font-size:16px;"></i>Zonas de envío</button>
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">Más</div>
@@ -9448,6 +9449,58 @@ let cobranzasMesActual  = new Date().getMonth();   // 0-based
 let cobranzasAnio       = new Date().getFullYear();
 let cobranzasFiltroActual = 'todos';
 
+function admRenderCobranzasDesktop(){
+  window._cobranzasEsDesktop = true;
+  const cont = document.getElementById('admDesktopContent');
+  cont.innerHTML = `
+    <div style="display:flex;gap:20px;height:calc(100vh - 60px);overflow:hidden;">
+      <!-- Columna izquierda: lista -->
+      <div style="width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;overflow-y:auto;padding-right:4px;">
+        <!-- Mes nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;">
+          <button onclick="cobranzasCambiarMes(-1)" style="background:#F5F5F2;border:none;border-radius:8px;padding:6px 12px;font-size:16px;cursor:pointer;">‹</button>
+          <span id="cobranzasMesLabel" style="font-weight:800;font-size:15px;color:#1A1A1A;"></span>
+          <button onclick="cobranzasCambiarMes(1)" style="background:#F5F5F2;border:none;border-radius:8px;padding:6px 12px;font-size:16px;cursor:pointer;">›</button>
+        </div>
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0;">
+          <div style="background:#E8F5EE;border-radius:10px;padding:10px;text-align:center;">
+            <div id="cobranzasStatPagados" style="font-size:22px;font-weight:900;color:#2F7A55;">0</div>
+            <div style="font-size:10px;color:#2F7A55;font-weight:700;">Pagados</div>
+          </div>
+          <div style="background:#FFF8E1;border-radius:10px;padding:10px;text-align:center;">
+            <div id="cobranzasStatPendientes" style="font-size:22px;font-weight:900;color:#C99A3E;">0</div>
+            <div style="font-size:10px;color:#C99A3E;font-weight:700;">Pendientes</div>
+          </div>
+          <div style="background:#FEECEC;border-radius:10px;padding:10px;text-align:center;">
+            <div id="cobranzasStatVencidos" style="font-size:22px;font-weight:900;color:#e05a5a;">0</div>
+            <div style="font-size:10px;color:#e05a5a;font-weight:700;">Vencidos</div>
+          </div>
+          <div style="background:#F0EBF8;border-radius:10px;padding:10px;text-align:center;">
+            <div id="cobranzasStatGracia" style="font-size:22px;font-weight:900;color:#7B5EA7;">0</div>
+            <div style="font-size:10px;color:#7B5EA7;font-weight:700;">En gracia</div>
+          </div>
+        </div>
+        <!-- Filtros -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;">
+          <button onclick="cobranzasSetFiltro('todos')" style="padding:4px 10px;border-radius:20px;border:1.5px solid #ccc;font-size:11px;font-weight:700;background:#fff;cursor:pointer;" id="cobranzasFiltro-todos">Todos</button>
+          <button onclick="cobranzasSetFiltro('pagados')" style="padding:4px 10px;border-radius:20px;border:1.5px solid #ccc;font-size:11px;font-weight:700;background:#fff;cursor:pointer;" id="cobranzasFiltro-pagados">✅ Pagados</button>
+          <button onclick="cobranzasSetFiltro('revision')" style="padding:4px 10px;border-radius:20px;border:1.5px solid #ccc;font-size:11px;font-weight:700;background:#fff;cursor:pointer;" id="cobranzasFiltro-revision">⏳ Revisión</button>
+          <button onclick="cobranzasSetFiltro('pendientes')" style="padding:4px 10px;border-radius:20px;border:1.5px solid #ccc;font-size:11px;font-weight:700;background:#fff;cursor:pointer;" id="cobranzasFiltro-pendientes">⚠️ Pendientes</button>
+          <button onclick="cobranzasSetFiltro('vencidos')" style="padding:4px 10px;border-radius:20px;border:1.5px solid #ccc;font-size:11px;font-weight:700;background:#fff;cursor:pointer;" id="cobranzasFiltro-vencidos">🔴 Vencidos</button>
+          <button onclick="cobranzasSetFiltro('gracia')" style="padding:4px 10px;border-radius:20px;border:1.5px solid #ccc;font-size:11px;font-weight:700;background:#fff;cursor:pointer;" id="cobranzasFiltro-gracia">🎁 Gracia</button>
+        </div>
+        <!-- Lista -->
+        <div id="cobranzasLista" style="flex:1;overflow-y:auto;"></div>
+      </div>
+      <!-- Columna derecha: detalle -->
+      <div style="flex:1;overflow-y:auto;background:#F9F9F7;border-radius:12px;padding:20px;" id="cobranzasDetalleDesktop">
+        <div style="color:#AAA;font-size:13px;text-align:center;margin-top:60px;">Seleccioná un comercio para ver el detalle</div>
+      </div>
+    </div>`;
+  cobranzasRender();
+}
+
 function cobranzasCargar(){
   renderCPlanBox(); // por si acaso
   cobranzasRender();
@@ -9536,6 +9589,14 @@ function cobranzasRender(){
 function cobranzaAbrirDetalle(comercioId){
   const c = state.comercios.find(x => x.id === comercioId);
   if(!c) return;
+  if(window._cobranzasEsDesktop){
+    const col = document.getElementById('cobranzasDetalleDesktop');
+    if(col){
+      col.innerHTML = '<div style="font-size:15px;font-weight:800;margin-bottom:16px;">'+c.nombre+'</div><div id="cobranzaDetalleContenido"></div>';
+      cobranzaRenderDetalle(c);
+    }
+    return;
+  }
   const el = document.getElementById('cobranzaDetalleNombre');
   if(el) el.textContent = c.nombre;
   cobranzaRenderDetalle(c);
@@ -14661,7 +14722,7 @@ function adminDesktopTab(tab){
   document.querySelectorAll('.adm-nav').forEach(b=>b.classList.remove('active'));
   const navBtn = document.getElementById('admNav-'+tab);
   if(navBtn) navBtn.classList.add('active');
-  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',repartidores:'Repartidores',zonasenvio:'Zonas de envío',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home',ciudadhoy:'🏙️ La Ciudad Hoy',papelera:'🗑️ Papelera'};
+  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',cobranzas:'💰 Cobranzas',repartidores:'Repartidores',zonasenvio:'Zonas de envío',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home',ciudadhoy:'🏙️ La Ciudad Hoy',papelera:'🗑️ Papelera'};
   document.getElementById('admDesktopTitle').textContent = titles[tab]||tab;
   document.getElementById('admDesktopBadge').innerHTML = '';
   const cont = document.getElementById('admDesktopContent');
@@ -14680,6 +14741,7 @@ function adminDesktopTab(tab){
   else if(tab==='nuevo')        admRenderNuevoComercioDesktop();
   else if(tab==='rubroshome')   adminCargarRubrosHome(true);
   else if(tab==='ciudadhoy')    adminAbrirCiudadHoy(true);
+  else if(tab==='cobranzas')    admRenderCobranzasDesktop();
 }
 
 async function admRenderDashboard(){
