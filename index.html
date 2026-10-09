@@ -1110,6 +1110,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div class="section-title" id="tituloSeccionEncantar">✨ Te va a encantar</div>
         </div>
         <div id="feedGridEncantar" class="feed-grid-encantar"></div>
+        <button id="btnEncantarVerOfertas" class="btn btn-primary" style="display:none;width:100%;margin-top:14px;" onclick="setFeedTab('ofertas')">🔥 Ver todas las ofertas</button>
       </div>
 
       <!-- Banner Tornado de Ofertas — reemplaza el botón fijo, mismo sistema
@@ -12702,6 +12703,9 @@ function renderFeedEncantar(){
   if(!grid) return;
   var titulo = document.getElementById('tituloSeccionEncantar');
   if(titulo) titulo.textContent = buscadorQuery ? '🔍 Resultados de tu búsqueda' : '✨ Te va a encantar';
+  // Botón "Ver todas las ofertas": solo cuando se muestran los productos destacados (no en búsqueda ni vacío)
+  var btnOfertas = document.getElementById('btnEncantarVerOfertas');
+  if(btnOfertas) btnOfertas.style.display = 'none';
   var prods = [];
   (state.comercios||[]).forEach(function(c){
     if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
@@ -12758,6 +12762,7 @@ function renderFeedEncantar(){
     return;
   }
   grid.innerHTML = top10.map(tarjetaEncantarHTML).join('');
+  if(btnOfertas) btnOfertas.style.display = '';
 }
 
 var _feedInfinitoOffset = 0;
