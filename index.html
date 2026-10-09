@@ -1558,7 +1558,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <!-- portada: img2 si existe, sino img con contain para que no se corte -->
       </div>
       <!-- logo flotante -->
-      <div id="lpLogo" style="display:none; position:relative; margin-top:-36px; margin-bottom:8px; margin-left:12px; width:64px; height:64px; border-radius:14px; overflow:hidden; border:3px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.15); background:#fff; flex-shrink:0;"></div>
+      <div id="lpLogo" style="display:none; position:relative; margin-top:-52px; margin-bottom:8px; margin-left:12px; width:100px; height:100px; border-radius:18px; overflow:hidden; border:3px solid #fff; cursor:zoom-in; box-shadow:0 2px 8px rgba(0,0,0,.15); background:#fff; flex-shrink:0;"></div>
       <h1 class="page-title" style="margin-bottom:2px;" id="lpNombre">Comercio</h1>
       <div class="page-sub" style="margin-bottom:14px;" id="lpMeta">Rubro</div>
 
@@ -2648,6 +2648,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="p-card" style="background:#FBF7EF;color:#5C4A1E;" onclick="renderCHistorial();showScreen('c-historial')">
         <i class="ti ti-history p-card-ic"></i>
         <div class="p-card-title">Historial</div>
+      </button>
+
+      <button class="p-card" style="background:#E0F7FA;color:#00697A;" onclick="compartirCatalogoComercio()">
+        <i class="ti ti-share p-card-ic"></i>
+        <div class="p-card-title">Compartir catálogo</div>
       </button>
 
       <button class="p-card" style="background:#F3E8FF;color:#6A1B9A;position:relative;" onclick="renderCSuscripcionBox();showScreen('c-suscripcion')">
@@ -8290,6 +8295,77 @@ function reabrirReserva(idx){
 // que reemplazar por el envío real (emailjs.send(serviceId, templateId, params)).
 // Los 3 destinatarios y el contenido del mail ya quedan armados acá.
 const ADMIN_EMAIL = 'infopuent@gmail.com'; // mail real de admin
+
+// ── Helpers de ficha / catálogo ──────────────────────────────────────────────
+// Instagram: acepta "@usuario", "usuario", "instagram.com/usuario" o la URL completa.
+function instagramUrl(v){
+  v = String(v||'').trim();
+  if(!v) return '';
+  if(/^https?:\/\//i.test(v)) return v;
+  if(/instagram\.com/i.test(v)) return 'https://' + v.replace(/^\/+/, '');
+  const user = v.replace(/^@/, '').replace(/[^\w.]/g, '');
+  return user ? 'https://www.instagram.com/' + user : '';
+}
+
+// Ver una imagen (logo) en grande; tocar en cualquier lado para cerrar.
+function verImagenGrande(src, alt){
+  if(!src) return;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out;';
+  const im = document.createElement('img');
+  im.src = src; im.alt = alt || '';
+  im.style.cssText = 'width:min(92vw,460px);max-height:85vh;border-radius:14px;background:#fff;object-fit:contain;';
+  ov.appendChild(im);
+  ov.onclick = ()=> ov.remove();
+  document.body.appendChild(ov);
+}
+
+// Link directo a la ficha de un comercio: ?local=ID
+function linkCatalogoComercio(c){
+  return PUENT_URL + '/?local=' + encodeURIComponent(c.id);
+}
+
+// Botón "Compartir catálogo" del panel del comercio: arma un mensaje con todos los
+// productos publicados + el link a la ficha del comercio en PuenT.
+async function compartirCatalogoComercio(){
+  const c = state.currentUser;
+  if(!c){ return; }
+  const prods = (state.productos||[]).filter(p => p.comercioId === c.id && (p.origen === 'comercio' || !p.origen) && p.stock !== 0);
+  const link = linkCatalogoComercio(c);
+  const MAX = 40;
+  let txt = `🏬 *${c.nombre}* — mirá nuestro catálogo en PuenT\n`;
+  if(prods.length){
+    txt += '\n' + prods.slice(0, MAX).map(p => `• ${p.nombre} — ${precioTexto(p)}`).join('\n');
+    if(prods.length > MAX) txt += `\n… y ${prods.length - MAX} productos más`;
+    txt += '\n';
+  }
+  txt += `\n👉 Catálogo completo y contacto: ${link}`;
+  if(!prods.length) toast('Todavía no tenés productos publicados: se comparte solo el link de tu ficha');
+  if(navigator.share){
+    try{ await navigator.share({ title: c.nombre + ' — Catálogo', text: txt }); return; }
+    catch(e){ if(e && e.name === 'AbortError') return; }
+  }
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
+// Entrada por link compartido (?local=ID): espera a que carguen los comercios y abre la ficha.
+(function(){
+  try{
+    const id = new URLSearchParams(location.search).get('local');
+    if(!id) return;
+    history.replaceState({}, '', location.pathname);
+    let intentos = 0;
+    const t = setInterval(function(){
+      intentos++;
+      try{
+        if(typeof state !== 'undefined' && (state.comercios||[]).some(x => x.id === id)){
+          clearInterval(t);
+          verProductosDeLocal(id);
+        } else if(intentos > 60){ clearInterval(t); }
+      }catch(e){ clearInterval(t); }
+    }, 500);
+  }catch(e){}
+})();
 
 async function compartirProducto(prodId){
   const p = state.productos.find(x=>x.id===prodId);
@@ -14015,7 +14091,7 @@ function verProductosDeLocal(comercioId){
   if(c.img2){
     cover.innerHTML = `<img src="${c.img2}" alt="${c.nombre}" style="width:100%;height:100%;object-fit:cover;">`;
   } else if(c.img){
-    cover.innerHTML = `<img src="${c.img}" alt="${c.nombre}" style="width:100%;height:100%;object-fit:contain; padding:12px;">`;
+    cover.innerHTML = `<img src="${c.img}" alt="${c.nombre}" style="width:100%;height:100%;object-fit:contain; padding:12px;cursor:zoom-in;" onclick="verImagenGrande(this.src, this.alt)">`;
   } else {
     cover.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;">🏬</div>`;
   }
@@ -14024,6 +14100,7 @@ function verProductosDeLocal(comercioId){
   if(c.img && c.img2){
     logoEl.style.display = 'block';
     logoEl.innerHTML = `<img src="${c.img}" alt="${c.nombre}" style="width:100%;height:100%;object-fit:contain; padding:4px;">`;
+    logoEl.onclick = ()=> verImagenGrande(c.img, c.nombre);
   } else {
     logoEl.style.display = 'none';
   }
@@ -14042,6 +14119,11 @@ function verProductosDeLocal(comercioId){
   showRow('lpTelefonoRow',  'lpTelefono',  c.telefono);
   showRow('lpWhatsappRow',  'lpWhatsapp',  c.whatsapp);
   showRow('lpInstagramRow', 'lpInstagram', c.instagram ? '@'+c.instagram.replace('@','') : '');
+  // Instagram tocable: abre la cuenta directo
+  const _igEl = document.getElementById('lpInstagram');
+  if(_igEl && c.instagram && instagramUrl(c.instagram)){
+    _igEl.innerHTML = `<a href="${vitEsc(instagramUrl(c.instagram))}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">${vitEsc(_igEl.textContent)}</a>`;
+  }
   renderVitrinaFicha(c);
 
   // Botón WhatsApp
@@ -16454,8 +16536,8 @@ async function adminVerComercio(docId){
   const pubColor = pubActiva ? '#2F7A55' : '#C23B3B';
   const pubLabel = pubActiva ? 'Publicidad activa hasta ' + pubVence : 'Publicidad VENCIDA';
   const imgHtml  = c.img
-    ? `<img src="${c.img}" style="width:56px;height:56px;border-radius:14px;object-fit:cover;flex-shrink:0;">`
-    : `<div style="width:56px;height:56px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏬</div>`;
+    ? `<img src="${c.img}" onclick="verImagenGrande(this.src, this.alt)" alt="${vitEsc(c.nombre||'')}" style="width:104px;height:104px;border-radius:18px;object-fit:cover;flex-shrink:0;cursor:zoom-in;">`
+    : `<div style="width:104px;height:104px;border-radius:18px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;">🏬</div>`;
   const fila = (l, v) => v ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--line);font-size:13px;"><span style="color:var(--muted);font-weight:700;">${l}</span><span>${v}</span></div>` : '';
   const diasPlanDetalle = c.plan ? planDiasRestantes(c) : null;
   const graciaVencidaDetalle = c.plan && !c.pagos?.length && diasPlanDetalle !== null && diasPlanDetalle < 0;
@@ -16548,8 +16630,9 @@ async function adminVerComercio(docId){
       ${fila('Dirección', c.direccion)}
       ${fila('Teléfono', c.telefono)}
       ${fila('Email', c.email)}
-      ${fila('Instagram', c.instagram)}
-      ${fila('Web', c.web)}
+      ${fila('Instagram', c.instagram && instagramUrl(c.instagram) ? `<a href="${vitEsc(instagramUrl(c.instagram))}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;">${vitEsc(c.instagram)}</a>` : c.instagram)}
+      ${fila('Facebook', c.facebook ? `<a href="${vitEsc(vitUrl(c.facebook))}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;">${vitEsc(c.facebook)}</a>` : '')}
+      ${fila('Web', c.web ? `<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;">${vitEsc(c.web)}</a>` : '')}
       ${fila('Horario', c.horario)}
       ${fila('Modo', c.modo==='vitrina' ? '🏬 Solo vidriera' : '🛍️ Tienda')}
       ${fila('Galería', (c.galeria||[]).length ? c.galeria.length+' foto(s)' : null)}
@@ -16594,7 +16677,7 @@ async function adminVerComercio(docId){
       <div style="flex:1;min-width:130px;">
         <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Logo principal</div>
         <div id="adminFotoLogoBox" style="position:relative;border-radius:14px;overflow:hidden;background:var(--line);aspect-ratio:1;display:flex;align-items:center;justify-content:center;max-width:160px;">
-          ${c.img ? `<img src="${c.img}" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:36px;">🏬</span>`}
+          ${c.img ? `<img src="${c.img}" alt="${vitEsc(c.nombre||'')}" onclick="verImagenGrande(this.src, this.alt)" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;">` : `<span style="font-size:36px;">🏬</span>`}
         </div>
         <div style="display:flex;gap:6px;margin-top:7px;max-width:160px;">
           <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;" onclick="document.getElementById('adminLogoUpload_${docId}').click()">📷 Cambiar</button>
