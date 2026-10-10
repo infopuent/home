@@ -11366,8 +11366,8 @@ const TIPOS_POR_RUBRO = {
     'Cerrajería','Herrería / soldadura','Carpintería',
     // Decoración
     'Mueblería','Colchonería','Decoración y textil del hogar','Cortinas y persianas','Iluminación',
-    // Limpieza
-    'Servicio de limpieza','Fumigación','Jardinería y paisajismo',
+    // Limpieza y blanquería
+    'Artículos de limpieza','Blanquería','Servicio de limpieza','Fumigación','Jardinería y paisajismo',
     // Electrodomésticos
     'Venta de electrodomésticos','Reparación de electrodomésticos',
     // Mantenimiento y productos (juntos y por separado)
@@ -11577,6 +11577,159 @@ function onRubroChange(rubroSelectId, tipoSelectId, tipoFieldId){
     if(_h) _h.style.display = rubro ? 'none' : '';
   }
 }
+// ── Leyenda "¿En qué rubro / subrubro registrarlo?" según el nombre del local ──
+// Mientras se escribe el nombre, se busca en los subrubros (TIPOS_POR_RUBRO) y en algunos
+// sinónimos; si hay coincidencia, se muestra debajo del campo con un botón "Usar".
+const SUG_STOP = new Set(['de','del','la','el','los','las','y','e','en','para','con','sin','por','al','a','un','una',
+  'venta','servicio','servicios','casa','centro','productos','mantenimiento','comida','ropa','tienda','local','articulos',
+  'accesorios','alquiler','clases','estudio','agencia','instituto','club','don','dona','san','santa','nueva','nuevo']);
+// Sinónimos / palabras que no coinciden con ningún subrubro tal cual
+const SUG_SINONIMOS = [
+  {k:'limpieza',   r:'Hogar y Construcción', t:['Artículos de limpieza','Servicio de limpieza']},
+  {k:'blancos',    r:'Hogar y Construcción', t:['Blanquería']},
+  {k:'sabanas',    r:'Hogar y Construcción', t:['Blanquería']},
+  {k:'quiosco',    r:'Almacén y Alimentos',  t:['Kiosco']},
+  {k:'despensa',   r:'Almacén y Alimentos',  t:['Almacén']},
+  {k:'supermercado',r:'Almacén y Alimentos', t:['Minimercado / autoservicio']},
+  {k:'polleria',   r:'Almacén y Alimentos',  t:['Carnicería']},
+  {k:'boutique',   r:'Indumentaria y Calzado',t:['Ropa femenina']},
+  {k:'zapatillas', r:'Indumentaria y Calzado',t:['Calzado deportivo']},
+  {k:'papeleria',  r:'Educación y Librerías', t:['Librería y papelería']},
+  {k:'cotillon',   r:'Eventos y Fiestas',    t:['Cotillón y fiestas']},
+  {k:'pizzas',     r:'Gastronomía',          t:['Pizzería']},
+  {k:'restaurant', r:'Gastronomía',          t:['Restaurante']},
+  {k:'resto',      r:'Gastronomía',          t:['Restaurante']},
+  {k:'rotiseria',  r:'Gastronomía',          t:['Rotisería']},
+  {k:'cafe',       r:'Gastronomía',          t:['Cafetería']},
+  {k:'gym',        r:'Deportes y Recreación',t:['Gimnasio']},
+  {k:'remis',      r:'Transporte, Encomiendas y Viajes', t:['Remises y taxis']},
+  {k:'taxi',       r:'Transporte, Encomiendas y Viajes', t:['Remises y taxis']},
+  {k:'flete',      r:'Transporte, Encomiendas y Viajes', t:['Fletes y mudanzas']},
+  {k:'ypf',        r:'Combustibles, Gas y Energía', t:['Estación de servicio']},
+  {k:'shell',      r:'Combustibles, Gas y Energía', t:['Estación de servicio']},
+  {k:'axion',      r:'Combustibles, Gas y Energía', t:['Estación de servicio']},
+];
+let _sugIndice = null;
+function _sugConstruirIndice(){
+  const norm = t => normalizarTexto(t).replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  const idx = [];
+  Object.keys(TIPOS_POR_RUBRO).forEach(rubro=>{
+    TIPOS_POR_RUBRO[rubro].forEach(tipo=>{
+      const base = tipo.replace(/\(.*?\)/g,' ');
+      const vistos = new Set();
+      base.split(/[\/,]|\sy\s/).forEach(parte=>{
+        const f = norm(parte); if(!f) return;
+        const claves = [f];
+        const primera = f.split(' ')[0];
+        if(f.includes(' ') && primera.length >= 6 && !SUG_STOP.has(primera)) claves.push(primera);
+        claves.forEach(k=>{
+          if(vistos.has(k) || (k.length < 3) || SUG_STOP.has(k)) return;
+          vistos.add(k); idx.push({k, r:rubro, t:tipo, esFrase:k.includes(' ')});
+        });
+      });
+    });
+  });
+  SUG_SINONIMOS.forEach(sn=> sn.t.forEach(t=> idx.push({k:sn.k, r:sn.r, t, esFrase:false, sin:true})));
+  return idx.map(e=>({...e, kw:e.k.split(' ').length}));
+}
+// Devuelve hasta 2 sugerencias [{rubro, tipos:[...]}], la mejor primero
+function sugerirRubroPorNombre(nombre){
+  const n = normalizarTexto(nombre||'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  if(n.length < 3) return [];
+  if(!_sugIndice) _sugIndice = _sugConstruirIndice();
+  const tokens = n.split(' ');
+  const hits = [];
+  _sugIndice.forEach(e=>{
+    let ok = false;
+    if(e.kw > 1){
+      const kw = e.k.split(' ');
+      ok = tokens.some((_,i)=>{
+        if(i + kw.length > tokens.length) return false;
+        for(let j = 0; j < kw.length - 1; j++) if(tokens[i + j] !== kw[j]) return false;
+        return tokens[i + kw.length - 1].startsWith(kw[kw.length - 1]);   // tolera plural
+      });
+    }
+    else ok = tokens.some(t => t === e.k || (e.k.length >= 6 && t.startsWith(e.k)));
+    if(ok) hits.push({...e, puntaje: e.k.length + (e.kw > 1 ? 12 : 0) + (n.startsWith(e.k) ? 3 : 0) + (e.sin ? 5 : 0)});
+  });
+  if(!hits.length) return [];
+  hits.sort((a,b)=> b.puntaje - a.puntaje);
+  const porRubro = new Map();
+  hits.forEach(h=>{
+    if(!porRubro.has(h.r)) porRubro.set(h.r, {rubro:h.r, mejor:h.puntaje, tipos:[]});
+    const g = porRubro.get(h.r);
+    // solo los subrubros que empatan con (o casi igualan) la mejor coincidencia de ese rubro
+    if(h.puntaje >= g.mejor - 1 && !g.tipos.includes(h.t) && g.tipos.length < 3) g.tipos.push(h.t);
+  });
+  const grupos = [...porRubro.values()];
+  // el 2.º rubro solo se muestra si su coincidencia es casi tan buena como la primera
+  return grupos.filter((g,i)=> i === 0 || g.mejor >= grupos[0].mejor * 0.7).slice(0, 2).map(g=>({rubro:g.rubro, tipos:g.tipos}));
+}
+
+// Campos de nombre que muestran la leyenda → selects de rubro/subrubro asociados
+const SUG_CAMPOS = {
+  rcNombre:     {rubro:'rcRubro'},                                  // registro (wizard)
+  adNombre:     {rubro:'adRubro',     tipo:'adTipo'},               // alta desde admin
+  editAdNombre: {rubro:'editAdRubro', tipo:'editAdTipo'},           // edición desde admin
+  editCNombre:  {rubro:'editCRubro',  tipo:'editCTipo'},            // edición por el comercio
+};
+// Busca un elemento por id subiendo desde el campo (hay ids repetidos entre pantallas)
+function _sugBuscar(desde, id){
+  if(!id) return null;
+  for(let el = desde; el && el !== document; el = el.parentElement){
+    const f = el.querySelector && el.querySelector('#' + id);
+    if(f) return f;
+  }
+  return document.getElementById(id);
+}
+function _sugRenderizar(input){
+  const cfg = SUG_CAMPOS[input.id]; if(!cfg) return;
+  let hint = input.parentElement.querySelector('.sug-rubro-hint');
+  if(!hint){
+    hint = document.createElement('div');
+    hint.className = 'sug-rubro-hint';
+    hint.style.cssText = 'margin-top:8px;font-size:12.5px;line-height:1.45;color:var(--ink);';
+    input.insertAdjacentElement('afterend', hint);
+  }
+  const sugs = sugerirRubroPorNombre(input.value);
+  if(!sugs.length){ hint.innerHTML = ''; hint.style.display = 'none'; return; }
+  const selR = _sugBuscar(input, cfg.rubro), selT = _sugBuscar(input, cfg.tipo);
+  const E = vitEsc;
+  const filas = sugs.map((g,i)=>{
+    const yaRubro = selR && selR.value === g.rubro;
+    const yaTipo  = yaRubro && selT && g.tipos.length === 1 && selT.value === g.tipos[0];
+    const tipoTxt = g.tipos.length === 1 ? ' › <b>' + E(g.tipos[0]) + '</b>'
+                  : g.tipos.length > 1   ? ' › <span style="color:var(--muted);">elegí: ' + g.tipos.map(E).join(' / ') + '</span>' : '';
+    const boton = (yaRubro && (yaTipo || g.tipos.length !== 1))
+      ? '<span style="color:#2F7A55;font-weight:800;">✅ Ya está elegido</span>'
+      : `<button type="button" onclick="_sugAplicar(this)" data-input="${E(input.id)}" data-i="${i}" style="margin-left:6px;background:var(--orange,#FC1820);color:#fff;border:none;border-radius:100px;padding:3px 12px;font-size:12px;font-weight:800;cursor:pointer;">Usar</button>`;
+    return `<div style="padding:2px 0;">💡 Rubro: <b>${E(g.rubro)}</b>${tipoTxt} ${boton}</div>`;
+  }).join('');
+  hint.style.display = '';
+  hint.innerHTML = `<div style="background:#f5f5f3;border-radius:10px;padding:8px 12px;">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px;">Sugerencia para registrarlo</div>${filas}</div>`;
+  hint._sugs = sugs;
+}
+function _sugAplicar(btn){
+  const input = document.getElementById(btn.dataset.input) ;
+  const inp = [...document.querySelectorAll('#' + btn.dataset.input)].find(el => el.parentElement.contains(btn)) || input;
+  const cfg = SUG_CAMPOS[inp.id]; const hint = inp.parentElement.querySelector('.sug-rubro-hint');
+  const g = hint && hint._sugs && hint._sugs[+btn.dataset.i]; if(!g) return;
+  const selR = _sugBuscar(inp, cfg.rubro);
+  if(selR){
+    selR.value = g.rubro;
+    selR.dispatchEvent(new Event('change', {bubbles:true}));   // llena los subrubros del rubro elegido
+    const selT = _sugBuscar(inp, cfg.tipo);
+    if(selT && g.tipos.length === 1 && [...selT.options].some(o => o.value === g.tipos[0])) selT.value = g.tipos[0];
+  }
+  _sugRenderizar(inp);
+  if(typeof toast === 'function') toast('✅ Rubro cargado: ' + g.rubro + (g.tipos.length === 1 ? ' › ' + g.tipos[0] : ''));
+}
+document.addEventListener('input', function(e){
+  const t = e.target;
+  if(t && t.id && SUG_CAMPOS[t.id]){ try{ _sugRenderizar(t); }catch(err){ console.error('sugerencia de rubro:', err); } }
+});
+
 function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
 function renderExploraCiudad(){
   const el = document.getElementById('exploraRow');
