@@ -1744,6 +1744,21 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <!-- PASO 1: Email + contraseña -->
     <div id="rcPaso1" style="padding:28px 20px 20px;">
+      <button type="button" onclick="loginComercioConGoogle()" style="width:100%;padding:14px 16px;border-radius:100px;border:1.5px solid #DADCE0;background:white;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700;color:#1A1A1A;cursor:pointer;">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.1 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.8 23.8 0 0 0 0 24c0 3.8.9 7.4 2.5 10.6l8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.1C6.5 42.5 14.6 48 24 48z"/></svg>
+        Registrarme con Google
+      </button>
+      <div style="text-align:center;margin-top:10px;font-size:12.5px;color:#888;line-height:1.5;">
+        ⚡ Inicio rápido, fácil y directo al panel de tu comercio. Después configurás tu tienda online desde ahí.
+      </div>
+
+      <!-- Separador: otras cuentas -->
+      <div style="display:flex;align-items:center;gap:12px;margin:22px 0 18px;">
+        <div style="flex:1;height:1px;background:#DDD;"></div>
+        <div style="font-size:12px;color:#888;font-weight:600;text-align:center;line-height:1.4;">¿Tenés otro tipo de cuenta, como Hotmail, Yahoo u otra?<br>Registrate en 3 pasos</div>
+        <div style="flex:1;height:1px;background:#DDD;"></div>
+      </div>
+
       <h1 style="font-family:'Bai Jamjuree',sans-serif;font-size:26px;font-weight:700;color:#1A1A1A;margin-bottom:6px;line-height:1.2;">Hola, en solo 3 pasos<br>te podés registrar</h1>
       <p style="font-size:13.5px;color:#888;margin-bottom:28px;line-height:1.5;">Vamos a pedirte el correo para verificar tu identidad.</p>
 
@@ -1780,20 +1795,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button onclick="rcAvanzarPaso1()" style="width:100%;padding:16px;border-radius:100px;background:#FC1820;color:white;font-weight:800;font-size:16px;border:none;cursor:pointer;margin-top:32px;">
         Continuar
       </button>
-
-      <!-- Alternativa rápida: registro con Google -->
-      <div style="display:flex;align-items:center;gap:12px;margin:22px 0 16px;">
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.3);"></div>
-        <div style="font-size:12px;color:#AAA;font-weight:600;">o registrate más rápido</div>
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.3);"></div>
-      </div>
-      <button type="button" onclick="loginComercioConGoogle()" style="width:100%;padding:14px 16px;border-radius:100px;border:1.5px solid #DADCE0;background:white;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700;color:#1A1A1A;cursor:pointer;">
-        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.1 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.8 23.8 0 0 0 0 24c0 3.8.9 7.4 2.5 10.6l8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.1C6.5 42.5 14.6 48 24 48z"/></svg>
-        Registrarme con Google
-      </button>
-      <div style="text-align:center;margin-top:10px;font-size:12.5px;color:#888;line-height:1.5;">
-        Es la forma más rápida: entrás con tu cuenta y después configurás tu tienda online desde el panel de tu comercio.
-      </div>
 
       <div style="text-align:center;margin-top:20px;font-size:13px;color:#888;">
         ¿Ya tenés cuenta? <button onclick="showScreen('login-comercio')" style="background:none;border:none;font-size:13px;font-weight:800;color:#FC1820;cursor:pointer;">Iniciá sesión</button>
