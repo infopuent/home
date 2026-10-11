@@ -12579,13 +12579,12 @@ function renderSeccionesCategorias(){
       grid.innerHTML = '<div class="cat-banner-empty" style="grid-column:1/-1;">Todavía no hay ofertas cargadas en este rubro.</div>';
       return;
     }
-    // una tarjeta de vidriera cada 3 productos; las que sobran van al final
-    var celdas = [], vi = 0;
-    prods.forEach(function(pr, i){
-      celdas.push(tarjetaEncantarHTML(pr));
-      if((i+1) % 3 === 0 && vi < vits.length) celdas.push(tarjetaVidrieraHTML(vits[vi++]));
-    });
-    while(vi < vits.length) celdas.push(tarjetaVidrieraHTML(vits[vi++]));
+    // Los productos van primero; los comercios en vidriera van aparte, en un bloque propio al final
+    var celdas = prods.map(tarjetaEncantarHTML);
+    if(vits.length){
+      celdas.push('<div style="grid-column:1/-1;margin:'+(prods.length?'10px':'0')+' 2px 0;font-size:13px;font-weight:800;color:var(--navy);">🏬 Comercios de este rubro</div>');
+      vits.forEach(function(co){ celdas.push(tarjetaVidrieraHTML(co)); });
+    }
     grid.innerHTML = celdas.join('');
   });
 }
