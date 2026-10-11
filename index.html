@@ -9131,8 +9131,19 @@ function shuffleConSemillaDiaria(arr){
   return a;
 }
 
+// Shuffle con semilla por carga de página: cambia en cada refresh, pero se mantiene
+// estable mientras la persona navega (para que el orden no salte al volver al Home)
+const _SEMILLA_CARGA = Math.floor(Math.random()*2147483646) + 1;
+function shuffleConSemillaCarga(arr){
+  let seed = _SEMILLA_CARGA;
+  const rng = () => { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return (seed >>> 0) / 0xffffffff; };
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rng() * (i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
 function renderVitrinaSecciones(){
-  const lista = shuffleConSemillaDiaria((state.comercios||[]).filter(c=> comercioEnVitrina(c) && (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada))));
+  const lista = shuffleConSemillaCarga((state.comercios||[]).filter(c=> comercioEnVitrina(c) && (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada))));
   const html = lista.map(c=>{
     const portada = c.img2 || c.img;
     return `
@@ -12521,6 +12532,29 @@ function setFeedCategoria(cat, btn){
   }
 }
 
+// Tarjeta de un comercio en modo vidriera, con el mismo formato que la de producto:
+// portada (o logo si no hay portada), logo en la esquina, nombre y subrubro del local.
+function tarjetaVidrieraHTML(c){
+  var portada = c.img2 || c.img;
+  var foto = c.img2
+    ? '<img src="'+c.img2+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="">'
+    : (c.img
+        ? '<img src="'+c.img+'" style="width:100%;height:100%;object-fit:contain;padding:14%;box-sizing:border-box;display:block;" loading="lazy" alt="">'
+        : '<span style="font-size:40px;font-weight:800;color:#5C7355;">'+vitEsc((c.nombre||'?').charAt(0).toUpperCase())+'</span>');
+  var logoBadge = (c.img2 && c.img)
+    ? '<div class="prod-logo-badge" style="width:36px;height:36px;"><img src="'+c.img+'" alt=""></div>'
+    : '';
+  var sub = c.tipo || c.rubro || '';
+  return '<div class="prod-card" onclick="verProductosDeLocal(\''+c.id+'\')" style="cursor:pointer;">'
+    +'<div class="prod-photo">'+foto+logoBadge+'</div>'
+    +'<div class="prod-body" style="flex-direction:column;align-items:stretch;gap:2px;">'
+    +'<div class="prod-desc" style="font-size:12px;font-weight:800;">'+vitEsc(c.nombre||'')+'</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">'
+    +'<div style="font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">'+vitEsc(sub)+'</div>'
+    +'<span style="flex-shrink:0;font-size:10px;font-weight:800;color:#5C7355;">🏬 Vidriera</span>'
+    +'</div></div></div>';
+}
+
 function renderSeccionesCategorias(){
   actualizarBannersVacios();
   const cat = _feedCategoriaActual;
@@ -12543,11 +12577,23 @@ function renderSeccionesCategorias(){
       var pCat = categoriaDeProducto(p);
       return pCat === c;
     });
-    if(!prods.length){
+    // Comercios en modo "vidriera" (plan base): entran como una tarjeta más del rubro.
+    // Si el comercio pasa a modo tienda, deja de cumplir comercioEnVitrina y desaparece de acá.
+    var vits = shuffleConSemillaCarga((state.comercios||[]).filter(function(co){
+      return comercioEnVitrina(co) && (!ciudadSeleccionada || mismaCiudad(co.ciudad, ciudadSeleccionada)) && categoriaDeRubro(co.rubro||'') === c;
+    }));
+    if(!prods.length && !vits.length){
       grid.innerHTML = '<div class="cat-banner-empty" style="grid-column:1/-1;">Todavía no hay ofertas cargadas en este rubro.</div>';
       return;
     }
-    grid.innerHTML = prods.map(tarjetaEncantarHTML).join('');
+    // una tarjeta de vidriera cada 3 productos; las que sobran van al final
+    var celdas = [], vi = 0;
+    prods.forEach(function(pr, i){
+      celdas.push(tarjetaEncantarHTML(pr));
+      if((i+1) % 3 === 0 && vi < vits.length) celdas.push(tarjetaVidrieraHTML(vits[vi++]));
+    });
+    while(vi < vits.length) celdas.push(tarjetaVidrieraHTML(vits[vi++]));
+    grid.innerHTML = celdas.join('');
   });
 }
 
@@ -13051,7 +13097,7 @@ function renderAdheridosGrid(){
     (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)) &&
     !(c.viaEmail && c.emailVerificado === false)
   );
-  const comercios = shuffleConSemillaDiaria(comerciosFiltrados);
+  const comercios = shuffleConSemillaCarga(comerciosFiltrados);
   if(!comercios.length){
     grid.innerHTML = '';
     return;
