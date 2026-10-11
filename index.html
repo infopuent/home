@@ -12548,9 +12548,17 @@ function tarjetaVidrieraHTML(c){
     +'</div></div></div>';
 }
 
+var CAT_TANDA = 12;            // productos por tanda en cada rubro del Home
+var _catVisibles = {};         // rubro → cuántos productos se muestran ahora
+var _catUltimoAbierto = null;
+function verMasProductosCat(c){
+  _catVisibles[c] = (_catVisibles[c] || CAT_TANDA) + CAT_TANDA;
+  renderSeccionesCategorias();
+}
 function renderSeccionesCategorias(){
   actualizarBannersVacios();
   const cat = _feedCategoriaActual;
+  if(cat !== _catUltimoAbierto){ _catVisibles = {}; _catUltimoAbierto = cat; }   // al abrir otro rubro, vuelve a 12
   // Recopilar todos los productos con su categoría
   var todosProd = [];
   (state.comercios||[]).forEach(function(c){
@@ -12579,8 +12587,14 @@ function renderSeccionesCategorias(){
       grid.innerHTML = '<div class="cat-banner-empty" style="grid-column:1/-1;">Todavía no hay ofertas cargadas en este rubro.</div>';
       return;
     }
-    // Los productos van primero; los comercios en vidriera van aparte, en un bloque propio al final
-    var celdas = prods.map(tarjetaEncantarHTML);
+    // Productos de a tandas (el resto se carga con "Ver más"); las vidrieras quedan siempre
+    // justo debajo de lo que ya se mostró, en un bloque propio.
+    var visibles = _catVisibles[c] || CAT_TANDA;
+    var celdas = prods.slice(0, visibles).map(tarjetaEncantarHTML);
+    if(prods.length > visibles){
+      var faltan = prods.length - visibles;
+      celdas.push('<div style="grid-column:1/-1;text-align:center;padding:6px 0 2px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="verMasProductosCat(\''+c+'\')">Ver más productos ('+faltan+')</button></div>');
+    }
     if(vits.length){
       celdas.push('<div style="grid-column:1/-1;margin:'+(prods.length?'10px':'0')+' 2px 0;font-size:13px;font-weight:800;color:var(--navy);">🏬 Comercios de este rubro</div>');
       vits.forEach(function(co){ celdas.push(tarjetaVidrieraHTML(co)); });
