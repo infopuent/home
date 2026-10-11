@@ -775,6 +775,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 }
 .feed-solapa.active{color:var(--orange); border-bottom-color:var(--orange);}
 .feed-solapa:active{opacity:.75;}
+.feed-solapas{-webkit-overflow-scrolling:touch; scroll-behavior:smooth;}
+.feed-solapas.hay-mas{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent); mask-image:linear-gradient(to right,#000 88%,transparent);}
 
 /* ---- GRILLA "Te va a encantar" (Ofertas del día) ---- */
 .feed-grid-encantar{
@@ -982,7 +984,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">&#128293; Ofertas</button>
     <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">&#127961;&#65039; Ciudad Hoy</button>
     <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">🗺️ Mapa</button>
-    <button class="feed-solapa" id="tabMas" onclick="setFeedTab('mas')">&#8226; &#8226; &#8226;</button>
+    <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">🏪 Locales</button>
+    <button class="feed-solapa" id="tabRubros" onclick="abrirTodosRubros()">📂 Rubros</button>
+    <button class="feed-solapa" id="tabRanking" onclick="abrirRankingComercios()">🏆 Ranking</button>
+    <button class="feed-solapa" id="tabTornado" onclick="renderTornadoOfertas(); showScreen('tornado-ofertas')">🌪️ Tornado</button>
+    <button class="feed-solapa" id="tabMas" onclick="setFeedTab('mas')">➕ Más</button>
   </div>
 
   <!-- ============ SCREEN: BIENVENIDA LANDING ============ -->
@@ -1131,7 +1137,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div id="bannerTornadoOfertas"></div>
 
 
-      <!-- (La tira "Solo vidriera" se quitó del Home: ahora esos comercios entran como tarjeta dentro de su rubro) -->
+      <!-- Vitrina: comercios que están en PuenT con su ficha (con o sin productos) -->
+      <div id="vitrinaHomeSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">🏬 Solo vidriera</div>
+          <span class="ver-todo" onclick="setFeedTab('locales')">Ver todos →</span>
+        </div>
+        <div id="vitrinaHomeRow" class="vit-row"></div>
+      </div>
       <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
            dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
       <div style="padding:14px 16px 0;">
@@ -12525,40 +12538,9 @@ function setFeedCategoria(cat, btn){
   }
 }
 
-// Tarjeta de un comercio en modo vidriera, con el mismo formato que la de producto:
-// portada (o logo si no hay portada), logo en la esquina, nombre y subrubro del local.
-function tarjetaVidrieraHTML(c){
-  var portada = c.img2 || c.img;
-  var foto = c.img2
-    ? '<img src="'+c.img2+'" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="">'
-    : (c.img
-        ? '<img src="'+c.img+'" style="width:100%;height:100%;object-fit:contain;padding:14%;box-sizing:border-box;display:block;" loading="lazy" alt="">'
-        : '<span style="font-size:40px;font-weight:800;color:#5C7355;">'+vitEsc((c.nombre||'?').charAt(0).toUpperCase())+'</span>');
-  var logoBadge = (c.img2 && c.img)
-    ? '<div class="prod-logo-badge" style="width:36px;height:36px;"><img src="'+c.img+'" alt=""></div>'
-    : '';
-  var sub = c.tipo || c.rubro || '';
-  return '<div class="prod-card" onclick="verProductosDeLocal(\''+c.id+'\')" style="cursor:pointer;">'
-    +'<div class="prod-photo">'+foto+logoBadge+'</div>'
-    +'<div class="prod-body" style="flex-direction:column;align-items:stretch;gap:2px;">'
-    +'<div class="prod-desc" style="font-size:12px;font-weight:800;">'+vitEsc(c.nombre||'')+'</div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">'
-    +'<div style="font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">'+vitEsc(sub)+'</div>'
-    +'<span style="flex-shrink:0;font-size:10px;font-weight:800;color:#5C7355;">🏬 Vidriera</span>'
-    +'</div></div></div>';
-}
-
-var CAT_TANDA = 12;            // productos por tanda en cada rubro del Home
-var _catVisibles = {};         // rubro → cuántos productos se muestran ahora
-var _catUltimoAbierto = null;
-function verMasProductosCat(c){
-  _catVisibles[c] = (_catVisibles[c] || CAT_TANDA) + CAT_TANDA;
-  renderSeccionesCategorias();
-}
 function renderSeccionesCategorias(){
   actualizarBannersVacios();
   const cat = _feedCategoriaActual;
-  if(cat !== _catUltimoAbierto){ _catVisibles = {}; _catUltimoAbierto = cat; }   // al abrir otro rubro, vuelve a 12
   // Recopilar todos los productos con su categoría
   var todosProd = [];
   (state.comercios||[]).forEach(function(c){
@@ -12578,28 +12560,11 @@ function renderSeccionesCategorias(){
       var pCat = categoriaDeProducto(p);
       return pCat === c;
     });
-    // Comercios en modo "vidriera" (plan base): entran como una tarjeta más del rubro.
-    // Si el comercio pasa a modo tienda, deja de cumplir comercioEnVitrina y desaparece de acá.
-    var vits = shuffleConSemillaCarga((state.comercios||[]).filter(function(co){
-      return comercioEnVitrina(co) && (!ciudadSeleccionada || mismaCiudad(co.ciudad, ciudadSeleccionada)) && categoriaDeRubro(co.rubro||'') === c;
-    }));
-    if(!prods.length && !vits.length){
+    if(!prods.length){
       grid.innerHTML = '<div class="cat-banner-empty" style="grid-column:1/-1;">Todavía no hay ofertas cargadas en este rubro.</div>';
       return;
     }
-    // Productos de a tandas (el resto se carga con "Ver más"); las vidrieras quedan siempre
-    // justo debajo de lo que ya se mostró, en un bloque propio.
-    var visibles = _catVisibles[c] || CAT_TANDA;
-    var celdas = prods.slice(0, visibles).map(tarjetaEncantarHTML);
-    if(prods.length > visibles){
-      var faltan = prods.length - visibles;
-      celdas.push('<div style="grid-column:1/-1;text-align:center;padding:6px 0 2px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="verMasProductosCat(\''+c+'\')">Ver más productos ('+faltan+')</button></div>');
-    }
-    if(vits.length){
-      celdas.push('<div style="grid-column:1/-1;margin:'+(prods.length?'10px':'0')+' 2px 0;font-size:13px;font-weight:800;color:var(--navy);">🏬 Comercios de este rubro</div>');
-      vits.forEach(function(co){ celdas.push(tarjetaVidrieraHTML(co)); });
-    }
-    grid.innerHTML = celdas.join('');
+    grid.innerHTML = prods.map(tarjetaEncantarHTML).join('');
   });
 }
 
@@ -12858,12 +12823,20 @@ function renderFeedVendedores(){
 function setFeedRubroVend(r){ feedRubroFiltroVend = r; renderFeedVendedores(); }
 
 let tabActiva = 'home';
+// degradé a la derecha mientras la barra de solapas tenga más para deslizar
+(function(){
+  function act(){ var b=document.getElementById('feedSolapas'); if(!b) return; b.classList.toggle('hay-mas', b.scrollLeft + b.clientWidth < b.scrollWidth - 6); }
+  document.addEventListener('scroll', function(e){ if(e.target && e.target.id==='feedSolapas') act(); }, true);
+  window.addEventListener('resize', act);
+  window.addEventListener('load', function(){ setTimeout(act, 300); });
+  setInterval(act, 1500);
+})();
 
 function setFeedTab(tab){
   tabActiva = tab;
   if(tab !== 'ciudadhoy' && _sponsorBannerTimer){ clearInterval(_sponsorBannerTimer); _sponsorBannerTimer = null; }
   // Botones de solapa
-  ['home','ofertas','ciudadhoy','util','mas'].forEach(t=>{
+  ['home','ofertas','ciudadhoy','util','locales','mas'].forEach(t=>{
     var btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
     if(btn) btn.classList.toggle('active', t===tab);
   });
@@ -12876,6 +12849,8 @@ function setFeedTab(tab){
     var el = document.getElementById(id);
     if(el) el.classList.toggle('hidden', t!==tab);
   });
+  // la solapa activa queda a la vista dentro de la barra deslizable
+  try{ var _ta = document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)); if(_ta && _ta.scrollIntoView) _ta.scrollIntoView({inline:'center', block:'nearest'}); }catch(e){}
   window.scrollTo(0,0);
   if(tab !== 'util') ocultarMapa();
   if(tab==='ofertas'){ renderFeed(); }
