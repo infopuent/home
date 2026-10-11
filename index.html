@@ -4295,6 +4295,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     }
     // Ningún CDN funcionó — app sin login
     console.error('Firebase no se pudo inicializar. App en modo sin conexión.');
+    if(typeof splashDatosListos === 'function') splashDatosListos();
     if(typeof _tryHideSplash === 'function') _tryHideSplash();
   }
   cargarFirebaseConFallback();
@@ -5843,7 +5844,9 @@ function entrarConDatosGuardados(rol, data){
 // Se llama automáticamente en cuanto Firebase termina de cargar (puede tardar un instante,
 // por eso no lo hacemos de forma síncrona apenas arranca la página).
 function onFirebaseReady(){
-  cargarDatosPublicosDeFirestore();
+  Promise.allSettled([cargarDatosPublicosDeFirestore(), lanzarCargaHome()])
+    .then(function(){ return splashEsperarImagenes(); })
+    .then(function(){ splashDatosListos(); });
   tarifarioCargarRemoto();
   // Migrar categorías de productos existentes (solo se ejecuta si hay auth admin)
   setTimeout(migrarCategorias, 5000);
@@ -11007,12 +11010,20 @@ function hideSplash(){
   s.classList.add('hide');
   // Si el admin ya autenticó antes de que termine el splash, activar layout ahora
   if(state && state.role === 'admin') setTimeout(adminIniciarLayout, 520);
-  cargarRubrosHome();
-  cargarBannerPublicidadHome();
-  cargarBannerTornadoOfertas();
+  lanzarCargaHome();   // no hace nada si ya se lanzó durante el splash
   cargarCiudadHoy();
   if(typeof MOSTRAR_GUIA_UTIL !== 'undefined' && MOSTRAR_GUIA_UTIL) cargarGuiaUtilCiudadHoy();
   cargarSponsorBanner();
+}
+
+// Rubros y banners del Home: se piden apenas Firebase está listo (en paralelo con los productos)
+// para que el splash pueda esperarlos, en vez de pedirlos recién cuando ya se cerró.
+var _homeCargaPromesa = null;
+function lanzarCargaHome(){
+  if(!_homeCargaPromesa){
+    _homeCargaPromesa = Promise.allSettled([cargarRubrosHome(), cargarBannerPublicidadHome(), cargarBannerTornadoOfertas()]);
+  }
+  return _homeCargaPromesa;
 }
 
 // Mostrar el spinner si Firebase no cargó en 1s (red lenta / adblocker / fallback CDN)
@@ -11023,19 +11034,35 @@ setTimeout(function(){
   }
 }, 1000);
 
-// Ocultar el splash en cuanto Firebase esté listo (con mínimo visual de 1.2s)
-var _splashMinTime = Date.now() + 1200;
-function _tryHideSplash(){
+// El splash se cierra cuando (a) Firebase está listo, (b) el Home ya tiene sus datos
+// (comercios, productos, rubros y banners) y (c) pasó un mínimo visual de 2.5s.
+// Si algo tarda de más, el seguro de abajo lo cierra igual.
+var _splashMinTime = Date.now() + 2500;
+var _splashFbListo = false, _splashDatosListos = false;
+function _splashEvaluar(){
+  if(!_splashFbListo || !_splashDatosListos) return;
   var wait = Math.max(0, _splashMinTime - Date.now());
   setTimeout(hideSplash, wait);
+}
+function _tryHideSplash(){ _splashFbListo = true; _splashEvaluar(); }
+function splashDatosListos(){ _splashDatosListos = true; _splashEvaluar(); }
+// Espera (hasta 2s) a que terminen de bajar las imágenes de arriba del Home
+function splashEsperarImagenes(){
+  var imgs = Array.prototype.slice.call(document.querySelectorAll('#bannerPublicidadHome img, #bannerTornadoOfertas img, #adheridosGrid img'))
+    .filter(function(im){ return !im.complete; });
+  if(!imgs.length) return Promise.resolve();
+  return Promise.race([
+    Promise.all(imgs.map(function(im){ return new Promise(function(ok){ im.addEventListener('load', ok, {once:true}); im.addEventListener('error', ok, {once:true}); }); })),
+    new Promise(function(ok){ setTimeout(ok, 2000); })
+  ]);
 }
 
 // Safety net: ocultar el splash a los 4s pase lo que pase (Firebase muy lento o bloqueado)
 setTimeout(function(){
   var txt = document.getElementById('splashLoaderTxt');
-  if(txt && !_splashYaOculto) txt.textContent = 'Entrando sin conexión…';
+  if(txt && !_splashYaOculto) txt.textContent = 'Conexión lenta, entrando igual…';
   hideSplash();
-}, 4000);
+}, 7000);
 // Mostrar el menú inferior desde el inicio (modo invitado)
 updateBottomNav('feed');
 
@@ -11850,6 +11877,14 @@ document.addEventListener('click', (e)=>{
   if(!e.target.closest('.filter-dd')) document.querySelectorAll('.filter-dd-panel').forEach(p=>p.classList.add('hidden'));
 });
 
+// Cuántas tarjetas se muestran por tanda en Ofertas / ConectoresT / rubros del Home
+var GRID_TANDA = 12;
+var _gridVisibles = {};   // gridId → {clave, n, args}
+function verMasFeedGrid(gridId){
+  var g = _gridVisibles[gridId]; if(!g) return;
+  g.n += GRID_TANDA;
+  renderFeedGrid.apply(null, g.args);
+}
 function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
   let universo;
   if(origenTipo==='comercio'){
@@ -11897,6 +11932,13 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
       : ctaSumarCiudadHTML(ciudadSeleccionada, '🗂️');
     return;
   }
+  // De a 12: al cambiar el filtro o la búsqueda vuelve a empezar; el resto se pide con "Ver más"
+  const _clave = origenTipo+'|'+filtroActual+'|'+buscadorQuery;
+  let _gv = _gridVisibles[gridId];
+  if(!_gv || _gv.clave !== _clave){ _gv = _gridVisibles[gridId] = {clave:_clave, n:GRID_TANDA}; }
+  _gv.args = [origenTipo, chipsId, gridId, filtroActual, setFiltroFn];
+  const _total = prods.length;
+  prods = prods.slice(0, _gv.n);
   grid.innerHTML = prods.map(p=>{
     const foto = p.img ? `<img src="${p.img}" alt="${p.nombre}">` : p.foto;
     let etiqueta;
@@ -11931,7 +11973,9 @@ function renderFeedGrid(origenTipo, chipsId, gridId, filtroActual, setFiltroFn){
           ${botonVendedor}
         </div>
       </div>`;
-  }).join('');
+  }).join('') + (_total > _gv.n
+    ? `<div style="grid-column:1/-1;text-align:center;padding:6px 0 14px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="verMasFeedGrid('${gridId}')">Ver más productos (${_total - _gv.n})</button></div>`
+    : '');
 }
 function v_ciudadOk(vendedorId){
   const v = state.vendedores.find(x=>x.id===vendedorId);
@@ -12538,9 +12582,16 @@ function setFeedCategoria(cat, btn){
   }
 }
 
+var _catVisibles = {};         // rubro del Home → cuántos productos se muestran ahora
+var _catUltimoAbierto = null;
+function verMasProductosCat(c){
+  _catVisibles[c] = (_catVisibles[c] || GRID_TANDA) + GRID_TANDA;
+  renderSeccionesCategorias();
+}
 function renderSeccionesCategorias(){
   actualizarBannersVacios();
   const cat = _feedCategoriaActual;
+  if(cat !== _catUltimoAbierto){ _catVisibles = {}; _catUltimoAbierto = cat; }   // al abrir otro rubro, vuelve a 12
   // Recopilar todos los productos con su categoría
   var todosProd = [];
   (state.comercios||[]).forEach(function(c){
@@ -12564,7 +12615,12 @@ function renderSeccionesCategorias(){
       grid.innerHTML = '<div class="cat-banner-empty" style="grid-column:1/-1;">Todavía no hay ofertas cargadas en este rubro.</div>';
       return;
     }
-    grid.innerHTML = prods.map(tarjetaEncantarHTML).join('');
+    var visibles = _catVisibles[c] || GRID_TANDA;
+    var celdas = prods.slice(0, visibles).map(tarjetaEncantarHTML);
+    if(prods.length > visibles){
+      celdas.push('<div style="grid-column:1/-1;text-align:center;padding:6px 0 2px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="verMasProductosCat(\''+c+'\')">Ver más productos ('+(prods.length - visibles)+')</button></div>');
+    }
+    grid.innerHTML = celdas.join('');
   });
 }
 
@@ -13011,19 +13067,6 @@ function renderFeedInfinito(reset){
   grid.innerHTML += lote.map(tarjetaEncantarHTML).join('');
   if(loader) loader.style.display = (_feedInfinitoOffset < _feedInfinitoTodos.length) ? 'block' : 'none';
 }
-
-// Scroll infinito
-window.addEventListener('scroll', function(){
-  if(tabActiva!=='home' || _feedInfinitoLoading) return;
-  if(_feedInfinitoOffset >= _feedInfinitoTodos.length) return;
-  var loader = document.getElementById('feedGridInfinitoLoader');
-  if(!loader) return;
-  var rect = loader.getBoundingClientRect();
-  if(rect.top < window.innerHeight + 200){
-    _feedInfinitoLoading = true;
-    setTimeout(function(){ renderFeedInfinito(false); _feedInfinitoLoading=false; }, 300);
-  }
-});
 
 function renderLocalesComida(){
   var cont = document.getElementById('feedLocalesComida');
