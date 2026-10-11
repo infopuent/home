@@ -9210,6 +9210,7 @@ function abrirEditarComercio(){
     if(tipoField) tipoField.style.display = '';
     const _hh = document.getElementById('editCTipoHint'); if(_hh) _hh.style.display='none';
   }
+  try{ _sugRenderizar(document.getElementById('editCNombre')); }catch(e){}
   document.getElementById('editCTelefono').value = c.telefono || '';
   document.getElementById('editCWhatsapp').value = c.whatsapp || '';
   document.getElementById('editCTelefonoAlt').value = c.telefonoAlt || '';
@@ -11692,7 +11693,13 @@ function _sugRenderizar(input){
     input.insertAdjacentElement('afterend', hint);
   }
   const sugs = sugerirRubroPorNombre(input.value);
-  if(!sugs.length){ hint.innerHTML = ''; hint.style.display = 'none'; return; }
+  if(!sugs.length){
+    if((input.value||'').trim().length >= 3){
+      hint.style.display = '';
+      hint.innerHTML = '<div style="background:#f5f5f3;border-radius:10px;padding:8px 12px;color:var(--muted);">💡 No encontramos una sugerencia para este nombre. Elegí el rubro y subrubro manualmente.</div>';
+    } else { hint.innerHTML = ''; hint.style.display = 'none'; }
+    return;
+  }
   const selR = _sugBuscar(input, cfg.rubro), selT = _sugBuscar(input, cfg.tipo);
   const E = vitEsc;
   const filas = sugs.map((g,i)=>{
@@ -11725,9 +11732,11 @@ function _sugAplicar(btn){
   _sugRenderizar(inp);
   if(typeof toast === 'function') toast('✅ Rubro cargado: ' + g.rubro + (g.tipos.length === 1 ? ' › ' + g.tipos[0] : ''));
 }
-document.addEventListener('input', function(e){
-  const t = e.target;
-  if(t && t.id && SUG_CAMPOS[t.id]){ try{ _sugRenderizar(t); }catch(err){ console.error('sugerencia de rubro:', err); } }
+['input','keyup','change','paste'].forEach(function(ev){
+  document.addEventListener(ev, function(e){
+    const t = e.target;
+    if(t && t.id && SUG_CAMPOS[t.id]){ setTimeout(function(){ try{ _sugRenderizar(t); }catch(err){ console.error('sugerencia de rubro:', err); } }, ev==='paste'?30:0); }
+  });
 });
 
 function fluentImg(file){ return `<img src="${FLUENT_BASE}${file}" alt="" style="width:36px;height:36px;object-fit:contain;">`; }
