@@ -778,6 +778,24 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .feed-solapas{-webkit-overflow-scrolling:touch; scroll-behavior:smooth;}
 .feed-solapas.hay-mas{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent); mask-image:linear-gradient(to right,#000 88%,transparent);}
 
+/* ---- Grilla de categorías: Red Local / Empresas / Talleres ---- */
+.guia-ciudad-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+}
+.guia-cat-tile{
+  background:white; border:1.5px solid var(--line); border-radius:16px;
+  padding:14px 8px 12px; display:flex; flex-direction:column; align-items:center;
+  gap:7px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease;
+  text-align:center;
+}
+.guia-cat-tile:active{transform:scale(0.96);}
+.guia-cat-tile .gct-ic{font-size:26px; line-height:1;}
+.guia-cat-tile .gct-nm{font-size:11.5px; font-weight:700; color:var(--navy); line-height:1.3;}
+.guia-cat-tile .gct-prox{
+  font-size:10px; font-weight:700; color:white; background:var(--orange);
+  border-radius:20px; padding:2px 7px; margin-top:2px; letter-spacing:.02em;
+}
+
 /* ---- GRILLA "Te va a encantar" (Ofertas del día) ---- */
 .feed-grid-encantar{
   display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:18px;
@@ -980,10 +998,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   <!-- SOLAPAS FIJAS debajo del topbar, visibles en el feed -->
   <div class="feed-solapas hidden" id="feedSolapas" style="position:sticky;top:0;z-index:19;">
-    <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">&#127968; Home</button>
-    <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">&#128293; Ofertas</button>
-    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">&#127961;&#65039; Ciudad Hoy</button>
+    <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">🏠 Home</button>
+    <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">🏷️ Ofertas</button>
+    <button class="feed-solapa" id="tabRedlocal" onclick="setFeedTab('redlocal')">🤝 Red Local</button>
+    <button class="feed-solapa" id="tabEmpresas" onclick="setFeedTab('empresas')">🏢 Empresas</button>
+    <button class="feed-solapa" id="tabTalleres" onclick="setFeedTab('talleres')">🔧 Talleres</button>
     <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">🗺️ Mapa</button>
+    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">📍 Ciudad Hoy</button>
     <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">🏪 Locales</button>
     <button class="feed-solapa" id="tabRubros" onclick="abrirTodosRubros()">📂 Rubros</button>
     <button class="feed-solapa" id="tabRanking" onclick="abrirRankingComercios()">🏆 Ranking</button>
@@ -1171,6 +1192,39 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="chiprow" id="feedChips" style="flex-wrap:nowrap;white-space:nowrap;"></div>
       </div>
       <div id="feedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;overflow:hidden;min-width:0;padding:0 16px;"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: RED LOCAL
+    ================================================================ -->
+    <div id="feedRedlocalView" class="hidden" style="padding:16px 16px 24px;">
+      <div style="margin-bottom:6px;">
+        <div class="section-title" style="margin-bottom:2px;">🤝 Red Local</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Profesionales independientes de tu ciudad. Encontrá al experto que necesitás.</p>
+      </div>
+      <div class="guia-ciudad-grid" id="redlocalGrid"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: EMPRESAS
+    ================================================================ -->
+    <div id="feedEmpresasView" class="hidden" style="padding:16px 16px 24px;">
+      <div style="margin-bottom:6px;">
+        <div class="section-title" style="margin-bottom:2px;">🏢 Empresas</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Pymes, empresas e instituciones de tu ciudad.</p>
+      </div>
+      <div class="guia-ciudad-grid" id="empresasGrid"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: TALLERES
+    ================================================================ -->
+    <div id="feedTalleresView" class="hidden" style="padding:16px 16px 24px;">
+      <div style="margin-bottom:6px;">
+        <div class="section-title" style="margin-bottom:2px;">🔧 Talleres</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Talleres y servicios especializados de tu ciudad.</p>
+      </div>
+      <div class="guia-ciudad-grid" id="talleresGrid"></div>
     </div>
 
     <!-- ================================================================
@@ -11046,31 +11100,8 @@ function _splashEvaluar(){
 }
 function _tryHideSplash(){ _splashFbListo = true; _splashEvaluar(); }
 function splashDatosListos(){ _splashDatosListos = true; _splashEvaluar(); }
-
-// Precarga en segundo plano las imágenes de los primeros productos del feed y los
-// banners de rubros — así cuando el usuario llega al home ya están en caché del browser.
-// Se lanza apenas renderFeed() termina de escribir el DOM, sin bloquear el splash.
-function precargaImagenesFeed(){
-  try{
-    // Imágenes ya en el DOM (banners, vidriera, primeras tarjetas del feed)
-    var selectores = '#bannerPublicidadHome img, #bannerTornadoOfertas img, #adheridosGrid img, #feedGrid img, #feedGridEncantar img, .cat-banner-item img';
-    var imgs = Array.prototype.slice.call(document.querySelectorAll(selectores)).slice(0, 30);
-    // Además precargamos vía new Image() las fotos de los primeros productos en state
-    // aunque todavía no estén en el DOM (ej: cuando el feed abre en pestaña "Home")
-    var urls = [];
-    (state.productos||[]).slice(0, 24).forEach(function(p){ if(p.img) urls.push(p.img); });
-    (state.comercios||[]).slice(0, 12).forEach(function(c){ if(c.img) urls.push(c.img); });
-    urls.forEach(function(u){
-      var im = new Image();
-      im.src = u; // solo pone en caché; no necesitamos esperar a que cargue
-    });
-  }catch(e){ /* silencioso */ }
-}
-
-// Espera (hasta 2s) a que terminen de bajar las imágenes críticas del Home
-// (banners de arriba + primeras tarjetas del feed)
+// Espera (hasta 2s) a que terminen de bajar las imágenes de arriba del Home
 function splashEsperarImagenes(){
-  precargaImagenesFeed(); // kick off background preload
   var imgs = Array.prototype.slice.call(document.querySelectorAll('#bannerPublicidadHome img, #bannerTornadoOfertas img, #adheridosGrid img'))
     .filter(function(im){ return !im.complete; });
   if(!imgs.length) return Promise.resolve();
@@ -11080,7 +11111,7 @@ function splashEsperarImagenes(){
   ]);
 }
 
-// Safety net: ocultar el splash a los 7s pase lo que pase (Firebase muy lento o bloqueado)
+// Safety net: ocultar el splash a los 4s pase lo que pase (Firebase muy lento o bloqueado)
 setTimeout(function(){
   var txt = document.getElementById('splashLoaderTxt');
   if(txt && !_splashYaOculto) txt.textContent = 'Conexión lenta, entrando igual…';
@@ -12893,8 +12924,6 @@ function renderFeed(){
   actualizarBadgeTornado();
   renderAdheridosGrid();
   renderHomeTab();
-  // Precarga en background las imágenes del feed para que estén en caché cuando el usuario llegue
-  if(typeof precargaImagenesFeed === 'function') precargaImagenesFeed();
 }
 function setFeedRubro(r){ feedRubroFiltro = r; renderFeed(); }
 
@@ -12917,14 +12946,15 @@ function setFeedTab(tab){
   tabActiva = tab;
   if(tab !== 'ciudadhoy' && _sponsorBannerTimer){ clearInterval(_sponsorBannerTimer); _sponsorBannerTimer = null; }
   // Botones de solapa
-  ['home','ofertas','ciudadhoy','util','locales','mas'].forEach(t=>{
+  ['home','ofertas','redlocal','empresas','talleres','ciudadhoy','util','locales','mas'].forEach(t=>{
     var btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
     if(btn) btn.classList.toggle('active', t===tab);
   });
   // Vistas
   var views = {
     home:'feedHomeView', ofertas:'feedOfertasView', locales:'feedLocalesView',
-    ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView'
+    ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView',
+    redlocal:'feedRedlocalView', empresas:'feedEmpresasView', talleres:'feedTalleresView'
   };
   Object.entries(views).forEach(([t, id])=>{
     var el = document.getElementById(id);
@@ -12938,7 +12968,6 @@ function setFeedTab(tab){
   if(tab==='locales'){ renderLocales(); }
   if(tab==='ciudadhoy'){ renderCiudadHoy(); renderGuiaUtilCiudadHoy(); renderSponsorBanner(); }
   if(tab==='util'){
-    // Esperar dos frames para que el DOM pinte el div con dimensiones reales
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
         iniciarMapaCity();
@@ -12947,6 +12976,76 @@ function setFeedTab(tab){
   }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ _encantarCache = { key: null, ids: [] }; _feedCategoriaActual = 'todos'; renderHomeTab(); }
+  if(tab==='redlocal'){ renderGuiaCiudadTab('redlocal'); }
+  if(tab==='empresas'){ renderGuiaCiudadTab('empresas'); }
+  if(tab==='talleres'){ renderGuiaCiudadTab('talleres'); }
+}
+
+/* ══════════════════════════════════════════════════════
+   RED LOCAL / EMPRESAS / TALLERES — categorías y render
+   ══════════════════════════════════════════════════════ */
+var GUIA_CIUDAD_CATS = {
+  redlocal: [
+    { ic:'⚕️',  nm:'Salud',                 rubro:'Salud y Farmacia' },
+    { ic:'⚖️',  nm:'Legal',                 rubro:'Servicios Profesionales' },
+    { ic:'🧮',  nm:'Contabilidad',          rubro:'Servicios Profesionales' },
+    { ic:'🧠',  nm:'Psicología',            rubro:'Salud y Farmacia' },
+    { ic:'🥗',  nm:'Nutrición',             rubro:'Salud y Farmacia' },
+    { ic:'📚',  nm:'Educación',             rubro:'Educación y Librerías' },
+    { ic:'🏋️', nm:'Deporte y Fitness',     rubro:'Deportes y Recreación' },
+    { ic:'🎨',  nm:'Diseño',               rubro:'Servicios Profesionales' },
+    { ic:'📷',  nm:'Fotografía',            rubro:'Servicios Varios' },
+    { ic:'💻',  nm:'Informática',           rubro:'Tecnología' },
+    { ic:'⚡',  nm:'Electricidad',          rubro:'Hogar y Construcción' },
+    { ic:'🔩',  nm:'Plomería',              rubro:'Hogar y Construcción' },
+    { ic:'🖌️', nm:'Pintura',               rubro:'Hogar y Construcción' },
+    { ic:'🌿',  nm:'Jardín',               rubro:'Servicios Varios' },
+    { ic:'✂️',  nm:'Peluquería',           rubro:'Belleza y Estética' },
+    { ic:'🛠️', nm:'Otros servicios',       rubro:'Servicios Varios' }
+  ],
+  empresas: [
+    { ic:'🏥',  nm:'Clínicas y Salud',      rubro:'Salud y Farmacia' },
+    { ic:'🏠',  nm:'Inmobiliarias',         rubro:'Inmobiliarias y Turismo' },
+    { ic:'🏗️', nm:'Construcción',          rubro:'Hogar y Construcción' },
+    { ic:'📦',  nm:'Distribuidoras',        rubro:'Almacén y Alimentos' },
+    { ic:'🚗',  nm:'Concesionarias',        rubro:'Automotor' },
+    { ic:'🛡️', nm:'Seguros',               rubro:'Servicios Profesionales' },
+    { ic:'💰',  nm:'Financieras',           rubro:'Servicios Profesionales' },
+    { ic:'🚚',  nm:'Logística',             rubro:'Servicios Varios' },
+    { ic:'✈️',  nm:'Turismo y Hotelería',  rubro:'Inmobiliarias y Turismo' },
+    { ic:'🎓',  nm:'Educación',             rubro:'Educación y Librerías' },
+    { ic:'🏢',  nm:'Otras empresas',        rubro:'Servicios Profesionales' }
+  ],
+  talleres: [
+    { ic:'🔧',  nm:'Mecánica',              rubro:'Automotor' },
+    { ic:'🫧',  nm:'Gomería',               rubro:'Automotor' },
+    { ic:'🚘',  nm:'Chapa y Pintura',       rubro:'Automotor' },
+    { ic:'🔌',  nm:'Electricidad Auto',     rubro:'Automotor' },
+    { ic:'🪵',  nm:'Carpintería',           rubro:'Hogar y Construcción' },
+    { ic:'⚙️',  nm:'Herrería',              rubro:'Hogar y Construcción' },
+    { ic:'📺',  nm:'Electrónica',           rubro:'Tecnología' },
+    { ic:'🚿',  nm:'Lavadero de Autos',     rubro:'Automotor' },
+    { ic:'🛠️', nm:'Otros talleres',        rubro:'Servicios Varios' }
+  ]
+};
+
+function renderGuiaCiudadTab(tipo){
+  var gridId = tipo === 'redlocal' ? 'redlocalGrid' : tipo === 'empresas' ? 'empresasGrid' : 'talleresGrid';
+  var grid = document.getElementById(gridId);
+  if(!grid) return;
+  var cats = GUIA_CIUDAD_CATS[tipo] || [];
+  grid.innerHTML = cats.map(function(c){
+    return '<button class="guia-cat-tile" onclick="abrirGuiaCiudadCat(\''+tipo+'\',\''+c.nm+'\',\''+c.rubro+'\')">'
+      +'<div class="gct-ic">'+c.ic+'</div>'
+      +'<div class="gct-nm">'+c.nm+'</div>'
+      +'<div class="gct-prox">Próximamente</div>'
+      +'</button>';
+  }).join('');
+}
+
+function abrirGuiaCiudadCat(tipo, nombre, rubro){
+  // Por ahora muestra un toast informativo. En la Fase 2 abrirá el listado de profesionales.
+  toast('🚀 '+nombre+' — ¡Próximamente en PuenT!');
 }
 
 function renderHomeTab(){
