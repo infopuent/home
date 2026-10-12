@@ -831,6 +831,21 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 /* ---- VITRINA (comercios en modo ficha / vitrina) ---- */
 .vit-row{display:flex;gap:12px;overflow-x:auto;padding:8px 16px 6px;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .vit-row::-webkit-scrollbar{display:none;}
+.rc-que{display:flex;align-items:center;gap:12px;text-align:left;width:100%;padding:12px 14px;border:1.5px solid #EAEAEA;border-radius:14px;background:#F8F8F8;font-family:inherit;cursor:pointer;color:#1A1A1A;}
+.rc-que .ic{font-size:24px;flex-shrink:0;}
+.rc-que b{display:block;font-size:14px;}
+.rc-que small{display:block;font-size:12px;color:#888;margin-top:2px;line-height:1.35;}
+.rc-que.sel{border-color:#FC1820;background:#FFF0F0;}
+.serv-card{flex:0 0 210px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:8px;}
+.serv-top{display:flex;align-items:center;gap:10px;min-width:0;}
+.serv-logo{width:48px;height:48px;border-radius:50%;background:var(--cream);border:1px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:800;font-size:18px;color:#5C7355;}
+.serv-logo img{width:100%;height:100%;object-fit:cover;}
+.serv-nombre{font-weight:800;font-size:13.5px;color:var(--navy);line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.serv-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.serv-acciones{display:flex;gap:6px;}
+.serv-btn{flex:1;text-align:center;border-radius:100px;padding:7px 4px;font-size:12px;font-weight:800;text-decoration:none;border:1.5px solid var(--line);color:var(--navy);background:#fff;}
+.serv-btn.wsp{background:#25D366;border-color:#25D366;color:#fff;}
+.serv-card.fila{flex:none;width:100%;box-sizing:border-box;}
 .vit-card{flex:0 0 220px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;position:relative;padding-bottom:12px;}
 .vit-cover{height:104px;background:linear-gradient(135deg,#EDF1EA,#FBF7EF);display:flex;align-items:center;justify-content:center;font-size:34px;overflow:hidden;}
 .vit-cover img{width:100%;height:100%;object-fit:cover;}
@@ -1145,6 +1160,22 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div id="vitrinaHomeRow" class="vit-row"></div>
       </div>
+
+      <!-- Servicios: profesionales y mantenimientos/talleres (comercios que no venden productos) -->
+      <div id="servHomeProfSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">👔 Servicios profesionales</div>
+          <span class="ver-todo" onclick="abrirServicios('profesionales')">Ver todos →</span>
+        </div>
+        <div id="servHomeProfRow" class="vit-row"></div>
+      </div>
+      <div id="servHomeMantSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">🔧 Mantenimientos y talleres</div>
+          <span class="ver-todo" onclick="abrirServicios('mantenimientos')">Ver todos →</span>
+        </div>
+        <div id="servHomeMantRow" class="vit-row"></div>
+      </div>
       <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
            dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
       <div style="padding:14px 16px 0;">
@@ -1413,6 +1444,16 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   </div>
 
   <!-- ============ RAYO OFERTAS: LISTADO DE 24HS PROGRAMADAS/ACTIVAS ============ -->
+  <!-- ============ SERVICIOS: LISTA COMPLETA (profesionales / mantenimientos) ============ -->
+  <div class="screen hidden" id="screen-servicios">
+    <div class="link-back" onclick="showScreen('feed')">← Volver</div>
+    <div class="kicker" id="servKicker">Servicios</div>
+    <h1 class="page-title" id="servTitulo">Servicios</h1>
+    <p class="page-sub" id="servSub"></p>
+    <div class="chiprow" id="servChips" style="margin-bottom:12px;"></div>
+    <div id="servLista" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+
   <div class="screen hidden" id="screen-tornado-ofertas">
     <div class="link-back" onclick="showScreen('feed')">← Volver</div>
     <div class="kicker">🌪️ Tornado de Ofertas</div>
@@ -1813,7 +1854,16 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <!-- PASO 2: Datos del comercio -->
     <div id="rcPaso2" style="padding:28px 20px 20px;display:none;">
       <h1 style="font-family:'Bai Jamjuree',sans-serif;font-size:26px;font-weight:700;color:#1A1A1A;margin-bottom:6px;line-height:1.2;">Contanos sobre<br>tu comercio</h1>
-      <p style="font-size:13.5px;color:#888;margin-bottom:28px;line-height:1.5;">Con estos datos armamos tu perfil en PuenT.</p>
+      <p style="font-size:13.5px;color:#888;margin-bottom:22px;line-height:1.5;">Con estos datos armamos tu perfil en PuenT.</p>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:8px;">¿Qué querés hacer en PuenT?</label>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button type="button" class="rc-que" data-v="tienda" onclick="rcElegirQue('tienda')"><span class="ic">🛍️</span><span><b>Vendo productos</b><small>Armo mi tienda con fotos y precios.</small></span></button>
+          <button type="button" class="rc-que" data-v="vitrina" onclick="rcElegirQue('vitrina')"><span class="ic">🏬</span><span><b>Quiero mostrar mi local</b><small>Fotos y datos de mi local, sin vender productos.</small></span></button>
+          <button type="button" class="rc-que" data-v="servicio" onclick="rcElegirQue('servicio')"><span class="ic">🧰</span><span><b>Soy profesional o presto un servicio</b><small>Abogado, electricista, docente, mecánico, plomero…</small></span></button>
+        </div>
+      </div>
 
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div>
@@ -1821,7 +1871,17 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <input id="rcNombre" type="text" placeholder="Ej: Panadería San Martín" autocomplete="organization"
             style="width:100%;padding:14px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-family:inherit;box-sizing:border-box;background:#F8F8F8;">
         </div>
-        <div>
+        <div id="rcServicioField" style="display:none;">
+          <label style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">¿Qué servicio ofrecés?</label>
+          <div style="position:relative;">
+            <select id="rcServicio" onchange="rcServicioCambio()"
+              style="width:100%;padding:14px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-family:inherit;box-sizing:border-box;background:#F8F8F8;color:#1A1A1A;appearance:none;-webkit-appearance:none;">
+              <option value="">Elegí tu servicio</option>
+            </select>
+            <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#AAA;font-size:12px;">▼</span>
+          </div>
+        </div>
+        <div id="rcRubroField">
           <label style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">Rubro:</label>
           <div style="position:relative;">
             <select id="rcRubro"
@@ -5016,12 +5076,50 @@ function rcAvanzarPaso1(){
   rcMostrarPaso(2);
 }
 
+var _rcQue = '', _rcTipo = '', _rcGrupo = '';
+function rcElegirQue(v){
+  _rcQue = v;
+  document.querySelectorAll('.rc-que').forEach(function(b){ b.classList.toggle('sel', b.dataset.v === v); });
+  var esServ = (v === 'servicio');
+  var fs = document.getElementById('rcServicioField'), fr = document.getElementById('rcRubroField');
+  if(fs) fs.style.display = esServ ? '' : 'none';
+  if(fr) fr.style.display = esServ ? 'none' : '';
+  if(esServ){
+    var sel = document.getElementById('rcServicio');
+    if(sel && sel.options.length <= 1){
+      var html = '<option value="">Elegí tu servicio</option>';
+      ['profesionales','mantenimientos'].forEach(function(g){
+        var rubros = SERV_SUBRUBROS[g];
+        Object.keys(rubros).forEach(function(r){
+          html += '<optgroup label="'+SERV_GRUPOS[g].icono+' '+SERV_GRUPOS[g].titulo+' · '+r+'">'
+            + rubros[r].map(function(t){ return '<option value="'+g+'||'+r+'||'+t+'">'+t+'</option>'; }).join('')
+            + '</optgroup>';
+        });
+      });
+      sel.innerHTML = html;
+    }
+    rcServicioCambio();
+  } else {
+    _rcTipo = ''; _rcGrupo = '';
+    var rb = document.getElementById('rcRubro'); if(rb) rb.value = '';
+  }
+}
+function rcServicioCambio(){
+  var v = (document.getElementById('rcServicio')||{}).value || '';
+  var rb = document.getElementById('rcRubro');
+  if(!v){ _rcTipo = ''; _rcGrupo = ''; if(rb) rb.value = ''; return; }
+  var partes = v.split('||');
+  _rcGrupo = partes[0]; _rcTipo = partes[2];
+  if(rb) rb.value = partes[1];
+}
 function rcAvanzarPaso2(){
   var nombre  = (document.getElementById('rcNombre')?.value||'').trim();
   var rubro   = (document.getElementById('rcRubro')?.value||'').trim();
   var celular = (document.getElementById('rcCelular')?.value||'').trim();
   var ciudad  = (document.getElementById('rcCiudad')?.value||'').trim();
+  if(!_rcQue){ toast('Elegí qué querés hacer en PuenT.'); return; }
   if(!nombre){ toast('Ingresá el nombre de tu comercio.'); return; }
+  if(_rcQue === 'servicio' && !_rcTipo){ toast('Elegí qué servicio ofrecés.'); return; }
   if(!rubro){ toast('Elegí el rubro de tu comercio.'); return; }
   if(!celular){ toast('Ingresá tu celular o WhatsApp.'); return; }
   if(!ciudad){ toast('Elegí la ciudad de tu comercio.'); return; }
@@ -5057,6 +5155,7 @@ async function registrarComercioSimple(){
   const pass2     = document.getElementById('rcPass2')?.value;
   const terminos  = document.getElementById('rcAceptoTerminos')?.checked;
   if(!terminos){ toast('Tenés que aceptar los términos y condiciones.'); return; }
+  if(!_rcQue){ toast('Elegí qué querés hacer en PuenT.'); return; }
   if(!nombre){ toast('Ingresá el nombre de tu comercio.'); return; }
   if(!rubro){ toast('Elegí el rubro de tu comercio.'); return; }
   if(!email){ toast('Ingresá tu correo.'); return; }
@@ -5071,7 +5170,9 @@ async function registrarComercioSimple(){
     const _gracia = new Date(); _gracia.setDate(_gracia.getDate() + 30);
     const c = {
       id: nextId('c'), uid: user.uid, nombre, email, ciudad, provincia,
-      rubro, tipo:'', descripcion:'', direccion:'', telefono: celular, whatsapp: celular,
+      rubro, tipo: (_rcQue === 'servicio' ? _rcTipo : ''), descripcion:'', direccion:'', telefono: celular, whatsapp: celular,
+      modo: (_rcQue === 'tienda' ? 'tienda' : 'vitrina'),
+      ...(_rcQue === 'servicio' && _rcGrupo ? { grupo: _rcGrupo } : {}),
       instagram:'', facebook:'', horario:'', dias:[], metodosPago:[],
       adheridos:[], img: null, imgGaleria: null,
       publicidadActiva:true, publicidadVence:diasAtras(-30),
@@ -9151,8 +9252,114 @@ function shuffleConSemillaCarga(arr){
   return a;
 }
 
+/* ================= SERVICIOS (profesionales / mantenimientos y talleres) =================
+   Comercios que no venden productos. El grupo sale del subrubro ("tipo"); si el comercio
+   se registró con la opción "servicio" también guarda c.grupo. No entran en "Te va a encantar". */
+const SERV_GRUPOS = {
+  profesionales:  { titulo:'Servicios profesionales',     icono:'👔', sub:'Abogados, contadores, docentes, profesionales de la salud y más.' },
+  mantenimientos: { titulo:'Mantenimientos y talleres',   icono:'🔧', sub:'Electricistas, plomeros, mecánicos, pintores, jardinería y más.' },
+};
+// rubro → subrubros de cada grupo (los nombres son los de TIPOS_POR_RUBRO)
+const SERV_SUBRUBROS = {
+  profesionales: {
+    'Servicios Profesionales': ['Estudio contable / impuestos','Estudio jurídico / escribanía','Diseño gráfico','Fotografía y video','Marketing digital','Arquitectura e ingeniería','Agrimensura','Traductor / intérprete','Recursos humanos','Gestoría del automotor','Consultoría de empresas','Ingeniería agronómica','Peritajes','Diseño web y desarrollo'],
+    'Salud y Farmacia': ['Médico clínico','Pediatra','Odontología','Psicología','Nutrición','Kinesiología / fisioterapia','Fonoaudiología','Enfermería a domicilio','Centro de salud integral','Terapias alternativas / holísticas','Laboratorio de análisis','Diagnóstico por imágenes','Ginecología y obstetricia','Traumatología','Dermatología','Oftalmología','Cardiología','Podología','Clínica / sanatorio','Ambulancias y emergencias médicas'],
+    'Educación y Librerías': ['Clases particulares','Inglés y otros idiomas','Danza y movimiento','Apoyo escolar','Jardín / guardería / estimulación temprana','Cursos y talleres','Autoescuela / academia de manejo','Computación y programación','Maestra particular a domicilio','Instituto / capacitación laboral','Preparación de exámenes'],
+    'Inmobiliarias y Turismo': ['Inmobiliaria','Administración de propiedades','Alquiler de propiedades','Venta de terrenos y loteos','Tasaciones','Desarrollos y constructoras'],
+    'Cuidado de Personas': ['Geriátrico / residencia','Cuidadores de adultos mayores','Niñeras y cuidado infantil','Acompañante terapéutico','Servicio doméstico','Traslados sanitarios'],
+    'Servicios Varios': ['Gestión y trámites'],
+    'Agro y Mascotas': ['Veterinaria rural / ganadería','Veterinaria de pequeños animales','Veterinaria de equinos'],
+    'Bancos, Pagos y Finanzas': ['Seguros y aseguradoras'],
+  },
+  mantenimientos: {
+    'Hogar y Construcción': ['Electricista','Plomero','Gasista matriculado','Pintor','Albañil / constructor','Cerrajería','Herrería / soldadura','Carpintería','Servicio de limpieza','Fumigación','Jardinería y paisajismo','Reparación de electrodomésticos','Mantenimiento','Aire acondicionado y refrigeración','Techista e impermeabilización','Portones, rejas y automatización','Piletas y mantenimiento','Desagotes y destapaciones'],
+    'Tecnología': ['Reparación de celulares','Reparación de computadoras','Instalación de cámaras de seguridad','Redes y WiFi'],
+    'Automotor': ['Lubricentro / cambio de aceite','Taller mecánico','Gomería','Chapería y pintura','Lavadero de autos','Instalación de alarmas y audio','Electricidad del automotor','Escapes','Vidrios y cristales','Grúa y auxilio mecánico','Taller de motos','Cubiertas y alineación'],
+    'Servicios Varios': ['Costura y arreglos','Confección a medida','Bordado y tejido','Tapicería','Lavandería / tintorería','Reparación de calzado','Relojería','Cerrajería móvil','Limpieza de tapizados y alfombras','Afilado de cuchillos y herramientas','Restauración de muebles'],
+    'Agro y Mascotas': ['Peluquería canina','Guardería / hotel para mascotas'],
+  },
+};
+// Si todavía no eligió subrubro, estos rubros enteros ya dicen el grupo
+const SERV_RUBRO_DEFAULT = {
+  'Servicios Profesionales':'profesionales', 'Cuidado de Personas':'profesionales',
+  'Inmobiliarias y Turismo':'profesionales', 'Servicios Varios':'mantenimientos',
+};
+function grupoServicio(c){
+  if(!c) return null;
+  if(c.rubro && c.tipo){
+    for(const g of ['profesionales','mantenimientos']){
+      const lista = SERV_SUBRUBROS[g][c.rubro];
+      if(lista && lista.includes(c.tipo)) return g;
+    }
+  }
+  if(c.grupo && SERV_GRUPOS[c.grupo]) return c.grupo;
+  if(c.rubro && !c.tipo && SERV_RUBRO_DEFAULT[c.rubro]) return SERV_RUBRO_DEFAULT[c.rubro];
+  return null;
+}
+function _servWsp(c){
+  const raw = String(c.whatsapp || c.telefono || '').replace(/\D/g,'');
+  if(!raw) return '';
+  let n = raw.replace(/^0+/,'');
+  if(n.startsWith('549')) return n;
+  if(n.startsWith('54')) return '549' + n.slice(2);
+  return '549' + n.replace(/^15/,'');
+}
+function _servTel(c){ return String(c.telefono || c.whatsapp || '').replace(/[^\d+]/g,''); }
+function servComerciosDe(grupo){
+  return (state.comercios||[]).filter(c=>
+    grupoServicio(c) === grupo &&
+    (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)) &&
+    !(c.viaEmail && c.emailVerificado === false));
+}
+function servTarjetaHTML(c, fila){
+  const E = vitEsc;
+  const wsp = _servWsp(c), tel = _servTel(c);
+  const botones = (wsp ? `<a class="serv-btn wsp" href="https://wa.me/${wsp}" target="_blank" rel="noopener" onclick="event.stopPropagation()">💬 WhatsApp</a>` : '')
+                + (tel ? `<a class="serv-btn" href="tel:${E(tel)}" onclick="event.stopPropagation()">📞 Llamar</a>` : '');
+  return `<div class="serv-card${fila?' fila':''}" onclick="verProductosDeLocal('${c.id}')">
+    <div class="serv-top">
+      <div class="serv-logo">${c.img ? `<img src="${c.img}" alt="">` : E((c.nombre||'?').charAt(0).toUpperCase())}</div>
+      <div style="min-width:0;"><div class="serv-nombre">${E(c.nombre)}</div><div class="serv-sub">${E(c.tipo || c.rubro || '')}</div></div>
+    </div>
+    ${botones ? `<div class="serv-acciones">${botones}</div>` : ''}
+  </div>`;
+}
+function renderServiciosHome(){
+  [['profesionales','servHomeProfSection','servHomeProfRow'],['mantenimientos','servHomeMantSection','servHomeMantRow']].forEach(([g,sec,row])=>{
+    const s = document.getElementById(sec), r = document.getElementById(row);
+    if(!s || !r) return;
+    const lista = shuffleConSemillaCarga(servComerciosDe(g)).slice(0, 12);
+    s.style.display = lista.length ? '' : 'none';
+    r.innerHTML = lista.map(c=>servTarjetaHTML(c,false)).join('');
+  });
+}
+var _servGrupoActual = 'profesionales', _servFiltroTipo = '';
+function abrirServicios(grupo){
+  _servGrupoActual = grupo; _servFiltroTipo = '';
+  renderServiciosPantalla();
+  showScreen('servicios');
+}
+function setServFiltro(t){ _servFiltroTipo = t; renderServiciosPantalla(); }
+function renderServiciosPantalla(){
+  const g = SERV_GRUPOS[_servGrupoActual]; if(!g) return;
+  const E = vitEsc;
+  document.getElementById('servKicker').textContent = g.icono + ' ' + g.titulo;
+  document.getElementById('servTitulo').textContent = g.titulo;
+  document.getElementById('servSub').textContent = g.sub;
+  const todos = shuffleConSemillaCarga(servComerciosDe(_servGrupoActual));
+  const tipos = [...new Set(todos.map(c=>c.tipo).filter(Boolean))].sort();
+  const chips = document.getElementById('servChips');
+  chips.innerHTML = tipos.length > 1
+    ? ['', ...tipos].map(t=>`<button class="filtro-chip ${t===_servFiltroTipo?'active':''}" data-t="${E(t)}" onclick="setServFiltro(this.dataset.t)">${t===_servFiltroTipo?'<span class="filtro-check">✓</span>':''}${t?E(t):'Todos'}</button>`).join('')
+    : '';
+  const lista = _servFiltroTipo ? todos.filter(c=>c.tipo===_servFiltroTipo) : todos;
+  document.getElementById('servLista').innerHTML = lista.length
+    ? lista.map(c=>servTarjetaHTML(c,true)).join('')
+    : `<div class="empty"><div class="ic">${g.icono}</div><div class="t">Todavía no hay ${E(g.titulo.toLowerCase())} en ${E(ciudadSeleccionada||'tu ciudad')}</div></div>`;
+}
+
 function renderVitrinaSecciones(){
-  const lista = shuffleConSemillaCarga((state.comercios||[]).filter(c=> comercioEnVitrina(c) && (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada))));
+  const lista = shuffleConSemillaCarga((state.comercios||[]).filter(c=> comercioEnVitrina(c) && !grupoServicio(c) && (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada))));
   const html = lista.map(c=>{
     const portada = c.img2 || c.img;
     return `
@@ -12926,6 +13133,7 @@ function setFeedTab(tab){
 
 function renderHomeTab(){
   renderAdheridosGrid();
+  renderServiciosHome();
   renderFeedEncantar();
   actualizarBadgeTornado();
   renderCatChipsYSecciones();
