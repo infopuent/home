@@ -839,6 +839,30 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .vit-nombre{margin:34px 12px 0;font-weight:800;font-size:14px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-rubro{margin:2px 12px 0;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-modo-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;}
+.guia-ciudad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.guia-cat-tile{background:white;border:1.5px solid var(--line);border-radius:16px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .12s ease;text-align:center;}
+.guia-cat-tile:active{transform:scale(0.96);}
+.guia-cat-tile .gct-ic{font-size:26px;line-height:1;}
+.guia-cat-tile .gct-nm{font-size:11.5px;font-weight:700;color:var(--navy);line-height:1.3;}
+.guia-cat-tile .gct-prox{font-size:10px;font-weight:700;color:white;background:var(--orange);border-radius:20px;padding:2px 7px;margin-top:2px;}
+.guia-cat-tile .gct-vivo{font-size:10px;font-weight:700;color:white;background:#5C7355;border-radius:20px;padding:2px 8px;margin-top:2px;}
+.servicio-card{background:white;border:1.5px solid var(--line);border-radius:16px;display:flex;align-items:center;gap:14px;padding:14px;cursor:pointer;transition:transform .12s ease;}
+.servicio-card:active{transform:scale(0.98);}
+.servicio-card-foto{width:58px;height:58px;border-radius:12px;overflow:hidden;flex-shrink:0;background:#F2F2EF;display:flex;align-items:center;justify-content:center;}
+.servicio-card-foto img{width:100%;height:100%;object-fit:cover;}
+.servicio-card-ic{font-size:26px;}
+.servicio-card-body{flex:1;min-width:0;}
+.servicio-card-nom{font-weight:800;font-size:15px;color:var(--navy);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.servicio-card-rub{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.servicio-card-desc{font-size:12.5px;color:var(--ink);line-height:1.4;}
+.modo-reg-btn{width:100%;background:white;border:1.5px solid var(--line);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;}
+.modo-reg-btn:active{transform:scale(0.98);}
+.modo-reg-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.modo-reg-body{flex:1;min-width:0;}
+.modo-reg-t{font-weight:800;font-size:15.5px;color:var(--navy);margin-bottom:3px;}
+.modo-reg-s{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:4px;}
+.modo-reg-ejemplo{font-size:11.5px;color:#B0B0B0;font-style:italic;}
+.modo-reg-arrow{font-size:22px;color:#CCC;flex-shrink:0;padding-left:4px;}
 .modo-reg-btn{width:100%;background:white;border:1.5px solid var(--line);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:border-color .15s;}
 .modo-reg-btn:active{transform:scale(0.98);}
 .modo-reg-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
@@ -988,10 +1012,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   <!-- SOLAPAS FIJAS debajo del topbar, visibles en el feed -->
   <div class="feed-solapas hidden" id="feedSolapas" style="position:sticky;top:0;z-index:19;">
-    <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">&#127968; Home</button>
-    <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">&#128293; Ofertas</button>
-    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">&#127961;&#65039; Ciudad Hoy</button>
+    <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">🏠 Home</button>
+    <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">🏷️ Ofertas</button>
+    <button class="feed-solapa" id="tabRedlocal" onclick="setFeedTab('redlocal')">🤝 Red Local</button>
+    <button class="feed-solapa" id="tabEmpresas" onclick="setFeedTab('empresas')">🏢 Empresas</button>
+    <button class="feed-solapa" id="tabTalleres" onclick="setFeedTab('talleres')">🔧 Talleres</button>
     <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">🗺️ Mapa</button>
+    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">📍 Ciudad Hoy</button>
     <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">🏪 Locales</button>
     <button class="feed-solapa" id="tabRubros" onclick="abrirTodosRubros()">📂 Rubros</button>
     <button class="feed-solapa" id="tabRanking" onclick="abrirRankingComercios()">🏆 Ranking</button>
@@ -1179,6 +1206,33 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="chiprow" id="feedChips" style="flex-wrap:nowrap;white-space:nowrap;"></div>
       </div>
       <div id="feedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;overflow:hidden;min-width:0;padding:0 16px;"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: RED LOCAL
+    ================================================================ -->
+    <div id="feedRedlocalView" class="hidden" style="padding:16px 16px 24px;">
+      <div class="section-title" style="margin-bottom:2px;">🤝 Red Local</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Profesionales independientes de tu ciudad.</p>
+      <div class="guia-ciudad-grid" id="redlocalGrid"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: EMPRESAS
+    ================================================================ -->
+    <div id="feedEmpresasView" class="hidden" style="padding:16px 16px 24px;">
+      <div class="section-title" style="margin-bottom:2px;">🏢 Empresas</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Pymes, empresas e instituciones de tu ciudad.</p>
+      <div class="guia-ciudad-grid" id="empresasGrid"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: TALLERES
+    ================================================================ -->
+    <div id="feedTalleresView" class="hidden" style="padding:16px 16px 24px;">
+      <div class="section-title" style="margin-bottom:2px;">🔧 Talleres</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Talleres y servicios especializados de tu ciudad.</p>
+      <div class="guia-ciudad-grid" id="talleresGrid"></div>
     </div>
 
     <!-- ================================================================
@@ -1390,6 +1444,17 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     </div>
     <p style="text-align:center;font-size:12px;color:#BBB;margin-top:24px;line-height:1.6;">Todos los modos incluyen 30 días gratis.<br>Podés cambiar el modo desde tu panel en cualquier momento.</p>
+  </div>
+
+  <!-- ============ SCREEN: DETALLE CATEGORÍA SERVICIO ============ -->
+  <div class="screen hidden" id="screen-guia-cat-detalle" style="padding:0 0 32px;">
+    <div id="guiaCatDetalleBack" class="link-back" data-tipo="redlocal"
+      onclick="var t=this.dataset.tipo;setFeedTab(t);showScreen('feed');">← Volver</div>
+    <div style="padding:0 16px;">
+      <div class="kicker" style="margin-top:8px;">Red Local · PuenT</div>
+      <h1 id="guiaCatDetalleTitulo" style="font-family:'Bai Jamjuree',sans-serif;font-size:24px;font-weight:700;color:#1A1A1A;margin-bottom:16px;line-height:1.2;"></h1>
+      <div id="guiaCatDetalleCont" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div>
   </div>
 
   <!-- ============ PANEL REPARTIDOR ============ -->
@@ -1867,7 +1932,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div>
-          <label style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">Nombre del comercio:</label>
+          <label id="rcLabelNombre" style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">Nombre del comercio:</label>
           <input id="rcNombre" type="text" placeholder="Ej: Panadería San Martín" autocomplete="organization"
             style="width:100%;padding:14px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-family:inherit;box-sizing:border-box;background:#F8F8F8;">
         </div>
@@ -3134,11 +3199,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
 
-    <div class="card" style="margin-top:0;">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🏬 Modo de tu comercio en PuenT</div>
+    <div class="card" style="margin-top:0;" id="vitCardModoSelector">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🏬 Modo de tu negocio en PuenT</div>
       <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos. También podés sumar galería y características.</div></div></label>
       <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🏬 Solo vidriera</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Para locales, profesionales y talleres que quieren estar en PuenT con su ficha, galería y características, sin vender productos.</div></div></label>
-          </div>
+      <div id="vitModoServicioInfo" style="display:none;background:#EEF2FF;border-radius:12px;padding:12px 14px;font-size:13px;color:#3730A3;line-height:1.5;">🤝 <strong>Modo Servicio activo.</strong> Tu negocio aparece en Red Local, Empresas o Talleres según tu rubro. Para cambiar el modo contactá al soporte de PuenT.</div>
+    </div>
 
 
     <div class="card" style="margin-top:0;">
@@ -5022,6 +5088,42 @@ const PREGUNTAS_POR_TIPO = {
 };
 
 // ── REGISTRO SIMPLE COMERCIO ──
+
+var _rcModoRegistro = 'tienda'; // 'tienda' | 'vitrina' | 'servicio'
+
+function elegirModoRegistro(modo){
+  _rcModoRegistro = modo;
+
+  // Adaptar label del nombre
+  var labelNombre = document.getElementById('rcLabelNombre');
+  if(labelNombre){
+    if(modo==='servicio') labelNombre.textContent = 'Nombre / Razón social:';
+    else if(modo==='vitrina') labelNombre.textContent = 'Nombre del local:';
+    else labelNombre.textContent = 'Nombre del comercio:';
+  }
+
+  // Adaptar placeholder del nombre
+  var inputNombre = document.getElementById('rcNombre');
+  if(inputNombre){
+    if(modo==='servicio') inputNombre.placeholder = 'Ej: Estudio Jurídico López, Taller El Mecánico…';
+    else if(modo==='vitrina') inputNombre.placeholder = 'Ej: Bar La Esquina, Peluquería Sol…';
+    else inputNombre.placeholder = 'Ej: Panadería San Martín';
+  }
+
+  // Filtrar rubros según modo
+  var RUBROS_TIENDA = ['Gastronomía','Belleza y Estética','Hogar y Construcción','Almacén y Alimentos','Indumentaria y Calzado','Salud y Farmacia','Agro y Mascotas','Tecnología','Educación y Librerías','Deportes y Recreación','Regalos y Detalles','Imprenta y Gráfica','Alquiler y Préstamo','Caza, Pesca y Camping','Eventos y Fiestas','Artesanías y Productos Regionales','Combustibles, Gas y Energía','Cuidado de Personas'];
+  var RUBROS_SERVICIO = ['Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética'];
+  var lista = modo==='servicio' ? RUBROS_SERVICIO : RUBROS_TIENDA;
+  var selectRubro = document.getElementById('rcRubro');
+  if(selectRubro){
+    selectRubro.innerHTML = '<option value="">Elegí el rubro</option>' +
+      lista.map(function(r){ return '<option value="'+r+'">'+r+'</option>'; }).join('');
+  }
+
+  showScreen('registro-comercio');
+  rcMostrarPaso(1);
+}
+
 /* ===== STEPPER REGISTRO COMERCIO ===== */
 var _rcPasoActual = 1;
 
@@ -5053,7 +5155,7 @@ function rcMostrarPaso(n){
 
 function rcRetroceder(){
   if(_rcPasoActual > 1){ rcMostrarPaso(_rcPasoActual - 1); }
-  else { showScreen('bienvenida-comercio'); }
+  else { showScreen('elegir-modo'); }
 }
 
 function rcAvanzarPaso1(){
@@ -5124,6 +5226,7 @@ async function registrarComercioSimple(){
       rubro, tipo:'', descripcion:'', direccion:'', telefono: celular, whatsapp: celular,
       instagram:'', facebook:'', horario:'', dias:[], metodosPago:[],
       adheridos:[], img: null, imgGaleria: null,
+      modo: _rcModoRegistro || 'tienda',
       publicidadActiva:true, publicidadVence:diasAtras(-30),
       plan:'gracia', planMonto:null, planComPct:null,
       planVence: _gracia.toISOString().slice(0,10), planActivo:true,
@@ -5748,6 +5851,7 @@ function crearCuentaDesdeGoogle(rol, user){
     const _graciaGoogle = new Date(); _graciaGoogle.setDate(_graciaGoogle.getDate() + 30);
     data = {id: nextId('c'), uid:user.uid, nombre, email, ciudad:'La Paz',
             rubro:'', tipo:'', descripcion:'',
+            modo: (typeof _rcModoRegistro !== 'undefined' && _rcModoRegistro) ? _rcModoRegistro : 'tienda',
             viaGoogle:true, adheridos:[], img: null,
             publicidadActiva:true, publicidadVence:diasAtras(-30),
             aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true,
@@ -9169,14 +9273,17 @@ function leerVitrinaDeEditar(c){
   c.caracVitrina = _vitCaract.slice();
 }
 
-// En modo "solo vitrina" el panel no ofrece cargar ni ver productos
+// En modo "vitrina" o "servicio" el panel no ofrece cargar ni ver productos
 function aplicarModoPanelComercio(){
   const c = state.currentUser;
-  const soloVitrina = !!c && c.modo==='vitrina';
+  const sinProductos = !!c && (c.modo==='vitrina' || c.modo==='servicio');
   ['btnCargarProdPanel','btnProductosPanel'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.style.display = soloVitrina ? 'none' : '';
+    if(el) el.style.display = sinProductos ? 'none' : '';
   });
+  // En modo servicio ocultar también el ConectorT
+  const conectorBox = document.getElementById('cConectorToggleBox');
+  if(conectorBox) conectorBox.style.display = (c && c.modo==='servicio') ? 'none' : '';
 }
 
 
@@ -9345,6 +9452,25 @@ function abrirEditarComercio(){
   document.getElementById('editCCoordsEstado').textContent = (c.lat && c.lng)
     ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.'
     : '⚠️ Todavía no marcaste tu ubicación exacta — tocá el mapa o usá el botón de GPS.';
+
+  // Adaptar formulario según modo del comercio
+  var _esModoServicio = c.modo === 'servicio';
+  var _optT = document.getElementById('vitOpt-tienda');
+  var _optV = document.getElementById('vitOpt-vitrina');
+  var _infoServ = document.getElementById('vitModoServicioInfo');
+  if(_optT)  _optT.style.display  = _esModoServicio ? 'none' : '';
+  if(_optV)  _optV.style.display  = _esModoServicio ? 'none' : '';
+  if(_infoServ) _infoServ.style.display = _esModoServicio ? '' : 'none';
+  // Rubros: si es servicio mostrar solo los de servicio
+  if(_esModoServicio){
+    var RUBROS_SERV_ED = ['Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética'];
+    var _selR = document.getElementById('editCRubro');
+    if(_selR){
+      var _rAct = c.rubro || '';
+      _selR.innerHTML = '<option value="">Elegí el rubro</option>' +
+        RUBROS_SERV_ED.map(function(r){ return '<option value="'+r+'"'+(r===_rAct?' selected':'')+'>'+r+'</option>'; }).join('');
+    }
+  }
 
   cargarVitrinaEnEditar();
   showScreen('editar-comercio');
@@ -12941,21 +13067,19 @@ let tabActiva = 'home';
 function setFeedTab(tab){
   tabActiva = tab;
   if(tab !== 'ciudadhoy' && _sponsorBannerTimer){ clearInterval(_sponsorBannerTimer); _sponsorBannerTimer = null; }
-  // Botones de solapa
-  ['home','ofertas','ciudadhoy','util','locales','mas'].forEach(t=>{
+  ['home','ofertas','redlocal','empresas','talleres','ciudadhoy','util','locales','mas'].forEach(t=>{
     var btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
     if(btn) btn.classList.toggle('active', t===tab);
   });
-  // Vistas
   var views = {
     home:'feedHomeView', ofertas:'feedOfertasView', locales:'feedLocalesView',
-    ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView'
+    ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView',
+    redlocal:'feedRedlocalView', empresas:'feedEmpresasView', talleres:'feedTalleresView'
   };
   Object.entries(views).forEach(([t, id])=>{
     var el = document.getElementById(id);
     if(el) el.classList.toggle('hidden', t!==tab);
   });
-  // la solapa activa queda a la vista dentro de la barra deslizable
   try{ var _ta = document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)); if(_ta && _ta.scrollIntoView) _ta.scrollIntoView({inline:'center', block:'nearest'}); }catch(e){}
   window.scrollTo(0,0);
   if(tab !== 'util') ocultarMapa();
@@ -12963,15 +13087,111 @@ function setFeedTab(tab){
   if(tab==='locales'){ renderLocales(); }
   if(tab==='ciudadhoy'){ renderCiudadHoy(); renderGuiaUtilCiudadHoy(); renderSponsorBanner(); }
   if(tab==='util'){
-    // Esperar dos frames para que el DOM pinte el div con dimensiones reales
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        iniciarMapaCity();
-      });
-    });
+    requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ iniciarMapaCity(); }); });
   }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ _encantarCache = { key: null, ids: [] }; _feedCategoriaActual = 'todos'; renderHomeTab(); }
+  if(tab==='redlocal'){ renderGuiaCiudadTab('redlocal'); }
+  if(tab==='empresas'){ renderGuiaCiudadTab('empresas'); }
+  if(tab==='talleres'){ renderGuiaCiudadTab('talleres'); }
+}
+
+/* ══════════════════════════════════════════════════════
+   RED LOCAL / EMPRESAS / TALLERES
+   ══════════════════════════════════════════════════════ */
+var GUIA_CIUDAD_CATS = {
+  redlocal:[
+    {ic:'⚕️',nm:'Salud',rubro:'Salud y Farmacia'},
+    {ic:'⚖️',nm:'Legal',rubro:'Servicios Profesionales'},
+    {ic:'🧮',nm:'Contabilidad',rubro:'Servicios Profesionales'},
+    {ic:'🧠',nm:'Psicología',rubro:'Salud y Farmacia'},
+    {ic:'🥗',nm:'Nutrición',rubro:'Salud y Farmacia'},
+    {ic:'📚',nm:'Educación',rubro:'Educación y Librerías'},
+    {ic:'🏋️',nm:'Deporte y Fitness',rubro:'Deportes y Recreación'},
+    {ic:'🎨',nm:'Diseño',rubro:'Servicios Profesionales'},
+    {ic:'📷',nm:'Fotografía',rubro:'Servicios Varios'},
+    {ic:'💻',nm:'Informática',rubro:'Tecnología'},
+    {ic:'⚡',nm:'Electricidad',rubro:'Hogar y Construcción'},
+    {ic:'🔩',nm:'Plomería',rubro:'Hogar y Construcción'},
+    {ic:'🖌️',nm:'Pintura',rubro:'Hogar y Construcción'},
+    {ic:'🌿',nm:'Jardín',rubro:'Servicios Varios'},
+    {ic:'✂️',nm:'Peluquería',rubro:'Belleza y Estética'},
+    {ic:'🛠️',nm:'Otros servicios',rubro:'Servicios Varios'}
+  ],
+  empresas:[
+    {ic:'🏥',nm:'Clínicas y Salud',rubro:'Salud y Farmacia'},
+    {ic:'🏠',nm:'Inmobiliarias',rubro:'Inmobiliarias y Turismo'},
+    {ic:'🏗️',nm:'Construcción',rubro:'Hogar y Construcción'},
+    {ic:'📦',nm:'Distribuidoras',rubro:'Servicios Varios'},
+    {ic:'🚗',nm:'Concesionarias',rubro:'Automotor'},
+    {ic:'🛡️',nm:'Seguros',rubro:'Servicios Profesionales'},
+    {ic:'💰',nm:'Financieras',rubro:'Bancos, Pagos y Finanzas'},
+    {ic:'🚚',nm:'Logística',rubro:'Transporte, Encomiendas y Viajes'},
+    {ic:'✈️',nm:'Turismo y Hotelería',rubro:'Inmobiliarias y Turismo'},
+    {ic:'🎓',nm:'Educación',rubro:'Educación y Librerías'},
+    {ic:'🏢',nm:'Otras empresas',rubro:'Servicios Profesionales'}
+  ],
+  talleres:[
+    {ic:'🔧',nm:'Mecánica',rubro:'Automotor'},
+    {ic:'🫧',nm:'Gomería',rubro:'Automotor'},
+    {ic:'🚘',nm:'Chapa y Pintura',rubro:'Automotor'},
+    {ic:'🔌',nm:'Electricidad Auto',rubro:'Automotor'},
+    {ic:'🪵',nm:'Carpintería',rubro:'Hogar y Construcción'},
+    {ic:'⚙️',nm:'Herrería',rubro:'Hogar y Construcción'},
+    {ic:'📺',nm:'Electrónica',rubro:'Tecnología'},
+    {ic:'🚿',nm:'Lavadero de Autos',rubro:'Automotor'},
+    {ic:'🛠️',nm:'Otros talleres',rubro:'Servicios Varios'}
+  ]
+};
+
+function renderGuiaCiudadTab(tipo){
+  var gridId = tipo==='redlocal'?'redlocalGrid':tipo==='empresas'?'empresasGrid':'talleresGrid';
+  var grid = document.getElementById(gridId);
+  if(!grid) return;
+  var cats = GUIA_CIUDAD_CATS[tipo]||[];
+  var rubrosConServicios = new Set(
+    (state.comercios||[]).filter(function(c){
+      return c.modo==='servicio' && c.aprobado!==false && c.estado!=='papelera' &&
+             (!ciudadSeleccionada||mismaCiudad(c.ciudad,ciudadSeleccionada));
+    }).map(function(c){ return c.rubro; })
+  );
+  grid.innerHTML = cats.map(function(c){
+    var hay = rubrosConServicios.has(c.rubro);
+    var badge = hay ? '<div class="gct-vivo">Ver →</div>' : '<div class="gct-prox">Próximamente</div>';
+    var onclick = hay
+      ? 'abrirGuiaCiudadCat(\''+tipo+'\',\''+c.nm+'\',\''+c.rubro+'\')'
+      : 'toast(\'🚀 '+c.nm+' — ¡Próximamente en PuenT!\')';
+    return '<button class="guia-cat-tile" onclick="'+onclick+'"><div class="gct-ic">'+c.ic+'</div><div class="gct-nm">'+c.nm+'</div>'+badge+'</button>';
+  }).join('');
+}
+
+function abrirGuiaCiudadCat(tipo, nombre, rubro){
+  var coms = (state.comercios||[]).filter(function(c){
+    return c.modo==='servicio' && c.rubro===rubro &&
+           c.aprobado!==false && c.estado!=='papelera' &&
+           (!ciudadSeleccionada||mismaCiudad(c.ciudad,ciudadSeleccionada));
+  });
+  var cont = document.getElementById('guiaCatDetalleCont');
+  var titulo = document.getElementById('guiaCatDetalleTitulo');
+  if(!cont||!titulo) return;
+  titulo.textContent = nombre;
+  var back = document.getElementById('guiaCatDetalleBack');
+  if(back) back.dataset.tipo = tipo;
+  if(!coms.length){
+    cont.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;">Todavía no hay registros en esta categoría.<br><br>'
+      +'<button class="btn btn-primary" style="width:auto;padding:12px 28px;border-radius:100px;" onclick="showScreen(\'bienvenida-comercio\')">Registrar mi negocio →</button></div>';
+  } else {
+    cont.innerHTML = coms.map(function(c){
+      return '<div class="servicio-card" onclick="abrirLocal(\''+c.id+'\')">'
+        +'<div class="servicio-card-foto">'+(c.img?'<img src="'+c.img+'" alt="'+c.nombre+'">':'<div class="servicio-card-ic">🏢</div>')+'</div>'
+        +'<div class="servicio-card-body">'
+        +'<div class="servicio-card-nom">'+c.nombre+'</div>'
+        +'<div class="servicio-card-rub">'+c.rubro+'</div>'
+        +(c.descripcion?'<div class="servicio-card-desc">'+c.descripcion.slice(0,80)+'…</div>':'')
+        +'</div></div>';
+    }).join('');
+  }
+  showScreen('guia-cat-detalle');
 }
 
 function renderHomeTab(){
