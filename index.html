@@ -839,6 +839,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .vit-nombre{margin:34px 12px 0;font-weight:800;font-size:14px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-rubro{margin:2px 12px 0;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-modo-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;}
+.modo-reg-btn{width:100%;background:white;border:1.5px solid var(--line);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:border-color .15s;}
+.modo-reg-btn:active{transform:scale(0.98);}
+.modo-reg-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.modo-reg-body{flex:1;min-width:0;}
+.modo-reg-t{font-weight:800;font-size:15.5px;color:var(--navy);margin-bottom:3px;}
+.modo-reg-s{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:4px;}
+.modo-reg-ejemplo{font-size:11.5px;color:#B0B0B0;font-style:italic;}
+.modo-reg-arrow{font-size:22px;color:#CCC;flex-shrink:0;padding-left:4px;}
 .vit-modo-opt input{width:auto;margin-top:3px;}
 .vit-modo-opt.sel{border-color:#5C7355;background:#F2F6EF;}
 .vit-gal-item{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
@@ -1310,14 +1318,23 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ BIENVENIDA: SUMÁ TU COMERCIO ============ -->
   <div class="screen hidden" id="screen-bienvenida-comercio">
     <div class="link-back" onclick="showScreen('feed')">← Volver</div>
-    <div class="kicker">Para comercios</div>
-    <h1 class="page-title">Tu comercio también puede estar en PuenT</h1>
-    <p class="page-sub">Mostrá lo que tenés. Llegá a más personas de tu ciudad.</p>
-    <p style="font-size:13.5px; color:var(--ink); line-height:1.6; margin:0 0 16px;">PuenT reúne comercios reales de la ciudad en un solo lugar, para que tus clientes puedan encontrarte, conocer tus productos y contactarte fácilmente.</p>
+    <div class="kicker">Sumá tu negocio</div>
+    <h1 class="page-title">Tu ciudad te espera en PuenT</h1>
+    <p class="page-sub">Tienda, vidriera, profesional, empresa o taller. Hay un lugar para cada negocio.</p>
 
     <div class="card" style="margin-bottom:12px;">
-      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🏪 Tu vidriera, ahora online</div>
-      <p style="font-size:13.5px; color:var(--ink); margin:0;">Mostrá tus productos y hacé que más personas conozcan tu comercio.</p>
+      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🛍️ Tienda online</div>
+      <p style="font-size:13.5px; color:var(--ink); margin:0;">Publicá productos con foto y precio. Tus clientes te encuentran en el feed.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🏬 Solo vidriera</div>
+      <p style="font-size:13.5px; color:var(--ink); margin:0;">Mostrá tu local con fotos e info. Sin necesidad de publicar productos.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🤝 Servicio profesional</div>
+      <p style="font-size:13.5px; color:var(--ink); margin:0;">Abogados, mecánicos, clínicas, carpinteros y más. Aparecés en Red Local, Empresas o Talleres.</p>
     </div>
 
     <div class="card" style="margin-bottom:12px;">
@@ -1325,21 +1342,54 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <p style="font-size:13.5px; color:var(--ink); margin:0;">Tu negocio aparece donde están tus clientes: cerca, simple y directo.</p>
     </div>
 
-    <div class="card" style="margin-bottom:12px;">
-      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">📦 Mové tu stock</div>
-      <p style="font-size:13.5px; color:var(--ink); margin:0;">Publicá lo que tenés disponible y convertí visitas en consultas y ventas.</p>
-    </div>
-
-    <div class="card" style="margin-bottom:12px;">
-      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🤝 Crecemos juntos</div>
-      <p style="font-size:13.5px; color:var(--ink); margin:0;">Cuando más comercios participan, más opciones encuentran los vecinos y más movimiento queda en la ciudad.</p>
-    </div>
-
     <p style="text-align:center; font-size:14px; font-weight:700; color:var(--ink); margin:18px 0 4px;">Sumate a PuenT.</p>
-    <p style="text-align:center; font-size:13px; color:var(--muted); margin:0 0 14px;">Tu comercio tiene algo para mostrar.</p>
+    <p style="text-align:center; font-size:13px; color:var(--muted); margin:0 0 14px;">Todos los modos incluyen 30 días gratis.</p>
 
-    <button class="btn btn-primary" onclick="showScreen('registro-comercio')">Registrar mi comercio</button>
+    <button class="btn btn-primary" onclick="showScreen('elegir-modo')">Registrar mi negocio →</button>
     <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Es gratis empezar. Te lleva un par de minutos.</p>
+  </div>
+
+  <!-- ============ SCREEN: ELEGIR MODO DE REGISTRO ============ -->
+  <div class="screen hidden" id="screen-elegir-modo" style="padding:28px 20px 40px;">
+    <div class="link-back" onclick="showScreen('bienvenida-comercio')">← Volver</div>
+    <div class="kicker" style="margin-top:8px;">Sumá tu negocio</div>
+    <h1 style="font-family:'Bai Jamjuree',sans-serif;font-size:26px;font-weight:700;color:#1A1A1A;margin-bottom:6px;line-height:1.2;">¿Cómo querés<br>aparecer en PuenT?</h1>
+    <p style="font-size:13.5px;color:#888;margin-bottom:28px;line-height:1.5;">Elegí el modo que mejor representa tu negocio. Después podés cambiarlo desde tu panel.</p>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <button class="modo-reg-btn" onclick="elegirModoRegistro('tienda')">
+        <div class="modo-reg-ic" style="background:#FFF0F0;">🛍️</div>
+        <div class="modo-reg-body">
+          <div class="modo-reg-t">Tienda</div>
+          <div class="modo-reg-s">Vendé productos online. Tus artículos aparecen en el feed y en "Te va a encantar". Con o sin vidriera.</div>
+          <div class="modo-reg-ejemplo">Panadería, ropa, ferretería, farmacia…</div>
+        </div>
+        <div class="modo-reg-arrow">›</div>
+      </button>
+
+      <button class="modo-reg-btn" onclick="elegirModoRegistro('vitrina')">
+        <div class="modo-reg-ic" style="background:#EAF2E6;">🏬</div>
+        <div class="modo-reg-body">
+          <div class="modo-reg-t">Solo vidriera</div>
+          <div class="modo-reg-s">Mostrá tu local con fotos, info y contacto. Sin publicar productos. Aparecés en Locales y en el Home.</div>
+          <div class="modo-reg-ejemplo">Kiosco, peluquería, bar, gimnasio…</div>
+        </div>
+        <div class="modo-reg-arrow">›</div>
+      </button>
+
+      <button class="modo-reg-btn" onclick="elegirModoRegistro('servicio')">
+        <div class="modo-reg-ic" style="background:#EEF2FF;">🤝</div>
+        <div class="modo-reg-body">
+          <div class="modo-reg-t">Servicio</div>
+          <div class="modo-reg-s">Para profesionales, empresas y talleres. Aparecés en Red Local, Empresas o Talleres según tu rubro.</div>
+          <div class="modo-reg-ejemplo">Abogado, mecánico, clínica, carpintero, electricista…</div>
+        </div>
+        <div class="modo-reg-arrow">›</div>
+      </button>
+
+    </div>
+    <p style="text-align:center;font-size:12px;color:#BBB;margin-top:24px;line-height:1.6;">Todos los modos incluyen 30 días gratis.<br>Podés cambiar el modo desde tu panel en cualquier momento.</p>
   </div>
 
   <!-- ============ PANEL REPARTIDOR ============ -->
@@ -3084,15 +3134,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
 
-    <div class="card" style="margin-top:0;" id="vitCardModoSelector">
+    <div class="card" style="margin-top:0;">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🏬 Modo de tu comercio en PuenT</div>
       <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos. También podés sumar galería y características.</div></div></label>
       <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🏬 Solo vidriera</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Para locales, profesionales y talleres que quieren estar en PuenT con su ficha, galería y características, sin vender productos.</div></div></label>
-      <!-- Modo servicio: no editable desde acá, solo informativo -->
-      <div id="vitModoServicioInfo" style="display:none;background:#EEF2FF;border-radius:12px;padding:12px 14px;font-size:13px;color:#3730A3;line-height:1.5;">
-        🤝 <strong>Modo Servicio activo.</strong> Tu negocio aparece en Red Local, Empresas o Talleres según tu rubro. Para cambiar el modo contactá al soporte de PuenT.
-      </div>
-    </div>
+          </div>
 
 
     <div class="card" style="margin-top:0;">
@@ -5702,7 +5748,6 @@ function crearCuentaDesdeGoogle(rol, user){
     const _graciaGoogle = new Date(); _graciaGoogle.setDate(_graciaGoogle.getDate() + 30);
     data = {id: nextId('c'), uid:user.uid, nombre, email, ciudad:'La Paz',
             rubro:'', tipo:'', descripcion:'',
-            modo: (typeof _rcModoRegistro !== 'undefined' && _rcModoRegistro) ? _rcModoRegistro : 'tienda',
             viaGoogle:true, adheridos:[], img: null,
             publicidadActiva:true, publicidadVence:diasAtras(-30),
             aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true,
@@ -9124,17 +9169,14 @@ function leerVitrinaDeEditar(c){
   c.caracVitrina = _vitCaract.slice();
 }
 
-// En modo "solo vitrina" o "servicio" el panel no ofrece cargar ni ver productos
+// En modo "solo vitrina" el panel no ofrece cargar ni ver productos
 function aplicarModoPanelComercio(){
   const c = state.currentUser;
-  const sinProductos = !!c && (c.modo==='vitrina' || c.modo==='servicio');
+  const soloVitrina = !!c && c.modo==='vitrina';
   ['btnCargarProdPanel','btnProductosPanel'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.style.display = sinProductos ? 'none' : '';
+    if(el) el.style.display = soloVitrina ? 'none' : '';
   });
-  // En modo servicio también ocultar el ConectorT (no aplica para servicios)
-  const conectorBox = document.getElementById('cConectorToggleBox');
-  if(conectorBox) conectorBox.style.display = (c && c.modo==='servicio') ? 'none' : '';
 }
 
 
@@ -9303,35 +9345,6 @@ function abrirEditarComercio(){
   document.getElementById('editCCoordsEstado').textContent = (c.lat && c.lng)
     ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.'
     : '⚠️ Todavía no marcaste tu ubicación exacta — tocá el mapa o usá el botón de GPS.';
-
-  // Adaptar el formulario según el modo del comercio
-  const _esModoServicio = c.modo === 'servicio';
-  // Selector Tienda/Vidriera: solo para tienda y vitrina, no para servicio
-  const _cardModo = document.getElementById('vitCardModoSelector');
-  const _infoServicio = document.getElementById('vitModoServicioInfo');
-  const _optTienda  = document.getElementById('vitOpt-tienda');
-  const _optVitrina = document.getElementById('vitOpt-vitrina');
-  if(_cardModo){
-    if(_esModoServicio){
-      if(_optTienda)  _optTienda.style.display  = 'none';
-      if(_optVitrina) _optVitrina.style.display = 'none';
-      if(_infoServicio) _infoServicio.style.display = '';
-    } else {
-      if(_optTienda)  _optTienda.style.display  = '';
-      if(_optVitrina) _optVitrina.style.display = '';
-      if(_infoServicio) _infoServicio.style.display = 'none';
-    }
-  }
-  // Select de rubros: si es servicio, mostrar solo rubros de servicio
-  if(_esModoServicio){
-    var RUBROS_SERVICIO_EDITAR = ['Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética'];
-    var _selRubro = document.getElementById('editCRubro');
-    if(_selRubro){
-      var _rubroActual = c.rubro || '';
-      _selRubro.innerHTML = '<option value="">Elegí el rubro</option>' +
-        RUBROS_SERVICIO_EDITAR.map(function(r){ return '<option value="'+r+'"'+(r===_rubroActual?' selected':'')+'>'+r+'</option>'; }).join('');
-    }
-  }
 
   cargarVitrinaEnEditar();
   showScreen('editar-comercio');
