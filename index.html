@@ -839,6 +839,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .vit-nombre{margin:34px 12px 0;font-weight:800;font-size:14px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-rubro{margin:2px 12px 0;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-modo-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;}
+.modo-reg-btn{width:100%;background:white;border:1.5px solid var(--line);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;}
+.modo-reg-btn:active{transform:scale(0.98);}
+.modo-reg-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.modo-reg-body{flex:1;min-width:0;}
+.modo-reg-t{font-weight:800;font-size:15.5px;color:var(--navy);margin-bottom:3px;}
+.modo-reg-s{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:4px;}
+.modo-reg-ejemplo{font-size:11.5px;color:#B0B0B0;font-style:italic;}
+.modo-reg-arrow{font-size:22px;color:#CCC;flex-shrink:0;padding-left:4px;}
 .guia-ciudad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .guia-cat-tile{background:white;border:1.5px solid var(--line);border-radius:16px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .12s ease;text-align:center;}
 .guia-cat-tile:active{transform:scale(0.96);}
@@ -855,22 +863,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .servicio-card-nom{font-weight:800;font-size:15px;color:var(--navy);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .servicio-card-rub{font-size:12px;color:var(--muted);margin-bottom:3px;}
 .servicio-card-desc{font-size:12.5px;color:var(--ink);line-height:1.4;}
-.modo-reg-btn{width:100%;background:white;border:1.5px solid var(--line);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;}
-.modo-reg-btn:active{transform:scale(0.98);}
-.modo-reg-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
-.modo-reg-body{flex:1;min-width:0;}
-.modo-reg-t{font-weight:800;font-size:15.5px;color:var(--navy);margin-bottom:3px;}
-.modo-reg-s{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:4px;}
-.modo-reg-ejemplo{font-size:11.5px;color:#B0B0B0;font-style:italic;}
-.modo-reg-arrow{font-size:22px;color:#CCC;flex-shrink:0;padding-left:4px;}
-.modo-reg-btn{width:100%;background:white;border:1.5px solid var(--line);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:border-color .15s;}
-.modo-reg-btn:active{transform:scale(0.98);}
-.modo-reg-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
-.modo-reg-body{flex:1;min-width:0;}
-.modo-reg-t{font-weight:800;font-size:15.5px;color:var(--navy);margin-bottom:3px;}
-.modo-reg-s{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:4px;}
-.modo-reg-ejemplo{font-size:11.5px;color:#B0B0B0;font-style:italic;}
-.modo-reg-arrow{font-size:22px;color:#CCC;flex-shrink:0;padding-left:4px;}
 .vit-modo-opt input{width:auto;margin-top:3px;}
 .vit-modo-opt.sel{border-color:#5C7355;background:#F2F6EF;}
 .vit-gal-item{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
@@ -1380,17 +1372,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🛍️ Tienda online</div>
       <p style="font-size:13.5px; color:var(--ink); margin:0;">Publicá productos con foto y precio. Tus clientes te encuentran en el feed.</p>
     </div>
-
     <div class="card" style="margin-bottom:12px;">
       <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🏬 Solo vidriera</div>
       <p style="font-size:13.5px; color:var(--ink); margin:0;">Mostrá tu local con fotos e info. Sin necesidad de publicar productos.</p>
     </div>
-
     <div class="card" style="margin-bottom:12px;">
       <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🤝 Servicio profesional</div>
       <p style="font-size:13.5px; color:var(--ink); margin:0;">Abogados, mecánicos, clínicas, carpinteros y más. Aparecés en Red Local, Empresas o Talleres.</p>
     </div>
-
     <div class="card" style="margin-bottom:12px;">
       <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">📍 Llegá a tu ciudad</div>
       <p style="font-size:13.5px; color:var(--ink); margin:0;">Tu negocio aparece donde están tus clientes: cerca, simple y directo.</p>
@@ -1398,52 +1387,46 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
     <p style="text-align:center; font-size:14px; font-weight:700; color:var(--ink); margin:18px 0 4px;">Sumate a PuenT.</p>
     <p style="text-align:center; font-size:13px; color:var(--muted); margin:0 0 14px;">Todos los modos incluyen 30 días gratis.</p>
-
     <button class="btn btn-primary" onclick="showScreen('elegir-modo')">Registrar mi negocio →</button>
     <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Es gratis empezar. Te lleva un par de minutos.</p>
   </div>
 
-  <!-- ============ SCREEN: ELEGIR MODO DE REGISTRO ============ -->
+  <!-- ============ SCREEN: ELEGIR MODO ============ -->
   <div class="screen hidden" id="screen-elegir-modo" style="padding:28px 20px 40px;">
     <div class="link-back" onclick="showScreen('bienvenida-comercio')">← Volver</div>
     <div class="kicker" style="margin-top:8px;">Sumá tu negocio</div>
     <h1 style="font-family:'Bai Jamjuree',sans-serif;font-size:26px;font-weight:700;color:#1A1A1A;margin-bottom:6px;line-height:1.2;">¿Cómo querés<br>aparecer en PuenT?</h1>
-    <p style="font-size:13.5px;color:#888;margin-bottom:28px;line-height:1.5;">Elegí el modo que mejor representa tu negocio. Después podés cambiarlo desde tu panel.</p>
-
+    <p style="font-size:13.5px;color:#888;margin-bottom:28px;line-height:1.5;">Elegí el modo que mejor representa tu negocio.</p>
     <div style="display:flex;flex-direction:column;gap:12px;">
-
       <button class="modo-reg-btn" onclick="elegirModoRegistro('tienda')">
         <div class="modo-reg-ic" style="background:#FFF0F0;">🛍️</div>
         <div class="modo-reg-body">
           <div class="modo-reg-t">Tienda</div>
-          <div class="modo-reg-s">Vendé productos online. Tus artículos aparecen en el feed y en "Te va a encantar". Con o sin vidriera.</div>
-          <div class="modo-reg-ejemplo">Panadería, ropa, ferretería, farmacia…</div>
+          <div class="modo-reg-s">Vendé productos online. Aparecen en el feed y en "Te va a encantar".</div>
+          <div class="modo-reg-ejemplo">Panadería, ropa, ferretería, agencia de autos, casa de repuestos…</div>
         </div>
         <div class="modo-reg-arrow">›</div>
       </button>
-
       <button class="modo-reg-btn" onclick="elegirModoRegistro('vitrina')">
         <div class="modo-reg-ic" style="background:#EAF2E6;">🏬</div>
         <div class="modo-reg-body">
           <div class="modo-reg-t">Solo vidriera</div>
-          <div class="modo-reg-s">Mostrá tu local con fotos, info y contacto. Sin publicar productos. Aparecés en Locales y en el Home.</div>
+          <div class="modo-reg-s">Mostrá tu local con fotos, info y contacto. Sin publicar productos.</div>
           <div class="modo-reg-ejemplo">Kiosco, peluquería, bar, gimnasio…</div>
         </div>
         <div class="modo-reg-arrow">›</div>
       </button>
-
       <button class="modo-reg-btn" onclick="elegirModoRegistro('servicio')">
         <div class="modo-reg-ic" style="background:#EEF2FF;">🤝</div>
         <div class="modo-reg-body">
           <div class="modo-reg-t">Servicio</div>
-          <div class="modo-reg-s">Para profesionales, empresas y talleres. Aparecés en Red Local, Empresas o Talleres según tu rubro.</div>
+          <div class="modo-reg-s">Para profesionales, empresas y talleres. Aparecés en Red Local, Empresas o Talleres.</div>
           <div class="modo-reg-ejemplo">Abogado, mecánico, clínica, carpintero, electricista…</div>
         </div>
         <div class="modo-reg-arrow">›</div>
       </button>
-
     </div>
-    <p style="text-align:center;font-size:12px;color:#BBB;margin-top:24px;line-height:1.6;">Todos los modos incluyen 30 días gratis.<br>Podés cambiar el modo desde tu panel en cualquier momento.</p>
+    <p style="text-align:center;font-size:12px;color:#BBB;margin-top:24px;line-height:1.6;">Todos los modos incluyen 30 días gratis.</p>
   </div>
 
   <!-- ============ SCREEN: DETALLE CATEGORÍA SERVICIO ============ -->
@@ -3203,7 +3186,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🏬 Modo de tu negocio en PuenT</div>
       <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos. También podés sumar galería y características.</div></div></label>
       <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🏬 Solo vidriera</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Para locales, profesionales y talleres que quieren estar en PuenT con su ficha, galería y características, sin vender productos.</div></div></label>
-      <div id="vitModoServicioInfo" style="display:none;background:#EEF2FF;border-radius:12px;padding:12px 14px;font-size:13px;color:#3730A3;line-height:1.5;">🤝 <strong>Modo Servicio activo.</strong> Tu negocio aparece en Red Local, Empresas o Talleres según tu rubro. Para cambiar el modo contactá al soporte de PuenT.</div>
+      <div id="vitModoServicioInfo" style="display:none;background:#EEF2FF;border-radius:12px;padding:12px 14px;font-size:13px;color:#3730A3;line-height:1.5;">🤝 <strong>Modo Servicio activo.</strong> Aparecés en Red Local, Empresas o Talleres según tu rubro. Para cambiar el modo contactá al soporte de PuenT.</div>
     </div>
 
 
@@ -5091,35 +5074,23 @@ const PREGUNTAS_POR_TIPO = {
 
 var _rcModoRegistro = 'tienda'; // 'tienda' | 'vitrina' | 'servicio'
 
+var _RUBROS_TIENDA   = ['Gastronomía','Belleza y Estética','Hogar y Construcción','Almacén y Alimentos','Indumentaria y Calzado','Salud y Farmacia','Vehículos y Repuestos','Agro y Mascotas','Tecnología','Educación y Librerías','Deportes y Recreación','Regalos y Detalles','Imprenta y Gráfica','Alquiler y Préstamo','Caza, Pesca y Camping','Eventos y Fiestas','Artesanías y Productos Regionales','Combustibles, Gas y Energía','Cuidado de Personas'];
+var _RUBROS_SERVICIO = ['Taller Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética'];
+
 function elegirModoRegistro(modo){
   _rcModoRegistro = modo;
-
-  // Adaptar label del nombre
-  var labelNombre = document.getElementById('rcLabelNombre');
-  if(labelNombre){
-    if(modo==='servicio') labelNombre.textContent = 'Nombre / Razón social:';
-    else if(modo==='vitrina') labelNombre.textContent = 'Nombre del local:';
-    else labelNombre.textContent = 'Nombre del comercio:';
+  // Label del nombre
+  var lbl = document.getElementById('rcLabelNombre');
+  if(lbl) lbl.textContent = modo==='servicio' ? 'Nombre / Razón social:' : modo==='vitrina' ? 'Nombre del local:' : 'Nombre del comercio:';
+  // Placeholder
+  var inp = document.getElementById('rcNombre');
+  if(inp) inp.placeholder = modo==='servicio' ? 'Ej: Estudio Jurídico López, Taller El Mecánico…' : modo==='vitrina' ? 'Ej: Bar La Esquina, Peluquería Sol…' : 'Ej: Panadería San Martín';
+  // Rubros filtrados
+  var sel = document.getElementById('rcRubro');
+  if(sel){
+    var lista = modo==='servicio' ? _RUBROS_SERVICIO : _RUBROS_TIENDA;
+    sel.innerHTML = '<option value="">Elegí el rubro</option>' + lista.map(function(r){ return '<option value="'+r+'">'+r+'</option>'; }).join('');
   }
-
-  // Adaptar placeholder del nombre
-  var inputNombre = document.getElementById('rcNombre');
-  if(inputNombre){
-    if(modo==='servicio') inputNombre.placeholder = 'Ej: Estudio Jurídico López, Taller El Mecánico…';
-    else if(modo==='vitrina') inputNombre.placeholder = 'Ej: Bar La Esquina, Peluquería Sol…';
-    else inputNombre.placeholder = 'Ej: Panadería San Martín';
-  }
-
-  // Filtrar rubros según modo
-  var RUBROS_TIENDA = ['Gastronomía','Belleza y Estética','Hogar y Construcción','Almacén y Alimentos','Indumentaria y Calzado','Salud y Farmacia','Agro y Mascotas','Tecnología','Educación y Librerías','Deportes y Recreación','Regalos y Detalles','Imprenta y Gráfica','Alquiler y Préstamo','Caza, Pesca y Camping','Eventos y Fiestas','Artesanías y Productos Regionales','Combustibles, Gas y Energía','Cuidado de Personas'];
-  var RUBROS_SERVICIO = ['Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética'];
-  var lista = modo==='servicio' ? RUBROS_SERVICIO : RUBROS_TIENDA;
-  var selectRubro = document.getElementById('rcRubro');
-  if(selectRubro){
-    selectRubro.innerHTML = '<option value="">Elegí el rubro</option>' +
-      lista.map(function(r){ return '<option value="'+r+'">'+r+'</option>'; }).join('');
-  }
-
   showScreen('registro-comercio');
   rcMostrarPaso(1);
 }
@@ -5227,7 +5198,7 @@ async function registrarComercioSimple(){
       instagram:'', facebook:'', horario:'', dias:[], metodosPago:[],
       adheridos:[], img: null, imgGaleria: null,
       modo: _rcModoRegistro || 'tienda',
-      publicidadActiva:true, publicidadVence:diasAtras(-30),
+      publicidadActiva:true, publicidadVende:diasAtras(-30),
       plan:'gracia', planMonto:null, planComPct:null,
       planVence: _gracia.toISOString().slice(0,10), planActivo:true,
       bannerActivo:false, bannerVence:null, pagos:[],
@@ -9281,7 +9252,6 @@ function aplicarModoPanelComercio(){
     const el = document.getElementById(id);
     if(el) el.style.display = sinProductos ? 'none' : '';
   });
-  // En modo servicio ocultar también el ConectorT
   const conectorBox = document.getElementById('cConectorToggleBox');
   if(conectorBox) conectorBox.style.display = (c && c.modo==='servicio') ? 'none' : '';
 }
@@ -9453,23 +9423,18 @@ function abrirEditarComercio(){
     ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.'
     : '⚠️ Todavía no marcaste tu ubicación exacta — tocá el mapa o usá el botón de GPS.';
 
-  // Adaptar formulario según modo del comercio
-  var _esModoServicio = c.modo === 'servicio';
-  var _optT = document.getElementById('vitOpt-tienda');
-  var _optV = document.getElementById('vitOpt-vitrina');
-  var _infoServ = document.getElementById('vitModoServicioInfo');
-  if(_optT)  _optT.style.display  = _esModoServicio ? 'none' : '';
-  if(_optV)  _optV.style.display  = _esModoServicio ? 'none' : '';
-  if(_infoServ) _infoServ.style.display = _esModoServicio ? '' : 'none';
-  // Rubros: si es servicio mostrar solo los de servicio
-  if(_esModoServicio){
-    var RUBROS_SERV_ED = ['Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética'];
-    var _selR = document.getElementById('editCRubro');
-    if(_selR){
-      var _rAct = c.rubro || '';
-      _selR.innerHTML = '<option value="">Elegí el rubro</option>' +
-        RUBROS_SERV_ED.map(function(r){ return '<option value="'+r+'"'+(r===_rAct?' selected':'')+'>'+r+'</option>'; }).join('');
-    }
+  // Adaptar formulario según modo
+  var _esSrv = c.modo === 'servicio';
+  var _oT = document.getElementById('vitOpt-tienda');
+  var _oV = document.getElementById('vitOpt-vitrina');
+  var _iS = document.getElementById('vitModoServicioInfo');
+  if(_oT) _oT.style.display  = _esSrv ? 'none' : '';
+  if(_oV) _oV.style.display  = _esSrv ? 'none' : '';
+  if(_iS) _iS.style.display  = _esSrv ? ''     : 'none';
+  if(_esSrv){
+    var _RSERV = ['Taller Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética','Vehículos y Repuestos'];
+    var _sR = document.getElementById('editCRubro');
+    if(_sR){ var _rA = c.rubro||''; _sR.innerHTML = '<option value="">Elegí el rubro</option>'+_RSERV.map(function(r){ return '<option value="'+r+'"'+(r===_rA?' selected':'')+'>'+r+'</option>'; }).join(''); }
   }
 
   cargarVitrinaEnEditar();
@@ -11527,7 +11492,8 @@ const RUBROS_LIST = [
   ['Almacén y Alimentos',       '1f6d2_3d.png'],
   ['Indumentaria y Calzado',    '1f455_3d.png'],
   ['Salud y Farmacia',          '1f48a_3d.png'],
-  ['Automotor',                 '1f697_3d.png'],
+  ['Vehículos y Repuestos',     '1f697_3d.png'],
+  ['Taller Automotor',          '1f527_3d.png'],
   ['Agro y Mascotas',           '1f69c_3d.png'],
   ['Tecnología',                '1f4f1_3d.png'],
   ['Educación y Librerías',     '1f4da_3d.png'],
@@ -11628,13 +11594,23 @@ const TIPOS_POR_RUBRO = {
     // Especialidades y estudios
     'Laboratorio de análisis','Diagnóstico por imágenes','Ginecología y obstetricia','Traumatología','Dermatología','Oftalmología','Cardiología','Ortopedia','Podología','Clínica / sanatorio','Ambulancias y emergencias médicas',
   ],
-  'Automotor': [
-    'Agencia de autos','Agencia de motos','Bicicletería',
-    'Repuestos y autopartes','Accesorios para autos','Lubricentro / cambio de aceite',
-    'Taller mecánico','Gomería','Chapería y pintura','Lavadero de autos',
-    'Instalación de alarmas y audio',
-    // Más servicios
-    'Electricidad del automotor','Escapes','Vidrios y cristales','Grúa y auxilio mecánico','Cubiertas y alineación','Taller de motos',
+  'Vehículos y Repuestos': [
+    // Venta de vehículos
+    'Agencia de autos','Agencia de motos','Agencia de usados','Bicicletería',
+    // Partes y accesorios
+    'Repuestos y autopartes','Accesorios para autos','Cubiertas y llantas',
+    'Instalación de alarmas y audio','Vidrios y cristales',
+    // Insumos
+    'Lubricentro / cambio de aceite','Combustibles y aditivos',
+  ],
+  'Taller Automotor': [
+    // Taller
+    'Taller mecánico','Taller de motos','Taller de camiones',
+    // Especialidades
+    'Gomería','Chapería y pintura','Electricidad del automotor',
+    'Escapes y silenciadores','Alineación y balanceo',
+    // Otros
+    'Lavadero de autos','Grúa y auxilio mecánico',
   ],
   'Agro y Mascotas': [
     'Agro e insumos rurales','Semillas y plantines','Maquinaria agrícola','Veterinaria rural / ganadería',
@@ -12177,7 +12153,8 @@ const RUBROS_HOME_DEFAULT = [
   {id:'almacen',            nombre:'Almacén y Alimentos',      icono:'🛒', orden:4,  imagen:''},
   {id:'indumentaria',       nombre:'Indumentaria y Calzado',   icono:'👗', orden:5,  imagen:''},
   {id:'salud',              nombre:'Salud y Farmacia',         icono:'💊', orden:6,  imagen:''},
-  {id:'automotor',          nombre:'Automotor',                icono:'🚗', orden:7,  imagen:''},
+  {id:'vehiculos-repuestos', nombre:'Vehículos y Repuestos',   icono:'🚗', orden:7,  imagen:''},
+  {id:'taller-automotor',   nombre:'Taller Automotor',         icono:'🔧', orden:8,  imagen:'', ocultarSiVacio:true},
   {id:'agro-mascotas',      nombre:'Agro y Mascotas',          icono:'🐾', orden:8,  imagen:''},
   {id:'tecnologia',         nombre:'Tecnología',               icono:'💻', orden:9,  imagen:''},
   {id:'educacion',          nombre:'Educación y Librerías',    icono:'📚', orden:10, imagen:''},
@@ -12213,7 +12190,9 @@ const RUBRO_A_CATEGORIA = {
   'Almacén y Alimentos':'almacen',
   'Indumentaria y Calzado':'indumentaria',
   'Salud y Farmacia':'salud',
-  'Automotor':'automotor',
+  'Automotor':'vehiculos-repuestos',          // compatibilidad registros viejos
+  'Vehículos y Repuestos':'vehiculos-repuestos',
+  'Taller Automotor':'taller-automotor',
   'Agro y Mascotas':'agro-mascotas',
   'Tecnología':'tecnologia',
   'Educación y Librerías':'educacion',
@@ -13086,9 +13065,7 @@ function setFeedTab(tab){
   if(tab==='ofertas'){ renderFeed(); }
   if(tab==='locales'){ renderLocales(); }
   if(tab==='ciudadhoy'){ renderCiudadHoy(); renderGuiaUtilCiudadHoy(); renderSponsorBanner(); }
-  if(tab==='util'){
-    requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ iniciarMapaCity(); }); });
-  }
+  if(tab==='util'){ requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ iniciarMapaCity(); }); }); }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ _encantarCache = { key: null, ids: [] }; _feedCategoriaActual = 'todos'; renderHomeTab(); }
   if(tab==='redlocal'){ renderGuiaCiudadTab('redlocal'); }
@@ -13123,7 +13100,7 @@ var GUIA_CIUDAD_CATS = {
     {ic:'🏠',nm:'Inmobiliarias',rubro:'Inmobiliarias y Turismo'},
     {ic:'🏗️',nm:'Construcción',rubro:'Hogar y Construcción'},
     {ic:'📦',nm:'Distribuidoras',rubro:'Servicios Varios'},
-    {ic:'🚗',nm:'Concesionarias',rubro:'Automotor'},
+    {ic:'🚗',nm:'Concesionarias',rubro:'Vehículos y Repuestos'},
     {ic:'🛡️',nm:'Seguros',rubro:'Servicios Profesionales'},
     {ic:'💰',nm:'Financieras',rubro:'Bancos, Pagos y Finanzas'},
     {ic:'🚚',nm:'Logística',rubro:'Transporte, Encomiendas y Viajes'},
@@ -13132,14 +13109,14 @@ var GUIA_CIUDAD_CATS = {
     {ic:'🏢',nm:'Otras empresas',rubro:'Servicios Profesionales'}
   ],
   talleres:[
-    {ic:'🔧',nm:'Mecánica',rubro:'Automotor'},
-    {ic:'🫧',nm:'Gomería',rubro:'Automotor'},
-    {ic:'🚘',nm:'Chapa y Pintura',rubro:'Automotor'},
-    {ic:'🔌',nm:'Electricidad Auto',rubro:'Automotor'},
+    {ic:'🔧',nm:'Mecánica',rubro:'Taller Automotor'},
+    {ic:'🫧',nm:'Gomería',rubro:'Taller Automotor'},
+    {ic:'🚘',nm:'Chapa y Pintura',rubro:'Taller Automotor'},
+    {ic:'🔌',nm:'Electricidad Auto',rubro:'Taller Automotor'},
     {ic:'🪵',nm:'Carpintería',rubro:'Hogar y Construcción'},
     {ic:'⚙️',nm:'Herrería',rubro:'Hogar y Construcción'},
     {ic:'📺',nm:'Electrónica',rubro:'Tecnología'},
-    {ic:'🚿',nm:'Lavadero de Autos',rubro:'Automotor'},
+    {ic:'🚿',nm:'Lavadero de Autos',rubro:'Taller Automotor'},
     {ic:'🛠️',nm:'Otros talleres',rubro:'Servicios Varios'}
   ]
 };
@@ -13158,10 +13135,10 @@ function renderGuiaCiudadTab(tipo){
   grid.innerHTML = cats.map(function(c){
     var hay = rubrosConServicios.has(c.rubro);
     var badge = hay ? '<div class="gct-vivo">Ver →</div>' : '<div class="gct-prox">Próximamente</div>';
-    var onclick = hay
-      ? 'abrirGuiaCiudadCat(\''+tipo+'\',\''+c.nm+'\',\''+c.rubro+'\')'
-      : 'toast(\'🚀 '+c.nm+' — ¡Próximamente en PuenT!\')';
-    return '<button class="guia-cat-tile" onclick="'+onclick+'"><div class="gct-ic">'+c.ic+'</div><div class="gct-nm">'+c.nm+'</div>'+badge+'</button>';
+    var fn = hay
+      ? 'abrirGuiaCiudadCat(\''+tipo+'\',\''+c.nm.replace(/'/g,"\\'")+'\''+',\''+c.rubro.replace(/'/g,"\\'")+'\''+')'
+      : 'toast(\'🚀 '+c.nm+' — ¡Próximamente!\')';
+    return '<button class="guia-cat-tile" onclick="'+fn+'"><div class="gct-ic">'+c.ic+'</div><div class="gct-nm">'+c.nm+'</div>'+badge+'</button>';
   }).join('');
 }
 
@@ -13177,20 +13154,16 @@ function abrirGuiaCiudadCat(tipo, nombre, rubro){
   titulo.textContent = nombre;
   var back = document.getElementById('guiaCatDetalleBack');
   if(back) back.dataset.tipo = tipo;
-  if(!coms.length){
-    cont.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;">Todavía no hay registros en esta categoría.<br><br>'
-      +'<button class="btn btn-primary" style="width:auto;padding:12px 28px;border-radius:100px;" onclick="showScreen(\'bienvenida-comercio\')">Registrar mi negocio →</button></div>';
-  } else {
-    cont.innerHTML = coms.map(function(c){
-      return '<div class="servicio-card" onclick="abrirLocal(\''+c.id+'\')">'
-        +'<div class="servicio-card-foto">'+(c.img?'<img src="'+c.img+'" alt="'+c.nombre+'">':'<div class="servicio-card-ic">🏢</div>')+'</div>'
-        +'<div class="servicio-card-body">'
-        +'<div class="servicio-card-nom">'+c.nombre+'</div>'
-        +'<div class="servicio-card-rub">'+c.rubro+'</div>'
-        +(c.descripcion?'<div class="servicio-card-desc">'+c.descripcion.slice(0,80)+'…</div>':'')
-        +'</div></div>';
-    }).join('');
-  }
+  cont.innerHTML = !coms.length
+    ? '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;">Todavía no hay registros en esta categoría.<br><br><button class="btn btn-primary" style="width:auto;padding:12px 28px;border-radius:100px;" onclick="showScreen(\'bienvenida-comercio\')">Registrar mi negocio →</button></div>'
+    : coms.map(function(c){
+        return '<div class="servicio-card" onclick="abrirLocal(\''+c.id+'\')">'
+          +'<div class="servicio-card-foto">'+(c.img?'<img src="'+c.img+'" alt="">':'<div class="servicio-card-ic">🏢</div>')+'</div>'
+          +'<div class="servicio-card-body"><div class="servicio-card-nom">'+c.nombre+'</div>'
+          +'<div class="servicio-card-rub">'+c.rubro+'</div>'
+          +(c.descripcion?'<div class="servicio-card-desc">'+c.descripcion.slice(0,80)+'…</div>':'')
+          +'</div></div>';
+      }).join('');
   showScreen('guia-cat-detalle');
 }
 
