@@ -839,6 +839,30 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .vit-nombre{margin:34px 12px 0;font-weight:800;font-size:14px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-rubro{margin:2px 12px 0;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .vit-modo-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;}
+.modo-reg-btn{width:100%;background:white;border:1.5px solid var(--line);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;}
+.modo-reg-btn:active{transform:scale(0.98);}
+.modo-reg-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.modo-reg-body{flex:1;min-width:0;}
+.modo-reg-t{font-weight:800;font-size:15.5px;color:var(--navy);margin-bottom:3px;}
+.modo-reg-s{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:4px;}
+.modo-reg-ejemplo{font-size:11.5px;color:#B0B0B0;font-style:italic;}
+.modo-reg-arrow{font-size:22px;color:#CCC;flex-shrink:0;padding-left:4px;}
+.guia-ciudad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.guia-cat-tile{background:white;border:1.5px solid var(--line);border-radius:16px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .12s ease;text-align:center;}
+.guia-cat-tile:active{transform:scale(0.96);}
+.guia-cat-tile .gct-ic{font-size:26px;line-height:1;}
+.guia-cat-tile .gct-nm{font-size:11.5px;font-weight:700;color:var(--navy);line-height:1.3;}
+.guia-cat-tile .gct-prox{font-size:10px;font-weight:700;color:white;background:var(--orange);border-radius:20px;padding:2px 7px;margin-top:2px;}
+.guia-cat-tile .gct-vivo{font-size:10px;font-weight:700;color:white;background:#5C7355;border-radius:20px;padding:2px 8px;margin-top:2px;}
+.servicio-card{background:white;border:1.5px solid var(--line);border-radius:16px;display:flex;align-items:center;gap:14px;padding:14px;cursor:pointer;transition:transform .12s ease;}
+.servicio-card:active{transform:scale(0.98);}
+.servicio-card-foto{width:58px;height:58px;border-radius:12px;overflow:hidden;flex-shrink:0;background:#F2F2EF;display:flex;align-items:center;justify-content:center;}
+.servicio-card-foto img{width:100%;height:100%;object-fit:cover;}
+.servicio-card-ic{font-size:26px;}
+.servicio-card-body{flex:1;min-width:0;}
+.servicio-card-nom{font-weight:800;font-size:15px;color:var(--navy);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.servicio-card-rub{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.servicio-card-desc{font-size:12.5px;color:var(--ink);line-height:1.4;}
 .vit-modo-opt input{width:auto;margin-top:3px;}
 .vit-modo-opt.sel{border-color:#5C7355;background:#F2F6EF;}
 .vit-gal-item{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
@@ -980,10 +1004,13 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
   <!-- SOLAPAS FIJAS debajo del topbar, visibles en el feed -->
   <div class="feed-solapas hidden" id="feedSolapas" style="position:sticky;top:0;z-index:19;">
-    <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">&#127968; Home</button>
-    <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">&#128293; Ofertas</button>
-    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">&#127961;&#65039; Ciudad Hoy</button>
+    <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">🏠 Home</button>
+    <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">🏷️ Ofertas</button>
+    <button class="feed-solapa" id="tabRedlocal" onclick="setFeedTab('redlocal')">🤝 Red Local</button>
+    <button class="feed-solapa" id="tabEmpresas" onclick="setFeedTab('empresas')">🏢 Empresas</button>
+    <button class="feed-solapa" id="tabTalleres" onclick="setFeedTab('talleres')">🔧 Talleres</button>
     <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">🗺️ Mapa</button>
+    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">📍 Ciudad Hoy</button>
     <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">🏪 Locales</button>
     <button class="feed-solapa" id="tabRubros" onclick="abrirTodosRubros()">📂 Rubros</button>
     <button class="feed-solapa" id="tabRanking" onclick="abrirRankingComercios()">🏆 Ranking</button>
@@ -1174,6 +1201,33 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
 
     <!-- ================================================================
+         TAB: RED LOCAL
+    ================================================================ -->
+    <div id="feedRedlocalView" class="hidden" style="padding:16px 16px 24px;">
+      <div class="section-title" style="margin-bottom:2px;">🤝 Red Local</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Profesionales independientes de tu ciudad.</p>
+      <div class="guia-ciudad-grid" id="redlocalGrid"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: EMPRESAS
+    ================================================================ -->
+    <div id="feedEmpresasView" class="hidden" style="padding:16px 16px 24px;">
+      <div class="section-title" style="margin-bottom:2px;">🏢 Empresas</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Pymes, empresas e instituciones de tu ciudad.</p>
+      <div class="guia-ciudad-grid" id="empresasGrid"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: TALLERES
+    ================================================================ -->
+    <div id="feedTalleresView" class="hidden" style="padding:16px 16px 24px;">
+      <div class="section-title" style="margin-bottom:2px;">🔧 Talleres</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;">Talleres y servicios especializados de tu ciudad.</p>
+      <div class="guia-ciudad-grid" id="talleresGrid"></div>
+    </div>
+
+    <!-- ================================================================
          TAB: LOCALES
     ================================================================ -->
     <div id="feedLocalesView" class="hidden" style="padding:0 16px; margin-top:12px;">
@@ -1310,36 +1364,80 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <!-- ============ BIENVENIDA: SUMÁ TU COMERCIO ============ -->
   <div class="screen hidden" id="screen-bienvenida-comercio">
     <div class="link-back" onclick="showScreen('feed')">← Volver</div>
-    <div class="kicker">Para comercios</div>
-    <h1 class="page-title">Tu comercio también puede estar en PuenT</h1>
-    <p class="page-sub">Mostrá lo que tenés. Llegá a más personas de tu ciudad.</p>
-    <p style="font-size:13.5px; color:var(--ink); line-height:1.6; margin:0 0 16px;">PuenT reúne comercios reales de la ciudad en un solo lugar, para que tus clientes puedan encontrarte, conocer tus productos y contactarte fácilmente.</p>
+    <div class="kicker">Sumá tu negocio</div>
+    <h1 class="page-title">Tu ciudad te espera en PuenT</h1>
+    <p class="page-sub">Tienda, vidriera, profesional, empresa o taller. Hay un lugar para cada negocio.</p>
 
     <div class="card" style="margin-bottom:12px;">
-      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🏪 Tu vidriera, ahora online</div>
-      <p style="font-size:13.5px; color:var(--ink); margin:0;">Mostrá tus productos y hacé que más personas conozcan tu comercio.</p>
+      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🛍️ Tienda online</div>
+      <p style="font-size:13.5px; color:var(--ink); margin:0;">Publicá productos con foto y precio. Tus clientes te encuentran en el feed.</p>
     </div>
-
+    <div class="card" style="margin-bottom:12px;">
+      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🏬 Solo vidriera</div>
+      <p style="font-size:13.5px; color:var(--ink); margin:0;">Mostrá tu local con fotos e info. Sin necesidad de publicar productos.</p>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🤝 Servicio profesional</div>
+      <p style="font-size:13.5px; color:var(--ink); margin:0;">Abogados, mecánicos, clínicas, carpinteros y más. Aparecés en Red Local, Empresas o Talleres.</p>
+    </div>
     <div class="card" style="margin-bottom:12px;">
       <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">📍 Llegá a tu ciudad</div>
       <p style="font-size:13.5px; color:var(--ink); margin:0;">Tu negocio aparece donde están tus clientes: cerca, simple y directo.</p>
     </div>
 
-    <div class="card" style="margin-bottom:12px;">
-      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">📦 Mové tu stock</div>
-      <p style="font-size:13.5px; color:var(--ink); margin:0;">Publicá lo que tenés disponible y convertí visitas en consultas y ventas.</p>
-    </div>
-
-    <div class="card" style="margin-bottom:12px;">
-      <div class="page-sub" style="font-weight:700; color:var(--navy); margin-bottom:6px;">🤝 Crecemos juntos</div>
-      <p style="font-size:13.5px; color:var(--ink); margin:0;">Cuando más comercios participan, más opciones encuentran los vecinos y más movimiento queda en la ciudad.</p>
-    </div>
-
     <p style="text-align:center; font-size:14px; font-weight:700; color:var(--ink); margin:18px 0 4px;">Sumate a PuenT.</p>
-    <p style="text-align:center; font-size:13px; color:var(--muted); margin:0 0 14px;">Tu comercio tiene algo para mostrar.</p>
-
-    <button class="btn btn-primary" onclick="showScreen('registro-comercio')">Registrar mi comercio</button>
+    <p style="text-align:center; font-size:13px; color:var(--muted); margin:0 0 14px;">Todos los modos incluyen 30 días gratis.</p>
+    <button class="btn btn-primary" onclick="showScreen('elegir-modo')">Registrar mi negocio →</button>
     <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Es gratis empezar. Te lleva un par de minutos.</p>
+  </div>
+
+  <!-- ============ SCREEN: ELEGIR MODO ============ -->
+  <div class="screen hidden" id="screen-elegir-modo" style="padding:28px 20px 40px;">
+    <div class="link-back" onclick="showScreen('bienvenida-comercio')">← Volver</div>
+    <div class="kicker" style="margin-top:8px;">Sumá tu negocio</div>
+    <h1 style="font-family:'Bai Jamjuree',sans-serif;font-size:26px;font-weight:700;color:#1A1A1A;margin-bottom:6px;line-height:1.2;">¿Cómo querés<br>aparecer en PuenT?</h1>
+    <p style="font-size:13.5px;color:#888;margin-bottom:28px;line-height:1.5;">Elegí el modo que mejor representa tu negocio.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <button class="modo-reg-btn" onclick="elegirModoRegistro('tienda')">
+        <div class="modo-reg-ic" style="background:#FFF0F0;">🛍️</div>
+        <div class="modo-reg-body">
+          <div class="modo-reg-t">Tienda</div>
+          <div class="modo-reg-s">Vendé productos online. Aparecen en el feed y en "Te va a encantar".</div>
+          <div class="modo-reg-ejemplo">Panadería, ropa, ferretería, agencia de autos, casa de repuestos…</div>
+        </div>
+        <div class="modo-reg-arrow">›</div>
+      </button>
+      <button class="modo-reg-btn" onclick="elegirModoRegistro('vitrina')">
+        <div class="modo-reg-ic" style="background:#EAF2E6;">🏬</div>
+        <div class="modo-reg-body">
+          <div class="modo-reg-t">Solo vidriera</div>
+          <div class="modo-reg-s">Mostrá tu local con fotos, info y contacto. Sin publicar productos.</div>
+          <div class="modo-reg-ejemplo">Kiosco, peluquería, bar, gimnasio…</div>
+        </div>
+        <div class="modo-reg-arrow">›</div>
+      </button>
+      <button class="modo-reg-btn" onclick="elegirModoRegistro('servicio')">
+        <div class="modo-reg-ic" style="background:#EEF2FF;">🤝</div>
+        <div class="modo-reg-body">
+          <div class="modo-reg-t">Servicio</div>
+          <div class="modo-reg-s">Para profesionales, empresas y talleres. Aparecés en Red Local, Empresas o Talleres.</div>
+          <div class="modo-reg-ejemplo">Abogado, mecánico, clínica, carpintero, electricista…</div>
+        </div>
+        <div class="modo-reg-arrow">›</div>
+      </button>
+    </div>
+    <p style="text-align:center;font-size:12px;color:#BBB;margin-top:24px;line-height:1.6;">Todos los modos incluyen 30 días gratis.</p>
+  </div>
+
+  <!-- ============ SCREEN: DETALLE CATEGORÍA SERVICIO ============ -->
+  <div class="screen hidden" id="screen-guia-cat-detalle" style="padding:0 0 32px;">
+    <div id="guiaCatDetalleBack" class="link-back" data-tipo="redlocal"
+      onclick="var t=this.dataset.tipo;setFeedTab(t);showScreen('feed');">← Volver</div>
+    <div style="padding:0 16px;">
+      <div class="kicker" style="margin-top:8px;">Red Local · PuenT</div>
+      <h1 id="guiaCatDetalleTitulo" style="font-family:'Bai Jamjuree',sans-serif;font-size:24px;font-weight:700;color:#1A1A1A;margin-bottom:16px;line-height:1.2;"></h1>
+      <div id="guiaCatDetalleCont" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div>
   </div>
 
   <!-- ============ PANEL REPARTIDOR ============ -->
@@ -1817,7 +1915,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div>
-          <label style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">Nombre del comercio:</label>
+          <label id="rcLabelNombre" style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">Nombre del comercio:</label>
           <input id="rcNombre" type="text" placeholder="Ej: Panadería San Martín" autocomplete="organization"
             style="width:100%;padding:14px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-family:inherit;box-sizing:border-box;background:#F8F8F8;">
         </div>
@@ -3084,11 +3182,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
 
-    <div class="card" style="margin-top:0;">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🏬 Modo de tu comercio en PuenT</div>
+    <div class="card" style="margin-top:0;" id="vitCardModoSelector">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">🏬 Modo de tu negocio en PuenT</div>
       <label class="vit-modo-opt" id="vitOpt-tienda"><input type="radio" name="vitModo" value="tienda" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🛍️ Tienda</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Mostrás tus productos. También podés sumar galería y características.</div></div></label>
       <label class="vit-modo-opt" id="vitOpt-vitrina"><input type="radio" name="vitModo" value="vitrina" onchange="vitMarcarModo()"><div><div style="font-weight:800;font-size:14px;">🏬 Solo vidriera</div><div style="font-size:12px;color:var(--muted);line-height:1.4;">Para locales, profesionales y talleres que quieren estar en PuenT con su ficha, galería y características, sin vender productos.</div></div></label>
-          </div>
+      <div id="vitModoServicioInfo" style="display:none;background:#EEF2FF;border-radius:12px;padding:12px 14px;font-size:13px;color:#3730A3;line-height:1.5;">🤝 <strong>Modo Servicio activo.</strong> Aparecés en Red Local, Empresas o Talleres según tu rubro. Para cambiar el modo contactá al soporte de PuenT.</div>
+    </div>
 
 
     <div class="card" style="margin-top:0;">
@@ -3994,36 +4093,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editAdWhatsapp" type="tel" inputmode="numeric" placeholder="Ej: 3454123456"></div>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:8px;">📲 Obligatorio — los clientes envían pedidos al WhatsApp del comercio.</div>
-      <div class="two-col">
-        <div class="field"><label>Teléfono alternativo</label><input id="editAdTelefonoAlt" type="tel" placeholder="Opcional"></div>
-        <div class="field"><label>Email</label><input id="editAdEmail" type="email"></div>
-      </div>
-      <div class="two-col">
-        <div class="field"><label>Instagram</label><input id="editAdInstagram" type="text"></div>
-        <div class="field"><label>Facebook</label><input id="editAdFacebook" type="text" placeholder="facebook.com/tunegocio"></div>
-      </div>
+      <div class="field"><label>Email</label><input id="editAdEmail" type="email"></div>
+      <div class="field"><label>Instagram</label><input id="editAdInstagram" type="text"></div>
       <div class="field"><label>Sitio web</label><input id="editAdWeb" type="text"></div>
       <div class="field"><label>Descripción</label><textarea id="editAdDescripcion" rows="2" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;"></textarea></div>
-      <div class="field">
-        <label>Turno mañana</label>
-        <div class="two-col">
-          <input id="editAdTurnoManDesde" type="time">
-          <input id="editAdTurnoManHasta" type="time">
-        </div>
-      </div>
-      <div class="field">
-        <label>Turno tarde <span style="font-weight:400;color:var(--muted);">(vacío si trabaja corrido o no abre a la tarde)</span></label>
-        <div class="two-col">
-          <input id="editAdTurnoTarDesde" type="time">
-          <input id="editAdTurnoTarHasta" type="time">
-        </div>
-      </div>
-      <div class="field"><label>Días de atención</label>
-        <div id="editAdDiasBox" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
-      </div>
-      <div class="field"><label>Métodos de pago</label>
-        <div id="editAdMetodosPagoBox" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
-      </div>
+      <div class="field"><label>Horario</label><input id="editAdHorario" type="text" placeholder="Ej: Lun a Vie 9 a 13 y 16 a 20hs"></div>
       <div class="field" style="background:var(--cream);border-radius:10px;padding:12px;">
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;">
           <input type="checkbox" id="editAdConectorActivo" style="width:20px;height:20px;flex-shrink:0;">
@@ -4997,6 +5071,30 @@ const PREGUNTAS_POR_TIPO = {
 };
 
 // ── REGISTRO SIMPLE COMERCIO ──
+
+var _rcModoRegistro = 'tienda'; // 'tienda' | 'vitrina' | 'servicio'
+
+var _RUBROS_TIENDA   = ['Gastronomía','Belleza y Estética','Hogar y Construcción','Almacén y Alimentos','Indumentaria y Calzado','Salud y Farmacia','Vehículos y Repuestos','Agro y Mascotas','Tecnología','Educación y Librerías','Deportes y Recreación','Regalos y Detalles','Imprenta y Gráfica','Alquiler y Préstamo','Caza, Pesca y Camping','Eventos y Fiestas','Artesanías y Productos Regionales','Combustibles, Gas y Energía','Cuidado de Personas'];
+var _RUBROS_SERVICIO = ['Taller Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética'];
+
+function elegirModoRegistro(modo){
+  _rcModoRegistro = modo;
+  // Label del nombre
+  var lbl = document.getElementById('rcLabelNombre');
+  if(lbl) lbl.textContent = modo==='servicio' ? 'Nombre / Razón social:' : modo==='vitrina' ? 'Nombre del local:' : 'Nombre del comercio:';
+  // Placeholder
+  var inp = document.getElementById('rcNombre');
+  if(inp) inp.placeholder = modo==='servicio' ? 'Ej: Estudio Jurídico López, Taller El Mecánico…' : modo==='vitrina' ? 'Ej: Bar La Esquina, Peluquería Sol…' : 'Ej: Panadería San Martín';
+  // Rubros filtrados
+  var sel = document.getElementById('rcRubro');
+  if(sel){
+    var lista = modo==='servicio' ? _RUBROS_SERVICIO : _RUBROS_TIENDA;
+    sel.innerHTML = '<option value="">Elegí el rubro</option>' + lista.map(function(r){ return '<option value="'+r+'">'+r+'</option>'; }).join('');
+  }
+  showScreen('registro-comercio');
+  rcMostrarPaso(1);
+}
+
 /* ===== STEPPER REGISTRO COMERCIO ===== */
 var _rcPasoActual = 1;
 
@@ -5028,7 +5126,7 @@ function rcMostrarPaso(n){
 
 function rcRetroceder(){
   if(_rcPasoActual > 1){ rcMostrarPaso(_rcPasoActual - 1); }
-  else { showScreen('bienvenida-comercio'); }
+  else { showScreen('elegir-modo'); }
 }
 
 function rcAvanzarPaso1(){
@@ -5099,7 +5197,8 @@ async function registrarComercioSimple(){
       rubro, tipo:'', descripcion:'', direccion:'', telefono: celular, whatsapp: celular,
       instagram:'', facebook:'', horario:'', dias:[], metodosPago:[],
       adheridos:[], img: null, imgGaleria: null,
-      publicidadActiva:true, publicidadVence:diasAtras(-30),
+      modo: _rcModoRegistro || 'tienda',
+      publicidadActiva:true, publicidadVende:diasAtras(-30),
       plan:'gracia', planMonto:null, planComPct:null,
       planVence: _gracia.toISOString().slice(0,10), planActivo:true,
       bannerActivo:false, bannerVence:null, pagos:[],
@@ -5723,6 +5822,7 @@ function crearCuentaDesdeGoogle(rol, user){
     const _graciaGoogle = new Date(); _graciaGoogle.setDate(_graciaGoogle.getDate() + 30);
     data = {id: nextId('c'), uid:user.uid, nombre, email, ciudad:'La Paz',
             rubro:'', tipo:'', descripcion:'',
+            modo: (typeof _rcModoRegistro !== 'undefined' && _rcModoRegistro) ? _rcModoRegistro : 'tienda',
             viaGoogle:true, adheridos:[], img: null,
             publicidadActiva:true, publicidadVence:diasAtras(-30),
             aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true,
@@ -9144,14 +9244,16 @@ function leerVitrinaDeEditar(c){
   c.caracVitrina = _vitCaract.slice();
 }
 
-// En modo "solo vitrina" el panel no ofrece cargar ni ver productos
+// En modo "vitrina" o "servicio" el panel no ofrece cargar ni ver productos
 function aplicarModoPanelComercio(){
   const c = state.currentUser;
-  const soloVitrina = !!c && c.modo==='vitrina';
+  const sinProductos = !!c && (c.modo==='vitrina' || c.modo==='servicio');
   ['btnCargarProdPanel','btnProductosPanel'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.style.display = soloVitrina ? 'none' : '';
+    if(el) el.style.display = sinProductos ? 'none' : '';
   });
+  const conectorBox = document.getElementById('cConectorToggleBox');
+  if(conectorBox) conectorBox.style.display = (c && c.modo==='servicio') ? 'none' : '';
 }
 
 
@@ -9320,6 +9422,20 @@ function abrirEditarComercio(){
   document.getElementById('editCCoordsEstado').textContent = (c.lat && c.lng)
     ? 'Tocá el mapa o arrastrá el pin para ajustar la ubicación.'
     : '⚠️ Todavía no marcaste tu ubicación exacta — tocá el mapa o usá el botón de GPS.';
+
+  // Adaptar formulario según modo
+  var _esSrv = c.modo === 'servicio';
+  var _oT = document.getElementById('vitOpt-tienda');
+  var _oV = document.getElementById('vitOpt-vitrina');
+  var _iS = document.getElementById('vitModoServicioInfo');
+  if(_oT) _oT.style.display  = _esSrv ? 'none' : '';
+  if(_oV) _oV.style.display  = _esSrv ? 'none' : '';
+  if(_iS) _iS.style.display  = _esSrv ? ''     : 'none';
+  if(_esSrv){
+    var _RSERV = ['Taller Automotor','Servicios Profesionales','Servicios Varios','Inmobiliarias y Turismo','Transporte, Encomiendas y Viajes','Entretenimiento y Vida Nocturna','Servicios Funerarios','Instituciones y Entidades','Bancos, Pagos y Finanzas','Salud y Farmacia','Educación y Librerías','Hogar y Construcción','Tecnología','Deportes y Recreación','Belleza y Estética','Vehículos y Repuestos'];
+    var _sR = document.getElementById('editCRubro');
+    if(_sR){ var _rA = c.rubro||''; _sR.innerHTML = '<option value="">Elegí el rubro</option>'+_RSERV.map(function(r){ return '<option value="'+r+'"'+(r===_rA?' selected':'')+'>'+r+'</option>'; }).join(''); }
+  }
 
   cargarVitrinaEnEditar();
   showScreen('editar-comercio');
@@ -11376,7 +11492,8 @@ const RUBROS_LIST = [
   ['Almacén y Alimentos',       '1f6d2_3d.png'],
   ['Indumentaria y Calzado',    '1f455_3d.png'],
   ['Salud y Farmacia',          '1f48a_3d.png'],
-  ['Automotor',                 '1f697_3d.png'],
+  ['Vehículos y Repuestos',     '1f697_3d.png'],
+  ['Taller Automotor',          '1f527_3d.png'],
   ['Agro y Mascotas',           '1f69c_3d.png'],
   ['Tecnología',                '1f4f1_3d.png'],
   ['Educación y Librerías',     '1f4da_3d.png'],
@@ -11477,13 +11594,23 @@ const TIPOS_POR_RUBRO = {
     // Especialidades y estudios
     'Laboratorio de análisis','Diagnóstico por imágenes','Ginecología y obstetricia','Traumatología','Dermatología','Oftalmología','Cardiología','Ortopedia','Podología','Clínica / sanatorio','Ambulancias y emergencias médicas',
   ],
-  'Automotor': [
-    'Agencia de autos','Agencia de motos','Bicicletería',
-    'Repuestos y autopartes','Accesorios para autos','Lubricentro / cambio de aceite',
-    'Taller mecánico','Gomería','Chapería y pintura','Lavadero de autos',
-    'Instalación de alarmas y audio',
-    // Más servicios
-    'Electricidad del automotor','Escapes','Vidrios y cristales','Grúa y auxilio mecánico','Cubiertas y alineación','Taller de motos',
+  'Vehículos y Repuestos': [
+    // Venta de vehículos
+    'Agencia de autos','Agencia de motos','Agencia de usados','Bicicletería',
+    // Partes y accesorios
+    'Repuestos y autopartes','Accesorios para autos','Cubiertas y llantas',
+    'Instalación de alarmas y audio','Vidrios y cristales',
+    // Insumos
+    'Lubricentro / cambio de aceite','Combustibles y aditivos',
+  ],
+  'Taller Automotor': [
+    // Taller
+    'Taller mecánico','Taller de motos','Taller de camiones',
+    // Especialidades
+    'Gomería','Chapería y pintura','Electricidad del automotor',
+    'Escapes y silenciadores','Alineación y balanceo',
+    // Otros
+    'Lavadero de autos','Grúa y auxilio mecánico',
   ],
   'Agro y Mascotas': [
     'Agro e insumos rurales','Semillas y plantines','Maquinaria agrícola','Veterinaria rural / ganadería',
@@ -12026,7 +12153,8 @@ const RUBROS_HOME_DEFAULT = [
   {id:'almacen',            nombre:'Almacén y Alimentos',      icono:'🛒', orden:4,  imagen:''},
   {id:'indumentaria',       nombre:'Indumentaria y Calzado',   icono:'👗', orden:5,  imagen:''},
   {id:'salud',              nombre:'Salud y Farmacia',         icono:'💊', orden:6,  imagen:''},
-  {id:'automotor',          nombre:'Automotor',                icono:'🚗', orden:7,  imagen:''},
+  {id:'vehiculos-repuestos', nombre:'Vehículos y Repuestos',   icono:'🚗', orden:7,  imagen:''},
+  {id:'taller-automotor',   nombre:'Taller Automotor',         icono:'🔧', orden:8,  imagen:'', ocultarSiVacio:true},
   {id:'agro-mascotas',      nombre:'Agro y Mascotas',          icono:'🐾', orden:8,  imagen:''},
   {id:'tecnologia',         nombre:'Tecnología',               icono:'💻', orden:9,  imagen:''},
   {id:'educacion',          nombre:'Educación y Librerías',    icono:'📚', orden:10, imagen:''},
@@ -12062,7 +12190,9 @@ const RUBRO_A_CATEGORIA = {
   'Almacén y Alimentos':'almacen',
   'Indumentaria y Calzado':'indumentaria',
   'Salud y Farmacia':'salud',
-  'Automotor':'automotor',
+  'Automotor':'vehiculos-repuestos',          // compatibilidad registros viejos
+  'Vehículos y Repuestos':'vehiculos-repuestos',
+  'Taller Automotor':'taller-automotor',
   'Agro y Mascotas':'agro-mascotas',
   'Tecnología':'tecnologia',
   'Educación y Librerías':'educacion',
@@ -12916,37 +13046,125 @@ let tabActiva = 'home';
 function setFeedTab(tab){
   tabActiva = tab;
   if(tab !== 'ciudadhoy' && _sponsorBannerTimer){ clearInterval(_sponsorBannerTimer); _sponsorBannerTimer = null; }
-  // Botones de solapa
-  ['home','ofertas','ciudadhoy','util','locales','mas'].forEach(t=>{
+  ['home','ofertas','redlocal','empresas','talleres','ciudadhoy','util','locales','mas'].forEach(t=>{
     var btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
     if(btn) btn.classList.toggle('active', t===tab);
   });
-  // Vistas
   var views = {
     home:'feedHomeView', ofertas:'feedOfertasView', locales:'feedLocalesView',
-    ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView'
+    ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView',
+    redlocal:'feedRedlocalView', empresas:'feedEmpresasView', talleres:'feedTalleresView'
   };
   Object.entries(views).forEach(([t, id])=>{
     var el = document.getElementById(id);
     if(el) el.classList.toggle('hidden', t!==tab);
   });
-  // la solapa activa queda a la vista dentro de la barra deslizable
   try{ var _ta = document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)); if(_ta && _ta.scrollIntoView) _ta.scrollIntoView({inline:'center', block:'nearest'}); }catch(e){}
   window.scrollTo(0,0);
   if(tab !== 'util') ocultarMapa();
   if(tab==='ofertas'){ renderFeed(); }
   if(tab==='locales'){ renderLocales(); }
   if(tab==='ciudadhoy'){ renderCiudadHoy(); renderGuiaUtilCiudadHoy(); renderSponsorBanner(); }
-  if(tab==='util'){
-    // Esperar dos frames para que el DOM pinte el div con dimensiones reales
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        iniciarMapaCity();
-      });
-    });
-  }
+  if(tab==='util'){ requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ iniciarMapaCity(); }); }); }
   if(tab==='mas'){ renderFeedVendedores(); }
   if(tab==='home'){ _encantarCache = { key: null, ids: [] }; _feedCategoriaActual = 'todos'; renderHomeTab(); }
+  if(tab==='redlocal'){ renderGuiaCiudadTab('redlocal'); }
+  if(tab==='empresas'){ renderGuiaCiudadTab('empresas'); }
+  if(tab==='talleres'){ renderGuiaCiudadTab('talleres'); }
+}
+
+/* ══════════════════════════════════════════════════════
+   RED LOCAL / EMPRESAS / TALLERES
+   ══════════════════════════════════════════════════════ */
+var GUIA_CIUDAD_CATS = {
+  redlocal:[
+    {ic:'⚕️',nm:'Salud',rubro:'Salud y Farmacia'},
+    {ic:'⚖️',nm:'Legal',rubro:'Servicios Profesionales'},
+    {ic:'🧮',nm:'Contabilidad',rubro:'Servicios Profesionales'},
+    {ic:'🧠',nm:'Psicología',rubro:'Salud y Farmacia'},
+    {ic:'🥗',nm:'Nutrición',rubro:'Salud y Farmacia'},
+    {ic:'📚',nm:'Educación',rubro:'Educación y Librerías'},
+    {ic:'🏋️',nm:'Deporte y Fitness',rubro:'Deportes y Recreación'},
+    {ic:'🎨',nm:'Diseño',rubro:'Servicios Profesionales'},
+    {ic:'📷',nm:'Fotografía',rubro:'Servicios Varios'},
+    {ic:'💻',nm:'Informática',rubro:'Tecnología'},
+    {ic:'⚡',nm:'Electricidad',rubro:'Hogar y Construcción'},
+    {ic:'🔩',nm:'Plomería',rubro:'Hogar y Construcción'},
+    {ic:'🖌️',nm:'Pintura',rubro:'Hogar y Construcción'},
+    {ic:'🌿',nm:'Jardín',rubro:'Servicios Varios'},
+    {ic:'✂️',nm:'Peluquería',rubro:'Belleza y Estética'},
+    {ic:'🛠️',nm:'Otros servicios',rubro:'Servicios Varios'}
+  ],
+  empresas:[
+    {ic:'🏥',nm:'Clínicas y Salud',rubro:'Salud y Farmacia'},
+    {ic:'🏠',nm:'Inmobiliarias',rubro:'Inmobiliarias y Turismo'},
+    {ic:'🏗️',nm:'Construcción',rubro:'Hogar y Construcción'},
+    {ic:'📦',nm:'Distribuidoras',rubro:'Servicios Varios'},
+    {ic:'🚗',nm:'Concesionarias',rubro:'Vehículos y Repuestos'},
+    {ic:'🛡️',nm:'Seguros',rubro:'Servicios Profesionales'},
+    {ic:'💰',nm:'Financieras',rubro:'Bancos, Pagos y Finanzas'},
+    {ic:'🚚',nm:'Logística',rubro:'Transporte, Encomiendas y Viajes'},
+    {ic:'✈️',nm:'Turismo y Hotelería',rubro:'Inmobiliarias y Turismo'},
+    {ic:'🎓',nm:'Educación',rubro:'Educación y Librerías'},
+    {ic:'🏢',nm:'Otras empresas',rubro:'Servicios Profesionales'}
+  ],
+  talleres:[
+    {ic:'🔧',nm:'Mecánica',rubro:'Taller Automotor'},
+    {ic:'🫧',nm:'Gomería',rubro:'Taller Automotor'},
+    {ic:'🚘',nm:'Chapa y Pintura',rubro:'Taller Automotor'},
+    {ic:'🔌',nm:'Electricidad Auto',rubro:'Taller Automotor'},
+    {ic:'🪵',nm:'Carpintería',rubro:'Hogar y Construcción'},
+    {ic:'⚙️',nm:'Herrería',rubro:'Hogar y Construcción'},
+    {ic:'📺',nm:'Electrónica',rubro:'Tecnología'},
+    {ic:'🚿',nm:'Lavadero de Autos',rubro:'Taller Automotor'},
+    {ic:'🛠️',nm:'Otros talleres',rubro:'Servicios Varios'}
+  ]
+};
+
+function renderGuiaCiudadTab(tipo){
+  var gridId = tipo==='redlocal'?'redlocalGrid':tipo==='empresas'?'empresasGrid':'talleresGrid';
+  var grid = document.getElementById(gridId);
+  if(!grid) return;
+  var cats = GUIA_CIUDAD_CATS[tipo]||[];
+  var rubrosConServicios = new Set(
+    (state.comercios||[]).filter(function(c){
+      return c.modo==='servicio' && c.aprobado!==false && c.estado!=='papelera' &&
+             (!ciudadSeleccionada||mismaCiudad(c.ciudad,ciudadSeleccionada));
+    }).map(function(c){ return c.rubro; })
+  );
+  grid.innerHTML = cats.map(function(c){
+    var hay = rubrosConServicios.has(c.rubro);
+    var badge = hay ? '<div class="gct-vivo">Ver →</div>' : '<div class="gct-prox">Próximamente</div>';
+    var fn = hay
+      ? 'abrirGuiaCiudadCat(\''+tipo+'\',\''+c.nm.replace(/'/g,"\\'")+'\''+',\''+c.rubro.replace(/'/g,"\\'")+'\''+')'
+      : 'toast(\'🚀 '+c.nm+' — ¡Próximamente!\')';
+    return '<button class="guia-cat-tile" onclick="'+fn+'"><div class="gct-ic">'+c.ic+'</div><div class="gct-nm">'+c.nm+'</div>'+badge+'</button>';
+  }).join('');
+}
+
+function abrirGuiaCiudadCat(tipo, nombre, rubro){
+  var coms = (state.comercios||[]).filter(function(c){
+    return c.modo==='servicio' && c.rubro===rubro &&
+           c.aprobado!==false && c.estado!=='papelera' &&
+           (!ciudadSeleccionada||mismaCiudad(c.ciudad,ciudadSeleccionada));
+  });
+  var cont = document.getElementById('guiaCatDetalleCont');
+  var titulo = document.getElementById('guiaCatDetalleTitulo');
+  if(!cont||!titulo) return;
+  titulo.textContent = nombre;
+  var back = document.getElementById('guiaCatDetalleBack');
+  if(back) back.dataset.tipo = tipo;
+  cont.innerHTML = !coms.length
+    ? '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;">Todavía no hay registros en esta categoría.<br><br><button class="btn btn-primary" style="width:auto;padding:12px 28px;border-radius:100px;" onclick="showScreen(\'bienvenida-comercio\')">Registrar mi negocio →</button></div>'
+    : coms.map(function(c){
+        return '<div class="servicio-card" onclick="abrirLocal(\''+c.id+'\')">'
+          +'<div class="servicio-card-foto">'+(c.img?'<img src="'+c.img+'" alt="">':'<div class="servicio-card-ic">🏢</div>')+'</div>'
+          +'<div class="servicio-card-body"><div class="servicio-card-nom">'+c.nombre+'</div>'
+          +'<div class="servicio-card-rub">'+c.rubro+'</div>'
+          +(c.descripcion?'<div class="servicio-card-desc">'+c.descripcion.slice(0,80)+'…</div>':'')
+          +'</div></div>';
+      }).join('');
+  showScreen('guia-cat-detalle');
 }
 
 function renderHomeTab(){
@@ -16120,26 +16338,13 @@ function admAbrirEditarDesktop(docId){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel" value="${esc(c.telefono)}"></div>
         <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editAdWhatsapp" type="tel" inputmode="numeric" value="${esc(c.whatsapp)}"></div>
-        <div class="field"><label>Teléfono alternativo</label><input id="editAdTelefonoAlt" type="tel" placeholder="Opcional" value="${esc(c.telefonoAlt)}"></div>
         <div class="field"><label>Email</label><input id="editAdEmail" type="email" value="${esc(c.email)}"></div>
         <div class="field"><label>Instagram</label><input id="editAdInstagram" type="text" value="${esc(c.instagram)}"></div>
-        <div class="field"><label>Facebook</label><input id="editAdFacebook" type="text" placeholder="facebook.com/tunegocio" value="${esc(c.facebook)}"></div>
         <div class="field"><label>Sitio web</label><input id="editAdWeb" type="text" value="${esc(c.web)}"></div>
         <div class="field"><label>Publicidad activa hasta</label><input id="editAdPublicidadVence" type="date" value="${c.publicidadVence?esc(c.publicidadVence.slice(0,10)):''}"></div>
       </div>
       <div class="field"><label>Descripción</label><textarea id="editAdDescripcion" rows="2" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;">${esc(c.descripcion)}</textarea></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="field"><label>Turno mañana desde</label><input id="editAdTurnoManDesde" type="time" value="${esc((c.turnos||{}).manDesde)}"></div>
-        <div class="field"><label>Turno mañana hasta</label><input id="editAdTurnoManHasta" type="time" value="${esc((c.turnos||{}).manHasta)}"></div>
-        <div class="field"><label>Turno tarde desde</label><input id="editAdTurnoTarDesde" type="time" value="${esc((c.turnos||{}).tarDesde)}"></div>
-        <div class="field"><label>Turno tarde hasta</label><input id="editAdTurnoTarHasta" type="time" value="${esc((c.turnos||{}).tarHasta)}"></div>
-      </div>
-      <div class="field"><label>Días de atención</label>
-        <div id="editAdDiasBox" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">${['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`<label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;"><input type="checkbox" name="editAdDias" value="${d}" style="width:auto;" ${(c.dias||[]).includes(d)?'checked':''}> ${d}</label>`).join('')}</div>
-      </div>
-      <div class="field"><label>Métodos de pago</label>
-        <div id="editAdMetodosPagoBox" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">${['Efectivo','Transferencia','Tarjeta débito','Tarjeta crédito','MercadoPago'].map(m=>`<label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;"><input type="checkbox" name="editAdMetodosPago" value="${m}" style="width:auto;" ${(c.metodosPago||[]).includes(m)?'checked':''}> ${m}</label>`).join('')}</div>
-      </div>
+      <div class="field"><label>Horario</label><input id="editAdHorario" type="text" value="${esc(c.horario)}"></div>
       <div class="field" style="background:var(--cream);border-radius:10px;padding:12px;">
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;">
           <input type="checkbox" id="editAdConectorActivo" ${c.conectorActivo?'checked':''} style="width:20px;height:20px;flex-shrink:0;">
@@ -17329,29 +17534,10 @@ function adminAbrirEditar(docId){
   document.getElementById('editAdTelefono').value = c.telefono||'';
   document.getElementById('editAdWhatsapp').value = c.whatsapp||'';
   document.getElementById('editAdEmail').value = c.email||'';
-  document.getElementById('editAdTelefonoAlt').value = c.telefonoAlt||'';
   document.getElementById('editAdInstagram').value = c.instagram||'';
-  document.getElementById('editAdFacebook').value = c.facebook||'';
   document.getElementById('editAdWeb').value = c.web||'';
   document.getElementById('editAdDescripcion').value = c.descripcion||'';
-  // Turnos
-  const _tAd = c.turnos || {};
-  document.getElementById('editAdTurnoManDesde').value = _tAd.manDesde || '';
-  document.getElementById('editAdTurnoManHasta').value = _tAd.manHasta || '';
-  document.getElementById('editAdTurnoTarDesde').value = _tAd.tarDesde || '';
-  document.getElementById('editAdTurnoTarHasta').value = _tAd.tarHasta || '';
-  // Días de atención
-  const _diasAd = c.dias || [];
-  document.getElementById('editAdDiasBox').innerHTML = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`
-    <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;">
-      <input type="checkbox" name="editAdDias" value="${d}" style="width:auto;" ${_diasAd.includes(d)?'checked':''}> ${d}
-    </label>`).join('');
-  // Métodos de pago
-  const _metodosAd = c.metodosPago || [];
-  document.getElementById('editAdMetodosPagoBox').innerHTML = ['Efectivo','Transferencia','Tarjeta débito','Tarjeta crédito','MercadoPago'].map(m=>`
-    <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;">
-      <input type="checkbox" name="editAdMetodosPago" value="${m}" style="width:auto;" ${_metodosAd.includes(m)?'checked':''}> ${m}
-    </label>`).join('');
+  document.getElementById('editAdHorario').value = c.horario||'';
   document.getElementById('editAdConectorActivo').checked = !!c.conectorActivo;
   document.getElementById('editAdLat').value = c.lat||'';
   document.getElementById('editAdLng').value = c.lng||'';
@@ -17429,19 +17615,10 @@ async function adminGuardarEdicionComercio(){
     telefono:   document.getElementById('editAdTelefono').value.trim(),
     whatsapp:   document.getElementById('editAdWhatsapp').value.trim().replace(/\D/g,''),
     email:      document.getElementById('editAdEmail').value.trim(),
-    telefonoAlt:document.getElementById('editAdTelefonoAlt').value.trim(),
     instagram:  document.getElementById('editAdInstagram').value.trim(),
-    facebook:   document.getElementById('editAdFacebook').value.trim(),
     web:        document.getElementById('editAdWeb').value.trim(),
     descripcion:document.getElementById('editAdDescripcion').value.trim(),
-    turnos: {
-      manDesde: document.getElementById('editAdTurnoManDesde').value,
-      manHasta: document.getElementById('editAdTurnoManHasta').value,
-      tarDesde: document.getElementById('editAdTurnoTarDesde').value,
-      tarHasta: document.getElementById('editAdTurnoTarHasta').value,
-    },
-    dias: Array.from(document.querySelectorAll('input[name="editAdDias"]:checked')).map(cb=>cb.value),
-    metodosPago: Array.from(document.querySelectorAll('input[name="editAdMetodosPago"]:checked')).map(cb=>cb.value),
+    horario:    document.getElementById('editAdHorario').value.trim(),
     conectorActivo: !!document.getElementById('editAdConectorActivo')?.checked,
   };
   const _cbMD = document.getElementById('editAdOfreceMenuDia');
