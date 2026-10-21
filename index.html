@@ -219,27 +219,53 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .rp-chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #E0E0E0;border-radius:100px;padding:7px 12px;font-size:13px;font-weight:600;color:#444;cursor:pointer;background:#fff;}
 .rp-chip input{width:auto;accent-color:#FC1820;margin:0;}
 .rp-chip.sel{border-color:#FC1820;background:#FFF0F0;color:#B3121A;}
-.rl-search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #EAEAEA;border-radius:14px;padding:10px 12px;margin-bottom:10px;}
-.rl-search input{flex:1;border:none;outline:none;font-size:14px;font-family:inherit;background:transparent;min-width:0;}
-.rl-chips-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;}
-.rl-chips-row::-webkit-scrollbar{display:none;}
-.rl-chips-sub{padding-top:0;}
-.rl-chip{flex-shrink:0;border:1.5px solid #E0E0E0;background:#fff;color:#444;border-radius:100px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
-.rl-chip.on{background:#FC1820;border-color:#FC1820;color:#fff;}
-.rl-chips-sub .rl-chip{font-size:12px;padding:5px 11px;background:#FAFAFA;}
-.rl-chips-sub .rl-chip.on{background:#FFF0F0;border-color:#FC1820;color:#B3121A;}
-.rl-card{display:flex;gap:12px;background:#fff;border:1.5px solid #EFEFEF;border-radius:16px;padding:12px;margin-bottom:10px;cursor:pointer;}
-.rl-logo{width:64px;height:64px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;}
+.rl-hero{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FFF3F3 0%,#F1F6FC 100%);border:1.5px solid #F1E6E6;border-radius:22px;padding:18px 16px;margin-bottom:12px;overflow:hidden;}
+.rl-hero-txt{flex:1;min-width:0;}
+.rl-kicker{font-size:12px;font-weight:800;color:#FC1820;letter-spacing:.04em;margin-bottom:4px;}
+.rl-h{font-family:'Bai Jamjuree',sans-serif;font-size:22px;line-height:1.15;font-weight:800;color:#1F2A44;margin:0 0 6px;}
+.rl-h span{color:#FC1820;}
+.rl-p{font-size:12.5px;color:#5B6478;line-height:1.45;margin:0;}
+.rl-art{display:grid;grid-template-columns:repeat(2,44px);gap:8px;flex-shrink:0;}
+.rl-art i{font-style:normal;width:44px;height:44px;border-radius:14px;background:#fff;box-shadow:0 4px 12px rgba(31,42,68,.12);display:flex;align-items:center;justify-content:center;font-size:22px;transform:rotate(var(--r));}
+.rl-search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #E6E9EF;border-radius:16px;padding:6px 6px 6px 14px;box-shadow:0 4px 14px rgba(31,42,68,.06);}
+.rl-search input{flex:1;border:none;outline:none;font-size:14px;font-family:inherit;background:transparent;min-width:0;padding:8px 0;}
+.rl-search button{background:#FC1820;color:#fff;border:none;border-radius:12px;padding:10px 16px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;}
+.rl-trust{display:flex;gap:6px 12px;flex-wrap:wrap;margin:10px 2px 14px;font-size:11.5px;font-weight:700;color:#4B5565;}
+.rl-sec-t{font-size:16px;font-weight:800;color:#1F2A44;margin:6px 0 10px;}
+.rl-grupos{display:grid;grid-template-columns:1fr;gap:10px;}
+.rl-grupo{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:1.5px solid #ECEEF3;border-radius:18px;padding:14px;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(31,42,68,.05);}
+.rl-grupo.on{border-color:var(--gc);background:color-mix(in srgb,var(--gc) 7%,#fff);}
+.rl-grupo-ic{width:50px;height:50px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0;background:color-mix(in srgb,var(--gc) 14%,#fff);}
+.rl-grupo-t{font-size:15px;font-weight:800;color:#1F2A44;line-height:1.2;}
+.rl-grupo-s{font-size:12px;color:#6B7385;margin-top:2px;}
+.rl-grupo-go{margin-left:auto;color:var(--gc);font-size:18px;font-weight:800;}
+.rl-subgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.rl-sub{background:#fff;border:1.5px solid #ECEEF3;border-radius:16px;padding:12px 6px 10px;text-align:center;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(31,42,68,.05);}
+.rl-sub.on{border-color:var(--gc);background:color-mix(in srgb,var(--gc) 8%,#fff);}
+.rl-sub-ic{width:44px;height:44px;margin:0 auto 6px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;background:color-mix(in srgb,var(--gc) 14%,#fff);}
+.rl-sub-t{font-size:12px;font-weight:800;color:#1F2A44;line-height:1.2;}
+.rl-sub-n{font-size:10.5px;color:#8A92A3;margin-top:2px;}
+.rl-card{display:flex;gap:12px;background:#fff;border:1.5px solid #ECEEF3;border-radius:18px;padding:12px;margin-bottom:10px;cursor:pointer;box-shadow:0 3px 10px rgba(31,42,68,.05);}
+.rl-logo{width:64px;height:64px;border-radius:16px;background:#F1F3F8;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;}
 .rl-logo img{width:100%;height:100%;object-fit:cover;}
 .rl-body{flex:1;min-width:0;}
-.rl-nombre{font-size:15px;font-weight:800;color:var(--navy);line-height:1.25;overflow:hidden;text-overflow:ellipsis;}
-.rl-oficios{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0;}
-.rl-of{background:#FFF0F0;color:#B3121A;border:1px solid #FFCDD0;border-radius:100px;padding:2px 9px;font-size:11px;font-weight:700;}
-.rl-meta{font-size:11.5px;color:var(--muted);line-height:1.4;}
+.rl-nombre{font-size:15px;font-weight:800;color:#1F2A44;line-height:1.25;overflow:hidden;text-overflow:ellipsis;}
+.rl-esp{font-size:12px;color:#6B7385;margin-top:1px;}
+.rl-oficios{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 5px;}
+.rl-of{background:color-mix(in srgb,var(--gc,#FC1820) 11%,#fff);color:var(--gc,#B3121A);border:1px solid color-mix(in srgb,var(--gc,#FC1820) 30%,#fff);border-radius:100px;padding:2px 9px;font-size:11px;font-weight:700;}
+.rl-meta{font-size:11.5px;color:#6B7385;line-height:1.4;}
 .rl-acc{display:flex;gap:8px;margin-top:9px;}
-.rl-btn{flex:1;border:none;border-radius:10px;padding:9px 6px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;display:inline-block;}
+.rl-btn{flex:1;border:none;border-radius:11px;padding:9px 6px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;display:inline-block;}
 .rl-btn.wa{background:#25D366;color:#fff;}
 .rl-btn.tel{background:#EEF2F7;color:#1F3A5F;}
+.rl-pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.rl-pasos div{background:#fff;border:1.5px solid #ECEEF3;border-radius:16px;padding:12px 8px;text-align:center;}
+.rl-pasos b{display:flex;width:30px;height:30px;margin:0 auto 6px;border-radius:50%;background:#FC1820;color:#fff;align-items:center;justify-content:center;font-size:14px;}
+.rl-pasos span{font-size:11.5px;font-weight:700;color:#3B4457;line-height:1.3;display:block;}
+.rl-cta{margin:18px 0 8px;background:linear-gradient(135deg,#FC1820,#C70F17);border-radius:22px;padding:20px 18px;color:#fff;}
+.rl-cta-t{font-family:'Bai Jamjuree',sans-serif;font-size:19px;font-weight:800;line-height:1.2;margin-bottom:6px;}
+.rl-cta-s{font-size:12.5px;line-height:1.55;opacity:.95;margin-bottom:14px;}
+.rl-cta button{width:100%;background:#fff;color:#C70F17;border:none;border-radius:100px;padding:13px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;}
 
 
 .prod-tag{display:none;}
@@ -1249,15 +1275,45 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
 
     <!-- ================================================================
-         TAB: RED LOCAL (profesionales y oficios)
+         TAB: RED LOCAL (profesionales, servicios y oficios, turismo y recreación)
     ================================================================ -->
     <div id="feedRedLocalView" class="hidden" style="padding:0 16px; margin-top:12px;">
-      <div class="section-title" style="margin-top:4px;">🤝 Red Local</div>
-      <p style="font-size:12.5px;color:var(--muted);margin:2px 0 10px;line-height:1.5;">Profesionales y oficios de tu ciudad. Escribiles por WhatsApp o llamalos directo.</p>
-      <div class="rl-search"><span>🔎</span><input id="rlBuscar" type="search" placeholder="¿Qué necesitás? Electricista, abogado, nutricionista…" oninput="rlSetQuery(this.value)" autocomplete="off"></div>
-      <div id="rlChipsCat" class="rl-chips-row"></div>
-      <div id="rlChipsOficio" class="rl-chips-row rl-chips-sub"></div>
+      <div class="rl-hero">
+        <div class="rl-hero-txt">
+          <div class="rl-kicker">🤝 Red Local</div>
+          <h2 class="rl-h">Encontrá lo que necesitás, <span>en tu ciudad</span></h2>
+          <p class="rl-p">Profesionales, servicios, oficios y turismo. Contacto directo por WhatsApp.</p>
+        </div>
+        <div class="rl-art" aria-hidden="true">
+          <i style="--r:-6deg">🩺</i><i style="--r:5deg">⚖️</i><i style="--r:-3deg">⚡</i>
+          <i style="--r:4deg">🔧</i><i style="--r:-5deg">🏨</i><i style="--r:6deg">🎣</i>
+        </div>
+      </div>
+      <div class="rl-search"><span>🔎</span><input id="rlBuscar" type="search" placeholder="¿Qué servicio buscás?" oninput="rlSetQuery(this.value)" autocomplete="off"><button type="button" onclick="rlIrALista()">Buscar</button></div>
+      <div class="rl-trust"><span>✔ Perfiles revisados</span><span>💬 Contacto directo</span><span>📍 De tu ciudad</span></div>
+
+      <div class="rl-sec-t">Explorá por tipo</div>
+      <div id="rlGrupos" class="rl-grupos"></div>
+      <div id="rlSubWrap" style="display:none;">
+        <div id="rlSubTitulo" class="rl-sec-t" style="margin-top:14px;"></div>
+        <div id="rlSubGrid" class="rl-subgrid"></div>
+      </div>
+
+      <div id="rlListaTitulo" class="rl-sec-t" style="margin-top:16px;"></div>
       <div id="rlLista"></div>
+
+      <div class="rl-sec-t" style="margin-top:20px;">¿Cómo funciona?</div>
+      <div class="rl-pasos">
+        <div><b>1</b><span>Elegí el tipo y la categoría</span></div>
+        <div><b>2</b><span>Mirá el perfil y lo que ofrece</span></div>
+        <div><b>3</b><span>Escribile por WhatsApp o llamalo</span></div>
+      </div>
+
+      <div class="rl-cta">
+        <div class="rl-cta-t">Sumate a la Red Local de tu ciudad</div>
+        <div class="rl-cta-s">Como profesional independiente, en servicios y oficios o en turismo y recreación. Un lugar para que te encuentren y puedas contar lo que hacés o lo que tenés para ofrecer.</div>
+        <button type="button" onclick="elegirModoNegocio('servicios')">🎁 Sumarme · 30 días gratis</button>
+      </div>
     </div>
 
     <!-- ================================================================
@@ -1482,10 +1538,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div><label class="rp-label">Tu nombre o el de tu estudio / empresa:</label>
           <input id="rpNombre" class="rp-input" type="text" placeholder="Ej: Juan Pérez - Electricista" autocomplete="organization"></div>
-        <div><label class="rp-label">¿A qué te dedicás? <span style="font-weight:500;color:#888;">(podés elegir varios)</span></label>
+        <div><label class="rp-label">¿Dónde querés que te encuentren? <span style="font-weight:500;color:#888;">(podés elegir varias)</span></label>
           <div id="rpOficios"></div>
-          <input id="rpOtroOficio" class="rp-input" type="text" placeholder="¿Otro oficio o especialidad? Escribilo acá" style="margin-top:8px;">
         </div>
+        <div><label class="rp-label">Tu especialidad o detalle <span style="font-weight:500;color:#888;">(opcional)</span></label>
+          <input id="rpEspecialidad" class="rp-input" type="text" maxlength="80" placeholder="Ej: Oftalmólogo, Instalador solar, Cabañas con pileta"></div>
         <div><label class="rp-label">Matrícula <span style="font-weight:500;color:#888;">(opcional)</span></label>
           <input id="rpMatricula" class="rp-input" type="text" placeholder="Ej: MP 1234"></div>
         <div><label class="rp-label">Zona donde atendés:</label>
@@ -5264,14 +5321,64 @@ function proPlanPrecio(){
   try{ const v = Number(tarifarioState().proPrecio); if(v > 0) return v; }catch(e){}
   return PRO_PRECIO_DEFAULT;
 }
-const OFICIOS_CATEGORIAS = [
-  ['🩺 Salud', ['Médico clínico','Nutricionista','Psicólogo/a','Oftalmólogo/a','Dermatólogo/a','Odontólogo/a','Kinesiólogo/a','Pediatra','Ginecólogo/a','Traumatólogo/a','Fonoaudiólogo/a','Veterinario/a']],
-  ['⚖️ Legal, gestión y finanzas', ['Abogado/a','Escribano/a','Contador/a','Gestor/a','Martillero/a','Despachante de aduana']],
-  ['🛠️ Oficios y mantenimiento', ['Electricista','Plomero/a','Gasista','Albañil','Pintor/a','Carpintero/a','Herrero/a','Mecánico/a','Jardinero/a','Techista','Cerrajero/a','Aire acondicionado','Flete y mudanzas','Limpieza']],
-  ['🌾 Técnicos y agro', ['Ingeniero/a agrónomo/a','Ingeniero/a civil','Arquitecto/a','Maestro mayor de obras','Agrimensor/a','Técnico/a en seguridad e higiene','Técnico/a informático/a']]
+/* Secciones de Red Local. Cada oficio se guarda por su nombre (n); l es lo que se muestra.
+   Editable más adelante desde el admin (window.OFICIOS_CUSTOM con esta misma forma). */
+const OFICIOS_GRUPOS = [
+  { id:'prof', nombre:'Profesionales independientes', corto:'Profesionales independientes', emoji:'🎓', color:'#2563EB', items:[
+    {n:'Salud', l:'Salud', e:'🩺'}, {n:'Legal', l:'Legal', e:'⚖️'}, {n:'Contabilidad', l:'Contabilidad', e:'🧮'},
+    {n:'Psicología', l:'Psicología', e:'🧠'}, {n:'Educación', l:'Educación', e:'🎓'}, {n:'Diseño', l:'Diseño', e:'🎨'},
+    {n:'Fotografía', l:'Fotografía', e:'📷'}, {n:'Informática', l:'Informática', e:'💻'}, {n:'Coaching', l:'Coaching', e:'🎯'},
+    {n:'Otros profesionales', l:'Otros', e:'➕'} ] },
+  { id:'serv', nombre:'Servicios y oficios', corto:'Servicios y oficios', emoji:'🛠️', color:'#EA580C', items:[
+    {n:'Electricidad', l:'Electricidad', e:'⚡'}, {n:'Plomería', l:'Plomería', e:'🚰'}, {n:'Pintura', l:'Pintura', e:'🖌️'},
+    {n:'Jardinería', l:'Jardinería', e:'🌿'}, {n:'Carpintería', l:'Carpintería', e:'🪚'}, {n:'Herrería', l:'Herrería', e:'🔨'},
+    {n:'Mecánica', l:'Mecánica', e:'🔧'}, {n:'Gomería', l:'Gomería', e:'🛞'}, {n:'Lavadero', l:'Lavadero', e:'🧽'},
+    {n:'Otros servicios', l:'Otros', e:'➕'} ] },
+  { id:'tur', nombre:'Turismo & Recreación', corto:'Turismo y recreación', emoji:'🏖️', color:'#0D9488', items:[
+    {n:'Hoteles', l:'Hoteles', e:'🏨'}, {n:'Cabañas', l:'Cabañas', e:'🏡'}, {n:'Excursiones', l:'Excursiones', e:'🥾'},
+    {n:'Pesca', l:'Pesca', e:'🎣'}, {n:'Deportes náuticos', l:'Deportes náuticos', e:'🏄'},
+    {n:'Otros turismo', l:'Otros', e:'➕'} ] }
 ];
-function profOficiosCategorias(){
-  return (window.OFICIOS_CUSTOM && window.OFICIOS_CUSTOM.length) ? window.OFICIOS_CUSTOM : OFICIOS_CATEGORIAS;
+// Perfiles cargados con la primera versión (oficios sueltos) se acomodan solos en las nuevas categorías
+const OFICIOS_LEGACY = {
+  'Médico clínico':'Salud','Nutricionista':'Salud','Oftalmólogo/a':'Salud','Dermatólogo/a':'Salud','Odontólogo/a':'Salud',
+  'Kinesiólogo/a':'Salud','Pediatra':'Salud','Ginecólogo/a':'Salud','Traumatólogo/a':'Salud','Fonoaudiólogo/a':'Salud',
+  'Psicólogo/a':'Psicología','Veterinario/a':'Otros profesionales',
+  'Abogado/a':'Legal','Escribano/a':'Legal','Contador/a':'Contabilidad','Gestor/a':'Otros profesionales',
+  'Martillero/a':'Otros profesionales','Despachante de aduana':'Otros profesionales',
+  'Electricista':'Electricidad','Plomero/a':'Plomería','Gasista':'Plomería','Albañil':'Otros servicios','Pintor/a':'Pintura',
+  'Carpintero/a':'Carpintería','Herrero/a':'Herrería','Mecánico/a':'Mecánica','Jardinero/a':'Jardinería',
+  'Techista':'Otros servicios','Cerrajero/a':'Otros servicios','Aire acondicionado':'Otros servicios',
+  'Flete y mudanzas':'Otros servicios','Limpieza':'Otros servicios',
+  'Ingeniero/a agrónomo/a':'Otros profesionales','Ingeniero/a civil':'Otros profesionales','Arquitecto/a':'Otros profesionales',
+  'Maestro mayor de obras':'Otros profesionales','Agrimensor/a':'Otros profesionales',
+  'Técnico/a en seguridad e higiene':'Otros profesionales','Técnico/a informático/a':'Informática'
+};
+function profGrupos(){
+  const c = window.OFICIOS_CUSTOM;
+  return (c && c.length && c[0] && c[0].items) ? c : OFICIOS_GRUPOS;
+}
+function profItemInfo(n){
+  const gs = profGrupos();
+  for(let i = 0; i < gs.length; i++){
+    const it = gs[i].items.find(function(x){ return x.n === n; });
+    if(it) return { g: gs[i], it: it };
+  }
+  return null;
+}
+// Oficios del perfil expresados en las categorías vigentes (sin duplicados)
+function proOficiosNorm(c){
+  const out = [];
+  (c && c.oficios || []).forEach(function(o){
+    const n = profItemInfo(o) ? o : (OFICIOS_LEGACY[o] || 'Otros servicios');
+    if(out.indexOf(n) < 0) out.push(n);
+  });
+  return out;
+}
+// Detalle libre ("Oftalmólogo", "Instalador solar"…): lo que cargó el profesional o los oficios viejos que no son categoría
+function proEspecialidad(c){
+  if(c && c.especialidad) return c.especialidad;
+  return (c && c.oficios || []).filter(function(o){ return !profItemInfo(o); }).join(', ');
 }
 function esProfesional(c){ return !!c && c.modo === 'servicios'; }
 function _pushComercioEnState(c){
@@ -5314,19 +5421,15 @@ function rpRenderOficios(sel){
   const el = document.getElementById('rpOficios');
   if(!el) return;
   sel = sel || [];
-  const conocidos = new Set();
-  el.innerHTML = profOficiosCategorias().map(function(g, i){
-    g[1].forEach(function(o){ conocidos.add(o); });
-    const cuantos = g[1].filter(function(o){ return sel.indexOf(o) >= 0; }).length;
-    return '<details class="rp-grupo"' + ((i === 0 || cuantos) ? ' open' : '') + '><summary><span>' + g[0] + '</span><span style="font-size:12px;color:#888;">' + (cuantos ? cuantos + ' elegido(s)' : '▾') + '</span></summary><div class="rp-chips">' +
-      g[1].map(function(o){
-        const on = sel.indexOf(o) >= 0;
-        return '<label class="rp-chip' + (on ? ' sel' : '') + '"><input type="checkbox" name="rpOficio" value="' + vitEsc(o) + '"' + (on ? ' checked' : '') + ' onchange="this.parentNode.classList.toggle(\'sel\',this.checked)"> ' + vitEsc(o) + '</label>';
+  el.innerHTML = profGrupos().map(function(g, i){
+    const cuantos = g.items.filter(function(it){ return sel.indexOf(it.n) >= 0; }).length;
+    return '<details class="rp-grupo"' + ((i === 0 || cuantos) ? ' open' : '') + '><summary><span>' + g.emoji + ' ' + vitEsc(g.nombre) + '</span><span style="font-size:12px;color:#888;">' + (cuantos ? cuantos + ' elegido(s)' : '▾') + '</span></summary><div class="rp-chips">' +
+      g.items.map(function(it){
+        const on = sel.indexOf(it.n) >= 0;
+        return '<label class="rp-chip' + (on ? ' sel' : '') + '"><input type="checkbox" name="rpOficio" value="' + vitEsc(it.n) + '"' + (on ? ' checked' : '') + ' onchange="this.parentNode.classList.toggle(\'sel\',this.checked)"> ' + it.e + ' ' + vitEsc(it.l) + '</label>';
       }).join('') + '</div></details>';
   }).join('');
-  const otros = sel.filter(function(o){ return !conocidos.has(o); });
-  const inp = document.getElementById('rpOtroOficio');
-  if(inp) inp.value = otros.join(', ');
+  if(!sel.length){ const e = document.getElementById('rpEspecialidad'); if(e) e.value = ''; }
 }
 function rpMostrarPaso(n){
   _rpPaso = n;
@@ -5376,17 +5479,14 @@ function rpLeerDatos(){
   const g = function(id){ return (document.getElementById(id)?.value||'').trim(); };
   const nombre = g('rpNombre');
   const oficios = Array.from(document.querySelectorAll('input[name="rpOficio"]:checked')).map(function(x){ return x.value; });
-  g('rpOtroOficio').split(',').map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(o){
-    if(oficios.indexOf(o) < 0) oficios.push(o.slice(0,40));
-  });
   const whatsapp = g('rpCelular').replace(/\D/g,'');
   const ciudad = g('rpCiudad');
   if(!nombre){ toast('Ingresá tu nombre o el de tu estudio.'); return null; }
-  if(!oficios.length){ toast('Elegí al menos un oficio o especialidad.'); return null; }
+  if(!oficios.length){ toast('Elegí al menos una categoría en la que te encuentren.'); return null; }
   if(whatsapp.length < 8){ toast('Ingresá un WhatsApp válido.'); return null; }
   if(!ciudad){ toast('Elegí la ciudad.'); return null; }
   return {
-    nombre: nombre, oficios: oficios, matricula: g('rpMatricula'), zona: g('rpZona'),
+    nombre: nombre, oficios: oficios, especialidad: g('rpEspecialidad').slice(0,80), matricula: g('rpMatricula'), zona: g('rpZona'),
     atiendeDomicilio: !!document.getElementById('rpDomicilio')?.checked,
     descripcion: g('rpDescripcion'), whatsapp: whatsapp, telefono: g('rpTelefono') || whatsapp,
     horario: g('rpHorario'), provincia: g('rpProvincia') || 'Entre Ríos', ciudad: ciudad
@@ -5476,8 +5576,9 @@ function proAbrirEditar(){
   const u = state.currentUser;
   if(!u) return;
   _rpModo = 'editar';
-  rpRenderOficios(u.oficios || []);
+  rpRenderOficios(proOficiosNorm(u));
   const set = function(id, v){ const el = document.getElementById(id); if(el) el.value = v || ''; };
+  set('rpEspecialidad', proEspecialidad(u));
   set('rpNombre', u.nombre); set('rpMatricula', u.matricula); set('rpZona', u.zona);
   set('rpDescripcion', u.descripcion); set('rpCelular', u.whatsapp || u.telefono);
   set('rpTelefono', u.telefono && u.telefono !== u.whatsapp ? u.telefono : ''); set('rpHorario', u.horario);
@@ -5530,29 +5631,25 @@ function proRenderPanel(){
     (dias !== null && enGracia ? (dias >= 0 ? 'Te quedan <strong>' + dias + ' día' + (dias === 1 ? '' : 's') + '</strong> gratis. ' : 'Tu prueba gratis terminó. ') : '') +
     'Plan Profesional: <strong>' + precio + ' por mes</strong>.</div></div>';
   const fila = function(l, v){ return v ? '<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:.5px solid var(--line);font-size:13px;"><span style="color:var(--muted);font-weight:700;">' + l + '</span><span style="text-align:right;">' + vitEsc(v) + '</span></div>' : ''; };
-  const chips = (u.oficios || []).map(function(o){ return '<span style="display:inline-block;background:#FFF0F0;color:#B3121A;border:1px solid #FFCDD0;border-radius:100px;padding:4px 11px;font-size:12px;font-weight:700;margin:0 6px 6px 0;">' + vitEsc(o) + '</span>'; }).join('');
+  const chips = '<div class="rl-oficios">' + rlChipsHTML(u) + '</div>';
   const logo = u.img ? '<img src="' + u.img + '" alt="" style="width:72px;height:72px;border-radius:16px;object-fit:cover;flex-shrink:0;">' : '<div style="width:72px;height:72px;border-radius:16px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;">🧰</div>';
   cont.innerHTML = estado + plan +
     '<div class="card" style="padding:16px;margin-bottom:12px;"><div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;">' + logo + '<div><div style="font-size:17px;font-weight:800;color:var(--navy);">' + vitEsc(u.nombre || '') + '</div><div style="font-size:12px;color:var(--muted);">' + vitEsc(u.ciudad || '') + '</div></div></div>' +
     '<div>' + chips + '</div>' +
-    fila('Matrícula', u.matricula) + fila('Zona', u.zona) + fila('A domicilio', u.atiendeDomicilio ? 'Sí' : '') +
+    fila('Especialidad', proEspecialidad(u)) + fila('Matrícula', u.matricula) + fila('Zona', u.zona) + fila('A domicilio', u.atiendeDomicilio ? 'Sí' : '') +
     fila('WhatsApp', u.whatsapp) + fila('Teléfono', u.telefono !== u.whatsapp ? u.telefono : '') + fila('Horario', u.horario) + fila('Descripción', u.descripcion) + '</div>' +
     '<button type="button" class="rp-btn" style="margin-top:4px;" onclick="proAbrirEditar()">✏️ Editar mis datos</button>';
 }
 
-/* ================= RED LOCAL: listado, filtros y ficha ================= */
-let _rlCat = 'todas', _rlOficio = '', _rlQuery = '';
-function rlCategoriaDe(oficio){
-  const cats = profOficiosCategorias();
-  for(let i = 0; i < cats.length; i++){ if(cats[i][1].indexOf(oficio) >= 0) return cats[i][0]; }
-  return '🔧 Otros';
-}
+/* ================= RED LOCAL: portada, secciones, listado y ficha ================= */
+let _rlGrupo = '', _rlOficio = '', _rlQuery = '';
 function rlProfesionales(){
   return (state.profesionales || []).filter(function(c){
     return c.estado !== 'papelera' && c.estado !== 'suspendido' && c.aprobado !== false &&
            (c.oficios && c.oficios.length) && mismaCiudad(c.ciudad, ciudadSeleccionada);
   });
 }
+function rlGrupoDeItem(n){ const i = profItemInfo(n); return i ? i.g : null; }
 function rlTelWa(tel){
   let d = String(tel||'').replace(/\D/g,'').replace(/^0+/, '');
   if(d.length === 10) d = '549' + d;          // 3437123456 -> 5493437123456
@@ -5560,39 +5657,48 @@ function rlTelWa(tel){
   return d;
 }
 function rlSetQuery(v){ _rlQuery = (v||'').trim(); rlRenderLista(); }
-function rlSetCat(c){ _rlCat = c; _rlOficio = ''; renderRedLocal(); }
-function rlSetOficio(o){ _rlOficio = (_rlOficio === o) ? '' : o; renderRedLocal(); }
+function rlSetGrupo(id){ _rlGrupo = (_rlGrupo === id) ? '' : id; _rlOficio = ''; renderRedLocal(); }
+function rlSetOficio(n){ _rlOficio = (_rlOficio === n) ? '' : n; renderRedLocal(); }
+function rlIrALista(){
+  const t = document.getElementById('rlListaTitulo');
+  if(t && t.scrollIntoView) t.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function _rlArg(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
 function renderRedLocal(){
-  const chipsCat = document.getElementById('rlChipsCat');
-  if(!chipsCat) return;
+  const boxG = document.getElementById('rlGrupos');
+  if(!boxG) return;
   const todos = rlProfesionales();
-  // Categorías y oficios que realmente tienen profesionales en la ciudad
-  const porCat = {}, porOficio = {};
+  const porGrupo = {}, porItem = {};
   todos.forEach(function(c){
-    const cats = new Set();
-    (c.oficios||[]).forEach(function(o){
-      porOficio[o] = (porOficio[o]||0) + 1;
-      cats.add(rlCategoriaDe(o));
+    const gs = new Set();
+    proOficiosNorm(c).forEach(function(n){
+      porItem[n] = (porItem[n]||0) + 1;
+      const g = rlGrupoDeItem(n); if(g) gs.add(g.id);
     });
-    cats.forEach(function(k){ porCat[k] = (porCat[k]||0) + 1; });
+    gs.forEach(function(id){ porGrupo[id] = (porGrupo[id]||0) + 1; });
   });
-  if(_rlCat !== 'todas' && !porCat[_rlCat]){ _rlCat = 'todas'; _rlOficio = ''; }
-  const esc = vitEsc;
-  const arg = function(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
-  const catsOrden = profOficiosCategorias().map(function(g){ return g[0]; }).concat(['🔧 Otros']).filter(function(k){ return porCat[k]; });
-  chipsCat.innerHTML = todos.length
-    ? '<button type="button" class="rl-chip' + (_rlCat === 'todas' ? ' on' : '') + '" onclick="rlSetCat(\'todas\')">Todos (' + todos.length + ')</button>' +
-      catsOrden.map(function(k){ return '<button type="button" class="rl-chip' + (_rlCat === k ? ' on' : '') + '" onclick="rlSetCat(\'' + arg(k) + '\')">' + esc(k) + ' (' + porCat[k] + ')</button>'; }).join('')
-    : '';
-  const sub = document.getElementById('rlChipsOficio');
-  if(sub){
-    const oficiosVis = Object.keys(porOficio).filter(function(o){ return _rlCat === 'todas' || rlCategoriaDe(o) === _rlCat; })
-      .sort(function(a,b){ return porOficio[b] - porOficio[a] || a.localeCompare(b, 'es'); });
-    sub.innerHTML = (todos.length && _rlCat !== 'todas')
-      ? oficiosVis.map(function(o){ return '<button type="button" class="rl-chip' + (_rlOficio === o ? ' on' : '') + '" onclick="rlSetOficio(\'' + arg(o) + '\')">' + esc(o) + ' (' + porOficio[o] + ')</button>'; }).join('')
-      : '';
-    sub.style.display = sub.innerHTML ? '' : 'none';
+  const grupos = profGrupos();
+  boxG.innerHTML = grupos.map(function(g){
+    const n = porGrupo[g.id] || 0;
+    return '<button type="button" class="rl-grupo' + (_rlGrupo === g.id ? ' on' : '') + '" style="--gc:' + g.color + '" onclick="rlSetGrupo(\'' + _rlArg(g.id) + '\')">' +
+      '<div class="rl-grupo-ic">' + g.emoji + '</div>' +
+      '<div><div class="rl-grupo-t">' + vitEsc(g.corto || g.nombre) + '</div><div class="rl-grupo-s">' + (n ? n + ' perfil' + (n === 1 ? '' : 'es') + ' en tu ciudad' : 'Sé el primero en sumarte') + '</div></div>' +
+      '<div class="rl-grupo-go">' + (_rlGrupo === g.id ? '▾' : '›') + '</div></button>';
+  }).join('');
+  // Categorías de la sección elegida
+  const wrap = document.getElementById('rlSubWrap'), grid = document.getElementById('rlSubGrid'), tit = document.getElementById('rlSubTitulo');
+  const gSel = grupos.find(function(g){ return g.id === _rlGrupo; });
+  if(wrap && grid){
+    if(gSel){
+      wrap.style.display = '';
+      if(tit) tit.textContent = gSel.nombre;
+      grid.innerHTML = gSel.items.map(function(it){
+        const n = porItem[it.n] || 0;
+        return '<button type="button" class="rl-sub' + (_rlOficio === it.n ? ' on' : '') + '" style="--gc:' + gSel.color + '" onclick="rlSetOficio(\'' + _rlArg(it.n) + '\')">' +
+          '<div class="rl-sub-ic">' + it.e + '</div><div class="rl-sub-t">' + vitEsc(it.l) + '</div><div class="rl-sub-n">' + (n ? n + ' perfil' + (n === 1 ? '' : 'es') : 'Próximamente') + '</div></button>';
+      }).join('');
+    } else { wrap.style.display = 'none'; grid.innerHTML = ''; }
   }
   rlRenderLista();
 }
@@ -5601,39 +5707,57 @@ function rlRenderLista(){
   const cont = document.getElementById('rlLista');
   if(!cont) return;
   const todos = rlProfesionales();
+  const gSel = profGrupos().find(function(g){ return g.id === _rlGrupo; });
+  const info = _rlOficio ? profItemInfo(_rlOficio) : null;
   let lista = todos.filter(function(c){
-    if(_rlCat !== 'todas' && !(c.oficios||[]).some(function(o){ return rlCategoriaDe(o) === _rlCat; })) return false;
-    if(_rlOficio && (c.oficios||[]).indexOf(_rlOficio) < 0) return false;
+    const ns = proOficiosNorm(c);
+    if(_rlGrupo && !ns.some(function(n){ const g = rlGrupoDeItem(n); return g && g.id === _rlGrupo; })) return false;
+    if(_rlOficio && ns.indexOf(_rlOficio) < 0) return false;
     return true;
   });
   if(_rlQuery){
-    lista = lista.filter(function(c){ return matchBusqueda((c.nombre||'') + ' ' + (c.oficios||[]).join(' ') + ' ' + (c.zona||'') + ' ' + (c.descripcion||''), _rlQuery); });
+    lista = lista.filter(function(c){
+      const etiquetas = proOficiosNorm(c).map(function(n){ const i = profItemInfo(n); return i ? i.it.l + ' ' + i.g.nombre : n; }).join(' ');
+      return matchBusqueda((c.nombre||'') + ' ' + etiquetas + ' ' + proEspecialidad(c) + ' ' + (c.zona||'') + ' ' + (c.descripcion||''), _rlQuery);
+    });
   } else if(typeof shuffleConSemillaCarga === 'function'){
     lista = shuffleConSemillaCarga(lista);   // orden parejo: todos tienen su turno arriba
   }
+  const tl = document.getElementById('rlListaTitulo');
+  if(tl){
+    tl.textContent = _rlQuery ? 'Resultados' : (info ? info.it.e + ' ' + info.it.l : (gSel ? gSel.nombre : 'Perfiles en ' + ciudadSeleccionada));
+  }
   if(!lista.length){
-    const hayFiltro = _rlQuery || _rlOficio || _rlCat !== 'todas';
-    cont.innerHTML = hayFiltro
-      ? '<div class="empty"><div class="ic">🔎</div><div class="t">No encontramos profesionales con ese filtro</div><div class="s">Probá con otra búsqueda u otro oficio.</div></div>'
-      : '<div class="empty"><div class="ic">🤝</div><div class="t">Todavía no hay profesionales en ' + vitEsc(ciudadSeleccionada) + '</div><div class="s">¿Sos profesional o hacés algún oficio? Sumate gratis y que te encuentren.</div>' +
-        '<button type="button" class="rp-btn" style="margin-top:14px;max-width:320px;" onclick="elegirModoNegocio(\'servicios\')">🧰 Sumarme a Red Local</button></div>';
+    const etiqueta = info ? info.it.l : (gSel ? gSel.corto : '');
+    cont.innerHTML = _rlQuery
+      ? '<div class="empty"><div class="ic">🔎</div><div class="t">No encontramos perfiles con esa búsqueda</div><div class="s">Probá con otra palabra o explorá por tipo.</div></div>'
+      : '<div class="empty"><div class="ic">🤝</div><div class="t">Todavía no hay ' + (etiqueta ? vitEsc(etiqueta) + ' ' : 'perfiles ') + 'en ' + vitEsc(ciudadSeleccionada) + '</div><div class="s">¿Es lo que hacés? Sumate a la Red Local y que te encuentren.</div>' +
+        '<button type="button" class="rp-btn" style="margin-top:14px;max-width:320px;" onclick="elegirModoNegocio(\'servicios\')">🎁 Sumarme · 30 días gratis</button></div>';
     return;
   }
-  cont.innerHTML = lista.map(rlCardHTML).join('') +
-    '<div style="text-align:center;margin:14px 0 6px;font-size:12.5px;color:var(--muted);">¿Hacés algún oficio o sos profesional? <a href="#" onclick="elegirModoNegocio(\'servicios\');return false;" style="color:#FC1820;font-weight:800;">Sumate gratis</a></div>';
+  cont.innerHTML = lista.map(rlCardHTML).join('');
 }
 function rlIdDe(c){ return c._docId || c.id || c.uid; }
+function rlChipsHTML(c, max){
+  const ns = proOficiosNorm(c);
+  const mostrar = (max ? ns.slice(0, max) : ns).map(function(n){
+    const i = profItemInfo(n);
+    return '<span class="rl-of" style="--gc:' + (i ? i.g.color : '#FC1820') + '">' + (i ? i.it.e + ' ' + vitEsc(i.it.l) : vitEsc(n)) + '</span>';
+  }).join('');
+  return mostrar + ((max && ns.length > max) ? '<span class="rl-of">+' + (ns.length - max) + '</span>' : '');
+}
 function rlCardHTML(c){
   const id = rlIdDe(c);
-  const of = (c.oficios||[]);
-  const ofs = of.slice(0,3).map(function(o){ return '<span class="rl-of">' + vitEsc(o) + '</span>'; }).join('') + (of.length > 3 ? '<span class="rl-of">+' + (of.length - 3) + '</span>' : '');
+  const esp = proEspecialidad(c);
   const meta = [c.zona ? '📍 ' + vitEsc(c.zona) : (c.ciudad ? '📍 ' + vitEsc(c.ciudad) : ''), c.atiendeDomicilio ? '🏠 A domicilio' : ''].filter(Boolean).join(' · ');
-  const logo = c.img ? '<img src="' + c.img + '" alt="" loading="lazy">' : '🧰';
+  const ns = proOficiosNorm(c); const i0 = ns.length ? profItemInfo(ns[0]) : null;
+  const logo = c.img ? '<img src="' + c.img + '" alt="" loading="lazy">' : (i0 ? i0.it.e : '🧰');
   const tel = (c.telefono || c.whatsapp || '').replace(/[^\d+]/g,'');
   return '<div class="rl-card" onclick="rlAbrirFicha(\'' + vitEsc(id) + '\')">' +
     '<div class="rl-logo">' + logo + '</div>' +
     '<div class="rl-body"><div class="rl-nombre">' + vitEsc(c.nombre||'') + '</div>' +
-    '<div class="rl-oficios">' + ofs + '</div>' +
+    (esp ? '<div class="rl-esp">' + vitEsc(esp) + '</div>' : '') +
+    '<div class="rl-oficios">' + rlChipsHTML(c, 3) + '</div>' +
     (meta ? '<div class="rl-meta">' + meta + '</div>' : '') +
     '<div class="rl-acc">' +
       '<button type="button" class="rl-btn wa" onclick="event.stopPropagation();rlWhatsApp(\'' + vitEsc(id) + '\')">💬 WhatsApp</button>' +
@@ -5648,7 +5772,7 @@ function rlWhatsApp(id){
   const c = rlBuscarPro(id);
   if(!c){ return; }
   const tel = rlTelWa(c.whatsapp || c.telefono);
-  if(!tel){ toast('Este profesional no cargó WhatsApp'); return; }
+  if(!tel){ toast('Este perfil no cargó WhatsApp'); return; }
   rlRegistrar(id, 'consulta');
   const u = state.currentUser || {};
   const msg = '¡Hola *' + c.nombre + '*! 👋\n\nSoy *' + (u.nombre || 'un vecino de PuenT') + '* y te escribo desde *PuenT · Red Local*. Vi tu perfil y quería hacerte una consulta.\n\n¡Gracias!';
@@ -5659,15 +5783,18 @@ function rlAbrirFicha(id){
   if(!c){ toast('No encontramos ese perfil'); return; }
   rlRegistrar(id, 'vistaFicha');
   const fila = function(l, v){ return v ? '<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line);font-size:13.5px;"><span style="color:var(--muted);font-weight:700;">' + l + '</span><span style="text-align:right;">' + vitEsc(v) + '</span></div>' : ''; };
-  const ofs = (c.oficios||[]).map(function(o){ return '<span class="rl-of" style="font-size:12px;padding:4px 11px;">' + vitEsc(o) + '</span>'; }).join('');
-  const logo = c.img ? '<img src="' + c.img + '" alt="" onclick="verImagenGrande(this.src, this.alt)" style="width:96px;height:96px;border-radius:20px;object-fit:cover;flex-shrink:0;cursor:zoom-in;">' : '<div style="width:96px;height:96px;border-radius:20px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;">🧰</div>';
+  const ns = proOficiosNorm(c); const i0 = ns.length ? profItemInfo(ns[0]) : null;
+  const esp = proEspecialidad(c);
+  const logo = c.img ? '<img src="' + c.img + '" alt="" onclick="verImagenGrande(this.src, this.alt)" style="width:96px;height:96px;border-radius:22px;object-fit:cover;flex-shrink:0;cursor:zoom-in;">' : '<div style="width:96px;height:96px;border-radius:22px;background:#F1F3F8;display:flex;align-items:center;justify-content:center;font-size:42px;flex-shrink:0;">' + (i0 ? i0.it.e : '🧰') + '</div>';
   const tel = (c.telefono || c.whatsapp || '').replace(/[^\d+]/g,'');
   document.getElementById('proFichaContenido').innerHTML =
-    '<div style="display:flex;gap:14px;align-items:center;margin:8px 0 14px;">' + logo + '<div><div style="font-size:21px;font-weight:800;color:var(--navy);line-height:1.2;">' + vitEsc(c.nombre||'') + '</div><div style="font-size:12.5px;color:var(--muted);margin-top:3px;">' + vitEsc(c.ciudad||'') + '</div></div></div>' +
-    '<div class="rl-oficios" style="margin-bottom:14px;">' + ofs + '</div>' +
+    '<div style="display:flex;gap:14px;align-items:center;margin:8px 0 14px;">' + logo + '<div><div style="font-size:21px;font-weight:800;color:#1F2A44;line-height:1.2;">' + vitEsc(c.nombre||'') + '</div>' +
+    (esp ? '<div style="font-size:13px;color:#6B7385;margin-top:2px;">' + vitEsc(esp) + '</div>' : '') +
+    '<div style="font-size:12.5px;color:#8A92A3;margin-top:3px;">📍 ' + vitEsc(c.ciudad||'') + '</div></div></div>' +
+    '<div class="rl-oficios" style="margin-bottom:14px;">' + rlChipsHTML(c) + '</div>' +
     '<div class="rl-acc" style="margin:0 0 16px;"><button type="button" class="rl-btn wa" style="padding:13px 6px;font-size:14px;" onclick="rlWhatsApp(\'' + vitEsc(rlIdDe(c)) + '\')">💬 Escribir por WhatsApp</button>' +
     (tel ? '<a class="rl-btn tel" style="padding:13px 6px;font-size:14px;" href="tel:' + vitEsc(tel) + '" onclick="rlRegistrar(\'' + vitEsc(rlIdDe(c)) + '\',\'llamada\')">📞 Llamar</a>' : '') + '</div>' +
-    (c.descripcion ? '<div style="background:#FAFAF8;border-radius:14px;padding:13px 14px;font-size:13.5px;line-height:1.6;color:#333;margin-bottom:12px;">' + vitEsc(c.descripcion) + '</div>' : '') +
+    (c.descripcion ? '<div style="background:#F7F8FB;border-radius:16px;padding:14px;font-size:13.5px;line-height:1.6;color:#333;margin-bottom:12px;">' + vitEsc(c.descripcion) + '</div>' : '') +
     '<div class="card" style="padding:4px 16px;">' +
       fila('Zona de atención', c.zona) + fila('A domicilio', c.atiendeDomicilio ? 'Sí' : '') + fila('Horario', c.horario) + fila('Matrícula', c.matricula) + fila('Ciudad', c.ciudad) +
     '</div>';
@@ -18782,7 +18909,8 @@ async function adminVerComercio(docId){
       ${fila('Web', c.web ? `<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;">${vitEsc(c.web)}</a>` : '')}
       ${fila('Horario', c.horario)}
       ${fila('Modo', c.modo==='vitrina' ? '🏬 Solo vidriera' : (c.modo==='servicios' ? '🧰 Profesional / oficio' : '🛍️ Tienda'))}
-      ${fila('Oficios', (c.oficios&&c.oficios.length) ? vitEsc(c.oficios.join(', ')) : '')}
+      ${fila('Categorías Red Local', (c.oficios&&c.oficios.length) ? vitEsc(proOficiosNorm(c).join(', ')) : '')}
+      ${fila('Especialidad', c.modo==='servicios' && proEspecialidad(c) ? vitEsc(proEspecialidad(c)) : '')}
       ${fila('Matrícula', c.matricula ? vitEsc(c.matricula) : '')}
       ${fila('Zona de atención', c.zona ? vitEsc(c.zona) : '')}
       ${fila('Atiende a domicilio', c.modo==='servicios' ? (c.atiendeDomicilio ? 'Sí' : 'No') : '')}
@@ -21592,7 +21720,7 @@ async function abrirPerfil(){
     campos = fila('Nombre', u.nombre) + fila('Dirección', u.direccion) + fila('Ciudad', u.ciudad) + fila('Rubro', u.rubro) + fila('Teléfono', u.telefono) + fila('Horario', u.horario) + fila('Rating', u.rating ? '⭐ '+u.rating : null);
     editAction = 'abrirEditarComercio()';
     if(esProfesional(u)){
-      campos = fila('Nombre', u.nombre) + fila('Oficios', (u.oficios||[]).join(', ')) + fila('Zona', u.zona) + fila('Ciudad', u.ciudad) + fila('WhatsApp', u.whatsapp) + fila('Horario', u.horario);
+      campos = fila('Nombre', u.nombre) + fila('Categorías', proOficiosNorm(u).join(', ')) + fila('Especialidad', proEspecialidad(u)) + fila('Zona', u.zona) + fila('Ciudad', u.ciudad) + fila('WhatsApp', u.whatsapp) + fila('Horario', u.horario);
       editAction = 'proAbrirEditar()';
     }
   } else if(state.role === 'cliente'){
