@@ -219,6 +219,28 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .rp-chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #E0E0E0;border-radius:100px;padding:7px 12px;font-size:13px;font-weight:600;color:#444;cursor:pointer;background:#fff;}
 .rp-chip input{width:auto;accent-color:#FC1820;margin:0;}
 .rp-chip.sel{border-color:#FC1820;background:#FFF0F0;color:#B3121A;}
+.rl-search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #EAEAEA;border-radius:14px;padding:10px 12px;margin-bottom:10px;}
+.rl-search input{flex:1;border:none;outline:none;font-size:14px;font-family:inherit;background:transparent;min-width:0;}
+.rl-chips-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;}
+.rl-chips-row::-webkit-scrollbar{display:none;}
+.rl-chips-sub{padding-top:0;}
+.rl-chip{flex-shrink:0;border:1.5px solid #E0E0E0;background:#fff;color:#444;border-radius:100px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.rl-chip.on{background:#FC1820;border-color:#FC1820;color:#fff;}
+.rl-chips-sub .rl-chip{font-size:12px;padding:5px 11px;background:#FAFAFA;}
+.rl-chips-sub .rl-chip.on{background:#FFF0F0;border-color:#FC1820;color:#B3121A;}
+.rl-card{display:flex;gap:12px;background:#fff;border:1.5px solid #EFEFEF;border-radius:16px;padding:12px;margin-bottom:10px;cursor:pointer;}
+.rl-logo{width:64px;height:64px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;}
+.rl-logo img{width:100%;height:100%;object-fit:cover;}
+.rl-body{flex:1;min-width:0;}
+.rl-nombre{font-size:15px;font-weight:800;color:var(--navy);line-height:1.25;overflow:hidden;text-overflow:ellipsis;}
+.rl-oficios{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0;}
+.rl-of{background:#FFF0F0;color:#B3121A;border:1px solid #FFCDD0;border-radius:100px;padding:2px 9px;font-size:11px;font-weight:700;}
+.rl-meta{font-size:11.5px;color:var(--muted);line-height:1.4;}
+.rl-acc{display:flex;gap:8px;margin-top:9px;}
+.rl-btn{flex:1;border:none;border-radius:10px;padding:9px 6px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;display:inline-block;}
+.rl-btn.wa{background:#25D366;color:#fff;}
+.rl-btn.tel{background:#EEF2F7;color:#1F3A5F;}
+
 
 .prod-tag{display:none;}
 .prod-like{background:none; border:none; padding:0; cursor:pointer; font-size:18px; line-height:1; color:#ddd; transition:color .15s;}
@@ -1014,8 +1036,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   <div class="feed-solapas hidden" id="feedSolapas" style="position:sticky;top:0;z-index:19;">
     <button class="feed-solapa active" id="tabHome" onclick="setFeedTab('home')">&#127968; Home</button>
     <button class="feed-solapa" id="tabOfertas" onclick="setFeedTab('ofertas')">&#128293; Ofertas</button>
-    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">&#127961;&#65039; Ciudad Hoy</button>
+    <button class="feed-solapa" id="tabRedlocal" onclick="setFeedTab('redlocal')">🤝 Red Local</button>
     <button class="feed-solapa" id="tabUtil" onclick="setFeedTab('util')">🗺️ Mapa</button>
+    <button class="feed-solapa" id="tabCiudadhoy" onclick="setFeedTab('ciudadhoy')">&#127961;&#65039; Ciudad Hoy</button>
     <button class="feed-solapa" id="tabLocales" onclick="setFeedTab('locales')">🏪 Locales</button>
     <button class="feed-solapa" id="tabRubros" onclick="abrirTodosRubros()">📂 Rubros</button>
     <button class="feed-solapa" id="tabRanking" onclick="abrirRankingComercios()">🏆 Ranking</button>
@@ -1223,6 +1246,18 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="section-title" style="margin-top:6px;">Todos los locales</div>
       <div id="localesFiltroActivo"></div>
       <div id="localesGrid"></div>
+    </div>
+
+    <!-- ================================================================
+         TAB: RED LOCAL (profesionales y oficios)
+    ================================================================ -->
+    <div id="feedRedLocalView" class="hidden" style="padding:0 16px; margin-top:12px;">
+      <div class="section-title" style="margin-top:4px;">🤝 Red Local</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:2px 0 10px;line-height:1.5;">Profesionales y oficios de tu ciudad. Escribiles por WhatsApp o llamalos directo.</p>
+      <div class="rl-search"><span>🔎</span><input id="rlBuscar" type="search" placeholder="¿Qué necesitás? Electricista, abogado, nutricionista…" oninput="rlSetQuery(this.value)" autocomplete="off"></div>
+      <div id="rlChipsCat" class="rl-chips-row"></div>
+      <div id="rlChipsOficio" class="rl-chips-row rl-chips-sub"></div>
+      <div id="rlLista"></div>
     </div>
 
     <!-- ================================================================
@@ -1512,7 +1547,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="background:#F0F7F2;border:1.5px solid #A8D5B5;border-radius:13px;padding:13px 14px;display:flex;gap:10px;align-items:flex-start;margin-bottom:18px;">
         <span style="font-size:18px;flex-shrink:0;">🎁</span>
         <div style="font-size:12.5px;color:#2F5C3F;line-height:1.6;">
-          <strong>30 días gratis, sin compromiso.</strong> Después, el plan Profesional cuesta <strong id="rpPrecioPlan">$25.000</strong> por mes.
+          <strong>30 días gratis, sin compromiso.</strong> Después, el plan Profesional cuesta <strong id="rpPrecioPlan">$29.999</strong> por mes.
         </div>
       </div>
       <div style="background:#F8F8F8;border:1.5px solid #EAEAEA;border-radius:13px;padding:13px 14px;margin-bottom:18px;max-height:130px;overflow-y:auto;font-size:12px;color:#666;line-height:1.7;">
@@ -1532,6 +1567,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="kicker">🧰 Profesional u oficio</div>
     <h1 class="page-title" id="proPanelNombre">Mi perfil</h1>
     <div id="proPanelContenido"></div>
+  </div>
+
+  <!-- ============ SCREEN: FICHA DE PROFESIONAL (Red Local) ============ -->
+  <div class="screen hidden" id="screen-pro-ficha" style="padding:16px 20px 32px;">
+    <div class="link-back" onclick="rlVolver()">← Volver a Red Local</div>
+    <div id="proFichaContenido"></div>
   </div>
 
   <!-- ============ PANEL REPARTIDOR ============ -->
@@ -5216,7 +5257,13 @@ var _rcPasoActual = 1;
 /* ================= RED LOCAL: profesionales y oficios (alta y panel) =================
    Un profesional es un documento de 'comercios' con modo:'servicios'. Se guarda aparte en
    state.profesionales para que NO aparezca en Locales, Rubros, Ofertas ni buscadores de tiendas. */
-const PRO_PLAN_PRECIO = 25000;
+// Precio mensual del plan Profesional. Arranca igual al plan Base de hoy ($29.999) y es un valor PROPIO
+// (tarifario.proPrecio): si más adelante suben las tiendas, el de profesionales no se mueve solo.
+const PRO_PRECIO_DEFAULT = 29999;
+function proPlanPrecio(){
+  try{ const v = Number(tarifarioState().proPrecio); if(v > 0) return v; }catch(e){}
+  return PRO_PRECIO_DEFAULT;
+}
 const OFICIOS_CATEGORIAS = [
   ['🩺 Salud', ['Médico clínico','Nutricionista','Psicólogo/a','Oftalmólogo/a','Dermatólogo/a','Odontólogo/a','Kinesiólogo/a','Pediatra','Ginecólogo/a','Traumatólogo/a','Fonoaudiólogo/a','Veterinario/a']],
   ['⚖️ Legal, gestión y finanzas', ['Abogado/a','Escribano/a','Contador/a','Gestor/a','Martillero/a','Despachante de aduana']],
@@ -5299,7 +5346,7 @@ function rpMostrarPaso(n){
   const tt = document.getElementById('rpTituloTop');
   if(tt) tt.textContent = _rpModo === 'editar' ? 'Editar mis datos' : 'Registro de profesional u oficio';
   const pr = document.getElementById('rpPrecioPlan');
-  if(pr) pr.textContent = '$' + PRO_PLAN_PRECIO.toLocaleString('es-AR');
+  if(pr) pr.textContent = '$' + proPlanPrecio().toLocaleString('es-AR');
   window.scrollTo(0,0);
 }
 function rpRetroceder(){
@@ -5475,7 +5522,7 @@ function proRenderPanel(){
   const tn = document.getElementById('proPanelNombre'); if(tn) tn.textContent = u.nombre || 'Mi perfil';
   const dias = (typeof planDiasRestantes === 'function') ? planDiasRestantes(u) : null;
   const enGracia = !u.planNuevo || u.planNuevo === 'gracia';
-  const precio = '$' + PRO_PLAN_PRECIO.toLocaleString('es-AR');
+  const precio = '$' + proPlanPrecio().toLocaleString('es-AR');
   const estado = u.aprobado === false
     ? '<div style="background:#FFF6F6;border:1.5px solid #FFCDD0;border-radius:16px;padding:16px;margin-bottom:12px;"><div style="font-weight:800;color:#B3121A;margin-bottom:4px;">⏳ Tu perfil está en revisión</div><div style="font-size:13px;color:#555;line-height:1.6;">El equipo de PuenT lo revisa y te contacta en las próximas 48 hs por WhatsApp o correo. Cuando lo aprueben, vas a aparecer en <strong>Red Local</strong>.</div></div>'
     : '<div style="background:#F0F7F2;border:1.5px solid #A8D5B5;border-radius:16px;padding:16px;margin-bottom:12px;"><div style="font-weight:800;color:#2F7A55;margin-bottom:4px;">✅ Perfil aprobado</div><div style="font-size:13px;color:#2F5C3F;line-height:1.6;">Ya formás parte de la Red Local de PuenT.</div></div>';
@@ -5492,6 +5539,141 @@ function proRenderPanel(){
     fila('WhatsApp', u.whatsapp) + fila('Teléfono', u.telefono !== u.whatsapp ? u.telefono : '') + fila('Horario', u.horario) + fila('Descripción', u.descripcion) + '</div>' +
     '<button type="button" class="rp-btn" style="margin-top:4px;" onclick="proAbrirEditar()">✏️ Editar mis datos</button>';
 }
+
+/* ================= RED LOCAL: listado, filtros y ficha ================= */
+let _rlCat = 'todas', _rlOficio = '', _rlQuery = '';
+function rlCategoriaDe(oficio){
+  const cats = profOficiosCategorias();
+  for(let i = 0; i < cats.length; i++){ if(cats[i][1].indexOf(oficio) >= 0) return cats[i][0]; }
+  return '🔧 Otros';
+}
+function rlProfesionales(){
+  return (state.profesionales || []).filter(function(c){
+    return c.estado !== 'papelera' && c.estado !== 'suspendido' && c.aprobado !== false &&
+           (c.oficios && c.oficios.length) && mismaCiudad(c.ciudad, ciudadSeleccionada);
+  });
+}
+function rlTelWa(tel){
+  let d = String(tel||'').replace(/\D/g,'').replace(/^0+/, '');
+  if(d.length === 10) d = '549' + d;          // 3437123456 -> 5493437123456
+  else if(d.length === 12 && d.indexOf('54') === 0 && d.charAt(2) !== '9') d = '549' + d.slice(2);
+  return d;
+}
+function rlSetQuery(v){ _rlQuery = (v||'').trim(); rlRenderLista(); }
+function rlSetCat(c){ _rlCat = c; _rlOficio = ''; renderRedLocal(); }
+function rlSetOficio(o){ _rlOficio = (_rlOficio === o) ? '' : o; renderRedLocal(); }
+
+function renderRedLocal(){
+  const chipsCat = document.getElementById('rlChipsCat');
+  if(!chipsCat) return;
+  const todos = rlProfesionales();
+  // Categorías y oficios que realmente tienen profesionales en la ciudad
+  const porCat = {}, porOficio = {};
+  todos.forEach(function(c){
+    const cats = new Set();
+    (c.oficios||[]).forEach(function(o){
+      porOficio[o] = (porOficio[o]||0) + 1;
+      cats.add(rlCategoriaDe(o));
+    });
+    cats.forEach(function(k){ porCat[k] = (porCat[k]||0) + 1; });
+  });
+  if(_rlCat !== 'todas' && !porCat[_rlCat]){ _rlCat = 'todas'; _rlOficio = ''; }
+  const esc = vitEsc;
+  const arg = function(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
+  const catsOrden = profOficiosCategorias().map(function(g){ return g[0]; }).concat(['🔧 Otros']).filter(function(k){ return porCat[k]; });
+  chipsCat.innerHTML = todos.length
+    ? '<button type="button" class="rl-chip' + (_rlCat === 'todas' ? ' on' : '') + '" onclick="rlSetCat(\'todas\')">Todos (' + todos.length + ')</button>' +
+      catsOrden.map(function(k){ return '<button type="button" class="rl-chip' + (_rlCat === k ? ' on' : '') + '" onclick="rlSetCat(\'' + arg(k) + '\')">' + esc(k) + ' (' + porCat[k] + ')</button>'; }).join('')
+    : '';
+  const sub = document.getElementById('rlChipsOficio');
+  if(sub){
+    const oficiosVis = Object.keys(porOficio).filter(function(o){ return _rlCat === 'todas' || rlCategoriaDe(o) === _rlCat; })
+      .sort(function(a,b){ return porOficio[b] - porOficio[a] || a.localeCompare(b, 'es'); });
+    sub.innerHTML = (todos.length && _rlCat !== 'todas')
+      ? oficiosVis.map(function(o){ return '<button type="button" class="rl-chip' + (_rlOficio === o ? ' on' : '') + '" onclick="rlSetOficio(\'' + arg(o) + '\')">' + esc(o) + ' (' + porOficio[o] + ')</button>'; }).join('')
+      : '';
+    sub.style.display = sub.innerHTML ? '' : 'none';
+  }
+  rlRenderLista();
+}
+
+function rlRenderLista(){
+  const cont = document.getElementById('rlLista');
+  if(!cont) return;
+  const todos = rlProfesionales();
+  let lista = todos.filter(function(c){
+    if(_rlCat !== 'todas' && !(c.oficios||[]).some(function(o){ return rlCategoriaDe(o) === _rlCat; })) return false;
+    if(_rlOficio && (c.oficios||[]).indexOf(_rlOficio) < 0) return false;
+    return true;
+  });
+  if(_rlQuery){
+    lista = lista.filter(function(c){ return matchBusqueda((c.nombre||'') + ' ' + (c.oficios||[]).join(' ') + ' ' + (c.zona||'') + ' ' + (c.descripcion||''), _rlQuery); });
+  } else if(typeof shuffleConSemillaCarga === 'function'){
+    lista = shuffleConSemillaCarga(lista);   // orden parejo: todos tienen su turno arriba
+  }
+  if(!lista.length){
+    const hayFiltro = _rlQuery || _rlOficio || _rlCat !== 'todas';
+    cont.innerHTML = hayFiltro
+      ? '<div class="empty"><div class="ic">🔎</div><div class="t">No encontramos profesionales con ese filtro</div><div class="s">Probá con otra búsqueda u otro oficio.</div></div>'
+      : '<div class="empty"><div class="ic">🤝</div><div class="t">Todavía no hay profesionales en ' + vitEsc(ciudadSeleccionada) + '</div><div class="s">¿Sos profesional o hacés algún oficio? Sumate gratis y que te encuentren.</div>' +
+        '<button type="button" class="rp-btn" style="margin-top:14px;max-width:320px;" onclick="elegirModoNegocio(\'servicios\')">🧰 Sumarme a Red Local</button></div>';
+    return;
+  }
+  cont.innerHTML = lista.map(rlCardHTML).join('') +
+    '<div style="text-align:center;margin:14px 0 6px;font-size:12.5px;color:var(--muted);">¿Hacés algún oficio o sos profesional? <a href="#" onclick="elegirModoNegocio(\'servicios\');return false;" style="color:#FC1820;font-weight:800;">Sumate gratis</a></div>';
+}
+function rlIdDe(c){ return c._docId || c.id || c.uid; }
+function rlCardHTML(c){
+  const id = rlIdDe(c);
+  const of = (c.oficios||[]);
+  const ofs = of.slice(0,3).map(function(o){ return '<span class="rl-of">' + vitEsc(o) + '</span>'; }).join('') + (of.length > 3 ? '<span class="rl-of">+' + (of.length - 3) + '</span>' : '');
+  const meta = [c.zona ? '📍 ' + vitEsc(c.zona) : (c.ciudad ? '📍 ' + vitEsc(c.ciudad) : ''), c.atiendeDomicilio ? '🏠 A domicilio' : ''].filter(Boolean).join(' · ');
+  const logo = c.img ? '<img src="' + c.img + '" alt="" loading="lazy">' : '🧰';
+  const tel = (c.telefono || c.whatsapp || '').replace(/[^\d+]/g,'');
+  return '<div class="rl-card" onclick="rlAbrirFicha(\'' + vitEsc(id) + '\')">' +
+    '<div class="rl-logo">' + logo + '</div>' +
+    '<div class="rl-body"><div class="rl-nombre">' + vitEsc(c.nombre||'') + '</div>' +
+    '<div class="rl-oficios">' + ofs + '</div>' +
+    (meta ? '<div class="rl-meta">' + meta + '</div>' : '') +
+    '<div class="rl-acc">' +
+      '<button type="button" class="rl-btn wa" onclick="event.stopPropagation();rlWhatsApp(\'' + vitEsc(id) + '\')">💬 WhatsApp</button>' +
+      (tel ? '<a class="rl-btn tel" href="tel:' + vitEsc(tel) + '" onclick="event.stopPropagation();rlRegistrar(\'' + vitEsc(id) + '\',\'llamada\')">📞 Llamar</a>' : '') +
+    '</div></div></div>';
+}
+function rlBuscarPro(id){ return (state.profesionales||[]).find(function(c){ return rlIdDe(c) === id || c.id === id || c.uid === id; }); }
+function rlRegistrar(id, tipo){
+  try{ const c = rlBuscarPro(id); if(c && typeof estRegistrar === 'function') estRegistrar(c.id || id, tipo); }catch(e){}
+}
+function rlWhatsApp(id){
+  const c = rlBuscarPro(id);
+  if(!c){ return; }
+  const tel = rlTelWa(c.whatsapp || c.telefono);
+  if(!tel){ toast('Este profesional no cargó WhatsApp'); return; }
+  rlRegistrar(id, 'consulta');
+  const u = state.currentUser || {};
+  const msg = '¡Hola *' + c.nombre + '*! 👋\n\nSoy *' + (u.nombre || 'un vecino de PuenT') + '* y te escribo desde *PuenT · Red Local*. Vi tu perfil y quería hacerte una consulta.\n\n¡Gracias!';
+  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg), '_blank');
+}
+function rlAbrirFicha(id){
+  const c = rlBuscarPro(id);
+  if(!c){ toast('No encontramos ese perfil'); return; }
+  rlRegistrar(id, 'vistaFicha');
+  const fila = function(l, v){ return v ? '<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line);font-size:13.5px;"><span style="color:var(--muted);font-weight:700;">' + l + '</span><span style="text-align:right;">' + vitEsc(v) + '</span></div>' : ''; };
+  const ofs = (c.oficios||[]).map(function(o){ return '<span class="rl-of" style="font-size:12px;padding:4px 11px;">' + vitEsc(o) + '</span>'; }).join('');
+  const logo = c.img ? '<img src="' + c.img + '" alt="" onclick="verImagenGrande(this.src, this.alt)" style="width:96px;height:96px;border-radius:20px;object-fit:cover;flex-shrink:0;cursor:zoom-in;">' : '<div style="width:96px;height:96px;border-radius:20px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;">🧰</div>';
+  const tel = (c.telefono || c.whatsapp || '').replace(/[^\d+]/g,'');
+  document.getElementById('proFichaContenido').innerHTML =
+    '<div style="display:flex;gap:14px;align-items:center;margin:8px 0 14px;">' + logo + '<div><div style="font-size:21px;font-weight:800;color:var(--navy);line-height:1.2;">' + vitEsc(c.nombre||'') + '</div><div style="font-size:12.5px;color:var(--muted);margin-top:3px;">' + vitEsc(c.ciudad||'') + '</div></div></div>' +
+    '<div class="rl-oficios" style="margin-bottom:14px;">' + ofs + '</div>' +
+    '<div class="rl-acc" style="margin:0 0 16px;"><button type="button" class="rl-btn wa" style="padding:13px 6px;font-size:14px;" onclick="rlWhatsApp(\'' + vitEsc(rlIdDe(c)) + '\')">💬 Escribir por WhatsApp</button>' +
+    (tel ? '<a class="rl-btn tel" style="padding:13px 6px;font-size:14px;" href="tel:' + vitEsc(tel) + '" onclick="rlRegistrar(\'' + vitEsc(rlIdDe(c)) + '\',\'llamada\')">📞 Llamar</a>' : '') + '</div>' +
+    (c.descripcion ? '<div style="background:#FAFAF8;border-radius:14px;padding:13px 14px;font-size:13.5px;line-height:1.6;color:#333;margin-bottom:12px;">' + vitEsc(c.descripcion) + '</div>' : '') +
+    '<div class="card" style="padding:4px 16px;">' +
+      fila('Zona de atención', c.zona) + fila('A domicilio', c.atiendeDomicilio ? 'Sí' : '') + fila('Horario', c.horario) + fila('Matrícula', c.matricula) + fila('Ciudad', c.ciudad) +
+    '</div>';
+  showScreen('pro-ficha');
+}
+function rlVolver(){ showScreen('feed'); setFeedTab('redlocal'); }
 
 function rcMostrarPaso(n){
   _rcPasoActual = n;
@@ -6921,6 +7103,7 @@ async function cargarDatosPublicosDeFirestore(){
   renderFeedVendedores();
   renderExploraCiudad();
   renderLocales();
+  try{ renderRedLocal(); }catch(e){ console.error(e); }
   migrarCategorias();
   migrarConectorActivo();
   migrarIdFaltanteEnComercios();
@@ -12778,6 +12961,7 @@ function setCiudad(c){
   renderFeed();
   renderFeedVendedores();
   renderLocales();
+  try{ renderRedLocal(); }catch(e){}
   renderMarcadoresMap();
   toast('📍 Mostrando ' + c + ', Entre Ríos');
 }
@@ -14381,14 +14565,14 @@ function setFeedTab(tab){
   tabActiva = tab;
   if(tab !== 'ciudadhoy' && _sponsorBannerTimer){ clearInterval(_sponsorBannerTimer); _sponsorBannerTimer = null; }
   // Botones de solapa
-  ['home','ofertas','ciudadhoy','util','locales','mas'].forEach(t=>{
+  ['home','ofertas','redlocal','ciudadhoy','util','locales','mas'].forEach(t=>{
     var btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
     if(btn) btn.classList.toggle('active', t===tab);
   });
   // Vistas
   var views = {
     home:'feedHomeView', ofertas:'feedOfertasView', locales:'feedLocalesView',
-    ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView'
+    redlocal:'feedRedLocalView', ciudadhoy:'feedCiudadHoyView', util:'feedUtilView', mas:'feedMasView'
   };
   Object.entries(views).forEach(([t, id])=>{
     var el = document.getElementById(id);
@@ -14400,6 +14584,7 @@ function setFeedTab(tab){
   if(tab !== 'util') ocultarMapa();
   if(tab==='ofertas'){ renderFeed(); }
   if(tab==='locales'){ renderLocales(); }
+  if(tab==='redlocal'){ renderRedLocal(); }
   if(tab==='ciudadhoy'){ renderCiudadHoy(); renderGuiaUtilCiudadHoy(); renderSponsorBanner(); }
   if(tab==='util'){
     // Esperar dos frames para que el DOM pinte el div con dimensiones reales
@@ -16138,6 +16323,7 @@ const TARIFARIO_DEFAULT = {
     {id:'pub_buscador', ic:'🔍', nombre:'Destacado en buscador', precio:34999,
      desc:'Aparecer primero cuando buscan tu rubro.'},
   ],
+  proPrecio:29999,   // plan Profesional (Red Local): mismo valor que el Base de hoy, editable aparte
   wspAdmin:'5493437430240',
   customFeats:[]
 };
