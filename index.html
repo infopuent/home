@@ -540,7 +540,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .rub-tile{position:relative;display:block;width:100%;aspect-ratio:3/4;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;
   background:var(--rt-a,#FC1820);-webkit-appearance:none;appearance:none;text-align:center;font-family:inherit;
   box-shadow:0 2px 8px rgba(0,0,0,.10);transition:transform .15s ease, box-shadow .15s ease;-webkit-tap-highlight-color:transparent;}
-.rub-tile .rt-bg{position:absolute;inset:0;background-size:cover;background-position:center top;background-repeat:no-repeat;}
+.rub-tile .rt-bg{position:absolute;inset:0;background-size:cover;background-position:center center;background-repeat:no-repeat;}
 /* Foto arriba, color del rubro abajo (último 35%) */
 .rub-tile .rt-vel{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,.3) 58%, var(--rt-b,#FC1820) 72%);opacity:1;transition:opacity .2s;}
 .rub-tile.rt-sinfoto .rt-vel{background:linear-gradient(160deg, var(--rt-a,#FC1820) 0%, var(--rt-b,#B3121A) 100%);opacity:1;}
@@ -14913,7 +14913,9 @@ function renderCatChipsYSecciones(){
     tiles += '<button type="button" class="rub-tile' + (foto ? '' : ' rt-sinfoto') + extra + '" data-id="' + _esc2(r.id) + '"' + ocultar +
       ' style="--rt-a:' + cols[0] + ';--rt-b:' + cols[1] + ';" onclick="setFeedCategoria(\'' + _esc2(r.id) + '\',this)" aria-label="' + _esc2(r.nombre || nombre) + '">' +
       (foto ? '<span class="rt-bg" style="background-image:url(\'' + _esc2(foto) + '\')"></span>' : '') +
-      '<span class="rt-vel"></span><span class="rt-ic">' + ic + '</span><span class="rt-nom">' + _esc2(nombre) + '</span></button>';
+      (foto ? '' : '<span class="rt-vel"></span>') +
+      (foto ? '' : '<span class="rt-ic">' + ic + '</span><span class="rt-nom">' + _esc2(nombre) + '</span>') +
+      '</button>';
     if(idx === RUBRO_TILE_VISIBLES - 1 && rubros.length > RUBRO_TILE_VISIBLES){
       tiles += '<button type="button" class="rub-tile rt-mas" onclick="toggleRubrosTodos()" aria-label="Ver todos los rubros">' +
         '<span class="rt-ic">' + RUBRO_SVG_MAS + '</span><span class="rt-nom" id="rubMasTxt">Ver todos</span></button>';
