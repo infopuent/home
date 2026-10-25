@@ -178,6 +178,10 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   display:none;
 }
 .navbtn-cart .cart-badge.visible{display:block;}
+.navbtn-cart .cart-badge{font-size:10px; padding:2px 5px; min-width:18px;}
+@keyframes cartPop{0%{transform:scale(1);}35%{transform:scale(1.22);}65%{transform:scale(.94);}100%{transform:scale(1);}}
+.navbtn-cart.cart-pop{animation:cartPop .55s ease;}
+.navbtn-cart.cart-pop .cart-badge{background:#1E9E4E;}
 .nav-badge{
   position:absolute; top:-3px; right:-3px;
   background:#D98080; color:white;
@@ -191,7 +195,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .prod-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 .prod-card{background:white; border:none; border-radius:0; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08);}
 .prod-photo{aspect-ratio:3/4; height:auto; background:linear-gradient(135deg,#FFF0F0,#FFE3E4); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; position:relative;}
-.prod-photo img{width:100%; height:100%; object-fit:contain; display:block;}
+.prod-photo img{width:100%; height:100%; object-fit:contain; display:block; position:relative;}
+/* Fondo difuminado: si la foto no llena el cuadro, en vez de bandas vacías se ve la misma foto desenfocada */
+.prod-photo.pb-on::before{content:''; position:absolute; inset:-14%; background-image:var(--fotobg); background-size:cover; background-position:center; filter:blur(14px) saturate(1.15); opacity:.85; pointer-events:none;}
+.foto-guia{margin-top:12px; background:#F7F8FB; border-radius:14px; padding:12px;}
+.foto-guia-t{font-size:12.5px; font-weight:800; color:#1F2A44; margin-bottom:8px; line-height:1.35;}
+.foto-guia-g{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.foto-guia-i{display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; font-size:11px; line-height:1.35; color:#555;}
+.foto-guia-i .ok{color:#1C7C3F; font-weight:700;} .foto-guia-i .mal{color:#B42318; font-weight:700;}
+.foto-guia-s{font-size:11.5px; color:#777; margin-top:8px; line-height:1.4;}
 .prod-body{padding:7px 10px 8px; display:flex; align-items:center; justify-content:space-between; gap:6px;}
 .prod-name{display:none;}
 .prod-price{font-size:13px; font-weight:800; color:#FC1820; display:inline-flex; align-items:baseline; gap:4px;}
@@ -206,6 +218,16 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .modo-neg-t{font-size:16px;font-weight:800;color:#1A1A1A;margin-bottom:3px;}
 .modo-neg-s{font-size:12.5px;color:#777;line-height:1.4;}
 .rp-label{font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;}
+  .rp-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .rp-gal .rp-th{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#F1F2F6;}
+  .rp-gal .rp-th img{width:100%;height:100%;object-fit:cover;display:block;}
+  .rp-gal .rp-th button{position:absolute;top:4px;right:4px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:13px;line-height:24px;padding:0;cursor:pointer;}
+  .rp-gal .rp-add{aspect-ratio:1/1;border-radius:12px;border:2px dashed #CBD0DB;background:#FAFAFC;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:26px;color:#8A92A3;cursor:pointer;}
+  .rp-gal .rp-add span{font-size:11px;font-weight:700;}
+  .pf-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .pf-gal img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;cursor:zoom-in;background:#F1F2F6;}
+  .pf-redes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .pf-redes a{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:100px;background:#F1F2F6;color:#1F2A44;font-size:13px;font-weight:700;text-decoration:none;}
 .rp-input{width:100%;padding:14px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-family:inherit;box-sizing:border-box;background:#F8F8F8;color:#1A1A1A;}
 .rp-btn{width:100%;padding:16px;border-radius:100px;background:#FC1820;color:#fff;font-weight:800;font-size:16px;border:none;cursor:pointer;margin-top:28px;font-family:inherit;}
 .rp-dot{width:30px;height:30px;border-radius:50%;background:#EAEAEA;color:#AAA;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -266,6 +288,17 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .rl-cta-t{font-family:'Bai Jamjuree',sans-serif;font-size:19px;font-weight:800;line-height:1.2;margin-bottom:6px;}
 .rl-cta-s{font-size:12.5px;line-height:1.55;opacity:.95;margin-bottom:14px;}
 .rl-cta button{width:100%;background:#fff;color:#C70F17;border:none;border-radius:100px;padding:13px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;}
+.val-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;color:#8A5A00;background:#FFF6E0;border:1px solid #F3DFA8;border-radius:100px;padding:2px 9px;}
+.val-chip small{font-weight:700;opacity:.8;}
+.val-nuevo{display:inline-block;font-size:11px;font-weight:700;color:#8A92A3;}
+.val-rec{display:flex;gap:8px;}
+.val-rec button{flex:1;border:1.5px solid #E0E0E0;background:#fff;border-radius:12px;padding:11px 6px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;color:#444;}
+.val-rec button.on-si{border-color:#2F7A55;background:#E8F5EE;color:#2F7A55;}
+.val-rec button.on-no{border-color:#C23B3B;background:#FDE8E8;color:#C23B3B;}
+.val-pend{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:.5px solid var(--line);}
+.val-pend:last-child{border-bottom:none;}
+.val-fila{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:13px;}
+
 
 
 .prod-tag{display:none;}
@@ -501,6 +534,33 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .cat-banner-empty{
   padding:18px 4px; text-align:center; font-size:12.5px; color:var(--muted);
 }
+
+/* ---- Rubros del home: cuadros con foto + degradé + ícono ---- */
+.rub-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+.rub-tile{position:relative;display:block;width:100%;aspect-ratio:1/1;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;
+  background:var(--rt-a,#FC1820);-webkit-appearance:none;appearance:none;text-align:center;font-family:inherit;
+  box-shadow:0 2px 8px rgba(0,0,0,.10);transition:transform .15s ease, box-shadow .15s ease;-webkit-tap-highlight-color:transparent;}
+.rub-tile .rt-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;}
+.rub-tile .rt-vel{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0) 18%, var(--rt-b,#FC1820) 100%);opacity:.92;transition:opacity .2s;}
+.rub-tile.rt-sinfoto .rt-vel{background:linear-gradient(160deg, var(--rt-a,#FC1820) 0%, var(--rt-b,#B3121A) 100%);opacity:1;}
+.rub-tile .rt-ic{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 2px 6px rgba(0,0,0,.18);color:var(--rt-b,#FC1820);}
+.rub-tile .rt-ic svg{width:21px;height:21px;display:block;}
+.rub-tile .rt-nom{position:absolute;left:3px;right:3px;bottom:7px;color:#fff;font-weight:800;font-size:11px;line-height:1.12;
+  text-shadow:0 1px 3px rgba(0,0,0,.35);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.rub-tile:active{transform:scale(.96);}
+.rub-tile.sel{box-shadow:0 0 0 3px #fff, 0 0 0 5px #FC1820, 0 8px 18px rgba(252,24,32,.30);transform:translateY(-1px);}
+.rub-tile.sel .rt-vel{opacity:1;}
+.rub-tile.rt-mas{background:#FC1820;}
+.rub-tile.rt-mas .rt-ic{background:transparent;box-shadow:none;color:#fff;width:46px;height:46px;top:40%;}
+.rub-tile.rt-mas .rt-ic svg{width:34px;height:34px;}
+.rub-tile.rt-extra{display:none;}
+.rub-grid.rub-all .rub-tile.rt-extra{display:block;}
+.rub-panels{margin-top:12px;}
+.rub-panels .cat-banner-item{background:transparent;border-radius:16px;}
+.rub-panels .cat-banner-panel{background:#FAFAF8;border-radius:16px;}
+.rub-panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 0;font-weight:800;font-size:15px;color:var(--navy);}
+.rub-panel-head button{border:0;background:#F0F0EE;width:30px;height:30px;border-radius:50%;font-size:14px;font-weight:800;color:#555;cursor:pointer;}
 
 /* ---- Secciones de categoría en el home ---- */
 .feed-cat-seccion{ display:block; }
@@ -1202,6 +1262,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div id="adheridosGrid" class="adheridos-grid"></div>
       </div>
 
+      <!-- Rubros del home: cuadros con foto y degradé — generados
+           dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
+      <div style="padding:14px 16px 0;">
+        <div class="section-title-row">
+          <div class="section-title">🏙️ Rubros de la ciudad</div>
+        </div>
+      </div>
+      <div id="catBannerList" style="padding:6px 16px 4px;"></div>
+
       <!-- Te va a encantar — sección paga (productos destacados) -->
       <div style="padding:0 16px;" id="secEncantar">
         <div class="section-title-row">
@@ -1226,14 +1295,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div id="vitrinaHomeRow" class="vit-row"></div>
       </div>
-      <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
-           dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
-      <div style="padding:14px 16px 0;">
-        <div class="section-title-row">
-          <div class="section-title">🏙️ Rubros de la ciudad</div>
-        </div>
-      </div>
-      <div id="catBannerList" style="padding:6px 16px 4px;display:flex;flex-direction:column;gap:0;"></div>
+
 
 
       <!-- CTA ingreso (solo si no está logueado) -->
@@ -1542,7 +1604,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div id="rpOficios"></div>
         </div>
         <div><label class="rp-label">Tu especialidad o detalle <span style="font-weight:500;color:#888;">(opcional)</span></label>
-          <input id="rpEspecialidad" class="rp-input" type="text" maxlength="80" placeholder="Ej: Oftalmólogo, Instalador solar, Cabañas con pileta"></div>
+          <input id="rpEspecialidad" class="rp-input" type="text" maxlength="80" placeholder="Ej: Oftalmólogo, Instalador solar, Safari en lancha"></div>
         <div><label class="rp-label">Matrícula <span style="font-weight:500;color:#888;">(opcional)</span></label>
           <input id="rpMatricula" class="rp-input" type="text" placeholder="Ej: MP 1234"></div>
         <div><label class="rp-label">Zona donde atendés:</label>
@@ -1586,6 +1648,18 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <input type="file" id="rpLogoInput" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this,'rpLogo')">
           <div id="rpLogoFotoEstado" class="foto-upload-estado" style="font-size:11.5px;color:#888;margin-top:4px;"></div>
         </div>
+        <div><label class="rp-label">Mostrá tu trabajo <span style="font-weight:500;color:#888;">(opcional · hasta 6 fotos)</span></label>
+          <div style="font-size:12px;color:#888;margin:-2px 0 8px;line-height:1.4;">Tu oficina, trabajos terminados, tus lanchas, tus equipos… lo que quieras que vean antes de contactarte.</div>
+          <div id="rpGaleria" class="rp-gal"></div>
+          <input type="file" id="rpGaleriaInput" accept="image/*" multiple style="display:none" onchange="rpGaleriaAgregar(this)">
+          <div id="rpGaleriaEstado" style="font-size:11.5px;color:#888;margin-top:6px;"></div>
+        </div>
+        <div><label class="rp-label">Instagram <span style="font-weight:500;color:#888;">(opcional)</span></label>
+          <input id="rpInstagram" class="rp-input" type="text" maxlength="100" placeholder="@tuusuario" autocapitalize="none"></div>
+        <div><label class="rp-label">Facebook <span style="font-weight:500;color:#888;">(opcional)</span></label>
+          <input id="rpFacebook" class="rp-input" type="text" maxlength="120" placeholder="Tu página o link de Facebook" autocapitalize="none"></div>
+        <div><label class="rp-label">Sitio web <span style="font-weight:500;color:#888;">(opcional)</span></label>
+          <input id="rpWeb" class="rp-input" type="text" maxlength="150" placeholder="www.tusitio.com.ar" autocapitalize="none"></div>
       </div>
       <button type="button" class="rp-btn" id="rpBtnPaso2" onclick="rpAvanzarPaso2()">Continuar</button>
     </div>
@@ -3095,11 +3169,25 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div class="btn-block-row" style="margin-top:8px;">
           <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('cnpFotoInputCam').click()">📷 Sacar foto</button>
-          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('cnpFotoInputGal').click()">🖼️ Elegir de galería</button>
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('cnpFotoInputGal').click()">🖼️ Elegir de galería ✔</button>
         </div>
         <input type="file" id="cnpFotoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this, 'cnp')">
         <input type="file" id="cnpFotoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this, 'cnp')">
         <div id="cnpFotoEstado" class="foto-upload-estado"></div>
+        <div class="foto-guia">
+          <div class="foto-guia-t">📸 Para que tu producto se vea bien en el inicio y en ofertas</div>
+          <div class="foto-guia-g">
+            <div class="foto-guia-i">
+              <svg viewBox="0 0 80 80" width="64" height="64" aria-hidden="true"><rect width="80" height="80" rx="10" fill="#F4F5F8"/><rect x="18" y="14" width="44" height="54" rx="8" fill="#FC1820" opacity=".85"/><rect x="30" y="8" width="20" height="10" rx="3" fill="#B5121A"/></svg>
+              <span class="ok">✅ Producto grande y centrado, fondo liso y claro</span>
+            </div>
+            <div class="foto-guia-i">
+              <svg viewBox="0 0 80 80" width="64" height="64" aria-hidden="true"><rect width="80" height="80" rx="10" fill="#E4D9C8"/><rect x="52" y="46" width="30" height="30" rx="6" fill="#FC1820" opacity=".85"/><rect x="0" y="0" width="80" height="14" fill="#B7A68A" opacity=".6"/></svg>
+              <span class="mal">❌ Producto lejos, cortado o con mucho fondo</span>
+            </div>
+          </div>
+          <div class="foto-guia-s">Luz natural, sin sombras fuertes. Después de elegir la foto la vas a poder mover y hacer zoom hasta que quede perfecta. 💡 Es más estable sacar la foto con la cámara de tu celular y elegirla desde Galería (✔) que usar "Sacar foto" acá.</div>
+        </div>
       </div>
       <div class="field"><label>Nombre del producto</label><input id="cnpNombre" placeholder="Ej: Combo desayuno x2"></div>
       <!-- Características adicionales libres -->
@@ -3316,11 +3404,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
             <div class="t">Tocá una opción para cambiar la foto</div>
             <div class="btn-block-row" style="margin:4px 0;">
               <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('editLogoFotoInputCam').click()">📷 Foto</button>
-              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('editLogoFotoInputGal').click()">🖼️ Galería</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('editLogoFotoInputGal').click()">🖼️ Galería ✔</button>
             </div>
             <input type="file" id="editLogoFotoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this, 'editLogo')">
             <input type="file" id="editLogoFotoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this, 'editLogo')">
-            <div class="foto-upload-estado" id="editLogoFotoEstado" style="margin-bottom:0;">Se muestra en tu ficha y en tus productos.</div>
+            <div class="foto-upload-estado" id="editLogoFotoEstado" style="margin-bottom:0;">Se muestra en tu ficha y en tus productos. 💡 Más estable: elegila desde Galería.</div>
           </div>
         </div>
       </div>
@@ -3335,11 +3423,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
             <div class="t">Tocá para cambiar la portada</div>
             <div class="btn-block-row" style="margin:4px 0;">
               <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('editImg2FotoInputCam').click()">📷 Foto</button>
-              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('editImg2FotoInputGal').click()">🖼️ Galería</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('editImg2FotoInputGal').click()">🖼️ Galería ✔</button>
             </div>
             <input type="file" id="editImg2FotoInputCam" accept="image/*" capture="environment" style="display:none" onchange="onFotoSeleccionada(this,'editImg2')">
             <input type="file" id="editImg2FotoInputGal" accept="image/*" style="display:none" onchange="onFotoSeleccionada(this,'editImg2')">
-            <div class="foto-upload-estado" id="editImg2FotoEstado" style="margin-bottom:0;">Recomendado: foto horizontal del local o del negocio.</div>
+            <div class="foto-upload-estado" id="editImg2FotoEstado" style="margin-bottom:0;">Recomendado: foto horizontal del local o del negocio. 💡 Más estable: sacala con la cámara de tu celu y elegila desde Galería.</div>
           </div>
         </div>
         <div id="editImg2BtnEliminar" style="display:none;margin-top:8px;">
@@ -3714,6 +3802,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-repartidores');adminCargarRepartidores();adminCargarEnviosPendientes()"><i class="ti ti-bike ic"></i>Repartidores</button>
         <button class="btn-tile btn-tile-mint" onclick="showScreen('admin-zonas-envio');adminCargarZonasEnvio()"><i class="ti ti-map-2 ic"></i>Zonas de envío</button>
         <button class="btn-tile btn-tile-neutral" onclick="adminReGeocodificarTodo()"><i class="ti ti-map-pin ic"></i>Re-geocodificar mapa</button>
+        <button class="btn-tile btn-tile-neutral" onclick="adminMigrarFotosR2()"><i class="ti ti-cloud-upload ic"></i>Migrar fotos a Cloudflare</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio');setTimeout(()=>crearMapaPick('adMapaPickMobile', adminNuevoComLatLng?.lat, adminNuevoComLatLng?.lng, (lat,lng)=>{adminNuevoComLatLng={lat,lng};const est=document.getElementById('adUbicacionEstadoMobile');if(est)est.textContent='✅ Ubicación marcada correctamente.';}),50)"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
         <button class="btn-tile btn-tile-sage" style="grid-column:1/-1;" onclick="adminAbrirCiudadHoy();showScreen('admin-ciudad-hoy')"><i class="ti ti-building-community ic"></i>🏙️ La Ciudad Hoy</button>
@@ -3828,9 +3917,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <option value="📷">📷 Foto/Imprenta</option>
         <option value="🍷">🍷 Vinoteca</option>
       </select>
-      <label style="margin-top:10px;">Foto banner (se comprime sola)</label>
+      <label style="margin-top:10px;">Foto del cuadro (cuadrada, 480×480; se encuadra sola)</label>
       <div class="foto-upload" id="nrFotoBox" onclick="document.getElementById('nrFotoInput').click()">
-        <div class="foto-upload-empty"><div class="foto-upload-ic">📷</div><div class="foto-upload-txt">Tocá para elegir foto (banner apaisado)</div></div>
+        <div class="foto-upload-empty"><div class="foto-upload-ic">📷</div><div class="foto-upload-txt">Tocá para elegir foto (cuadrada)</div></div>
       </div>
       <input type="file" id="nrFotoInput" accept="image/*" style="display:none;" onchange="onFotoSeleccionada(this,'nr')">
       <div class="foto-upload-estado" id="nrFotoEstado"></div>
@@ -4511,14 +4600,16 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 <!-- ============ MODAL: VALORAR ============ -->
 <div class="hidden" id="modalValorar" style="position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;">
   <div class="card" style="width:100%; max-width:340px; margin:0; text-align:center;">
-    <div class="page-sub" style="margin-bottom:2px;">Calificar a</div>
-    <div class="page-title" style="font-size:18px; margin-bottom:14px;" id="valorarNombre">—</div>
+    <div class="page-sub" style="margin-bottom:2px;">Valorar a</div>
+    <div class="page-title" style="font-size:18px; margin-bottom:4px;" id="valorarNombre">—</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tu valoración es pública. No se escriben comentarios.</div>
     <div id="valorarEstrellas" style="display:flex; justify-content:center; gap:6px; margin-bottom:14px;"></div>
-    <div class="field" style="text-align:left;">
-      <label>Comentario (opcional)</label>
-      <textarea id="valorarComentario" rows="2" placeholder="¿Cómo fue la experiencia?"></textarea>
+    <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;">¿Lo recomendás?</div>
+    <div class="val-rec">
+      <button type="button" id="valRecSi" onclick="elegirRecomienda(true)">👍 Sí, lo recomiendo</button>
+      <button type="button" id="valRecNo" onclick="elegirRecomienda(false)">👎 No</button>
     </div>
-    <div class="btn-block-row" style="margin-top:10px;">
+    <div class="btn-block-row" style="margin-top:14px;">
       <button class="btn btn-ghost" onclick="cerrarModalValorar()">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarValoracion()">Enviar</button>
     </div>
@@ -4632,6 +4723,7 @@ let state = {
   currentUser: null,
   vendedores: [],
   comercios: [],
+  contrataciones: [], misVentasConfirmadas: [], contratacionesPro: [], // valoraciones v2
   profesionales: [], // Red Local: modo 'servicios' (no se mezcla con las tiendas)
   clientes: [],
   productos: [],
@@ -4872,51 +4964,236 @@ function estrellasHtml(prom, total){
   for(let i=1;i<=5;i++) out += `<i class="ti ${i<=Math.round(prom)?'ti-star-filled':'ti-star'}" style="font-size:14px; color:${i<=Math.round(prom)?'#D9A441':'var(--line)'}"></i>`;
   return `<span style="display:inline-flex; align-items:center; gap:2px; vertical-align:middle;">${out}<span style="font-size:12px; color:var(--muted); margin-left:4px;">${total>0 ? prom.toFixed(1)+' ('+total+')' : 'Sin valoraciones'}</span></span>`;
 }
-let _valorandoDestino = null; // {uid, rol, nombre, ventaId}
+/* ================= VALORACIONES v2 =================
+ * Estrellas (1 a 5) + "lo recomiendo" (sí / no). SIN comentarios.
+ * Solo valora un CLIENTE que contrató: una compra confirmada por el comercio (ventas) o un trabajo que el
+ * profesional marcó como realizado (contrataciones). Una valoración por contratación: el id del documento
+ * es 'val_' + refId, así no se puede valorar dos veces lo mismo. */
+let _valorandoItem = null;
 let _valorandoEstrellas = 0;
-function abrirModalValorar(paraUid, paraRol, paraNombre, ventaId){
-  if(!paraUid || paraUid===state.currentUser?.uid) return;
-  _valorandoDestino = {uid:paraUid, rol:paraRol, nombre:paraNombre, ventaId:ventaId||null};
-  _valorandoEstrellas = 0;
-  document.getElementById('valorarNombre').textContent = paraNombre;
-  document.getElementById('valorarComentario').value = '';
+let _valorandoRecomienda = null;
+
+function valResumen(uid){
+  const l = (state.valoraciones||[]).filter(function(v){ return v.paraUid === uid && v.estrellas; });
+  if(!l.length) return {n:0, prom:0, pct:null};
+  const conRec = l.filter(function(v){ return typeof v.recomienda === 'boolean'; });
+  const rec = conRec.filter(function(v){ return v.recomienda; }).length;
+  return {
+    n: l.length,
+    prom: l.reduce(function(a,v){ return a + v.estrellas; }, 0) / l.length,
+    pct: conRec.length ? Math.round(rec / conRec.length * 100) : null
+  };
+}
+function valChipHTML(uid){
+  const r = uid ? valResumen(uid) : {n:0};
+  if(!r.n) return '<span class="val-nuevo">Sin valoraciones</span>';
+  return '<span class="val-chip">⭐ ' + r.prom.toFixed(1) + ' <small>(' + r.n + ')</small>' + (r.pct !== null ? ' · 👍 ' + r.pct + '%' : '') + '</span>';
+}
+function valChipChico(uid){            // para tarjetas chicas: nada si todavía no hay valoraciones reales
+  const r = uid ? valResumen(uid) : {n:0};
+  return r.n ? '⭐ ' + r.prom.toFixed(1) + ' (' + r.n + ')' + (r.pct !== null ? ' · 👍 ' + r.pct + '%' : '') : '';
+}
+// Listado público de valoraciones recibidas: estrella + recomendación, sin texto libre
+function valListaHTML(uid){
+  const l = (state.valoraciones||[]).filter(function(v){ return v.paraUid === uid && v.estrellas; })
+    .sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); });
+  if(!l.length) return '';
+  return l.map(function(v){
+    return '<div class="val-fila"><span style="font-weight:700;">' + vitEsc(v.deNombre || 'Cliente') + '</span><span>' +
+      '★'.repeat(v.estrellas) + '☆'.repeat(5 - v.estrellas) +
+      (typeof v.recomienda === 'boolean' ? (v.recomienda ? ' · 👍' : ' · 👎') : '') + '</span></div>';
+  }).join('');
+}
+
+function pintarEstrellasModal(){
+  const cont = document.getElementById('valorarEstrellas');
+  cont.innerHTML = [1,2,3,4,5].map(function(n){
+    return '<i class="ti ' + (n <= _valorandoEstrellas ? 'ti-star-filled' : 'ti-star') + '" style="font-size:32px; color:' + (n <= _valorandoEstrellas ? '#D9A441' : 'var(--line)') + '; cursor:pointer;" onclick="elegirEstrella(' + n + ')"></i>';
+  }).join('');
+  const si = document.getElementById('valRecSi'), no = document.getElementById('valRecNo');
+  if(si) si.className = _valorandoRecomienda === true ? 'on-si' : '';
+  if(no) no.className = _valorandoRecomienda === false ? 'on-no' : '';
+}
+function elegirEstrella(n){ _valorandoEstrellas = n; pintarEstrellasModal(); }
+function elegirRecomienda(b){ _valorandoRecomienda = b; pintarEstrellasModal(); }
+function cerrarModalValorar(){ document.getElementById('modalValorar').classList.add('hidden'); }
+
+function abrirModalValorarItem(item){
+  if(!state.currentUser || state.role !== 'cliente'){ toast('Solo los clientes que contrataron pueden valorar'); return; }
+  if(!item || !item.paraUid || !item.refId || item.paraUid === state.currentUser.uid) return;
+  _valorandoItem = item; _valorandoEstrellas = 0; _valorandoRecomienda = null;
+  document.getElementById('valorarNombre').textContent = item.paraNombre || '—';
   pintarEstrellasModal();
   document.getElementById('modalValorar').classList.remove('hidden');
 }
-function cerrarModalValorar(){
-  document.getElementById('modalValorar').classList.add('hidden');
+// Compatibilidad con llamadas viejas: sin contratación verificada no se puede valorar
+function abrirModalValorar(paraUid, paraRol, paraNombre, ventaId){
+  if(!ventaId){ toast('Solo se puede valorar después de contratar'); return; }
+  abrirModalValorarItem({refTipo:'venta', refId: ventaId + '|' + paraRol, paraUid: paraUid, paraRol: paraRol, paraNombre: paraNombre});
 }
-function elegirEstrella(n){
-  _valorandoEstrellas = n;
-  pintarEstrellasModal();
-}
-function pintarEstrellasModal(){
-  const cont = document.getElementById('valorarEstrellas');
-  cont.innerHTML = [1,2,3,4,5].map(n=>
-    `<i class="ti ${n<=_valorandoEstrellas?'ti-star-filled':'ti-star'}" style="font-size:30px; color:${n<=_valorandoEstrellas?'#D9A441':'var(--line)'}; cursor:pointer;" onclick="elegirEstrella(${n})"></i>`
-  ).join('');
-}
-function guardarValoracion(){
-  if(!_valorandoDestino || _valorandoEstrellas===0){ toast('Elegí de 1 a 5 estrellas'); return; }
+
+async function guardarValoracion(){
+  const it = _valorandoItem;
+  if(!it) return;
+  if(_valorandoEstrellas < 1){ toast('Elegí de 1 a 5 estrellas'); return; }
+  if(_valorandoRecomienda === null){ toast('Contanos si lo recomendás'); return; }
+  const u = state.currentUser;
   const v = {
-    id: nextId('val'),
-    deUid: state.currentUser?.uid || state.currentUser?.id,
-    deRol: state.role,
-    deNombre: state.currentUser?.nombre || '—',
-    paraUid: _valorandoDestino.uid,
-    paraRol: _valorandoDestino.rol,
-    estrellas: _valorandoEstrellas,
-    comentario: document.getElementById('valorarComentario').value.trim(),
-    ventaId: _valorandoDestino.ventaId,
-    fecha: new Date().toISOString(),
+    id: 'val_' + String(it.refId).replace(/[^\w-]/g, '_'),
+    refTipo: it.refTipo, refId: it.refId,
+    deUid: u.uid, deRol: 'cliente', deNombre: u.nombre || 'Cliente',
+    paraUid: it.paraUid, paraRol: it.paraRol,
+    estrellas: _valorandoEstrellas, recomienda: _valorandoRecomienda,
+    fecha: new Date().toISOString()
   };
+  if((state.valoraciones||[]).some(function(x){ return x.id === v.id; })){ toast('Ya valoraste esta contratación'); cerrarModalValorar(); return; }
+  if(!firebaseListo || !db){ toast('Sin conexión. Intentá de nuevo en un momento.'); return; }
+  try{
+    await db.collection('valoraciones').doc(v.id).set(v);
+  }catch(e){
+    console.error('No se pudo guardar la valoración:', e);
+    toast('No pudimos guardar tu valoración. Intentá de nuevo.');
+    return;
+  }
   state.valoraciones.push(v);
-  if(firebaseListo) db.collection('valoraciones').doc(v.id).set(v).catch(e=>console.error('No se pudo guardar la valoración:', e));
+  _valorandoItem = null;
   cerrarModalValorar();
   toast('¡Gracias por tu valoración! ⭐');
-  if(state.role==='comercio') renderComercioPanel();
-  if(state.role==='vendedor') renderVElegirComercio();
+  try{ valRefrescarVistas(); }catch(e){}
 }
+function valRefrescarVistas(){
+  const abierto = function(id){ const e = document.getElementById(id); return e && !e.classList.contains('hidden'); };
+  if(abierto('modalValorarPend')) abrirPendientesValorar();
+  if(abierto('screen-perfil')) abrirPerfil();
+  if(abierto('feedRedLocalView')) renderRedLocal();
+  renderLocales && renderLocales();
+}
+
+/* ---- Qué puede valorar el cliente ---- */
+async function valCargarMias(){
+  if(!firebaseListo || !db || !state.currentUser?.uid || state.role !== 'cliente') return;
+  const uid = state.currentUser.uid;
+  try{
+    const s = await db.collection('ventas').where('ownerUid', '==', uid).get();
+    state.misVentasConfirmadas = s.docs.map(function(d){ return d.data(); }).filter(function(v){ return v.estado === 'confirmada'; });
+  }catch(e){ console.warn('valCargarMias ventas:', e); }
+  try{
+    const s = await db.collection('contrataciones').where('clienteUid', '==', uid).get();
+    state.contrataciones = s.docs.map(function(d){ return d.data(); });
+  }catch(e){ console.warn('valCargarMias contrataciones:', e); }
+}
+function valPendientes(){
+  const me = state.currentUser && state.currentUser.uid;
+  if(!me || state.role !== 'cliente') return [];
+  const hechas = new Set((state.valoraciones||[]).filter(function(v){ return v.deUid === me; }).map(function(v){ return v.refId; }));
+  const out = [];
+  const nomCom = function(uid){ const c = (state.comercios||[]).find(function(x){ return x.uid === uid; }); return c ? c.nombre : 'el comercio'; };
+  const nomVen = function(uid){ const c = (state.vendedores||[]).find(function(x){ return x.uid === uid; }); return c ? c.nombre : 'el ConectorT'; };
+  (state.misVentasConfirmadas || []).forEach(function(v){
+    if(v.comercioUid && !hechas.has(v.id + '|comercio'))
+      out.push({refTipo:'venta', refId: v.id + '|comercio', paraUid: v.comercioUid, paraRol:'comercio', paraNombre: v.comercioNombre || nomCom(v.comercioUid), contexto: v.productos || v.codigo || ''});
+    if(v.vendedorUid && !hechas.has(v.id + '|vendedor'))
+      out.push({refTipo:'venta', refId: v.id + '|vendedor', paraUid: v.vendedorUid, paraRol:'vendedor', paraNombre: nomVen(v.vendedorUid), contexto: 'ConectorT · ' + (v.codigo || '')});
+  });
+  (state.contrataciones || []).forEach(function(c){
+    if(c.clienteUid === me && c.estado === 'confirmada' && !hechas.has(c.id))
+      out.push({refTipo:'contratacion', refId: c.id, paraUid: c.proUid, paraRol:'profesional', paraNombre: c.proNombre || 'el profesional', contexto: 'Servicio realizado'});
+  });
+  return out;
+}
+function valAvisarPendientes(){
+  if(window._valAvisado) return;
+  const n = valPendientes().length;
+  if(n){ window._valAvisado = true; toast('⭐ Tenés ' + n + ' ' + (n === 1 ? 'servicio' : 'servicios') + ' para valorar. Entrá a tu perfil.'); }
+}
+function abrirPendientesValorar(){
+  const lista = valPendientes();
+  let ov = document.getElementById('modalValorarPend');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'modalValorarPend';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:190;display:flex;align-items:center;justify-content:center;padding:20px;';
+    document.body.appendChild(ov);
+  }
+  ov.classList.remove('hidden');
+  window._valPend = lista;
+  ov.innerHTML = '<div class="card" style="width:100%;max-width:360px;margin:0;max-height:80vh;overflow:auto;">' +
+    '<div style="font-size:17px;font-weight:800;color:var(--navy);margin-bottom:4px;">⭐ Valorá lo que contrataste</div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Estrellas y si lo recomendás. Sin comentarios.</div>' +
+    (lista.length ? lista.map(function(p, i){
+      return '<div class="val-pend"><div style="min-width:0;"><div style="font-size:13.5px;font-weight:700;">' + vitEsc(p.paraNombre) + '</div><div style="font-size:11px;color:var(--muted);">' + vitEsc(p.contexto || '') + '</div></div>' +
+        '<button class="btn btn-primary btn-sm" onclick="abrirModalValorarItem(window._valPend[' + i + '])">Valorar</button></div>';
+    }).join('') : '<div class="empty" style="padding:14px 0;"><div class="ic">✅</div><div class="t">No tenés nada para valorar</div></div>') +
+    '<button class="btn btn-ghost" style="width:100%;margin-top:12px;" onclick="document.getElementById(\'modalValorarPend\').classList.add(\'hidden\')">Cerrar</button></div>';
+}
+
+/* ---- Profesionales: consultas y trabajos realizados ---- */
+// Cuando un cliente con sesión toca WhatsApp o Llamar en un perfil de Red Local, queda una "consulta".
+// El profesional la marca como "trabajo realizado" y recién ahí el cliente puede valorarlo.
+async function valRegistrarContacto(pro){
+  const u = state.currentUser;
+  if(state.role !== 'cliente' || !u || !u.uid || !pro || !pro.uid || !firebaseListo || !db) return;
+  try{
+    if(!state.contrataciones) state.contrataciones = [];
+    const hace30 = Date.now() - 30*24*60*60*1000;
+    const hechas = new Set((state.valoraciones||[]).filter(function(v){ return v.deUid === u.uid; }).map(function(v){ return v.refId; }));
+    const abierta = state.contrataciones.find(function(c){
+      return c.clienteUid === u.uid && c.proUid === pro.uid && c.estado !== 'descartada' && !hechas.has(c.id) && new Date(c.fecha).getTime() > hace30;
+    });
+    if(abierta) return;
+    const c = { id: nextId('ctr'), clienteUid: u.uid, clienteNombre: u.nombre || 'Cliente', proUid: pro.uid, proNombre: pro.nombre || '', estado: 'consulta', fecha: new Date().toISOString() };
+    await db.collection('contrataciones').doc(c.id).set(c);
+    state.contrataciones.push(c);
+  }catch(e){ console.warn('No se pudo registrar la consulta:', e); }
+}
+async function proCargarContrataciones(){
+  if(!firebaseListo || !db || !state.currentUser?.uid) return;
+  try{
+    const s = await db.collection('contrataciones').where('proUid', '==', state.currentUser.uid).get();
+    state.contratacionesPro = s.docs.map(function(d){ return d.data(); }).sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); });
+  }catch(e){ console.warn('proCargarContrataciones:', e); state.contratacionesPro = state.contratacionesPro || []; }
+}
+function proConsultasHTML(){
+  const l = state.contratacionesPro || [];
+  const valoradas = new Set((state.valoraciones||[]).filter(function(v){ return v.paraUid === (state.currentUser && state.currentUser.uid); }).map(function(v){ return v.refId; }));
+  const fecha = function(f){ return f ? new Date(f).toLocaleDateString('es-AR') : ''; };
+  if(!l.length) return '<div style="font-size:13px;color:var(--muted);line-height:1.5;">Cuando un cliente te escriba o te llame desde Red Local, aparece acá. Si le hacés el trabajo, marcalo como realizado: así el cliente puede valorarte.</div>';
+  return l.slice(0, 30).map(function(c){
+    let acc;
+    if(c.estado === 'consulta') acc = '<div style="display:flex;gap:6px;"><button class="btn btn-primary btn-sm" onclick="proMarcarTrabajo(\'' + vitEsc(c.id) + '\',true)">✅ Realizado</button><button class="btn btn-ghost btn-sm" onclick="proMarcarTrabajo(\'' + vitEsc(c.id) + '\',false)">No</button></div>';
+    else if(c.estado === 'confirmada') acc = '<span style="font-size:11.5px;font-weight:800;color:#2F7A55;">' + (valoradas.has(c.id) ? '⭐ Valorado' : '✔ Puede valorarte') + '</span>';
+    else acc = '<span style="font-size:11.5px;color:var(--muted);">No se concretó</span>';
+    return '<div class="val-pend"><div style="min-width:0;"><div style="font-size:13.5px;font-weight:700;">' + vitEsc(c.clienteNombre || 'Cliente') + '</div><div style="font-size:11px;color:var(--muted);">Consulta del ' + fecha(c.fecha) + '</div></div>' + acc + '</div>';
+  }).join('');
+}
+async function proMarcarTrabajo(id, realizado){
+  const c = (state.contratacionesPro || []).find(function(x){ return x.id === id; });
+  if(!c) return;
+  const cambios = realizado ? { estado: 'confirmada', fechaConfirmada: new Date().toISOString() } : { estado: 'descartada' };
+  try{
+    await db.collection('contrataciones').doc(id).update(cambios);
+    Object.assign(c, cambios);
+    toast(realizado ? '✅ Listo. El cliente ya puede valorarte.' : 'Marcado como no concretado');
+  }catch(e){
+    console.error(e); toast('No pudimos guardar el cambio. Intentá de nuevo.');
+  }
+  const box = document.getElementById('proConsultasBox'); if(box) box.innerHTML = proConsultasHTML();
+}
+
+/* ---- Tarjeta en el perfil ---- */
+function valPerfilCardHTML(){
+  const u = state.currentUser;
+  if(!u) return '';
+  if(state.role === 'cliente'){
+    const n = valPendientes().length;
+    return n ? '<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin-bottom:16px;border:1.5px solid #F3DFA8;background:#FFFBEF;"><div><div style="font-size:13.5px;font-weight:800;color:#8A5A00;">⭐ Tenés ' + n + ' para valorar</div><div style="font-size:11.5px;color:var(--muted);">Contanos cómo te fue: estrellas y si lo recomendás.</div></div><button class="btn btn-primary btn-sm" onclick="abrirPendientesValorar()">Valorar</button></div>' : '';
+  }
+  if(state.role === 'comercio'){
+    return '<div class="card" style="padding:12px 14px;margin-bottom:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Tus valoraciones</div>' + valChipHTML(u.uid) + '</div>';
+  }
+  return '';
+}
+
 function genCodigo(){ return 'EP-' + (1000 + Math.floor(Math.random()*8999)); }
 
 function renderQR(container, texto){
@@ -5089,6 +5366,21 @@ function escanearCodigoConCamara(){
 /* ================= BOTTOM NAV ================= */
 // carrito debe definirse acá para que updateBottomNav lo encuentre
 const carrito = {};
+// Cantidad total de unidades en el carrito (suma las cantidades, no solo las filas)
+function carritoTotalUnidades(){
+  return Object.values(carrito).reduce((s,c)=>s+c.items.reduce((a,i)=>a+(i.cantidad||1),0), 0);
+}
+// Actualiza al instante el numerito del carrito y lo hace "saltar" para que se note
+function actualizarBadgeCarrito(animar){
+  try{
+    const n = carritoTotalUnidades();
+    document.querySelectorAll('#bottomnav .navbtn-cart').forEach(function(btn){
+      const b = btn.querySelector('.cart-badge');
+      if(b){ b.textContent = n; b.classList.toggle('visible', n > 0); }
+      if(animar){ btn.classList.remove('cart-pop'); void btn.offsetWidth; btn.classList.add('cart-pop'); setTimeout(function(){ btn.classList.remove('cart-pop'); }, 700); }
+    });
+  }catch(e){}
+}
 
 const navByRole = {
   guest:[
@@ -5137,7 +5429,7 @@ function updateBottomNav(current){
   const nav = document.getElementById('bottomnav');
   if(!state.role || !navByRole[state.role]){ nav.classList.add('hidden'); return; }
   nav.classList.remove('hidden');
-  const totalCarrito = Object.values(carrito).reduce((s,c)=>s+c.items.length, 0);
+  const totalCarrito = carritoTotalUnidades();
   const _navItems = (state.role==='comercio' && state.currentUser && state.currentUser.modo==='servicios') ? navByRole.profesional : navByRole[state.role];
   nav.innerHTML = _navItems.map(item=>{
     if(item.key === '__cart__'){
@@ -5325,34 +5617,62 @@ function proPlanPrecio(){
    Editable más adelante desde el admin (window.OFICIOS_CUSTOM con esta misma forma). */
 const OFICIOS_GRUPOS = [
   { id:'prof', nombre:'Profesionales independientes', corto:'Profesionales independientes', emoji:'🎓', color:'#2563EB', items:[
-    {n:'Salud', l:'Salud', e:'🩺'}, {n:'Legal', l:'Legal', e:'⚖️'}, {n:'Contabilidad', l:'Contabilidad', e:'🧮'},
-    {n:'Psicología', l:'Psicología', e:'🧠'}, {n:'Educación', l:'Educación', e:'🎓'}, {n:'Diseño', l:'Diseño', e:'🎨'},
-    {n:'Fotografía', l:'Fotografía', e:'📷'}, {n:'Informática', l:'Informática', e:'💻'}, {n:'Coaching', l:'Coaching', e:'🎯'},
-    {n:'Otros profesionales', l:'Otros', e:'➕'} ] },
+    {n:'Salud', l:'Salud', e:'🩺'}, {n:'Derecho y servicios legales', l:'Derecho y legales', e:'⚖️'},
+    {n:'Contabilidad y finanzas', l:'Contabilidad y finanzas', e:'🧮'}, {n:'Psicología y salud mental', l:'Psicología', e:'🧠'},
+    {n:'Educación y clases particulares', l:'Educación y clases', e:'🎓'}, {n:'Arquitectura e ingeniería', l:'Arquitectura e ingeniería', e:'📐'},
+    {n:'Diseño gráfico y comunicación', l:'Diseño gráfico', e:'🎨'}, {n:'Fotografía y producción audiovisual', l:'Fotografía y audiovisual', e:'📷'},
+    {n:'Informática y tecnología', l:'Informática y tecnología', e:'💻'}, {n:'Marketing y redes sociales', l:'Marketing y redes', e:'📣'},
+    {n:'Administración y gestión empresarial', l:'Administración y gestión', e:'📊'}, {n:'Recursos humanos', l:'Recursos humanos', e:'👥'},
+    {n:'Inmobiliaria', l:'Inmobiliaria', e:'🏘️'}, {n:'Escribanía y gestoría', l:'Escribanía y gestoría', e:'📜'},
+    {n:'Consultoría y asesoramiento', l:'Consultoría', e:'💡'}, {n:'Traducción e idiomas', l:'Traducción e idiomas', e:'🌐'},
+    {n:'Veterinaria', l:'Veterinaria', e:'🐶'}, {n:'Agronomía y servicios agropecuarios', l:'Agronomía y agro', e:'🌾'},
+    {n:'Seguridad e higiene laboral', l:'Seguridad e higiene', e:'🦺'}, {n:'Escribanía técnica y servicios técnicos profesionales', l:'Servicios técnicos prof.', e:'🧾'},
+    {n:'Coaching y desarrollo personal', l:'Coaching', e:'🎯'}, {n:'Otros profesionales', l:'Otros', e:'➕'} ] },
   { id:'serv', nombre:'Servicios y oficios', corto:'Servicios y oficios', emoji:'🛠️', color:'#EA580C', items:[
-    {n:'Electricidad', l:'Electricidad', e:'⚡'}, {n:'Plomería', l:'Plomería', e:'🚰'}, {n:'Pintura', l:'Pintura', e:'🖌️'},
-    {n:'Jardinería', l:'Jardinería', e:'🌿'}, {n:'Carpintería', l:'Carpintería', e:'🪚'}, {n:'Herrería', l:'Herrería', e:'🔨'},
-    {n:'Mecánica', l:'Mecánica', e:'🔧'}, {n:'Gomería', l:'Gomería', e:'🛞'}, {n:'Lavadero', l:'Lavadero', e:'🧽'},
-    {n:'Otros servicios', l:'Otros', e:'➕'} ] },
+    {n:'Electricidad', l:'Electricidad', e:'⚡'}, {n:'Plomería y gas', l:'Plomería y gas', e:'🚰'},
+    {n:'Albañilería y construcción', l:'Albañilería', e:'🧱'}, {n:'Pintura', l:'Pintura', e:'🖌️'},
+    {n:'Carpintería y herrería', l:'Carpintería y herrería', e:'🪚'}, {n:'Refrigeración y aire acondicionado', l:'Refrigeración y aire', e:'❄️'},
+    {n:'Mecánica automotor', l:'Mecánica automotor', e:'🔧'}, {n:'Reparaciones técnicas', l:'Reparaciones técnicas', e:'🛠️'},
+    {n:'Instalaciones y mantenimiento', l:'Instalaciones y mant.', e:'🔩'}, {n:'Limpieza y desinfección', l:'Limpieza y desinfección', e:'🧽'},
+    {n:'Jardinería y paisajismo', l:'Jardinería y paisajismo', e:'🌿'}, {n:'Peluquería y barbería', l:'Peluquería y barbería', e:'💈'},
+    {n:'Belleza y estética', l:'Belleza y estética', e:'💅'}, {n:'Costura y modista', l:'Costura y modista', e:'🧵'},
+    {n:'Fletes y mudanzas', l:'Fletes y mudanzas', e:'🚚'}, {n:'Mensajería y cadetería', l:'Mensajería y cadetería', e:'🛵'},
+    {n:'Cuidado de personas', l:'Cuidado de personas', e:'🤝'}, {n:'Cuidado de mascotas', l:'Cuidado de mascotas', e:'🐾'},
+    {n:'Servicios para eventos', l:'Servicios para eventos', e:'🎉'}, {n:'Servicios para el hogar', l:'Servicios para el hogar', e:'🏠'},
+    {n:'Cerrajería', l:'Cerrajería', e:'🔑'}, {n:'Alarmas y cámaras de seguridad', l:'Alarmas y cámaras', e:'📹'},
+    {n:'Otros oficios y servicios', l:'Otros', e:'➕'} ] },
   { id:'tur', nombre:'Turismo & Recreación', corto:'Turismo y recreación', emoji:'🏖️', color:'#0D9488', items:[
-    {n:'Hoteles', l:'Hoteles', e:'🏨'}, {n:'Cabañas', l:'Cabañas', e:'🏡'}, {n:'Excursiones', l:'Excursiones', e:'🥾'},
-    {n:'Pesca', l:'Pesca', e:'🎣'}, {n:'Deportes náuticos', l:'Deportes náuticos', e:'🏄'},
+    {n:'Guías turísticos', l:'Guías turísticos', e:'🧭'}, {n:'Excursiones y paseos', l:'Excursiones y paseos', e:'🚤'},
+    {n:'Pesca deportiva', l:'Pesca deportiva', e:'🎣'}, {n:'Deportes náuticos', l:'Deportes náuticos', e:'🏄'},
+    {n:'Safaris fotográficos', l:'Safaris fotográficos', e:'📸'}, {n:'Avistaje de aves y fauna', l:'Avistaje de aves', e:'🦜'},
+    {n:'Turismo rural', l:'Turismo rural', e:'🌾'}, {n:'Turismo aventura', l:'Turismo aventura', e:'🧗'},
+    {n:'Cabalgatas', l:'Cabalgatas', e:'🐎'}, {n:'Senderismo y trekking', l:'Senderismo y trekking', e:'🥾'},
+    {n:'Cicloturismo', l:'Cicloturismo', e:'🚴'}, {n:'Alquiler de bicicletas', l:'Alquiler de bicis', e:'🚲'},
+    {n:'Alquiler de equipos recreativos', l:'Alquiler de equipos', e:'🛶'}, {n:'Campings y campamentos', l:'Campings', e:'⛺'},
+    {n:'Experiencias gastronómicas', l:'Experiencias gastronómicas', e:'🍽️'}, {n:'Entretenimiento y recreación', l:'Entretenimiento', e:'🎡'},
+    {n:'Animación y actividades infantiles', l:'Animación infantil', e:'🎈'}, {n:'Visitas guiadas culturales e históricas', l:'Visitas guiadas', e:'🏛️'},
+    {n:'Experiencias en la naturaleza', l:'Experiencias en la naturaleza', e:'🌳'}, {n:'Clases y talleres', l:'Clases y talleres', e:'🎨'},
+    {n:'Bienestar y actividades al aire libre', l:'Bienestar al aire libre', e:'🧘'}, {n:'Turismo educativo', l:'Turismo educativo', e:'🎒'},
     {n:'Otros turismo', l:'Otros', e:'➕'} ] }
 ];
 // Perfiles cargados con la primera versión (oficios sueltos) se acomodan solos en las nuevas categorías
 const OFICIOS_LEGACY = {
   'Médico clínico':'Salud','Nutricionista':'Salud','Oftalmólogo/a':'Salud','Dermatólogo/a':'Salud','Odontólogo/a':'Salud',
   'Kinesiólogo/a':'Salud','Pediatra':'Salud','Ginecólogo/a':'Salud','Traumatólogo/a':'Salud','Fonoaudiólogo/a':'Salud',
-  'Psicólogo/a':'Psicología','Veterinario/a':'Otros profesionales',
-  'Abogado/a':'Legal','Escribano/a':'Legal','Contador/a':'Contabilidad','Gestor/a':'Otros profesionales',
-  'Martillero/a':'Otros profesionales','Despachante de aduana':'Otros profesionales',
-  'Electricista':'Electricidad','Plomero/a':'Plomería','Gasista':'Plomería','Albañil':'Otros servicios','Pintor/a':'Pintura',
-  'Carpintero/a':'Carpintería','Herrero/a':'Herrería','Mecánico/a':'Mecánica','Jardinero/a':'Jardinería',
-  'Techista':'Otros servicios','Cerrajero/a':'Otros servicios','Aire acondicionado':'Otros servicios',
-  'Flete y mudanzas':'Otros servicios','Limpieza':'Otros servicios',
-  'Ingeniero/a agrónomo/a':'Otros profesionales','Ingeniero/a civil':'Otros profesionales','Arquitecto/a':'Otros profesionales',
-  'Maestro mayor de obras':'Otros profesionales','Agrimensor/a':'Otros profesionales',
-  'Técnico/a en seguridad e higiene':'Otros profesionales','Técnico/a informático/a':'Informática'
+  'Psicólogo/a':'Psicología y salud mental','Veterinario/a':'Veterinaria',
+  'Abogado/a':'Derecho y servicios legales','Escribano/a':'Escribanía y gestoría','Contador/a':'Contabilidad y finanzas','Gestor/a':'Escribanía y gestoría',
+  'Martillero/a':'Inmobiliaria','Despachante de aduana':'Escribanía y gestoría',
+  'Electricista':'Electricidad','Plomero/a':'Plomería y gas','Gasista':'Plomería y gas','Albañil':'Albañilería y construcción','Pintor/a':'Pintura',
+  'Carpintero/a':'Carpintería y herrería','Herrero/a':'Carpintería y herrería','Mecánico/a':'Mecánica automotor','Jardinero/a':'Jardinería y paisajismo',
+  'Techista':'Albañilería y construcción','Cerrajero/a':'Cerrajería','Aire acondicionado':'Refrigeración y aire acondicionado',
+  'Flete y mudanzas':'Fletes y mudanzas','Limpieza':'Limpieza y desinfección',
+  'Plomería':'Plomería y gas','Jardinería':'Jardinería y paisajismo','Carpintería':'Carpintería y herrería','Herrería':'Carpintería y herrería',
+  'Mecánica':'Mecánica automotor','Gomería':'Mecánica automotor','Lavadero':'Limpieza y desinfección','Otros servicios':'Otros oficios y servicios',
+  'Ingeniero/a agrónomo/a':'Agronomía y servicios agropecuarios','Ingeniero/a civil':'Arquitectura e ingeniería','Arquitecto/a':'Arquitectura e ingeniería',
+  'Maestro mayor de obras':'Arquitectura e ingeniería','Agrimensor/a':'Arquitectura e ingeniería',
+  'Técnico/a en seguridad e higiene':'Seguridad e higiene laboral','Técnico/a informático/a':'Informática y tecnología',
+  'Hoteles':'Otros turismo','Cabañas':'Otros turismo','Excursiones':'Excursiones y paseos','Pesca':'Pesca deportiva',
+  'Legal':'Derecho y servicios legales','Contabilidad':'Contabilidad y finanzas','Psicología':'Psicología y salud mental','Educación':'Educación y clases particulares','Diseño':'Diseño gráfico y comunicación','Fotografía':'Fotografía y producción audiovisual','Informática':'Informática y tecnología','Coaching':'Coaching y desarrollo personal'
 };
 function profGrupos(){
   const c = window.OFICIOS_CUSTOM;
@@ -5370,7 +5690,7 @@ function profItemInfo(n){
 function proOficiosNorm(c){
   const out = [];
   (c && c.oficios || []).forEach(function(o){
-    const n = profItemInfo(o) ? o : (OFICIOS_LEGACY[o] || 'Otros servicios');
+    const n = profItemInfo(o) ? o : (OFICIOS_LEGACY[o] || 'Otros oficios y servicios');
     if(out.indexOf(n) < 0) out.push(n);
   });
   return out;
@@ -5408,12 +5728,74 @@ function elegirModoNegocio(m){
   else showScreen('registro-comercio');
 }
 
+/* ---- Redes y galería del profesional ---- */
+var RP_GAL_MAX = 6;
+var _rpGaleria = [];
+function facebookUrl(v){
+  v = String(v||'').trim();
+  if(!v) return '';
+  if(/^https?:\/\//i.test(v)) return v;
+  if(/facebook\.com|fb\.com/i.test(v)) return 'https://' + v.replace(/^\/+/, '');
+  const u = v.replace(/^@/, '').replace(/[^\w.\-]/g, '');
+  return u ? 'https://www.facebook.com/' + u : '';
+}
+function webUrl(v){
+  v = String(v||'').trim();
+  if(!v || /\s/.test(v)) return '';
+  return /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '');
+}
+function rpGaleriaRender(){
+  const el = document.getElementById('rpGaleria');
+  if(!el) return;
+  let h = _rpGaleria.map(function(u, i){
+    return '<div class="rp-th"><img src="' + vitEsc(u) + '" alt=""><button type="button" aria-label="Quitar foto" onclick="rpGaleriaQuitar(' + i + ')">✕</button></div>';
+  }).join('');
+  if(_rpGaleria.length < RP_GAL_MAX) h += '<div class="rp-add" onclick="document.getElementById(\'rpGaleriaInput\').click()">📷<span>Agregar</span></div>';
+  el.innerHTML = h;
+}
+function rpGaleriaReset(lista){
+  _rpGaleria = (lista || []).slice(0, RP_GAL_MAX);
+  rpGaleriaRender();
+  const e = document.getElementById('rpGaleriaEstado'); if(e) e.textContent = '';
+}
+function rpGaleriaQuitar(i){ _rpGaleria.splice(i, 1); rpGaleriaRender(); }
+async function rpGaleriaAgregar(input){
+  const files = Array.from(input.files || []);
+  input.value = '';
+  if(!files.length) return;
+  const estado = document.getElementById('rpGaleriaEstado');
+  const lugar = RP_GAL_MAX - _rpGaleria.length;
+  if(lugar <= 0){ toast('Máximo ' + RP_GAL_MAX + ' fotos.'); return; }
+  const usar = files.slice(0, lugar);
+  if(files.length > lugar) toast('Solo entran ' + RP_GAL_MAX + ' fotos, sumamos las primeras.');
+  let ok = 0;
+  for(let i = 0; i < usar.length; i++){
+    if(estado) estado.textContent = 'Subiendo foto ' + (i+1) + ' de ' + usar.length + '…';
+    try{
+      const local = await comprimirImagen(usar[i], 90 * 1024);
+      // Con sesión iniciada va a Cloudflare; en el registro por email todavía no hay sesión:
+      // queda en el celular y se sube apenas se crea la cuenta (ver registrarProfesional).
+      const url = await fotoAR2(local, 'galeria');
+      _rpGaleria.push(url); ok++;
+      rpGaleriaRender();
+    }catch(e){ console.error('Foto de galería:', e); }
+  }
+  if(estado) estado.textContent = ok === usar.length ? '✅ ' + _rpGaleria.length + ' de ' + RP_GAL_MAX + ' fotos' : '⚠️ Alguna foto no se pudo cargar. Probá con otra.';
+}
+/* Sube a Cloudflare lo que haya quedado en el celular (registro por email, ya con la cuenta creada) */
+async function rpSubirPendientes(d){
+  if(d.galeria && d.galeria.length){
+    d.galeria = await Promise.all(d.galeria.map(function(u){ return String(u).indexOf('data:') === 0 ? fotoAR2(u, 'galeria') : u; }));
+  }
+}
 /* ---- Formulario de alta (3 pasos) ---- */
 let _rpPaso = 1;
 let _rpModo = 'registro';   // 'registro' (email, 3 pasos) | 'google' (solo datos) | 'editar'
 function proIrRegistro(){
   _rpModo = 'registro';
   rpRenderOficios([]);
+  rpGaleriaReset([]);
+  ['rpInstagram','rpFacebook','rpWeb'].forEach(function(id){ const e = document.getElementById(id); if(e) e.value = ''; });
   showScreen('registro-profesional');
   rpMostrarPaso(1);
 }
@@ -5489,7 +5871,9 @@ function rpLeerDatos(){
     nombre: nombre, oficios: oficios, especialidad: g('rpEspecialidad').slice(0,80), matricula: g('rpMatricula'), zona: g('rpZona'),
     atiendeDomicilio: !!document.getElementById('rpDomicilio')?.checked,
     descripcion: g('rpDescripcion'), whatsapp: whatsapp, telefono: g('rpTelefono') || whatsapp,
-    horario: g('rpHorario'), provincia: g('rpProvincia') || 'Entre Ríos', ciudad: ciudad
+    horario: g('rpHorario'), provincia: g('rpProvincia') || 'Entre Ríos', ciudad: ciudad,
+    instagram: g('rpInstagram'), facebook: g('rpFacebook'), web: g('rpWeb'),
+    galeria: _rpGaleria.slice(0, RP_GAL_MAX)
   };
 }
 function rpAvanzarPaso2(){
@@ -5514,11 +5898,14 @@ async function registrarProfesional(){
   try{
     const result = await firebaseAuth.createUserWithEmailAndPassword(email, pass);
     const user = result.user;
+    try{ await rpSubirPendientes(d); }catch(eUp){ console.warn('No se pudieron subir las fotos pendientes:', eUp); }
+    let _logoPro = fotosCargadas['rpLogo'] || null;
+    if(_logoPro && _logoPro.indexOf('data:') === 0){ try{ _logoPro = await fotoAR2(_logoPro, 'logos'); }catch(eL){} }
     const _gracia = new Date(); _gracia.setDate(_gracia.getDate() + 30);
     const c = Object.assign({
       id: nextId('c'), uid: user.uid, email: email, modo: 'servicios', rubro: 'Servicios Profesionales', tipo: '',
-      direccion: '', instagram: '', facebook: '', dias: [], metodosPago: [], adheridos: [],
-      img: fotosCargadas['rpLogo'] || null, imgGaleria: null,
+      direccion: '', dias: [], metodosPago: [], adheridos: [],
+      img: _logoPro, imgGaleria: null,
       publicidadActiva: true, publicidadVence: diasAtras(-30),
       plan: 'gracia', planMonto: null, planComPct: null,
       planVence: _gracia.toISOString().slice(0,10), planActivo: true,
@@ -5565,6 +5952,7 @@ function profLoginGoogle(){
 function proAbrirCompletar(){
   _rpModo = 'google';
   rpRenderOficios([]);
+  rpGaleriaReset([]);
   const n = document.getElementById('rpNombre');
   if(n && !n.value) n.value = state.currentUser?.nombre || '';
   showScreen('registro-profesional');
@@ -5581,6 +5969,8 @@ function proAbrirEditar(){
   set('rpEspecialidad', proEspecialidad(u));
   set('rpNombre', u.nombre); set('rpMatricula', u.matricula); set('rpZona', u.zona);
   set('rpDescripcion', u.descripcion); set('rpCelular', u.whatsapp || u.telefono);
+  set('rpInstagram', u.instagram); set('rpFacebook', u.facebook); set('rpWeb', u.web);
+  rpGaleriaReset(u.galeria);
   set('rpTelefono', u.telefono && u.telefono !== u.whatsapp ? u.telefono : ''); set('rpHorario', u.horario);
   const dom = document.getElementById('rpDomicilio'); if(dom) dom.checked = !!u.atiendeDomicilio;
   set('rpProvincia', u.provincia || 'Entre Ríos'); rpActualizarCiudades(); set('rpCiudad', u.ciudad || 'La Paz');
@@ -5638,7 +6028,10 @@ function proRenderPanel(){
     '<div>' + chips + '</div>' +
     fila('Especialidad', proEspecialidad(u)) + fila('Matrícula', u.matricula) + fila('Zona', u.zona) + fila('A domicilio', u.atiendeDomicilio ? 'Sí' : '') +
     fila('WhatsApp', u.whatsapp) + fila('Teléfono', u.telefono !== u.whatsapp ? u.telefono : '') + fila('Horario', u.horario) + fila('Descripción', u.descripcion) + '</div>' +
+    '<div class="card" style="padding:14px 16px;margin-bottom:12px;"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Tus valoraciones</div>' + valChipHTML(u.uid) + '</div>' +
+    '<div class="card" style="padding:14px 16px;margin-bottom:12px;"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Consultas y trabajos</div><div id="proConsultasBox"><div style="font-size:13px;color:var(--muted);">Cargando…</div></div></div>' +
     '<button type="button" class="rp-btn" style="margin-top:4px;" onclick="proAbrirEditar()">✏️ Editar mis datos</button>';
+  proCargarContrataciones().then(function(){ const b = document.getElementById('proConsultasBox'); if(b) b.innerHTML = proConsultasHTML(); });
 }
 
 /* ================= RED LOCAL: portada, secciones, listado y ficha ================= */
@@ -5758,6 +6151,7 @@ function rlCardHTML(c){
     '<div class="rl-body"><div class="rl-nombre">' + vitEsc(c.nombre||'') + '</div>' +
     (esp ? '<div class="rl-esp">' + vitEsc(esp) + '</div>' : '') +
     '<div class="rl-oficios">' + rlChipsHTML(c, 3) + '</div>' +
+    '<div style="margin:0 0 4px;">' + valChipHTML(c.uid) + '</div>' +
     (meta ? '<div class="rl-meta">' + meta + '</div>' : '') +
     '<div class="rl-acc">' +
       '<button type="button" class="rl-btn wa" onclick="event.stopPropagation();rlWhatsApp(\'' + vitEsc(id) + '\')">💬 WhatsApp</button>' +
@@ -5766,7 +6160,7 @@ function rlCardHTML(c){
 }
 function rlBuscarPro(id){ return (state.profesionales||[]).find(function(c){ return rlIdDe(c) === id || c.id === id || c.uid === id; }); }
 function rlRegistrar(id, tipo){
-  try{ const c = rlBuscarPro(id); if(c && typeof estRegistrar === 'function') estRegistrar(c.id || id, tipo); }catch(e){}
+  try{ const c = rlBuscarPro(id); if(c && typeof estRegistrar === 'function') estRegistrar(c.id || id, tipo); if(c && (tipo === 'consulta' || tipo === 'llamada')) valRegistrarContacto(c); }catch(e){}
 }
 function rlWhatsApp(id){
   const c = rlBuscarPro(id);
@@ -5777,6 +6171,20 @@ function rlWhatsApp(id){
   const u = state.currentUser || {};
   const msg = '¡Hola *' + c.nombre + '*! 👋\n\nSoy *' + (u.nombre || 'un vecino de PuenT') + '* y te escribo desde *PuenT · Red Local*. Vi tu perfil y quería hacerte una consulta.\n\n¡Gracias!';
   window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg), '_blank');
+}
+function rlRedesHTML(c){
+  const out = [];
+  const ig = c.instagram && instagramUrl(c.instagram), fb = c.facebook && facebookUrl(c.facebook), wb = c.web && webUrl(c.web);
+  if(ig) out.push('<a href="' + vitEsc(ig) + '" target="_blank" rel="noopener">📸 Instagram</a>');
+  if(fb) out.push('<a href="' + vitEsc(fb) + '" target="_blank" rel="noopener">👍 Facebook</a>');
+  if(wb) out.push('<a href="' + vitEsc(wb) + '" target="_blank" rel="noopener">🌐 Sitio web</a>');
+  return out.length ? '<div class="pf-redes">' + out.join('') + '</div>' : '';
+}
+function rlGaleriaHTML(c){
+  const g = (c.galeria || []).filter(function(u){ return typeof u === 'string' && u; }).slice(0, 6);
+  if(!g.length) return '';
+  return '<div style="margin-bottom:14px;"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Fotos</div><div class="pf-gal">' +
+    g.map(function(u){ return '<img src="' + vitEsc(u) + '" alt="" loading="lazy" onclick="verImagenGrande(this.src, \'\')">'; }).join('') + '</div></div>';
 }
 function rlAbrirFicha(id){
   const c = rlBuscarPro(id);
@@ -5791,13 +6199,16 @@ function rlAbrirFicha(id){
     '<div style="display:flex;gap:14px;align-items:center;margin:8px 0 14px;">' + logo + '<div><div style="font-size:21px;font-weight:800;color:#1F2A44;line-height:1.2;">' + vitEsc(c.nombre||'') + '</div>' +
     (esp ? '<div style="font-size:13px;color:#6B7385;margin-top:2px;">' + vitEsc(esp) + '</div>' : '') +
     '<div style="font-size:12.5px;color:#8A92A3;margin-top:3px;">📍 ' + vitEsc(c.ciudad||'') + '</div></div></div>' +
-    '<div class="rl-oficios" style="margin-bottom:14px;">' + rlChipsHTML(c) + '</div>' +
+    '<div class="rl-oficios" style="margin-bottom:8px;">' + rlChipsHTML(c) + '</div>' +
+    '<div style="margin-bottom:14px;">' + valChipHTML(c.uid) + '</div>' +
     '<div class="rl-acc" style="margin:0 0 16px;"><button type="button" class="rl-btn wa" style="padding:13px 6px;font-size:14px;" onclick="rlWhatsApp(\'' + vitEsc(rlIdDe(c)) + '\')">💬 Escribir por WhatsApp</button>' +
     (tel ? '<a class="rl-btn tel" style="padding:13px 6px;font-size:14px;" href="tel:' + vitEsc(tel) + '" onclick="rlRegistrar(\'' + vitEsc(rlIdDe(c)) + '\',\'llamada\')">📞 Llamar</a>' : '') + '</div>' +
     (c.descripcion ? '<div style="background:#F7F8FB;border-radius:16px;padding:14px;font-size:13.5px;line-height:1.6;color:#333;margin-bottom:12px;">' + vitEsc(c.descripcion) + '</div>' : '') +
+    rlGaleriaHTML(c) + rlRedesHTML(c) +
     '<div class="card" style="padding:4px 16px;">' +
       fila('Zona de atención', c.zona) + fila('A domicilio', c.atiendeDomicilio ? 'Sí' : '') + fila('Horario', c.horario) + fila('Matrícula', c.matricula) + fila('Ciudad', c.ciudad) +
-    '</div>';
+    '</div>' +
+    (valResumen(c.uid).n ? '<div class="card" style="padding:4px 16px;margin-top:12px;"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:10px 0 2px;">Valoraciones de clientes</div>' + valListaHTML(c.uid) + '</div>' : '');
   showScreen('pro-ficha');
 }
 function rlVolver(){ showScreen('feed'); setFeedTab('redlocal'); }
@@ -6249,6 +6660,27 @@ function loginConGoogle(){
   const provider = new firebase.auth.GoogleAuthProvider();
   const esMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+  // Procesa el usuario que volvió de Google; si algo falla adentro, lo avisamos
+  // (antes quedaba en silencio y parecía que "no pasaba nada").
+  const _seguir = function(user){
+    Promise.resolve(manejarUsuarioGoogle(user)).catch(function(e){
+      console.error('Error procesando el login:', e);
+      _manejarGoogleEnCurso = false;
+      toast('No pudimos terminar de entrar. Tocá de nuevo para reintentar.');
+    });
+  };
+  // Si el popup se cierra sin devolver resultado (pasa en mobile al elegir la cuenta),
+  // la sesión igual puede haberse creado: esperamos un momento y la recuperamos.
+  const _recuperarTrasCierre = function(){
+    setTimeout(function(){
+      const u = firebaseAuth.currentUser;
+      if(u && !u.isAnonymous && !state.currentUser){ _seguir(u); return; }
+      if(!state.currentUser && !_manejarGoogleEnCurso){
+        toast('No se completó el ingreso. Si elegiste tu cuenta, tocá de nuevo.');
+      }
+    }, 2500);
+  };
+
   if(esMobile){
     // En celular probamos primero popup: signInWithRedirect depende de que sessionStorage
     // sobreviva a la ida y vuelta a Google, y eso falla en Safari con "Prevenir rastreo
@@ -6256,9 +6688,10 @@ function loginConGoogle(){
     // Facebook), tirando "missing initial state". El popup no navega la página, así que
     // evita ese problema. Si el popup falla (bloqueado, no soportado), caemos a redirect.
     firebaseAuth.signInWithPopup(provider).then(result=>{
-      manejarUsuarioGoogle(result.user);
+      _seguir(result.user);
     }).catch(err=>{
-      if(err.code === 'auth/popup-closed-by-user') return;
+      if(err.code === 'auth/popup-closed-by-user'){ _recuperarTrasCierre(); return; }
+      if(err.code === 'auth/cancelled-popup-request') return;
       firebaseAuth.signInWithRedirect(provider).catch(()=>{
         toast('No pudimos completar el login con Google, probá de nuevo');
       });
@@ -6266,10 +6699,11 @@ function loginConGoogle(){
     return;
   }
   firebaseAuth.signInWithPopup(provider).then(result=>{
-    manejarUsuarioGoogle(result.user);
+    _seguir(result.user);
   }).catch(err=>{
     console.error('Error de login con Google:', err);
-    if(err.code === 'auth/popup-closed-by-user') return;
+    if(err.code === 'auth/popup-closed-by-user'){ _recuperarTrasCierre(); return; }
+    if(err.code === 'auth/cancelled-popup-request') return;
     toast('No pudimos completar el login con Google, probá de nuevo');
   });
 }
@@ -6355,14 +6789,20 @@ async function recuperarContrasena(){
 // Si es cuenta nueva: si ya había elegido un rol en la pantalla de inicio, la crea directo con ese rol;
 // si no (ej: alguien entra por "Iniciar sesión" genérico), le pedimos que elija.
 let _manejarGoogleEnCurso = false;
-async function manejarUsuarioGoogle(user){
+let _manejarGoogleUid = null, _manejarGoogleDesde = 0;
+async function manejarUsuarioGoogle(user, _intento){
   // Google dispara el login por dos caminos a la vez (el .then() del popup/redirect
   // y el listener onAuthStateChanged) — sin esta guarda, esta función se ejecuta dos
   // veces para el mismo login y la segunda pasada (con rolPreElegido ya limpio) termina
   // mandando a la pantalla de "elegí tu perfil" aunque ya se haya elegido y creado la cuenta.
   if(state.currentUser && state.currentUser.uid === user.uid) return;
-  if(_manejarGoogleEnCurso) return;
-  _manejarGoogleEnCurso = true;
+  // La sesión anónima de invitado (se crea sola al abrir la app) NO es un login: antes
+  // ocupaba la guarda mientras consultaba Firestore y el login real del comercio
+  // quedaba descartado hasta refrescar la página.
+  if(user.isAnonymous) return;
+  // La guarda es por usuario y vence a los 20s, así un intento colgado no bloquea el siguiente.
+  if(_manejarGoogleEnCurso && _manejarGoogleUid === user.uid && (Date.now() - _manejarGoogleDesde) < 20000) return;
+  _manejarGoogleEnCurso = true; _manejarGoogleUid = user.uid; _manejarGoogleDesde = Date.now();
   if(esAdmin(user)){ _manejarGoogleEnCurso = false; entrarComoAdmin(user); return; }
   // Recuperar rol guardado antes del popup/redirect por si la variable en memoria se perdió
   if(!rolPreElegido){
@@ -6373,7 +6813,7 @@ async function manejarUsuarioGoogle(user){
   }
   try{
     for(const rol of Object.keys(COL_POR_ROL)){
-      const doc = await db.collection(COL_POR_ROL[rol]).doc(user.uid).get();
+      const doc = await _conTimeout(db.collection(COL_POR_ROL[rol]).doc(user.uid).get(), 8000);
       if(doc.exists){
         const datos = doc.data();
         // Si se registró por email y todavía no verificó, mandarlo a verificar
@@ -6400,6 +6840,14 @@ async function manejarUsuarioGoogle(user){
   }catch(e){
     console.error('Error buscando cuenta en Firestore:', e);
     _manejarGoogleEnCurso = false;
+    // En mobile el canal de Firestore a veces queda colgado justo después de loguear:
+    // reconectamos y reintentamos solos (antes había que refrescar la página a mano).
+    if(!_intento || _intento < 3){
+      if(_intento) toast('Conectando con tu cuenta…');
+      try{ await reconectarFirestore(); }catch(_e){}
+      return manejarUsuarioGoogle(user, (_intento||0) + 1);
+    }
+    toast('No pudimos cargar tu cuenta. Revisá tu conexión y volvé a intentar.');
     return;
   }
 
@@ -6408,7 +6856,7 @@ async function manejarUsuarioGoogle(user){
   // Acepta el comercio si: no tiene uid, o tiene uid pero es el mismo usuario (re-login).
   if(user.email && firebaseListo && (!rolPreElegido || rolPreElegido==='comercio')){
     try{
-      const snapClaim = await db.collection('comercios').where('email','==',user.email).get();
+      const snapClaim = await _conTimeout(db.collection('comercios').where('email','==',user.email).get(), 6000);
       // Tomar el que no tiene uid, o cuyo uid coincide con este usuario (mismo dueño)
       const candidato = snapClaim.docs.find(d=>{
         const v = d.data();
@@ -6446,7 +6894,7 @@ async function manejarUsuarioGoogle(user){
   // ── AUTO-CLAIM: buscar ConectorT registrado por formulario (sin uid) con el mismo email ──
   if(user.email && firebaseListo && (!rolPreElegido || rolPreElegido==='vendedor')){
     try{
-      const snapV = await db.collection('vendedores').where('email','==',user.email).get();
+      const snapV = await _conTimeout(db.collection('vendedores').where('email','==',user.email).get(), 6000);
       const sinUidV = snapV.docs.find(d=>{ const v=d.data(); return !v.uid && v.estado!=='papelera'; });
       if(sinUidV){
         const vd = sinUidV.data();
@@ -6465,7 +6913,7 @@ async function manejarUsuarioGoogle(user){
   // Aplica si la persona no eligió explícitamente ConectorT o Comercio.
   if(user.email && firebaseListo && (!rolPreElegido || rolPreElegido==='cliente')){
     try{
-      const snapCl = await db.collection('clientes').where('email','==',user.email).get();
+      const snapCl = await _conTimeout(db.collection('clientes').where('email','==',user.email).get(), 6000);
       const sinUidCl = snapCl.docs.find(d=>{ const v=d.data(); return !v.uid; });
       if(sinUidCl){
         const cl = sinUidCl.data();
@@ -6491,7 +6939,8 @@ async function manejarUsuarioGoogle(user){
     const _rolNuevo = rolPreElegido;
     rolPreElegido = null;
     _manejarGoogleEnCurso = false;
-    crearCuentaDesdeGoogle(_rolNuevo, user);
+    try{ crearCuentaDesdeGoogle(_rolNuevo, user); }
+    catch(e){ console.error('Error creando la cuenta:', e); toast('No pudimos crear tu cuenta. Tocá de nuevo para reintentar.'); }
     return;
   }
   if(!loginIniciadoPorUsuario){
@@ -6534,7 +6983,7 @@ function crearCuentaDesdeGoogle(rol, user){
             viaGoogle:true, adheridos:[], img: null,
             publicidadActiva:true, publicidadVence:diasAtras(-30),
             aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true,
-            plan:'gracia', perfilCompleto:false};
+            plan:'gracia', perfilCompleto:false, fechaAlta: new Date().toISOString()};
     const _mPre = _modoPreLeer();
     if(_mPre === 'servicios'){ data.modo = 'servicios'; data.rubro = 'Servicios Profesionales'; data.oficios = []; data.fechaAlta = new Date().toISOString(); }
     else if(_mPre === 'vitrina'){ data.modo = 'vitrina'; }
@@ -6656,6 +7105,7 @@ function entrarConDatosGuardados(rol, data){
     state.currentUser = data; state.role='cliente';
     setRoleChip('🙋 Cliente', false);
     sincronizarFavoritosAlLogin(data);
+    try{ valCargarMias().then(valAvisarPendientes); }catch(e){}
     renderClienteBuscador();
     cargarCalificaciones();
     if(_pedidoPendienteComercioId){
@@ -7034,6 +7484,16 @@ function _catalogoTrocear(lista){
   if(act.length) trozos.push(act.join(','));
   return trozos;
 }
+// Después de aprobar / editar / suspender un comercio desde el admin, se republica solo el catálogo
+// (en silencio, a los pocos segundos) para que los visitantes lo vean sin esperar la próxima ronda.
+var _catalogoRepubTimer = null;
+function _catalogoRepublicarPronto(){
+  try{
+    if(!CATALOGO_URL || !state || state.role !== 'admin') return;
+    clearTimeout(_catalogoRepubTimer);
+    _catalogoRepubTimer = setTimeout(function(){ try{ publicarCatalogo(true); }catch(e){} }, 5000);
+  }catch(e){}
+}
 var _catalogoPublicando = false;
 async function publicarCatalogo(silencioso){
   if(!CATALOGO_URL){ if(!silencioso) toast('Falta configurar CATALOGO_URL en el index.html'); return; }
@@ -7067,7 +7527,8 @@ async function publicarCatalogo(silencioso){
           if(data.estado === 'papelera') return;
         }
         if(nombre === 'comercios'){
-          if(data.viaEmail && data.emailVerificado === false) return;
+          if(!data.nombre) return;   // registro vacío (sin nombre)
+          if(data.viaEmail && data.emailVerificado === false && data.aprobado !== true) return;
           if(data.aprobado === false) return;
         }
         lista.push({ id: d.id, d: _cacheCodificar(data) });
@@ -7178,8 +7639,9 @@ async function cargarDatosPublicosDeFirestore(){
     comerciosR.value.forEach(doc=>{
       const data = doc.data();
       if(data.estado === 'papelera') return;
+      if(!data.nombre) return;   // registro vacío (sin nombre): no es un comercio
       // No cargar comercios registrados por email que aún no verificaron
-      if(data.viaEmail && data.emailVerificado === false) return;
+      if(data.viaEmail && data.emailVerificado === false && data.aprobado !== true) return;
       // No cargar comercios que aún no fueron aprobados
       if(data.aprobado === false) return;
       const c = {...data, id: data.id || doc.id, _docId: doc.id};
@@ -7265,6 +7727,21 @@ async function reconectarFirestore(){
   try{ await db.enableNetwork(); }catch(e){}
 }
 
+// Lectura "fresca" (desde el servidor) para el panel admin. Si el canal de Firestore está
+// colgado ("Failed to get documents from server"), reconecta y reintenta; como último recurso
+// usa los datos guardados en el celular/PC para que el panel no quede en error.
+async function _getSrv(ref){
+  try{ return await _conTimeout(ref.get({ source:'server' }), 12000); }
+  catch(e1){
+    console.warn('Lectura del servidor falló, reconecto y reintento:', e1 && e1.message);
+    try{ await reconectarFirestore(); return await _conTimeout(ref.get({ source:'server' }), 15000); }
+    catch(e2){
+      const r = await ref.get();   // caché local (puede no estar al día)
+      try{ if(typeof toast === 'function') toast('Sin conexión estable: mostrando datos guardados. Tocá actualizar en unos segundos.'); }catch(_){}
+      return r;
+    }
+  }
+}
 function _conTimeout(promesa, ms){
   return Promise.race([
     promesa,
@@ -7440,7 +7917,7 @@ async function migrarComercioUidEnVentas(){
   if(!miUid || !miId) return;
   try{
     // Buscar ventas con este comercioId pero sin comercioUid (o con uid incorrecto)
-    const snap = await db.collection('ventas').where('comercioId','==', miId).get({ source: 'server' });
+    const snap = await _getSrv(db.collection('ventas').where('comercioId','==', miId));
     const batch = db.batch();
     let count = 0;
     snap.docs.forEach(doc=>{
@@ -8085,6 +8562,7 @@ const LIMITE_FOTO_BYTES = 70 * 1024;
 const fotosCargadas = {}; // prefix -> dataURL comprimida, lista para publicar
 
 function onFotoSeleccionada(input, prefix){
+  try{ localStorage.removeItem('puente_camPendiente'); }catch(e){}
   const file = input.files[0];
   input.value = ''; // permite volver a elegir la MISMA foto (si no, el navegador no avisa el cambio)
   if(!file) return;
@@ -8103,9 +8581,16 @@ function onFotoSeleccionada(input, prefix){
     estado.textContent = `✅ Foto lista (~${kb} KB, menos de 70KB)`;
     estado.classList.add('ok');
     if(modo){ _fotoOrig[prefix] = { file:file, modo:modo }; _agregarBotonAjustar(prefix, estado); }
+    // Producto: se abre solo el encuadre para que la persona vea cómo queda y lo acomode
+    if(modo === 'producto') setTimeout(function(){ ajustarFotoManual(prefix, true); }, 200);
   }).catch((err)=>{
     console.error('Error procesando imagen:', err);
-    estado.textContent = '⚠️ No pudimos procesar esa foto. Probá desde Galería o elegí una imagen más pequeña.';
+    const _nm = (err && (err.name || '')) + ' ' + (err && err.message || '');
+    if(/Quota|NotReadable|NotAllowed|storage|memory/i.test(_nm)){
+      estado.textContent = '⚠️ Al celular le falta espacio o memoria libre. Cerrá otras apps, liberá espacio (fotos o descargas) y probá de nuevo.';
+    } else {
+      estado.textContent = '⚠️ No pudimos procesar esa foto. Probá desde Galería o elegí una imagen más pequeña.';
+    }
   });
 }
 
@@ -8236,12 +8721,45 @@ function comprimirImagenRecortada(file, maxBytes, aspectRatio, anchoDestino){
 const FOTO_MODOS = {
   logo:     { ratio:1,    ancho:700, margen:0.07, cover:false },
   producto: { ratio:1,    ancho:900, margen:0.05, cover:false },
-  portada:  { ratio:2.25, ancho:900, margen:0,    cover:true  }
+  portada:  { ratio:2.25, ancho:900, margen:0,    cover:true  },
+  rubroTile:{ ratio:1,    ancho:480, margen:0,    cover:true  }
 };
 const FOTO_PREFIJO_MODO = { editLogo:'logo', adLogo:'logo', rLogo:'logo', cnp:'producto',
-                            editImg2:'portada', adFoto2:'portada', rGaleria:'portada', rpLogo:'logo' };
+                            editImg2:'portada', adFoto2:'portada', rGaleria:'portada', rpLogo:'logo', nr:'rubroTile', nrd:'rubroTile' };
 const _fotoOrig = {}; // prefix -> { file, modo } para poder reabrir el editor con la foto original
 function _fotoModoDe(prefix){ return FOTO_PREFIJO_MODO[prefix] || null; }
+
+/* Fondo difuminado en las tarjetas de producto: si la foto no llena el cuadro (foto vertical,
+   apaisada o con mucho aire), se muestra la misma foto desenfocada detrás en vez de bandas vacías.
+   Funciona para todas las fotos, también las ya publicadas. */
+(function(){
+  function evaluar(im){
+    const box = im.parentElement;
+    if(!box || !box.classList || !box.classList.contains('prod-photo')) return;
+    const nw = im.naturalWidth, nh = im.naturalHeight;
+    if(!nw || !nh || !im.src) return;
+    const bw = box.clientWidth, bh = box.clientHeight;
+    const rImg = nw / nh, rBox = (bw && bh) ? bw / bh : 0;
+    if(rBox && Math.abs(rImg - rBox) / rBox < 0.06){ box.classList.remove('pb-on'); return; }
+    box.style.setProperty('--fotobg', 'url("' + im.src.replace(/"/g, '%22') + '")');
+    box.classList.add('pb-on');
+  }
+  function revisar(){
+    document.querySelectorAll('.prod-photo > img').forEach(function(im){
+      if(im._pbSrc === im.src) return;
+      im._pbSrc = im.src;
+      if(im.complete && im.naturalWidth) evaluar(im);
+      else im.addEventListener('load', function(){ evaluar(im); }, { once:true });
+    });
+  }
+  let pend = false;
+  function agendar(){ if(pend) return; pend = true; requestAnimationFrame(function(){ pend = false; try{ revisar(); }catch(e){} }); }
+  function iniciar(){
+    revisar();
+    try{ new MutationObserver(agendar).observe(document.body, { childList:true, subtree:true }); }catch(e){}
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
+})();
 
 // Busca el rectángulo que contiene "lo importante" de la imagen. Si los bordes no tienen un fondo
 // parejo (una foto normal) o no hay nada que recortar, devuelve la imagen completa.
@@ -8355,6 +8873,24 @@ function comprimirFotoAjustada(file, maxBytes, modo){
   });
 }
 
+// Vista previa del encuadre de producto: cuadrado (Inicio) y 3:4 con fondo difuminado (Ofertas)
+function _pintarPreviewsProducto(ov, cv){
+  const a = ov.querySelector('#fotoPv1'), b = ov.querySelector('#fotoPv2');
+  try{
+    if(a){ const g = a.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, a.width, a.height); g.drawImage(cv, 0, 0, a.width, a.height); }
+    if(b){
+      const g = b.getContext('2d'), w = b.width, h = b.height;
+      g.fillStyle = '#eef0f4'; g.fillRect(0, 0, w, h);
+      try{ g.filter = 'blur(10px)'; }catch(e){}
+      const kc = Math.max(w / cv.width, h / cv.height);
+      g.drawImage(cv, (w - cv.width * kc) / 2, (h - cv.height * kc) / 2, cv.width * kc, cv.height * kc);
+      try{ g.filter = 'none'; }catch(e){}
+      const kk = Math.min(w / cv.width, h / cv.height);
+      g.drawImage(cv, (w - cv.width * kk) / 2, (h - cv.height * kk) / 2, cv.width * kk, cv.height * kk);
+    }
+  }catch(e){}
+}
+
 // Editor manual: arrastrar para mover, pellizcar / rueda / control para acercar. Devuelve el dataURL o null.
 function abrirEditorFoto(file, modo, maxBytes, opts){
   const cfg = FOTO_MODOS[modo];
@@ -8379,7 +8915,15 @@ function abrirEditorFoto(file, modo, maxBytes, opts){
         + '<div style="font-size:12px;color:#777;line-height:1.4;">Arrastrá para mover. Pellizcá o usá el control para acercar o alejar. Lo que ves es lo que se guarda, con fondo blanco.</div>'
         + '<div style="display:flex;justify-content:center;"><canvas id="fotoEdCv" style="touch-action:none;border-radius:12px;border:1px solid #ddd;cursor:grab;max-width:100%;"></canvas></div>'
         + '<input id="fotoEdZoom" type="range" min="0" max="100" step="0.5" style="width:100%;">'
+        + (modo === 'producto'
+          ? '<div style="background:#F7F8FB;border-radius:12px;padding:10px;"><div style="font-size:11.5px;font-weight:800;color:#1F2A44;margin-bottom:8px;">Así se va a ver en PuenT</div>'
+          +   '<div style="display:flex;gap:14px;align-items:flex-end;justify-content:center;">'
+          +     '<div style="text-align:center;"><canvas id="fotoPv1" width="168" height="168" style="width:84px;height:84px;border-radius:10px;border:1px solid #e2e4ea;"></canvas><div style="font-size:10.5px;color:#777;margin-top:3px;">Inicio</div></div>'
+          +     '<div style="text-align:center;"><canvas id="fotoPv2" width="168" height="224" style="width:84px;height:112px;border-radius:10px;border:1px solid #e2e4ea;"></canvas><div style="font-size:10.5px;color:#777;margin-top:3px;">Ofertas</div></div>'
+          +   '</div><div style="font-size:11px;color:#777;margin-top:8px;line-height:1.4;">Tip: que el producto ocupe casi todo el cuadro y quede bien centrado. Si queda muy chico, acercalo.</div></div>'
+          : '')
         + '<div style="display:flex;gap:8px;">'
+        +   (modo === 'producto' ? '<button type="button" id="fotoEdLlenar" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #ddd;background:#fff;font-weight:700;font-size:13px;cursor:pointer;">Llenar</button>' : '')
         +   '<button type="button" id="fotoEdAuto" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #ddd;background:#fff;font-weight:700;font-size:13px;cursor:pointer;">Auto</button>'
         +   '<button type="button" id="fotoEdCancel" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #ddd;background:#fff;font-weight:700;font-size:13px;cursor:pointer;">Cancelar</button>'
         +   '<button type="button" id="fotoEdOk" style="flex:1.3;padding:10px;border-radius:10px;border:none;background:#5C7355;color:#fff;font-weight:800;font-size:13px;cursor:pointer;">Listo</button>'
@@ -8413,6 +8957,7 @@ function abrirEditorFoto(file, modo, maxBytes, opts){
           acotar();
           _dibujarAjuste(ctx, base.src, st, W, H, f, Fw, Fh);
           zoom.value = kASlider(st.k);
+          _pintarPreviewsProducto(ov, cv);
         });
       }
       function zoomEn(px, py, kNuevo){
@@ -8464,6 +9009,8 @@ function abrirEditorFoto(file, modo, maxBytes, opts){
         pintar();
       });
       ov.querySelector('#fotoEdAuto').onclick = ()=>{ st = { k:auto.k, tx:auto.tx, ty:auto.ty }; pintar(); };
+      const bLlenar = ov.querySelector('#fotoEdLlenar');
+      if(bLlenar) bLlenar.onclick = ()=>{ const k = Math.max(Fw / W, Fh / H); st = { k:k, tx:(Fw - W * k) / 2, ty:(Fh - H * k) / 2 }; pintar(); };
 
       function cerrar(res){
         base.cerrar();
@@ -8497,10 +9044,10 @@ function _agregarBotonAjustar(prefix, estado){
   b.onclick = ev=>{ ev.stopPropagation(); ajustarFotoManual(prefix); };
   estado.appendChild(b);
 }
-function ajustarFotoManual(prefix){
+function ajustarFotoManual(prefix, primeraVez){
   const o = _fotoOrig[prefix];
   if(!o || !fotosCargadas[prefix]){ if(typeof toast === 'function') toast('Elegí la foto de nuevo para poder ajustarla.'); return; }
-  abrirEditorFoto(o.file, o.modo, LIMITE_FOTO_BYTES).then(d0=>d0 ? fotoAR2(d0, FOTO_CARPETAS[o.modo] || 'otros').then(u=>({u, d0})) : null).then(res=>{
+  abrirEditorFoto(o.file, o.modo, LIMITE_FOTO_BYTES, primeraVez ? { primeraVez:true } : undefined).then(d0=>d0 ? fotoAR2(d0, FOTO_CARPETAS[o.modo] || 'otros').then(u=>({u, d0})) : null).then(res=>{
     if(!res) return;
     const dataUrl = res.u;
     fotosCargadas[prefix] = dataUrl;
@@ -8521,8 +9068,31 @@ function ajustarFotoManual(prefix){
 // comprimida se sube al Worker de fotos y en Firestore se guarda solo la dirección corta.
 // Si algo falla (sin sesión, sin red, Worker caído) se guarda como antes (base64): nunca se pierde una foto.
 // Dejar vacío para desactivarlo.
+/* Si el celular cierra la app mientras se saca la foto (le pasa a equipos con poca memoria),
+   al volver avisamos qué pasó y qué hacer, en vez de dejar a la persona sin explicación. */
+(function(){
+  document.addEventListener('click', function(e){
+    try{
+      const b = e.target && e.target.closest ? e.target.closest('button') : null;
+      const oc = b ? (b.getAttribute('onclick') || '') : '';
+      if(/Input(Cam|Camara)[A-Za-z]*'\)\.click\(\)/.test(oc) || /FotoInputCam/.test(oc)) localStorage.setItem('puente_camPendiente', String(Date.now()));
+    }catch(_){}
+  }, true);
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      try{
+        const t = Number(localStorage.getItem('puente_camPendiente') || 0);
+        if(!t) return;
+        localStorage.removeItem('puente_camPendiente');
+        if(Date.now() - t < 15 * 60 * 1000 && typeof toast === 'function')
+          toast('📷 Se reinició la app al sacar la foto (le pasa con poca memoria). Cerrá otras apps y probá de nuevo, o elegí la foto desde Galería.');
+      }catch(_){}
+    }, 3500);
+  });
+})();
+
 var R2_FOTOS_URL = 'https://puent-fotos.infopuent.workers.dev';   // ej: 'https://puent-fotos.TUUSUARIO.workers.dev' (sin barra al final)
-var FOTO_CARPETAS = { logo:'logos', portada:'portadas', producto:'productos' };
+var FOTO_CARPETAS = { logo:'logos', portada:'portadas', producto:'productos', rubroTile:'rubros' };
 async function fotoAR2(dataUrl, carpeta){
   try{
     if(!R2_FOTOS_URL || typeof dataUrl !== 'string' || dataUrl.indexOf('data:image/') !== 0) return dataUrl;
@@ -9470,7 +10040,7 @@ async function cargarProductosGuardados(ownerUid){
 async function cargarCatalogoDeConectoresParaComercio(comercioId){
   if(!firebaseListo || !db || !comercioId) return;
   try{
-    const snap = await db.collection('catalogoVendedor').where('comercioId','==', comercioId).get({ source: 'server' });
+    const snap = await _getSrv(db.collection('catalogoVendedor').where('comercioId','==', comercioId));
     snap.forEach(doc=>{
       const s = {...doc.data(), id: doc.id};
       const idx = state.catalogoVendedor.findIndex(x=>x.id===s.id);
@@ -9548,7 +10118,6 @@ function renderVElegirComercio(){
           <div class="meta">${cantidad} producto${cantidad===1?'':'s'} con comisión disponible</div>
           <div style="margin-top:2px;">${estrellasHtml(prom, total)}</div>
         </div>
-        ${c.uid ? `<button class="btn btn-ghost btn-sm" style="flex-shrink:0;" onclick="event.stopPropagation(); abrirModalValorar('${c.uid}','comercio','${c.nombre}')">Calificar</button>` : ''}
       </div>`;
   }).join('');
 }
@@ -10452,7 +11021,6 @@ function renderCalificaciones(){
           <div style="font-size:10.5px;color:var(--muted);">${new Date(c.fecha).toLocaleDateString('es-AR')}</div>
         </div>
         ${c.motivo ? `<div style="font-size:11.5px;color:#D9534F;margin-top:2px;">${c.motivo}</div>` : ''}
-        ${c.comentario ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">"${c.comentario}"</div>` : ''}
       </div>`;
     }).join('')}
   ` : '';
@@ -10485,10 +11053,7 @@ function abrirModalCalificar(item){
           ${motivos.map(m=>`<option value="${m}">${m}</option>`).join('')}
         </select>
       </div>
-      <div class="field" style="margin-bottom:14px;">
-        <label>Comentario (opcional)</label>
-        <textarea id="modalCalComentario" rows="3" placeholder="Contanos cómo te fue..."></textarea>
-      </div>
+      <input type="hidden" id="modalCalComentario" value="">
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('modalCalificarOverlay').remove()">Cancelar</button>
         <button class="btn btn-primary" id="modalCalEnviar" style="flex:1;" disabled onclick="_confirmarEnvioCalificacion()">Enviar</button>
@@ -10722,7 +11287,7 @@ let _vitGaleria = [];
 let _vitCaract = [];
 
 function vitEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function comercioEnVitrina(c){ return !!c && c.modo==='vitrina' && !(c.viaEmail && c.emailVerificado===false); }
+function comercioEnVitrina(c){ return !!c && c.modo==='vitrina' && !(c.viaEmail && c.emailVerificado===false && c.aprobado!==true); }
 
 function cargarVitrinaEnEditar(){
   const c = state.currentUser;
@@ -10986,7 +11551,7 @@ function abrirEditarComercio(){
       : `<div class="logo-upload-empty"><div class="ic">🖼️</div></div>`;
   }
   if(img2BtnElim) img2BtnElim.style.display = c.img2 ? 'block' : 'none';
-  document.getElementById('editImg2FotoEstado').textContent = c.img2 ? 'Tocá para cambiar la portada.' : 'Recomendado: foto horizontal del local o del negocio.';
+  document.getElementById('editImg2FotoEstado').textContent = c.img2 ? 'Tocá para cambiar la portada.' : 'Recomendado: foto horizontal del local o del negocio. 💡 Más estable: sacala con la cámara de tu celu y elegila desde Galería.';
   delete fotosCargadas['editImg2'];
 
   // Ubicación en el mapa
@@ -11109,7 +11674,7 @@ function eliminarPortadaComercio(){
       if(img2Box) img2Box.innerHTML = `<div class="logo-upload-empty"><div class="ic">🖼️</div></div>`;
       const img2BtnElim = document.getElementById('editImg2BtnEliminar');
       if(img2BtnElim) img2BtnElim.style.display = 'none';
-      document.getElementById('editImg2FotoEstado').textContent = 'Recomendado: foto horizontal del local o del negocio.';
+      document.getElementById('editImg2FotoEstado').textContent = 'Recomendado: foto horizontal del local o del negocio. 💡 Más estable: sacala con la cámara de tu celu y elegila desde Galería.';
       toast('Foto de portada eliminada');
     })
     .catch(e=>toast('Error al eliminar: '+e.message));
@@ -12107,7 +12672,7 @@ async function cobranzaAdminSubirComp(input, docId){
     const dataUrl = await comprimirImagen(file, 200*1024);
     const anio = cobranzasAnio;
     const clave = `${anio}-${String(cobranzasMesActual+1).padStart(2,'0')}`;
-    const snap  = await db.collection('comercios').doc(docId).get({ source:'server' });
+    const snap  = await _getSrv(db.collection('comercios').doc(docId));
     if(!snap.exists){ toast('Error: comercio no encontrado'); return; }
     const pagos = snap.data().pagos || [];
     const idx   = pagos.findIndex(p => p.mes === clave);
@@ -12125,7 +12690,7 @@ async function cobranzaAdminSubirComp(input, docId){
 async function cobranzaConfirmarPago(docId, clave, comercioId){
   if(!confirm('¿Confirmar pago recibido para este mes?')) return;
   try{
-    const snap  = await db.collection('comercios').doc(docId).get({ source:'server' });
+    const snap  = await _getSrv(db.collection('comercios').doc(docId));
     const pagos = snap.data()?.pagos || [];
     const idx   = pagos.findIndex(p => p.mes === clave);
     const entrada = { mes: clave, estado:'pagado', fechaPago: new Date().toISOString(), ...(pagos[idx]||{}) };
@@ -12228,7 +12793,6 @@ function renderComercioPanel(){
         <div class="main"><div class="t">${v?v.nombre:'—'}</div>
         <div class="s">${count} producto(s) tuyos elegidos para vender</div>
         <div style="margin-top:2px;">${estrellasHtml(prom, total)}</div></div>
-        ${v?.uid ? `<button class="btn btn-ghost btn-sm" onclick="abrirModalValorar('${v.uid}','vendedor','${v.nombre}')">Calificar</button>` : ''}
         </div>`;
     }).join('');
   }
@@ -12623,7 +13187,6 @@ function confirmarVenta(){
   renderComercioPanel();
   renderFeed();
   showScreen('c-panel');
-  if(vend && vend.uid) setTimeout(()=>abrirModalValorar(vend.uid, 'vendedor', vend.nombre, venta.id), 400);
 }
 
 const MOTIVOS_NO_VENTA = {
@@ -13582,7 +14145,7 @@ function renderDestacadosYCerca(){
       <div class="destacado-body">
         <div class="destacado-name">${c.nombre}</div>
         <div class="destacado-rubro">${c.rubro}</div>
-        <div class="destacado-rating">${estrellas(c.rating || 4.5)}</div>
+        <div class="destacado-rating">${valChipChico(c.uid)}</div>
       </div>
     </div>`).join('') : `<div class="empty" style="width:100%;"><div class="ic">🏬</div><div class="t">Todavía no hay comercios destacados en ${ciudadSeleccionada}</div></div>`;
 
@@ -13594,7 +14157,7 @@ function renderDestacadosYCerca(){
         <div class="cerca-nombre">${c.nombre}</div>
         <div class="cerca-meta">${c.rubro}${c.direccion ? ' · ' + c.direccion : ''}</div>
       </div>
-      <div class="cerca-rating">${estrellas(c.rating || 4.5)}</div>
+      <div class="cerca-rating">${valChipChico(c.uid)}</div>
     </div>`).join('') : `<div class="empty"><div class="ic">📍</div><div class="t">Todavía no hay locales cerca tuyo en ${ciudadSeleccionada}</div></div>`;
 }
 
@@ -14291,77 +14854,97 @@ function _grupoDeRubro(id){
   for(var g of GRUPOS_RUBROS){ if(g.ids.includes(id)) return g.label; }
   return null;
 }
+// ---- Cuadros de rubro (home) ----
+const RUBRO_TILE_COLORES = {
+  'gastronomia':['#F97316','#E11D2A'], 'belleza':['#EC4899','#BE185D'], 'hogar':['#FB923C','#EA580C'],
+  'almacen':['#22C55E','#0F9F6E'], 'indumentaria':['#8B5CF6','#4F46E5'], 'salud':['#38BDF8','#2563EB'],
+  'automotor':['#3B82F6','#1D4ED8'], 'agro-mascotas':['#FB7185','#E11D48'], 'tecnologia':['#6366F1','#4338CA'],
+  'educacion':['#A855F7','#7E22CE'], 'deportes':['#4ADE80','#16A34A']
+};
+const RUBRO_TILE_PALETA = [['#F59E0B','#D97706'],['#14B8A6','#0F766E'],['#F43F5E','#BE123C'],['#0EA5E9','#0369A1'],['#84CC16','#4D7C0F'],['#D946EF','#A21CAF'],['#64748B','#334155']];
+const RUBRO_CORTO = {
+  'gastronomia':'Gastronomía','belleza':'Belleza','hogar':'Hogar','almacen':'Almacén','indumentaria':'Indumentaria','salud':'Salud',
+  'automotor':'Automotor','agro-mascotas':'Mascotas','tecnologia':'Tecnología','educacion':'Librerías','deportes':'Deportes',
+  'inmobiliarias':'Inmobiliarias','servicios-prof':'Profesionales','servicios-varios':'Servicios','regalos':'Regalos','imprenta':'Imprenta',
+  'alquiler':'Alquiler','transporte':'Transporte','caza-pesca-camping':'Pesca y camping','turismo':'Turismo','eventos':'Eventos',
+  'artesanias':'Artesanías','entretenimiento':'Entretenimiento','combustibles-energia':'Combustibles','cuidado-personas':'Cuidado de personas',
+  'funerarios':'Funerarias','instituciones':'Instituciones','finanzas':'Finanzas'
+};
+const _RS = function(d){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>'; };
+const RUBRO_TILE_SVG = {
+  'gastronomia': _RS('<path d="M7 3v7M5 3v5a2 2 0 0 0 4 0V3M7 10v11M17 3c-2.2 1-3.2 3.6-3.2 6.5H17V21M17 3v6.5"/>'),
+  'belleza': _RS('<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 7.5L20 18M8 16.5L20 6"/>'),
+  'hogar': _RS('<path d="M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6"/>'),
+  'almacen': _RS('<path d="M3 4h2l2.5 11h10L20 7H6.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>'),
+  'indumentaria': _RS('<path d="M8 3L3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/>'),
+  'salud': _RS('<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>'),
+  'automotor': _RS('<path d="M5 16v-5l2-5h10l2 5v5M3 16h18M5 16v3M19 16v3"/><circle cx="8" cy="13" r=".9"/><circle cx="16" cy="13" r=".9"/>'),
+  'agro-mascotas': _RS('<circle cx="6.5" cy="10" r="1.8"/><circle cx="10.5" cy="6.5" r="1.8"/><circle cx="15.5" cy="7" r="1.8"/><circle cx="19" cy="11" r="1.8"/><path d="M8 17.5c0-3 2.5-5 5-5s5 2 5 5c0 2-1.5 3-3 3-1.2 0-1.6-.6-2-.6s-.8.6-2 .6c-1.5 0-3-1-3-3z"/>'),
+  'tecnologia': _RS('<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/>'),
+  'educacion': _RS('<path d="M4 19V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h13M8 7h7"/>'),
+  'deportes': _RS('<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6c3 3 3 10.8 0 12.8M18.4 5.6c-3 3-3 10.8 0 12.8"/>')
+};
+const RUBRO_SVG_MAS = _RS('<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>');
+const RUBRO_TILE_VISIBLES = 11;   // cuadros que se ven antes de "Ver todos"
+function _tileColores(r, idx){
+  if(r.colorA && r.colorB) return [r.colorA, r.colorB];
+  return RUBRO_TILE_COLORES[r.id] || RUBRO_TILE_PALETA[idx % RUBRO_TILE_PALETA.length];
+}
+function _esc2(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function toggleRubrosTodos(){
+  const g = document.getElementById('rubGrid'); if(!g) return;
+  const abierto = g.classList.toggle('rub-all');
+  const t = document.getElementById('rubMasTxt'); if(t) t.textContent = abierto ? 'Ver menos' : 'Ver todos';
+}
 function renderCatChipsYSecciones(){
   const lista = document.getElementById('catBannerList');
   if(!lista) return;
-  // Ordenar rubros por grupo para que el separador aparezca una sola vez
-  const rubrosOrdenados = RUBROS_HOME.slice().sort(function(a, b){
-    const ga = GRUPOS_RUBROS.findIndex(g => g.ids.includes(a.id));
-    const gb = GRUPOS_RUBROS.findIndex(g => g.ids.includes(b.id));
-    if(ga !== gb) return ga - gb;
-    return (a.orden||99) - (b.orden||99);
-  });
-  let html = '';
-  let grupoActual = null;
-  rubrosOrdenados.forEach(function(r){
-    const grupo = _grupoDeRubro(r.id);
-    if(grupo && grupo !== grupoActual){
-      grupoActual = grupo;
-      html += `<div style="display:flex;align-items:center;gap:10px;margin:18px 0 6px;"><div style="height:1px;flex:1;background:var(--line);"></div><span style="font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap;letter-spacing:.3px;">${grupo}</span><div style="height:1px;flex:1;background:var(--line);"></div></div>`;
+  const rubros = RUBROS_HOME.slice().sort(function(a, b){ return (a.orden||99) - (b.orden||99); });
+  let tiles = '', panels = '';
+  rubros.forEach(function(r, idx){
+    const cols = _tileColores(r, idx);
+    const foto = r.imagenTile || '';
+    const nombre = RUBRO_CORTO[r.id] || r.nombre || r.id;
+    const ic = RUBRO_TILE_SVG[r.id] || _esc2(r.icono || '🛍️');
+    const extra = idx >= RUBRO_TILE_VISIBLES ? ' rt-extra' : '';
+    const ocultar = (r.ocultarSiVacio && !foto) ? ' data-ocultar-vacio="1"' : '';
+    tiles += '<button type="button" class="rub-tile' + (foto ? '' : ' rt-sinfoto') + extra + '" data-id="' + _esc2(r.id) + '"' + ocultar +
+      ' style="--rt-a:' + cols[0] + ';--rt-b:' + cols[1] + ';" onclick="setFeedCategoria(\'' + _esc2(r.id) + '\',this)" aria-label="' + _esc2(r.nombre || nombre) + '">' +
+      (foto ? '<span class="rt-bg" style="background-image:url(\'' + _esc2(foto) + '\')"></span>' : '') +
+      '<span class="rt-vel"></span><span class="rt-ic">' + ic + '</span><span class="rt-nom">' + _esc2(nombre) + '</span></button>';
+    if(idx === RUBRO_TILE_VISIBLES - 1 && rubros.length > RUBRO_TILE_VISIBLES){
+      tiles += '<button type="button" class="rub-tile rt-mas" onclick="toggleRubrosTodos()" aria-label="Ver todos los rubros">' +
+        '<span class="rt-ic">' + RUBRO_SVG_MAS + '</span><span class="rt-nom" id="rubMasTxt">Ver todos</span></button>';
     }
-    const idx = RUBROS_HOME.indexOf(r);
-    const color = colorDeRubro(r, idx);
-    const fondoImg = r.imagen
-      ? `background-image:url('${r.imagen}'); --cb-color:${color};`
-      : `background-color:${color};`;
-    html += `<div class="cat-banner-item" id="catItem-${r.id}"${(r.ocultarSiVacio && !r.imagen) ? ' data-ocultar-vacio="1"' : ''}>
-        <button class="cat-banner${r.imagen?' cat-banner-conimg':''}" style="${fondoImg}" onclick="setFeedCategoria('${r.id}',this)">
-          <div class="cat-banner-icon">${r.icono||'🛍️'}</div>
-          <div class="cat-banner-label">${r.nombre}</div>
-          <div class="cat-banner-chevron">▾</div>
-        </button>
-        <div class="cat-banner-panel" id="secCat-${r.id}">
-          <div class="feed-cat-grid" id="gridCat-${r.id}" style="padding:12px;"></div>
-        </div>
-      </div>`;
+    panels += '<div class="cat-banner-item" id="catItem-' + _esc2(r.id) + '">' +
+      '<div class="cat-banner-panel" id="secCat-' + _esc2(r.id) + '">' +
+      '<div class="rub-panel-head"><span>' + _esc2(r.nombre || nombre) + '</span><button type="button" onclick="setFeedCategoria(\'' + _esc2(r.id) + '\')" aria-label="Cerrar">✕</button></div>' +
+      '<div class="feed-cat-grid" id="gridCat-' + _esc2(r.id) + '" style="padding:12px;"></div></div></div>';
   });
-  lista.innerHTML = html;
-  ajustarBannersAlAspecto();
+  lista.innerHTML = '<div class="rub-grid" id="rubGrid">' + tiles + '</div><div class="rub-panels">' + panels + '</div>';
+  if(_feedCategoriaActual && _feedCategoriaActual !== 'todos'){
+    const it = document.getElementById('catItem-' + _feedCategoriaActual); if(it) it.classList.add('open');
+    document.querySelectorAll('.rub-tile[data-id]').forEach(function(t){ t.classList.toggle('sel', t.getAttribute('data-id') === _feedCategoriaActual); });
+  }
   actualizarBannersVacios();
 }
 
 // Cada banner con imagen toma el formato (ancho/alto) de SU imagen: se ve entera, a todo el ancho del
 // contenedor, sin cortar ni deformar. Chica -> se agranda; grande -> se achica. Se limita el formato entre
 // 2.2:1 y 8:1 para que un banner casi cuadrado no quede gigante ni una tira finita quede ilegible.
-function ajustarBannersAlAspecto(){
-  try{
-    (RUBROS_HOME||[]).forEach(function(r){
-      if(!r.imagen) return;
-      const item = document.getElementById('catItem-'+r.id);
-      const btn = item && item.querySelector('.cat-banner');
-      if(!btn) return;
-      const im = new Image();
-      im.onload = function(){
-        if(!im.naturalWidth || !im.naturalHeight) return;
-        const ratio = Math.min(8, Math.max(2.2, im.naturalWidth / im.naturalHeight));
-        btn.style.aspectRatio = String(ratio);
-      };
-      im.src = r.imagen;
-    });
-  }catch(e){ console.warn('ajustarBannersAlAspecto:', e); }
-}
+function ajustarBannersAlAspecto(){ /* ya no se usa: los rubros son cuadros */ }
 
 // Los rubros nuevos (ocultarSiVacio) solo muestran su banner en el home cuando ya tienen
 // algún comercio u oferta; así el home no se llena de banners vacíos.
 // Si el admin les cargó una imagen de banner, se muestran siempre (la imagen es la señal de que quiere verlo).
 function actualizarBannersVacios(){
   try{
-    document.querySelectorAll('.cat-banner-item[data-ocultar-vacio="1"]').forEach(function(item){
-      const id = item.id.replace('catItem-','');
-      const hay = item.classList.contains('open')
+    document.querySelectorAll('.rub-tile[data-ocultar-vacio="1"]').forEach(function(el){
+      const id = el.getAttribute('data-id');
+      const hay = _feedCategoriaActual === id
         || (state.productos||[]).some(function(p){ return categoriaDeProducto(p) === id; })
         || (state.comercios||[]).some(function(c){ return categoriaDeRubro(c.rubro||'') === id; });
-      item.style.display = hay ? '' : 'none';
+      el.style.display = hay ? '' : 'none';
     });
   }catch(e){ console.warn('actualizarBannersVacios:', e); }
 }
@@ -14373,6 +14956,9 @@ function setFeedCategoria(cat, btn){
   _feedCategoriaActual = yaAbierto ? 'todos' : cat;
   document.querySelectorAll('.cat-banner-item').forEach(function(item){
     item.classList.toggle('open', item.id === 'catItem-'+_feedCategoriaActual);
+  });
+  document.querySelectorAll('.rub-tile[data-id]').forEach(function(t){
+    t.classList.toggle('sel', t.getAttribute('data-id') === _feedCategoriaActual);
   });
   renderSeccionesCategorias();
   if(!yaAbierto){
@@ -14431,11 +15017,12 @@ async function adminCargarRubrosHome(desktop){
   _admRubrosHomeDesktop = !!desktop;
   await cargarRubrosHome(); // refresca RUBROS_HOME por si se editó desde otra sesión
   const avisoMedida = `<div style="background:#FFF0F0;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;line-height:1.5;color:#7A0F14;">
-      📐 <b>Subí el rectángulo que tengas, de cualquier medida.</b> La app lo muestra entero, a todo el ancho de la pantalla: si es chico lo agranda, si es grande lo achica, y el alto se ajusta solo (no lo corta ni lo deforma).<br>
-      Lo mejor es un rectángulo apaisado, por ejemplo <b>1336 × 306 px</b>: así todos los banners quedan del mismo alto.
+      📐 <b>Foto de cada rubro: cuadrada, <u>480 × 480 px</u></b> (jpg o png; se encuadra y se comprime sola a menos de 70 KB).<br>
+      Es el fondo del cuadro del rubro en el home. Poné lo importante arriba y al centro: abajo queda tapado por el nombre y el degradé de color.<br>
+      Sin foto, el cuadro se ve igual con su degradé y su ícono.
     </div>`;
   const html = avisoMedida + RUBROS_HOME.map(function(r, idx){
-    const prev = r.imagen ? `<img src="${r.imagen}" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:22px;">${r.icono||'🛍️'}</span>`;
+    const prev = r.imagenTile ? `<img src="${r.imagenTile}" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:22px;">${r.icono||'🛍️'}</span>`;
     const esPrimero = idx === 0, esUltimo = idx === RUBROS_HOME.length-1;
     const nombreMostrado = r.nombre || `(sin nombre — id: ${r.id})`;
     return `<div class="card" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
@@ -14450,7 +15037,7 @@ async function adminCargarRubrosHome(desktop){
         </div>
         <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:stretch;">
           <input type="file" accept="image/*" id="rh-input-${r.id}" style="display:none;" onchange="onFotoRubroSeleccionada(this,'${r.id}')">
-          <button class="adm-btn" onclick="document.getElementById('rh-input-${r.id}').click()">Cambiar foto</button>
+          <button class="adm-btn" onclick="document.getElementById('rh-input-${r.id}').click()">${r.imagenTile?'Cambiar foto':'Subir foto'}</button>
           <button class="adm-btn" style="color:#C0392B;" onclick="eliminarRubroHome('${r.id}','${(r.nombre||r.id).replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
         </div>
       </div>`;
@@ -14557,9 +15144,9 @@ function formAgregarRubroHTML(prefix){
         <option value="📷">📷 Foto/Imprenta</option>
         <option value="🍷">🍷 Vinoteca</option>
       </select>
-      <label style="margin-top:10px;">Foto banner (se comprime sola)</label>
+      <label style="margin-top:10px;">Foto del cuadro (cuadrada, 480×480; se encuadra sola)</label>
       <div class="foto-upload" id="${prefix}FotoBox" onclick="document.getElementById('${prefix}FotoInput').click()">
-        <div class="foto-upload-empty"><div class="foto-upload-ic">📷</div><div class="foto-upload-txt">Tocá para elegir foto (banner apaisado)</div></div>
+        <div class="foto-upload-empty"><div class="foto-upload-ic">📷</div><div class="foto-upload-txt">Tocá para elegir foto (cuadrada)</div></div>
       </div>
       <input type="file" id="${prefix}FotoInput" accept="image/*" style="display:none;" onchange="onFotoSeleccionada(this,'${prefix}')">
       <div class="foto-upload-estado" id="${prefix}FotoEstado"></div>
@@ -14600,17 +15187,21 @@ function eliminarRubroHome(rubroId, nombreMostrado){
     .catch(e=>{ console.error(e); toast('No se pudo eliminar el rubro'); });
 }
 
-// Se llama cuando eligen una foto nueva para reemplazar la de un rubro existente.
-function onFotoRubroSeleccionada(input, rubroId){
+// Foto del cuadro de un rubro (cuadrada 480x480): se abre el encuadre para acomodarla y se guarda como 'imagenTile'.
+async function onFotoRubroSeleccionada(input, rubroId){
   const file = input.files[0];
+  input.value = '';
   if(!file) return;
-  // Se guarda la imagen completa (solo se comprime, no se recorta): en el home el recuadro se adapta a su formato
-  comprimirImagen(file, LIMITE_FOTO_BYTES).then(d=>fotoAR2(d,'rubros')).then(dataUrl=>{
+  try{
+    const d0 = await abrirEditorFoto(file, 'rubroTile', LIMITE_FOTO_BYTES);
+    if(!d0) return;   // canceló
+    const dataUrl = await fotoAR2(d0, 'rubros');
     if(!firebaseListo || !db){ toast('⚠️ Sin conexión a Firestore'); return; }
-    db.collection('rubrosHome').doc(rubroId).set({imagen:dataUrl}, {merge:true})
-      .then(()=>{ toast('✅ Imagen actualizada'); adminCargarRubrosHome(_admRubrosHomeDesktop); })
-      .catch(e=>{ console.error(e); toast('No se pudo guardar la imagen'); });
-  }).catch(()=>{ toast('No pudimos procesar esa foto, probá con otra.'); });
+    await db.collection('rubrosHome').doc(rubroId).set({imagenTile:dataUrl}, {merge:true});
+    toast('✅ Foto del rubro actualizada');
+    adminCargarRubrosHome(_admRubrosHomeDesktop);
+    if(typeof _cacheInvalidar==='function'){ try{ _cacheInvalidar(); }catch(e){} }
+  }catch(e){ console.error(e); toast('No pudimos guardar esa foto, probá con otra.'); }
 }
 
 // Alta de un rubro nuevo desde el admin (cuando surge un rubro que no existía).
@@ -14629,7 +15220,7 @@ function guardarRubroNuevo(prefix){
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   if(!id){ toast('Nombre inválido'); return; }
   const orden = (RUBROS_HOME.length||0) + 1;
-  db.collection('rubrosHome').doc(id).set({nombre, icono, imagen, orden})
+  db.collection('rubrosHome').doc(id).set({nombre, icono, imagenTile: imagen, orden})
     .then(()=>{
       toast('✅ Rubro agregado');
       delete fotosCargadas[prefix];
@@ -14942,7 +15533,7 @@ function renderAdheridosGrid(){
   if(!grid) return;
   const comerciosFiltrados = (state.comercios||[]).filter(c=>
     (!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)) &&
-    !(c.viaEmail && c.emailVerificado === false)
+    !(c.viaEmail && c.emailVerificado === false && c.aprobado !== true)
   );
   const comercios = shuffleConSemillaCarga(comerciosFiltrados);
   if(!comercios.length){
@@ -16016,7 +16607,8 @@ function renderOfertaTabs(p, c){
   if(c){
     const estaRegistrado = !!state.role && state.role !== null;
     const esFree = esComercioFree(c);
-    const prom = c.rating ? Number(c.rating).toFixed(1) : null;
+    const _vr = valResumen(c.uid);
+    const prom = _vr.n ? _vr.prom.toFixed(1) + ' (' + _vr.n + ')' : null;
     document.getElementById('ofTabComercioContenido').innerHTML = `
       <div style="font-weight:800; font-size:15px; color:var(--navy); margin-bottom:2px;">${estaRegistrado ? c.nombre : '🔒 Comercio verificado'}</div>
       <div style="color:var(--muted); margin-bottom:10px;">${c.rubro || ''}${prom && !esFree ? ' · ⭐ '+prom : ''}</div>
@@ -16060,23 +16652,12 @@ function renderOfertaTabs(p, c){
   }
 
   // --- Calificaciones ---
-  const uidComercio = c ? (c.uid || c.id) : null;
-  const vals = uidComercio ? state.valoraciones.filter(v=>v.paraUid===uidComercio) : [];
+  const uidComercio = c ? c.uid : null;
   let califHtml;
-  if(vals.length){
-    const prom = vals.reduce((a,v)=>a+v.estrellas,0) / vals.length;
-    califHtml = `<div style="font-weight:800; font-size:15px; color:var(--navy); margin-bottom:12px;">${estrellas(prom)} · ${vals.length} valoración${vals.length===1?'':'es'}</div>`
-      + vals.slice().sort((a,b)=> new Date(b.fecha)-new Date(a.fecha)).map(v=>`
-        <div style="padding:10px 0; border-top:1px solid var(--line);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-            <span style="font-weight:700;">${v.deNombre || 'Cliente'}</span>
-            <span>${estrellas(v.estrellas)}</span>
-          </div>
-          ${v.comentario ? `<div style="color:var(--muted); font-size:12.5px;">${v.comentario}</div>` : ''}
-        </div>
-      `).join('');
+  if(uidComercio && valResumen(uidComercio).n){
+    califHtml = '<div style="margin-bottom:10px;">' + valChipHTML(uidComercio) + '</div>' + valListaHTML(uidComercio);
   } else {
-    califHtml = '<p style="color:var(--muted);">Este comercio todavía no tiene calificaciones.</p>';
+    califHtml = '<p style="color:var(--muted);">Este comercio todavía no tiene valoraciones. Solo valoran los clientes que compraron.</p>';
   }
   document.getElementById('ofTabCalifContenido').innerHTML = califHtml;
 }
@@ -17258,6 +17839,117 @@ async function geocodearDireccion(direccion, ciudad){
   }
 }
 
+
+/* ================= MIGRAR FOTOS A CLOUDFLARE (admin) =================
+   Recorre comercios y productos, sube a Cloudflare R2 las fotos que todavía están guardadas
+   dentro de Firestore (base64) y reemplaza el dato por la dirección corta. Es seguro:
+   - solo reemplaza si la foto nueva se pudo subir Y se pudo abrir desde su dirección;
+   - si algo falla, deja la foto como estaba;
+   - se puede correr varias veces: retoma lo que falte. */
+function _esB64(v){ return typeof v === 'string' && v.indexOf('data:image/') === 0; }
+function _kbB64(v){ return Math.round(String(v).length * 0.75 / 1024); }
+function _verificarImagenURL(url){
+  return new Promise(function(res){
+    var im = new Image(), t = setTimeout(function(){ im.onload = im.onerror = null; res(false); }, 10000);
+    im.onload = function(){ clearTimeout(t); res(!!(im.naturalWidth && im.naturalHeight)); };
+    im.onerror = function(){ clearTimeout(t); res(false); };
+    im.src = url + (url.indexOf('?') < 0 ? '?v=chk' : '&v=chk');
+  });
+}
+// Lista de tareas: {col, id, campo ('img' | 'img2' | 'galeria:i' | 'galeria:i.img' | 'menuDelDia.foto'), carpeta, valor}
+function _migrarTareasDe(col, id, d){
+  var t = [];
+  if(col === 'comercios'){
+    if(_esB64(d.img))  t.push({col:col,id:id,campo:'img',  carpeta:'logos',    valor:d.img});
+    if(_esB64(d.img2)) t.push({col:col,id:id,campo:'img2', carpeta:'portadas', valor:d.img2});
+    if(d.menuDelDia && _esB64(d.menuDelDia.foto)) t.push({col:col,id:id,campo:'menuDelDia.foto',carpeta:'otros',valor:d.menuDelDia.foto});
+    if(Array.isArray(d.galeria)) d.galeria.forEach(function(g, i){
+      if(_esB64(g)) t.push({col:col,id:id,campo:'galeria:'+i, carpeta:'galeria', valor:g});
+      else if(g && _esB64(g.img)) t.push({col:col,id:id,campo:'galeria:'+i+'.img', carpeta:'galeria', valor:g.img});
+    });
+  } else if(col === 'productos'){
+    if(_esB64(d.img)) t.push({col:col,id:id,campo:'img',carpeta:'productos',valor:d.img});
+  }
+  return t;
+}
+var _migrarCancelar = false;
+async function adminMigrarFotosR2(){
+  if(!R2_FOTOS_URL){ toast('Cloudflare de fotos no está configurado.'); return; }
+  var u = firebaseAuth && firebaseAuth.currentUser;
+  if(!u || u.isAnonymous){ toast('Entrá como admin para migrar las fotos.'); return; }
+  toast('🔎 Buscando fotos para migrar…');
+  var tareas = [];
+  try{
+    var cols = ['comercios', 'productos'];
+    for(var ci = 0; ci < cols.length; ci++){
+      var snap = await _getSrv(db.collection(cols[ci]));
+      snap.docs.forEach(function(doc){ tareas = tareas.concat(_migrarTareasDe(cols[ci], doc.id, doc.data() || {})); });
+    }
+  }catch(e){ console.error(e); toast('No pudimos leer los datos: ' + e.message); return; }
+  if(!tareas.length){ toast('✅ No queda ninguna foto por migrar: todo está en Cloudflare.'); return; }
+  var kb = tareas.reduce(function(s, t){ return s + _kbB64(t.valor); }, 0);
+  if(!confirm('Hay ' + tareas.length + ' foto(s) guardadas dentro de la base de datos (~' + (kb/1024).toFixed(1) + ' MB).\n\n' +
+              'Se van a subir a Cloudflare y se reemplazarán por su dirección corta. Si una falla, queda como estaba.\n\n' +
+              'No cierres esta pantalla hasta que termine. ¿Migrar ahora?')) return;
+
+  _migrarCancelar = false;
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;z-index:100001;background:rgba(15,15,20,.78);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Manrope,sans-serif;';
+  ov.innerHTML = '<div style="background:#fff;border-radius:18px;width:min(420px,100%);padding:18px;">' +
+    '<div style="font-weight:800;font-size:16px;color:#1a2340;margin-bottom:6px;">☁️ Migrando fotos a Cloudflare</div>' +
+    '<div id="migTxt" style="font-size:13px;color:#555;margin-bottom:10px;">Preparando…</div>' +
+    '<div style="height:10px;background:#eee;border-radius:99px;overflow:hidden;"><div id="migBar" style="height:100%;width:0%;background:#2F7A55;transition:width .3s;"></div></div>' +
+    '<div id="migLog" style="font-size:11.5px;color:#888;margin-top:10px;max-height:90px;overflow:auto;"></div>' +
+    '<button id="migBtn" type="button" style="margin-top:14px;width:100%;padding:11px;border-radius:10px;border:1.5px solid #ddd;background:#fff;font-weight:800;cursor:pointer;">Detener</button></div>';
+  document.body.appendChild(ov);
+  var $ = function(id){ return ov.querySelector('#' + id); };
+  $('migBtn').onclick = function(){ if($('migBtn').dataset.fin) ov.remove(); else { _migrarCancelar = true; $('migBtn').textContent = 'Deteniendo…'; } };
+
+  var ok = 0, fallo = 0, ahorro = 0, hecho = 0;
+  // Agrupar por documento: una sola escritura por doc
+  var porDoc = {};
+  tareas.forEach(function(t){ (porDoc[t.col + '/' + t.id] = porDoc[t.col + '/' + t.id] || []).push(t); });
+  var claves = Object.keys(porDoc);
+  for(var k = 0; k < claves.length && !_migrarCancelar; k++){
+    var lista = porDoc[claves[k]], col = lista[0].col, id = lista[0].id;
+    var cambios = {}, galeriaNueva = null, subidas = 0;
+    try{
+      var fresco = null;
+      for(var j = 0; j < lista.length && !_migrarCancelar; j++){
+        var t = lista[j];
+        $('migTxt').textContent = 'Foto ' + (hecho + 1) + ' de ' + tareas.length + ' · ' + col + '/' + id.slice(0, 18);
+        var nueva = await fotoAR2(t.valor, t.carpeta);
+        var subida = typeof nueva === 'string' && nueva.indexOf('https://') === 0;
+        if(subida && !(await _verificarImagenURL(nueva))) subida = false;   // no reemplazar si no se puede abrir
+        hecho++;
+        $('migBar').style.width = Math.round(hecho / tareas.length * 100) + '%';
+        if(!subida){ fallo++; $('migLog').innerHTML += '⚠️ No se pudo subir ' + t.campo + ' de ' + id.slice(0, 14) + '<br>'; continue; }
+        if(t.campo.indexOf('galeria:') === 0){
+          if(!galeriaNueva){ if(!fresco) fresco = (await db.collection(col).doc(id).get()).data() || {}; galeriaNueva = (fresco.galeria || []).slice(); }
+          var m = t.campo.match(/^galeria:(\d+)(\.img)?$/), gi = parseInt(m[1], 10);
+          if(m[2]){ if(galeriaNueva[gi] && _esB64(galeriaNueva[gi].img)) galeriaNueva[gi] = Object.assign({}, galeriaNueva[gi], { img: nueva }); else { fallo++; continue; } }
+          else { if(_esB64(galeriaNueva[gi])) galeriaNueva[gi] = nueva; else { fallo++; continue; } }
+        } else {
+          cambios[t.campo] = nueva;
+        }
+        subidas++; ahorro += _kbB64(t.valor);
+      }
+      if(galeriaNueva) cambios.galeria = galeriaNueva;
+      if(Object.keys(cambios).length){
+        await db.collection(col).doc(id).update(cambios);
+        ok += subidas;
+      }
+    }catch(e){
+      console.error('Migración falló en', claves[k], e);
+      fallo += lista.length; $('migLog').innerHTML += '⚠️ Error en ' + id.slice(0, 14) + ': ' + (e.message || e) + '<br>';
+    }
+  }
+  try{ await _cacheInvalidar(); }catch(e){}
+  $('migTxt').innerHTML = (_migrarCancelar ? '⏹️ Detenido. ' : '✅ Listo. ') + '<b>' + ok + '</b> foto(s) migradas (~' + (ahorro/1024).toFixed(1) + ' MB menos en la base)' + (fallo ? ', <b>' + fallo + '</b> con problemas (quedaron como estaban)' : '') + '.' + (ok ? '<br>Ahora tocá <b>Actualizar catálogo</b>.' : '');
+  $('migBtn').textContent = 'Cerrar'; $('migBtn').dataset.fin = '1';
+  if(ok) _catalogoRepublicarPronto();
+}
+
 async function adminReGeocodificarTodo(){
   if(!confirm('Esto va a volver a buscar la ubicación de TODOS los comercios con dirección cargada, con la búsqueda corregida (antes confundía "La Paz ciudad" con "La Paz departamento"). Puede tardar unos minutos (1 comercio por segundo, por el límite del servicio gratuito). ¿Continuar?')) return;
   toast('📍 Re-geocodificando… no cierres esta pantalla');
@@ -17269,8 +17961,9 @@ async function adminReGeocodificarTodo(){
   const conDireccion = state.comercios.filter(c => c.direccion && c.direccion !== '—');
   for(const c of conDireccion){
     c.lat = null; c.lng = null;
-    if(firebaseListo && db && c.id){
-      try{ await db.collection('comercios').doc(c.id).set({lat:null,lng:null},{merge:true}); }catch(e){}
+    const _dg = c._docId || c.uid;   // el documento real (antes se usaba c.id y se creaban registros vacíos)
+    if(firebaseListo && db && _dg){
+      try{ await db.collection('comercios').doc(_dg).update({lat:null,lng:null}); }catch(e){}
     }
   }
   await geocodearComerciosPendientes();
@@ -17295,8 +17988,9 @@ async function geocodearComerciosPendientes(){
       c.lat = coords.lat;
       c.lng = coords.lng;
       huboCambios = true;
-      if(typeof firebaseListo !== 'undefined' && firebaseListo && c.id){
-        db.collection('comercios').doc(c.id).set({ lat: coords.lat, lng: coords.lng }, { merge:true }).catch(()=>{});
+      const _dg = c._docId || c.uid;   // documento real; update (no set) para no crear registros vacíos
+      if(typeof firebaseListo !== 'undefined' && firebaseListo && _dg){
+        db.collection('comercios').doc(_dg).update({ lat: coords.lat, lng: coords.lng }).catch(()=>{});
       }
     }
     await new Promise(r => setTimeout(r, 1100)); // respetar límite de 1 req/seg de Nominatim
@@ -17564,8 +18258,8 @@ function adminDesktopTab(tab){
 async function admRenderDashboard(){
   const cont=document.getElementById('admDesktopContent');
   try{
-    const [cs,vs,vts,cls,msgs]=await Promise.all([db.collection('comercios').get({ source: 'server' }),db.collection('vendedores').get({ source: 'server' }),db.collection('ventas').get({ source: 'server' }),db.collection('clientes').get({ source: 'server' }),db.collection('mensajes_admin').get({ source: 'server' })]);
-    const comercios=cs.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera');
+    const [cs,vs,vts,cls,msgs]=await Promise.all([_getSrv(db.collection('comercios')),_getSrv(db.collection('vendedores')),_getSrv(db.collection('ventas')),_getSrv(db.collection('clientes')),_getSrv(db.collection('mensajes_admin'))]);
+    const comercios=cs.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera').map(_admMarcarVacio);
     const ventas=vts.docs.map(d=>({...d.data(),_docId:d.id}));
     const ahora=new Date(),inicioMes=new Date(ahora.getFullYear(),ahora.getMonth(),1);
     const totalMes=ventas.filter(v=>v.fecha&&v.fecha.toDate&&v.fecha.toDate()>=inicioMes).reduce((a,v)=>a+(v.monto||0),0);
@@ -17573,7 +18267,8 @@ async function admRenderDashboard(){
     const porVencer=comercios.filter(c=>{const d=planDiasRestantes(c);return d!==null&&d<=7&&d>=0;}).length;
     const sinLeer=msgs.docs.filter(d=>!d.data().leido).length;
     if(porVencer>0) document.getElementById('admDesktopBadge').innerHTML=`<span style="font-size:11px;font-weight:800;background:#FFF0F0;color:#B3121A;padding:4px 10px;border-radius:100px;">${porVencer} plan${porVencer>1?'es':''} por vencer</span>`;
-    const recientes=[...comercios].sort((a,b)=>(b.creadoEn&&b.creadoEn.toDate?b.creadoEn.toDate():new Date(0))-(a.creadoEn&&a.creadoEn.toDate?a.creadoEn.toDate():new Date(0))).slice(0,10);
+    const _fAlta=c=>{ const v=c.creadoEn||c.fechaAlta||c.fechaAprobacion; if(!v) return new Date(0); if(v.toDate) return v.toDate(); const d=new Date(v); return isNaN(d)?new Date(0):d; };
+    const recientes=[...comercios].sort((a,b)=>_fAlta(b)-_fAlta(a)).slice(0,10);
     _adminComercios=comercios;
     cont.innerHTML=`
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
@@ -17589,6 +18284,7 @@ async function admRenderDashboard(){
         <div class="adm-stat2"><div class="val" style="color:${sinLeer>0?'#B3121A':'inherit'}">${sinLeer}</div><div class="lbl">Mensajes sin leer</div></div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="adm-btn" onclick="adminMigrarFotosR2()" style="margin-right:8px;">☁️ Migrar fotos a Cloudflare</button>
         <button class="adm-btn" onclick="adminReGeocodificarTodo()">📍 Re-geocodificar mapa</button>
       </div>
       <div class="adm-section">
@@ -17900,8 +18596,8 @@ async function admRenderProductosDesktop(){
 async function admRenderComerciosDesktop(){
   const cont=document.getElementById('admDesktopContent');
   try{
-    const snap=await db.collection('comercios').get({ source: 'server' });
-    _adminComercios=snap.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera');
+    const snap=await _getSrv(db.collection('comercios'));
+    _adminComercios=snap.docs.map(d=>({...d.data(),_docId:d.id})).filter(c=>c.estado!=='papelera').map(_admMarcarVacio);
     cont.innerHTML=`
       <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
         <input class="adm-search" style="max-width:260px;margin:0;" placeholder="Buscar comercio…" oninput="admFiltrarComerciosDesktop(this.value)" id="admSearchComercio">
@@ -17959,6 +18655,36 @@ function admRowsComercios(lista){
   }).join('');
 }
 
+// Registros sin nombre (restos de un error viejo del mapa): se rotulan para poder borrarlos
+function _admMarcarVacio(c){
+  if(c && !c.nombre){ c._vacio = true; c.nombre = '⚠️ Registro vacío (borrar)'; }
+  return c;
+}
+// "¿Se ve en la app?": revisa los motivos más comunes por los que un comercio aprobado no aparece
+function admDiagVisibilidadHTML(c){
+  const ok = [], mal = [];
+  const CIUDADES = ['La Paz','Bovril','Alcaraz','Hernandarias','Colón','Concordia','Paraná','Gualeguaychú'];
+  if(c.estado === 'papelera') mal.push('Está en la papelera.');
+  if(c.estado === 'suspendido') mal.push('Está suspendido.');
+  if(c.aprobado === false) mal.push('Todavía no está aprobado.'); else ok.push('Aprobado.');
+  if(c.viaEmail && c.emailVerificado === false && c.aprobado !== true) mal.push('Registrado por email y sin verificar el correo.');
+  if(!c.ciudad) mal.push('No tiene ciudad cargada: no aparece en ninguna ciudad. Editá los datos y elegila.');
+  else if(!CIUDADES.some(function(x){ return mismaCiudad(x, c.ciudad); })) mal.push('La ciudad "' + c.ciudad + '" no es una de las ciudades de la app: solo se vería si alguien elige esa ciudad.');
+  else ok.push('Ciudad: ' + c.ciudad + '.');
+  if(!c.rubro && !esProfesional(c)) mal.push('No tiene rubro: no sale en los filtros por rubro.');
+  if(esProfesional(c) && !(c.oficios && c.oficios.length)) mal.push('Profesional sin categorías de Red Local elegidas.');
+  if(!(c.lat && c.lng)) mal.push('Sin ubicación en el mapa (se ve en la lista, pero no en el mapa).');
+  try{
+    const em = String(c.email||'').trim().toLowerCase();
+    const otros = (_adminComercios||[]).filter(function(x){ return x !== c && (x._docId||x.id) !== (c._docId||c.id) && x.estado !== 'papelera' && ((em && String(x.email||'').trim().toLowerCase() === em) || (c.uid && x.uid === c.uid)); });
+    if(otros.length) mal.push('Hay ' + otros.length + ' registro(s) más con el mismo email/cuenta (' + otros.map(function(x){ return (x.nombre||'sin nombre'); }).join(', ') + '). Conviene dejar uno solo.');
+  }catch(e){}
+  const lista = mal.map(function(t){ return '<div style="color:#93520A;">⚠️ ' + t + '</div>'; }).concat(ok.map(function(t){ return '<div style="color:#2F7A55;">✅ ' + t + '</div>'; })).join('');
+  return '<details style="background:#F7F8FB;border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:12px;line-height:1.6;"' + (mal.length ? ' open' : '') + '>' +
+    '<summary style="font-weight:800;font-size:12.5px;color:var(--navy);cursor:pointer;">🔍 ¿Se ve en la app?' + (mal.length ? ' — revisar ' + mal.length : '') + '</summary>' +
+    '<div style="margin-top:6px;">' + lista +
+    '<div style="color:#666;margin-top:6px;">Los visitantes reciben una copia guardada del catálogo: después de aprobar o editar puede tardar unos minutos en verse. Si pasó más tiempo, tocá "Actualizar catálogo" en el panel y pedile al comercio que refresque la app.</div></div></details>';
+}
 async function admAbrirComercioDetalle(id){
   const c=_adminComercios.find(x=>(x._docId||x.id)===id);
   if(!c) return;
@@ -18673,8 +19399,8 @@ async function adminCargarComercios(){
   const el = document.getElementById('adminComerciosList');
   if(el) el.innerHTML = '<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
   try{
-    const snap = await db.collection('comercios').get({ source: 'server' });
-    _adminComercios = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(c=>c.estado!=='papelera');
+    const snap = await _getSrv(db.collection('comercios'));
+    _adminComercios = snap.docs.map(d=>({...d.data(), _docId: d.id})).filter(c=>c.estado!=='papelera').map(_admMarcarVacio);
     if(el) adminRenderComercios(_adminComercios);
     adminActualizarBadgePendientes();
   }catch(e){ if(el) el.innerHTML = '<p style="color:red;font-size:13px;">Error al cargar.</p>'; }
@@ -18839,7 +19565,6 @@ async function adminVerComercio(docId){
         vals.map(v=>`
           <div style="padding:8px 0;border-bottom:.5px solid var(--line);">
             <div style="font-size:12px;">⭐ ${'★'.repeat(v.estrellas||0)}${'☆'.repeat(5-(v.estrellas||0))} — <span style="font-weight:700;">${v.deNombre||'Anónimo'}</span></div>
-            ${v.comentario ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">"${v.comentario}"</div>` : ''}
           </div>`).join('');
     }
   }catch(e){ console.error(e); }
@@ -18876,6 +19601,8 @@ async function adminVerComercio(docId){
         </button>
       </div>
     </div>`}
+
+    ${admDiagVisibilidadHTML(c)}
 
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="admEditarComercio('${docId}')">✏️ Editar datos</button>
@@ -19361,7 +20088,7 @@ async function adminGuardarEdicionComercio(){
   try{
     await db.collection('comercios').doc(docId).set(cambios, {merge:true});
     // Leer desde servidor para confirmar que el cambio persistió
-    const docFresh = await db.collection('comercios').doc(docId).get({ source: 'server' });
+    const docFresh = await _getSrv(db.collection('comercios').doc(docId));
     // Mantener el mismo id que usa la carga inicial (data.id || doc.id): los productos se vinculan por ese id
     const dataFresh = docFresh.exists ? { ...docFresh.data(), id: (docFresh.data().id || docId), _docId: docId } : null;
     if(dataFresh){
@@ -19377,6 +20104,7 @@ async function adminGuardarEdicionComercio(){
       if(idxA>=0) Object.assign(_adminComercios[idxA], cambios);
     }
     toast('✅ Comercio actualizado');
+    _catalogoRepublicarPronto();
     if(cambios.rubro && cambios.rubro !== _rubroViejoAd){
       const _cAd = state.comercios.find(c=>c.id===docId || (c._docId && c._docId===docId)) || {id:docId, _docId:docId};
       await propagarCambioRubroComercio(_cAd, _rubroViejoAd, cambios.rubro);
@@ -19424,6 +20152,7 @@ function adminReemplazarFotoComercio(docId, campo, input){
 async function adminRenderProductosComercio(comercioId){
   const el = document.getElementById('adminProductosComercioLista');
   if(!el) return;
+  if(!comercioId){ el.innerHTML='<p style="color:var(--muted);font-size:12px;">Sin productos cargados aún.</p>'; return; }
   try{
     const snap = await db.collection('productos').where('comercioId','==',comercioId).get();
     const docs = snap.docs.filter(d=>d.data().estado!=='papelera');
@@ -19662,6 +20391,7 @@ async function adminAprobarComercio(docId){
       renderFeed(); renderAdheridosGrid(); renderLocales();
     }
     toast('Comercio aprobado ✅');
+    _catalogoRepublicarPronto();
     adminActualizarBadgePendientes();
     if(window.innerWidth >= 900){
       // Desktop: refrescar la tabla y el detalle si está abierto
@@ -19686,6 +20416,7 @@ async function adminSuspenderComercio(docId){
     const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
     if(c) c.aprobado = false;
     toast('Comercio suspendido.');
+    _catalogoRepublicarPronto();
     adminActualizarBadgePendientes();
     adminVerComercio(docId);
   }catch(e){ toast('Error al suspender.'); console.error(e); }
@@ -19781,7 +20512,7 @@ async function admGestionarEmailConector(){
   try{
     for(const col of ['vendedores','comercios','clientes']){
       for(const em of variantes){
-        const snap = await db.collection(col).where('email','==',em).get({ source:'server' }).catch(()=>db.collection(col).where('email','==',em).get());
+        const snap = await _getSrv(db.collection(col).where('email','==',em)).catch(()=>db.collection(col).where('email','==',em).get());
         snap.forEach(d=>{ if(!hallados.find(h=>h.col===col && h.id===d.id)) hallados.push({col, id:d.id, data:d.data()}); });
       }
     }
@@ -19818,7 +20549,7 @@ async function admGestionarEmailConector(){
 }
 
 async function admLeerVendedores(){
-  try{ return await db.collection('vendedores').get({ source: 'server' }); }
+  try{ return await _getSrv(db.collection('vendedores')); }
   catch(e){ return await db.collection('vendedores').get(); }
 }
 async function adminCargarVendedores(){
@@ -19964,7 +20695,6 @@ async function adminVerVendedor(docId){
       valoracionesHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">⭐ ${prom} promedio · ${vals.length} valoración(es)</div>` +
         vals.map(x=>`<div style="padding:8px 0;border-bottom:.5px solid var(--line);">
           <div style="font-size:12px;">⭐ ${'★'.repeat(x.estrellas||0)}${'☆'.repeat(5-(x.estrellas||0))} — <span style="font-weight:700;">${x.deNombre||'Anónimo'}</span></div>
-          ${x.comentario?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">"${x.comentario}"</div>`:''}
         </div>`).join('');
     }
   }catch(e){ console.error(e); }
@@ -20178,7 +20908,6 @@ async function adminVerCliente(docId){
       valoracionesHtml = `<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;">⭐ ${prom} promedio · ${vals.length} valoración(es) recibidas</div>` +
         vals.map(x=>`<div style="padding:8px 0;border-bottom:.5px solid var(--line);">
           <div style="font-size:12px;">⭐ ${'★'.repeat(x.estrellas||0)}${'☆'.repeat(5-(x.estrellas||0))} — <span style="font-weight:700;">${x.deNombre||'Anónimo'}</span></div>
-          ${x.comentario?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">"${x.comentario}"</div>`:''}
         </div>`).join('');
     }
   }catch(e){ console.error(e); }
@@ -21059,6 +21788,7 @@ function reservarProducto(){
     }
     if(p.stock !== null && p.stock !== undefined){ p.stock = Math.max(0, p.stock - unidades); }
     guardarProductoEnFirestore(p, state.currentUser?.uid);
+    actualizarBadgeCarrito(true);
     toast(`🛒 ${unidades > 1 ? unidades + 'x ' : ''}${p.nombre} agregado al carrito`);
     document.getElementById('ofBtnReservar')?.classList.add('hidden');
     document.getElementById('ofYaReservado')?.classList.remove('hidden');
@@ -21085,6 +21815,7 @@ function reservarProducto(){
 
   document.getElementById('ofBtnReservar')?.classList.add('hidden');
   document.getElementById('ofYaReservado')?.classList.remove('hidden');
+  actualizarBadgeCarrito(true);
   toast(`✅ ${unidades > 1 ? unidades + 'x ' : ''}${p.nombre} en tu carrito`);
 }
 
@@ -21269,6 +22000,7 @@ function fpEnviarWhatsApp(tipo){
 
   // Vaciar items del grupo del carrito
   delete carrito[_pedidoGrupoId];
+  actualizarBadgeCarrito();
 
   // Abrir WhatsApp
   const url = `https://wa.me/54${whatsapp}?text=${encodeURIComponent(msg)}`;
@@ -21703,7 +22435,7 @@ async function abrirPerfil(){
     showScreen('home');
     return;
   }
-  if(state.role === 'cliente') await cargarMisPedidos();
+  if(state.role === 'cliente'){ await cargarMisPedidos(); await valCargarMias(); }
 
   const fila = (label, valor) => valor ? `
     <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:0.5px solid var(--line);">
@@ -21812,6 +22544,7 @@ async function abrirPerfil(){
       </div>
     </div>
     ${accionesHtml}
+    ${valPerfilCardHTML()}
     <div class="card" style="padding:4px 16px;">${campos}</div>
 
     <div style="margin-top:22px;margin-bottom:10px;">
@@ -22640,7 +23373,7 @@ function cAbrirDetalleOperacion(ventaId){
       +'</div>';
   } else if(v.estado === 'comision_recibida'){
     var valHtml = '';
-    if(v.valoracion) valHtml = '<div style="margin-top:8px;font-size:13px;">★ '+v.valoracion.estrellas+'/5'+(v.valoracion.comentario?' — "'+v.valoracion.comentario+'"':'')+' </div>';
+    if(v.valoracion) valHtml = '<div style="margin-top:8px;font-size:13px;">★ '+v.valoracion.estrellas+'/5'+''+' </div>';
     acHtml = '<div class="card" style="background:#EAF0E6;">'
       +'<div style="font-size:14px;font-weight:700;color:#2F7A55;">✅ Operación cerrada</div>'
       +'<div style="font-size:12px;color:#2F7A55;margin-top:4px;">El conector confirmó que recibió la comisión.</div>'
