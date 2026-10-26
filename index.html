@@ -1256,11 +1256,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div id="bannerTornadoOfertas"></div>
 
 
-      <!-- Comer y comprar alimentos: comercios de Gastronomía y Almacén y Alimentos (separados de los productos) -->
+      <!-- Gastronomía y Almacén: solo los productos que suben esos comercios (separados de "Te va a encantar") -->
       <div id="comidaHomeSection" style="display:none;padding:14px 0 0;">
         <div class="section-title-row" style="padding:0 16px;">
-          <div class="section-title">🍽️ Comer y comprar alimentos</div>
-          <span class="ver-todo" id="comidaHomeCerca" onclick="pedirUbicacionComida()">📍 Más cerca</span>
+          <div class="section-title">🍽️ Gastronomía y Almacén</div>
+          <span style="font-size:12px;color:var(--muted);white-space:nowrap;"><span class="ver-todo" onclick="setFeedCategoria('gastronomia')">Gastronomía</span> · <span class="ver-todo" onclick="setFeedCategoria('almacen')">Almacén</span></span>
         </div>
         <div id="comidaHomeRow" class="vit-row"></div>
       </div>
@@ -11473,8 +11473,7 @@ function renderVitrinaSecciones(){
       <div class="vit-rubro">${vitEsc(c.rubro||'')}</div>
     </div>`;
   };
-  // En el home, los de comida/almacén no se repiten acá (salen en su propia fila)
-  const listaHome = lista.filter(function(c){ return !esComercioComidaAlmacen(c); });
+  const listaHome = lista; // todos los comercios en modo vidriera, también los de comida/almacén (sin preferencias)
   // Si todavía no hay vitrinas, la sección igual se ve para comercios y admin (con un aviso)
   const verVacia = !lista.length && (state.role==='comercio' || state.role==='admin');
   const vacio = `<div style="flex:1;border:1.5px dashed var(--line);border-radius:16px;padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5;">🏬 Todavía no hay comercios en modo vidriera. Desde el panel del comercio, entrá a <b>Editar info</b> y elegí el modo "Solo vidriera" o "Vidriera + productos".</div>`;
@@ -11487,54 +11486,43 @@ function renderVitrinaSecciones(){
   try{ renderComidaHome(); }catch(e){ console.warn('renderComidaHome:', e); }
 }
 
-// Fila del home "🍽️ Comer y comprar alimentos": tarjetas de los comercios de Gastronomía y
-// Almacén y Alimentos (tengan o no productos cargados). Si el cliente ya dio permiso de ubicación
-// (o toca "📍 Más cerca"), salen del más cercano al más lejano y con la distancia en cada tarjeta.
+// Fila del home "Gastronomía y Almacén": solo los PRODUCTOS que suben esos comercios, con la misma
+// tarjeta de producto del resto de la app, en una fila que se desliza hacia el costado. Es el lugar de
+// la comida (que no entra en "Te va a encantar"), sin dar preferencia a ningún comercio: no hay tarjetas
+// de comercio. Si el cliente ya dio permiso de ubicación, salen del más cercano al más lejano con la distancia.
+const COMIDA_HOME_MAX = 12;
 function renderComidaHome(){
   const sec = document.getElementById('comidaHomeSection'), row = document.getElementById('comidaHomeRow');
   if(!sec || !row) return;
-  let lista = (state.comercios||[]).filter(function(c){
-    if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return false;
-    if(c.aprobado === false || c.estado === 'papelera') return false;
-    if(c.restricciones && c.restricciones.ocultarFeed) return false;
-    if(c.modo === 'servicios') return false;
-    return esComercioComidaAlmacen(c);
+  let prods = [];
+  (state.comercios||[]).forEach(function(c){
+    if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return;
+    if(c.restricciones && c.restricciones.ocultarFeed) return;
+    const cId = c.id || c._docId;
+    (state.productos||[]).filter(function(p){ return p.comercioId === cId && (p.origen === 'comercio' || !p.origen); })
+      .forEach(function(p){
+        const cat = categoriaDeRubro(c.rubro || '');
+        if(cat !== 'gastronomia' && cat !== 'almacen' && !esComercioGastronomico(c)) return;
+        prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng, _verDist:true});
+      });
   });
-  if(!lista.length){ sec.style.display = 'none'; row.innerHTML = ''; return; }
+  if(!prods.length){ sec.style.display = 'none'; row.innerHTML = ''; return; }
   sec.style.display = '';
   if(!_geoCliente) iniciarUbicacionBusqueda(false); // usa la ubicación solo si ya había dado permiso (no pregunta nada)
-  lista = shuffleConSemillaCarga(lista);
+  prods = shuffleConSemillaCarga(prods);
   if(_geoCliente){
-    lista.sort(function(a, b){
-      const da = distanciaAComercio(a), db = distanciaAComercio(b);
+    prods.sort(function(a, b){
+      const da = distanciaAComercio({ lat:a._comercioLat, lng:a._comercioLng });
+      const db = distanciaAComercio({ lat:b._comercioLat, lng:b._comercioLng });
       if(da == null && db == null) return 0;
       if(da == null) return 1;
       if(db == null) return -1;
       return da - db;
     });
   }
-  const btn = document.getElementById('comidaHomeCerca');
-  if(btn) btn.style.display = _geoCliente ? 'none' : '';
-  row.innerHTML = lista.map(function(c){
-    const portada = c.img2 || c.img;
-    const tipoOk = c.tipo && ['gastronomia','productos','servicios','mixto'].indexOf(c.tipo) < 0;
-    const dm = distanciaAComercio(c);
-    return `
-    <div class="vit-card" onclick="verProductosDeLocal('${c.id}')">
-      <div class="vit-cover">${portada ? `<img src="${portada}" alt="">` : '🍽️'}</div>
-      <div class="vit-logo">${c.img ? `<img src="${c.img}" alt="">` : vitEsc((c.nombre||'?').charAt(0).toUpperCase())}</div>
-      <div class="vit-nombre">${vitEsc(c.nombre)}</div>
-      <div class="vit-rubro">${vitEsc(tipoOk ? c.tipo : (c.rubro||''))}</div>
-      ${dm != null ? `<div class="vit-rubro" style="margin-top:5px;"><span class="dist-badge">📍 ${textoDistancia(dm)}</span></div>` : ''}
-    </div>`;
+  row.innerHTML = prods.slice(0, COMIDA_HOME_MAX).map(function(p){
+    return '<div style="flex:0 0 140px;width:140px;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
   }).join('');
-}
-// Botón "📍 Más cerca": pide la ubicación (el cliente toca a propósito) y reordena la fila
-function pedirUbicacionComida(){
-  if(!navigator.geolocation){ if(typeof toast === 'function') toast('Tu dispositivo no permite usar la ubicación.'); return; }
-  if(_geoCliente){ renderComidaHome(); return; }
-  _geoPedida = true;
-  _leerUbicacionCliente(true);
 }
 
 function vitUrl(u){ u = String(u||'').trim(); if(!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://'+u.replace(/^\/+/, ''); }
@@ -13518,8 +13506,8 @@ function textoDistancia(m){
   return 'a ' + (m / 1000).toFixed(m < 10000 ? 1 : 0).replace('.', ',') + ' km';
 }
 // Etiqueta "📍 a 350 m" — solo mientras hay una búsqueda activa y se conoce la distancia
-function badgeDistanciaHTML(c){
-  if(!buscadorQuery) return '';
+function badgeDistanciaHTML(c, forzar){
+  if(!buscadorQuery && !forzar) return '';
   var m = distanciaAComercio(c);
   return m == null ? '' : '<span class="dist-badge">📍 ' + textoDistancia(m) + '</span>';
 }
@@ -15599,7 +15587,7 @@ function tarjetaEncantarHTML(p){
     +'<div class="prod-photo">'+foto+ofertaBadge+logoBadge+'</div>'
     +'<div class="prod-body" style="flex-direction:column;align-items:stretch;gap:2px;">'
     +'<div class="prod-desc">'+(p.nombre||'')+'</div>'
-    +badgeDistanciaHTML({ lat:p._comercioLat, lng:p._comercioLng })
+    +badgeDistanciaHTML({ lat:p._comercioLat, lng:p._comercioLng }, p._verDist)
     +precioAntLineHTML
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;">'
     +'<div class="prod-price">'+precioHTML+'</div>'
