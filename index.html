@@ -905,6 +905,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
    público (Te va a encantar, Rubros, Oferta infinita), no en catálogos
    internos de comercio/admin que reusan la misma clase .prod-photo */
 .feed-grid-encantar .prod-photo, .feed-cat-grid .prod-photo, #feedGridInfinito .prod-photo{aspect-ratio:1/1;}
+#comidaHomeRow .prod-photo{aspect-ratio:1/1;}
+#comidaHomeRow .prod-body{padding:5px 8px 6px;}
 .prod-logo-badge{
   position:absolute; bottom:6px; left:6px; width:26px; height:26px; border-radius:50%;
   background:white; display:flex; align-items:center; justify-content:center;
@@ -1256,15 +1258,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div id="bannerTornadoOfertas"></div>
 
 
-      <!-- Gastronomía y Almacén: solo los productos que suben esos comercios (separados de "Te va a encantar") -->
-      <div id="comidaHomeSection" style="display:none;padding:14px 0 0;">
-        <div class="section-title-row" style="padding:0 16px;">
-          <div class="section-title">🍽️ Gastronomía y Almacén</div>
-          <span style="font-size:12px;color:var(--muted);white-space:nowrap;"><span class="ver-todo" onclick="setFeedCategoria('gastronomia')">Gastronomía</span> · <span class="ver-todo" onclick="setFeedCategoria('almacen')">Almacén</span></span>
-        </div>
-        <div id="comidaHomeRow" class="vit-row"></div>
-      </div>
-
       <!-- Vitrina: comercios que están en PuenT con su ficha (con o sin productos) -->
       <div id="vitrinaHomeSection" style="display:none;padding:14px 0 0;">
         <div class="section-title-row" style="padding:0 16px;">
@@ -1273,6 +1266,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div id="vitrinaHomeRow" class="vit-row"></div>
       </div>
+      <!-- Gastronomía y Almacén: solo los productos que suben esos comercios (separados de "Te va a encantar") -->
+      <div id="comidaHomeSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">🍽️ Gastronomía y Almacén</div>
+          <span class="ver-todo" id="comidaHomeVerTodos" onclick="toggleComidaHomeTodos()">Ver todos →</span>
+        </div>
+        <div id="comidaHomeRow" class="vit-row"></div>
+      </div>
+
       <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
            dinámicamente desde RUBROS_HOME, ver renderCatChipsYSecciones() -->
       <div style="padding:14px 16px 0;">
@@ -11490,7 +11492,14 @@ function renderVitrinaSecciones(){
 // tarjeta de producto del resto de la app, en una fila que se desliza hacia el costado. Es el lugar de
 // la comida (que no entra en "Te va a encantar"), sin dar preferencia a ningún comercio: no hay tarjetas
 // de comercio. Si el cliente ya dio permiso de ubicación, salen del más cercano al más lejano con la distancia.
-const COMIDA_HOME_MAX = 12;
+const COMIDA_HOME_MAX = 12;      // productos que se ven en la fila que se desliza
+const COMIDA_HOME_TOPE = 60;     // tope al tocar "Ver todos" (grilla)
+var _comidaHomeVerTodos = false;
+function toggleComidaHomeTodos(){
+  _comidaHomeVerTodos = !_comidaHomeVerTodos;
+  renderComidaHome();
+  if(!_comidaHomeVerTodos){ try{ document.getElementById('comidaHomeSection').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} }
+}
 function renderComidaHome(){
   const sec = document.getElementById('comidaHomeSection'), row = document.getElementById('comidaHomeRow');
   if(!sec || !row) return;
@@ -11520,9 +11529,22 @@ function renderComidaHome(){
       return da - db;
     });
   }
-  row.innerHTML = prods.slice(0, COMIDA_HOME_MAX).map(function(p){
-    return '<div style="flex:0 0 140px;width:140px;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
-  }).join('');
+  const verLink = document.getElementById('comidaHomeVerTodos');
+  const hayMas = prods.length > COMIDA_HOME_MAX;
+  const todos = _comidaHomeVerTodos && hayMas;
+  if(verLink){ verLink.style.display = hayMas ? '' : 'none'; verLink.textContent = todos ? 'Ver menos' : 'Ver todos →'; }
+  if(todos){
+    // Ver todos: grilla de 2 columnas, igual que "Te va a encantar"
+    row.className = 'feed-grid-encantar';
+    row.style.padding = '8px 16px 0';
+    row.innerHTML = prods.slice(0, COMIDA_HOME_TOPE).map(tarjetaEncantarHTML).join('');
+  } else {
+    row.className = 'vit-row';
+    row.style.padding = '';
+    row.innerHTML = prods.slice(0, COMIDA_HOME_MAX).map(function(p){
+      return '<div style="flex:0 0 140px;width:140px;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
+    }).join('');
+  }
 }
 
 function vitUrl(u){ u = String(u||'').trim(); if(!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://'+u.replace(/^\/+/, ''); }
