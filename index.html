@@ -11490,15 +11490,30 @@ function renderVitrinaSecciones(){
 
 // Fila del home "Gastronomía y Almacén": solo los PRODUCTOS que suben esos comercios, con la misma
 // tarjeta de producto del resto de la app, en una fila que se desliza hacia el costado. Es el lugar de
-// la comida (que no entra en "Te va a encantar"), sin dar preferencia a ningún comercio: no hay tarjetas
-// de comercio. Si el cliente ya dio permiso de ubicación, salen del más cercano al más lejano con la distancia.
+// la comida (que no entra en "Te va a encantar") y busca darle visibilidad a TODOS los comercios de la
+// ciudad: se toma un producto de cada comercio por vuelta (así uno con muchos productos no ocupa todos
+// los lugares) y el orden se mezcla en cada recarga. No usa la ubicación: eso queda para el buscador.
 const COMIDA_HOME_MAX = 12;      // productos que se ven en la fila que se desliza
-const COMIDA_HOME_TOPE = 60;     // tope al tocar "Ver todos" (grilla)
+const COMIDA_HOME_TANDA = 24;    // al tocar "Ver todos": productos por tanda en la grilla
 var _comidaHomeVerTodos = false;
+var _comidaHomeVisibles = COMIDA_HOME_TANDA;
 function toggleComidaHomeTodos(){
   _comidaHomeVerTodos = !_comidaHomeVerTodos;
+  _comidaHomeVisibles = COMIDA_HOME_TANDA;
   renderComidaHome();
   if(!_comidaHomeVerTodos){ try{ document.getElementById('comidaHomeSection').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} }
+}
+function verMasComidaHome(){ _comidaHomeVisibles += COMIDA_HOME_TANDA; renderComidaHome(); }
+// Un producto de cada comercio por vuelta, con el comercio y el producto mezclados por carga de página
+function intercalarPorComercio(prods){
+  const porComercio = {};
+  shuffleConSemillaCarga(prods).forEach(function(p){ (porComercio[p._comercioId] = porComercio[p._comercioId] || []).push(p); });
+  const grupos = shuffleConSemillaCarga(Object.keys(porComercio)).map(function(k){ return porComercio[k]; });
+  const res = [];
+  for(let ronda = 0; res.length < prods.length; ronda++){
+    grupos.forEach(function(g){ if(g[ronda]) res.push(g[ronda]); });
+  }
+  return res;
 }
 function renderComidaHome(){
   const sec = document.getElementById('comidaHomeSection'), row = document.getElementById('comidaHomeRow');
@@ -11512,32 +11527,24 @@ function renderComidaHome(){
       .forEach(function(p){
         const cat = categoriaDeRubro(c.rubro || '');
         if(cat !== 'gastronomia' && cat !== 'almacen' && !esComercioGastronomico(c)) return;
-        prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng, _verDist:true});
+        prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng});
       });
   });
   if(!prods.length){ sec.style.display = 'none'; row.innerHTML = ''; return; }
   sec.style.display = '';
-  if(!_geoCliente) iniciarUbicacionBusqueda(false); // usa la ubicación solo si ya había dado permiso (no pregunta nada)
-  prods = shuffleConSemillaCarga(prods);
-  if(_geoCliente){
-    prods.sort(function(a, b){
-      const da = distanciaAComercio({ lat:a._comercioLat, lng:a._comercioLng });
-      const db = distanciaAComercio({ lat:b._comercioLat, lng:b._comercioLng });
-      if(da == null && db == null) return 0;
-      if(da == null) return 1;
-      if(db == null) return -1;
-      return da - db;
-    });
-  }
+  prods = intercalarPorComercio(prods);
   const verLink = document.getElementById('comidaHomeVerTodos');
   const hayMas = prods.length > COMIDA_HOME_MAX;
   const todos = _comidaHomeVerTodos && hayMas;
   if(verLink){ verLink.style.display = hayMas ? '' : 'none'; verLink.textContent = todos ? 'Ver menos' : 'Ver todos →'; }
   if(todos){
-    // Ver todos: grilla de 2 columnas, igual que "Te va a encantar"
+    // Ver todos: grilla de 2 columnas, igual que "Te va a encantar", de a tandas
     row.className = 'feed-grid-encantar';
     row.style.padding = '8px 16px 0';
-    row.innerHTML = prods.slice(0, COMIDA_HOME_TOPE).map(tarjetaEncantarHTML).join('');
+    row.innerHTML = prods.slice(0, _comidaHomeVisibles).map(tarjetaEncantarHTML).join('')
+      + (prods.length > _comidaHomeVisibles
+        ? '<div style="grid-column:1/-1;text-align:center;padding:6px 0 2px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="verMasComidaHome()">Ver más productos (' + (prods.length - _comidaHomeVisibles) + ')</button></div>'
+        : '');
   } else {
     row.className = 'vit-row';
     row.style.padding = '';
@@ -13562,7 +13569,6 @@ function _leerUbicacionCliente(avisarError){
     _geoPidiendo = false;
     _geoCliente = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     if(buscadorQuery) _rerenderBusqueda(); // la búsqueda en pantalla se reordena y muestra las distancias
-    try{ renderComidaHome(); }catch(e){}   // la fila de comida del home también
   }, function(){
     _geoPidiendo = false;
     if(avisarError === true && typeof toast === 'function') toast('No pudimos ubicarte. Revisá que el permiso de ubicación esté activado.');
