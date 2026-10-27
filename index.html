@@ -1810,10 +1810,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
 
     <div class="card" style="text-align:left;">
-      <h1 class="page-title" id="ofNombre" style="margin-bottom:4px;">Producto</h1>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;"><h1 class="page-title" id="ofNombre" style="margin:0;flex:1;min-width:0;">Producto</h1><button type="button" aria-label="Compartir" onclick="compartirProductoCliente(ofertaAbierta)" style="background:none;border:none;padding:4px;cursor:pointer;color:#25D366;flex-shrink:0;line-height:0;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button></div>
       <div class="prod-price" style="font-size:22px; margin-bottom:8px;" id="ofPrecio">$0</div>
       <div id="ofStockInfo" style="margin-bottom:8px;"></div>
-      <button class="share-btn" style="margin:0 0 12px;width:100%;background:#25D366;color:#fff;border-color:#25D366;" onclick="compartirProductoCliente(ofertaAbierta)">📤 Compartir este producto</button>
       <div id="ofRestricciones" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
 
       <!-- Descripción libre del producto -->
@@ -10714,6 +10713,28 @@ async function compartirCatalogoComercio(){
 
 // ---- Compartir un producto (cliente o comercio): imagen + texto + link directo (?prod=ID) ----
 function linkProducto(p){ return PUENT_URL + '/?prod=' + encodeURIComponent(p.id); }
+// Arma una imagen lista para estados: foto del producto + franja inferior con nombre, precio y link.
+async function _imgProductoParaCompartir(blob, p, c, precio, link){
+  const bmp = await createImageBitmap(blob);
+  const W = 1080, H = 1080, F = 230;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H + F;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0,0,W,H);
+  const k = Math.min(W/bmp.width, H/bmp.height);
+  const w = bmp.width*k, h = bmp.height*k;
+  g.drawImage(bmp, (W-w)/2, (H-h)/2, w, h);
+  g.fillStyle = '#1b2a49'; g.fillRect(0,H,W,F);
+  g.fillStyle = '#fff'; g.textBaseline = 'alphabetic';
+  let nom = String(p.nombre||''); g.font = '700 44px system-ui,Arial,sans-serif';
+  while(g.measureText(nom).width > W-80 && nom.length > 4) nom = nom.slice(0,-2);
+  if(nom !== p.nombre) nom = nom.trim() + '…';
+  g.fillText(nom, 40, H+62);
+  g.font = '800 54px system-ui,Arial,sans-serif'; g.fillStyle = '#ffd166';
+  g.fillText(precio + (c ? '  ·  ' + String(c.nombre).slice(0,24) : ''), 40, H+130);
+  g.font = '600 34px system-ui,Arial,sans-serif'; g.fillStyle = '#fff';
+  g.fillText('👉 ' + link.replace(/^https?:\/\//,''), 40, H+195);
+  return await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.88));
+}
 var _compartiendoProd = false;
 async function compartirProductoCliente(prodId){
   if(_compartiendoProd) return;
@@ -10731,7 +10752,8 @@ async function compartirProductoCliente(prodId){
     if(p.img && navigator.canShare && navigator.share){
       try{
         const res = await fetch(p.img);
-        const blob = await res.blob();
+        let blob = await res.blob();
+        try{ const comp = await _imgProductoParaCompartir(blob, p, c, precio, link); if(comp) blob = comp; }catch(e){}
         if(blob && blob.size){
           const ext = (blob.type||'').includes('png') ? 'png' : (blob.type||'').includes('webp') ? 'webp' : 'jpg';
           const nombre = (p.nombre||'producto').replace(/[^\w\-]+/g,'_').slice(0,40) + '.' + ext;
