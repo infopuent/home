@@ -304,6 +304,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .prod-tag{display:none;}
 .prod-like{background:none; border:none; padding:0; cursor:pointer; font-size:18px; line-height:1; color:#ddd; transition:color .15s;}
 .prod-like.liked{color:#e05a5a;}
+.prod-acts{display:inline-flex;align-items:center;gap:8px;flex-shrink:0;}
+.prod-share{background:none;border:none;padding:0;cursor:pointer;font-size:15px;line-height:1;opacity:.75;}
+.prod-share:active{opacity:1;transform:scale(.92);}
 .prod-comm{display:inline-block; margin-top:5px; font-size:9.5px; font-weight:700; color:#D6101A; background:#FFF0F0; padding:2px 7px; border-radius:100px;}
 
 /* ---- List rows ---- */
@@ -1810,6 +1813,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <h1 class="page-title" id="ofNombre" style="margin-bottom:4px;">Producto</h1>
       <div class="prod-price" style="font-size:22px; margin-bottom:8px;" id="ofPrecio">$0</div>
       <div id="ofStockInfo" style="margin-bottom:8px;"></div>
+      <button class="share-btn" style="margin:0 0 12px;width:100%;background:#25D366;color:#fff;border-color:#25D366;" onclick="compartirProductoCliente(ofertaAbierta)">📤 Compartir este producto</button>
       <div id="ofRestricciones" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
 
       <!-- Descripción libre del producto -->
@@ -8466,7 +8470,7 @@ function renderVendedorCatalogo(){
           <div class="prod-price">${precioTexto(p)}</div>
           <div class="prod-comm" style="margin-top:2px;">Comisión: $${comMonto.toLocaleString('es-AR')} (${p.comision}%)</div>
           <div style="display:flex;flex-direction:column;gap:5px;margin-top:7px;">
-            <button class="share-btn" style="margin-top:0;width:100%;" onclick="compartirProducto('${p.id}')">📤 Compartir</button>
+            <button class="share-btn" style="margin-top:0;width:100%;" onclick="compartirProductoCliente('${p.id}')">📤 Compartir</button>
             <button class="share-btn" style="margin-top:0;width:100%;background:var(--navy);color:white;" onclick="abrirReservaParaCliente('${p.id}')">🔖 Reservar</button>
             <button class="share-btn" style="margin-top:0;width:100%;background:transparent;border:1.5px solid #e0a0a0;color:#B33A3A;" onclick="quitarDeMiCatalogo('${p.id}')">🗑️ Quitar de mi catálogo</button>
           </div>
@@ -9242,7 +9246,7 @@ function renderTornadoOfertas(){
         <div class="prod-photo" style="position:relative;">${foto}${chip}</div>
         <div class="prod-body">
           <div class="prod-price">${precioTexto(p)}</div>
-          <button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button>
+          <span class="prod-acts"><button class="prod-share" aria-label="Compartir" onclick="event.stopPropagation(); compartirProductoCliente('${p.id}')">📤</button><button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button></span>
         </div>
       </div>`;
   }).join('') + `</div>`;
@@ -10702,6 +10706,64 @@ async function compartirCatalogoComercio(){
         if(typeof state !== 'undefined' && (state.comercios||[]).some(x => x.id === id)){
           clearInterval(t);
           verProductosDeLocal(id);
+        } else if(intentos > 60){ clearInterval(t); }
+      }catch(e){ clearInterval(t); }
+    }, 500);
+  }catch(e){}
+})();
+
+// ---- Compartir un producto (cliente o comercio): imagen + texto + link directo (?prod=ID) ----
+function linkProducto(p){ return PUENT_URL + '/?prod=' + encodeURIComponent(p.id); }
+var _compartiendoProd = false;
+async function compartirProductoCliente(prodId){
+  if(_compartiendoProd) return;
+  const p = (state.productos||[]).find(x=>x.id===prodId);
+  if(!p) return;
+  _compartiendoProd = true;
+  try{
+    const c = (state.comercios||[]).find(x=>x.id===p.comercioId);
+    const precio = (typeof productoSinPrecio==='function' && productoSinPrecio(p)) ? 'Consultar precio' : '$' + Number(p.precio||0).toLocaleString('es-AR');
+    const link = linkProducto(p);
+    const texto = `🛍️ *${p.nombre}* — ${precio}\n` + (c ? `🏬 ${c.nombre}\n` : '') + `\n👉 Mirá el producto en PuenT: ${link}`;
+
+    // Intentar adjuntar la imagen real (así WhatsApp manda foto + texto)
+    let files = [];
+    if(p.img && navigator.canShare && navigator.share){
+      try{
+        const res = await fetch(p.img);
+        const blob = await res.blob();
+        if(blob && blob.size){
+          const ext = (blob.type||'').includes('png') ? 'png' : (blob.type||'').includes('webp') ? 'webp' : 'jpg';
+          const nombre = (p.nombre||'producto').replace(/[^\w\-]+/g,'_').slice(0,40) + '.' + ext;
+          files = [new File([blob], nombre, {type: blob.type||'image/jpeg'})];
+        }
+      }catch(e){ /* sin CORS o sin red: seguimos sin imagen */ }
+    }
+    if(files.length && navigator.canShare({ files })){
+      try{ await navigator.share({ title: p.nombre, text: texto, files }); return; }
+      catch(e){ if(e && e.name==='AbortError') return; }
+    }
+    if(navigator.share){
+      try{ await navigator.share({ title: p.nombre, text: texto }); return; }
+      catch(e){ if(e && e.name==='AbortError') return; }
+    }
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+  } finally { _compartiendoProd = false; }
+}
+
+// Entrada por link de producto (?prod=ID): espera a que carguen los productos y abre la ficha.
+(function(){
+  try{
+    const id = new URLSearchParams(location.search).get('prod');
+    if(!id) return;
+    history.replaceState({}, '', location.pathname);
+    let intentos = 0;
+    const t = setInterval(function(){
+      intentos++;
+      try{
+        if(typeof state !== 'undefined' && (state.productos||[]).some(x => x.id === id) && (state.comercios||[]).length){
+          clearInterval(t);
+          abrirOferta(id);
         } else if(intentos > 60){ clearInterval(t); }
       }catch(e){ clearInterval(t); }
     }, 500);
@@ -13411,7 +13473,7 @@ function abrirCatalogoVendedor(vendedorId){
       <div class="prod-photo">${p.img ? `<img src="${p.img}" alt="${p.nombre}">` : p.foto}</div>
       <div class="prod-body">
         <div class="prod-price">${precioTexto(p)}</div>
-        <button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button>
+        <span class="prod-acts"><button class="prod-share" aria-label="Compartir" onclick="event.stopPropagation(); compartirProductoCliente('${p.id}')">📤</button><button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button></span>
       </div>
     </div>`).join('');
   showScreen('cl-catalogo');
@@ -15619,7 +15681,7 @@ function tarjetaEncantarHTML(p){
     +precioAntLineHTML
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;">'
     +'<div class="prod-price">'+precioHTML+'</div>'
-    +'<button class="prod-like'+(esFavorito(p.id)?' liked':'')+'" onclick="event.stopPropagation(); toggleFavorito(\''+p.id+'\', this)">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
+    +'<span class="prod-acts"><button class="prod-share" aria-label="Compartir" onclick="event.stopPropagation(); compartirProductoCliente(\''+p.id+'\')">📤</button>'+'<button class="prod-like'+(esFavorito(p.id)?' liked':'')+'" onclick="event.stopPropagation(); toggleFavorito(\''+p.id+'\', this)">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'+'</span>'
     +'</div>'
     +cuotasLineHTML
     +'</div></div>';
@@ -17186,7 +17248,7 @@ function verProductosDeLocal(comercioId){
           <div class="prod-photo">${foto}${badge ? `<span class="oferta-badge">${badge}</span>` : ''}</div>
           <div class="prod-body">
             <div class="prod-price">${precioTexto(p)}</div>
-            <button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button>
+            <span class="prod-acts"><button class="prod-share" aria-label="Compartir" onclick="event.stopPropagation(); compartirProductoCliente('${p.id}')">📤</button><button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button></span>
           </div>
         </div>`;
     }).join('');
