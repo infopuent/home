@@ -1810,7 +1810,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     </div>
 
     <div class="card" style="text-align:left;">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;"><h1 class="page-title" id="ofNombre" style="margin:0;flex:1;min-width:0;">Producto</h1><button type="button" aria-label="Compartir" onclick="compartirProductoCliente(ofertaAbierta)" style="background:none;border:none;padding:4px;cursor:pointer;color:#25D366;flex-shrink:0;line-height:0;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;"><h1 class="page-title" id="ofNombre" style="margin:0;flex:1;min-width:0;">Producto</h1><button type="button" aria-label="Compartir" onclick="compartirProductoCliente(ofertaAbierta)" style="background:none;border:none;padding:4px;cursor:pointer;color:#111;flex-shrink:0;line-height:0;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button></div>
       <div class="prod-price" style="font-size:22px; margin-bottom:8px;" id="ofPrecio">$0</div>
       <div id="ofStockInfo" style="margin-bottom:8px;"></div>
       <div id="ofRestricciones" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
@@ -10759,12 +10759,13 @@ async function compartirProductoCliente(prodId){
           const nombre = (p.nombre||'producto').replace(/[^\w\-]+/g,'_').slice(0,40) + '.' + ext;
           files = [new File([blob], nombre, {type: blob.type||'image/jpeg'})];
         }
-      }catch(e){ /* sin CORS o sin red: seguimos sin imagen */ }
+      }catch(e){ console.warn('Compartir: no se pudo bajar la imagen (¿CORS del Worker de fotos?)', e); window._compartirMotivo='fetch'; }
     }
     if(files.length && navigator.canShare({ files })){
       try{ await navigator.share({ title: p.nombre, text: texto, files }); return; }
       catch(e){ if(e && e.name==='AbortError') return; }
     }
+    if(p.img && !files.length) toast(!navigator.canShare ? 'Este navegador no puede adjuntar la imagen' : 'No se pudo adjuntar la imagen (se comparte el link)');
     if(navigator.share){
       try{ await navigator.share({ title: p.nombre, text: texto }); return; }
       catch(e){ if(e && e.name==='AbortError') return; }
