@@ -1269,13 +1269,20 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         </div>
         <div id="vitrinaHomeRow" class="vit-row"></div>
       </div>
-      <!-- Gastronomía y Almacén: solo los productos que suben esos comercios (separados de "Te va a encantar") -->
+      <!-- Hoy se come…: solo los productos de comercios de Gastronomía (separados de "Te va a encantar") -->
       <div id="comidaHomeSection" style="display:none;padding:14px 0 0;">
         <div class="section-title-row" style="padding:0 16px;">
-          <div class="section-title">🍽️ Gastronomía y Almacén</div>
+          <div class="section-title">🍴 Hoy se come…</div>
           <span class="ver-todo" id="comidaHomeVerTodos" onclick="toggleComidaHomeTodos()">Ver todos →</span>
         </div>
         <div id="comidaHomeRow" class="vit-row"></div>
+      </div>
+      <!-- Vehículos y maquinaria: autos, motos, lanchas, tractores. Siempre "Consultar precio" -->
+      <div id="vehiculosHomeSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">🚗 Vehículos y maquinaria</div>
+        </div>
+        <div id="vehiculosHomeRow" class="vit-row"></div>
       </div>
 
       <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
@@ -1813,7 +1820,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;"><h1 class="page-title" id="ofNombre" style="margin:0;flex:1;min-width:0;">Producto</h1><button type="button" aria-label="Compartir" onclick="compartirProductoCliente(ofertaAbierta)" style="background:none;border:none;padding:4px;cursor:pointer;color:#111;flex-shrink:0;line-height:0;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button></div>
       <div class="prod-price" style="font-size:22px; margin-bottom:8px;" id="ofPrecio">$0</div>
       <div id="ofStockInfo" style="margin-bottom:8px;"></div>
-      <button type="button" id="ofVerEnML" onclick="verProductoEnML(ofertaAbierta)" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);border-radius:100px;padding:7px 14px;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;margin-bottom:12px;font-family:inherit;">🔎 Comparar precio en Mercado Libre</button>
       <div id="ofRestricciones" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
 
       <!-- Descripción libre del producto -->
@@ -9286,7 +9292,15 @@ function precioBaseCuotas(p, precioNormal){
   const lista = Number(p && p.precioAnterior) || 0;
   return (p && p.cuotasInteres === 'con' && lista > 0) ? lista : Number(precioNormal) || 0;
 }
-function productoSinPrecio(p){ return !!p && (p.sinPrecio === true || !Number(p.precio)); }
+// Comercios cuyo catálogo son vehículos / maquinaria: van a su propia fila del home y se muestran siempre con "Consultar".
+var VEHICULOS_TIPOS = ['Agencia de autos','Agencia de motos','Náutica y lanchas','Maquinaria agrícola'];
+function esComercioVehiculos(c){ return !!c && VEHICULOS_TIPOS.includes(c.tipo); }
+function esProductoDeVehiculos(p){
+  if(!p || !p.comercioId) return false;
+  const c = (state.comercios||[]).find(x => x.id === p.comercioId || x._docId === p.comercioId);
+  return esComercioVehiculos(c);
+}
+function productoSinPrecio(p){ return !!p && (p.sinPrecio === true || !Number(p.precio) || esProductoDeVehiculos(p)); }
 function precioTexto(p){ return productoSinPrecio(p) ? 'Consultar precio' : '$' + Number(p.precio).toLocaleString('es-AR'); }
 
 // Tilde "Publicar sin precio": deshabilita el campo precio
@@ -10736,14 +10750,6 @@ async function _imgProductoParaCompartir(blob, p, c, precio, link){
   g.fillText('👉 ' + link.replace(/^https?:\/\//,''), 40, H+195);
   return await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.88));
 }
-// Abre la búsqueda de Mercado Libre con el nombre del producto, para que el cliente compare precios.
-function verProductoEnML(prodId){
-  const p = (state.productos||[]).find(x=>x.id===prodId);
-  if(!p || !p.nombre) return;
-  const slug = String(p.nombre).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').trim().replace(/\s+/g,'-');
-  if(!slug) return;
-  window.open('https://listado.mercadolibre.com.ar/' + encodeURIComponent(slug), '_blank', 'noopener');
-}
 var _compartiendoProd = false;
 async function compartirProductoCliente(prodId){
   if(_compartiendoProd) return;
@@ -11580,6 +11586,7 @@ function renderVitrinaSecciones(){
     if(r) r.innerHTML = items.length ? items.map(tarjeta).join('') : (verVacia ? vacio : '');
   });
   try{ renderComidaHome(); }catch(e){ console.warn('renderComidaHome:', e); }
+  try{ renderVehiculosHome(); }catch(e){ console.warn('renderVehiculosHome:', e); }
 }
 
 // Fila del home "Gastronomía y Almacén": solo los PRODUCTOS que suben esos comercios, con la misma
@@ -11620,7 +11627,8 @@ function renderComidaHome(){
     (state.productos||[]).filter(function(p){ return p.comercioId === cId && (p.origen === 'comercio' || !p.origen); })
       .forEach(function(p){
         const cat = categoriaDeRubro(c.rubro || '');
-        if(cat !== 'gastronomia' && cat !== 'almacen' && !esComercioGastronomico(c)) return;
+        if(cat === 'almacen') return; // Almacén y Alimentos queda solo en su rubro
+        if(cat !== 'gastronomia' && !esComercioGastronomico(c)) return;
         prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng});
       });
   });
@@ -11646,6 +11654,28 @@ function renderComidaHome(){
       return '<div style="flex:0 0 140px;width:140px;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
     }).join('');
   }
+}
+
+// Fila del home "Vehículos y maquinaria": autos, motos, lanchas y maquinaria. Siempre con "Consultar precio".
+const VEHICULOS_HOME_MAX = 12;
+function renderVehiculosHome(){
+  const sec = document.getElementById('vehiculosHomeSection'), row = document.getElementById('vehiculosHomeRow');
+  if(!sec || !row) return;
+  let prods = [];
+  (state.comercios||[]).forEach(function(c){
+    if(!esComercioVehiculos(c)) return;
+    if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return;
+    if(c.restricciones && c.restricciones.ocultarFeed) return;
+    const cId = c.id || c._docId;
+    (state.productos||[]).filter(function(p){ return p.comercioId === cId && (p.origen === 'comercio' || !p.origen); })
+      .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng}); });
+  });
+  if(!prods.length){ sec.style.display = 'none'; row.innerHTML = ''; return; }
+  sec.style.display = '';
+  prods = intercalarPorComercio(prods);
+  row.innerHTML = prods.slice(0, VEHICULOS_HOME_MAX).map(function(p){
+    return '<div style="flex:0 0 140px;width:140px;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
+  }).join('');
 }
 
 function vitUrl(u){ u = String(u||'').trim(); if(!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://'+u.replace(/^\/+/, ''); }
@@ -14088,7 +14118,7 @@ const TIPOS_POR_RUBRO = {
     'Laboratorio de análisis','Diagnóstico por imágenes','Ginecología y obstetricia','Traumatología','Dermatología','Oftalmología','Cardiología','Ortopedia','Podología','Clínica / sanatorio','Ambulancias y emergencias médicas',
   ],
   'Automotor': [
-    'Agencia de autos','Agencia de motos','Bicicletería',
+    'Agencia de autos','Agencia de motos','Náutica y lanchas','Bicicletería',
     'Repuestos y autopartes','Accesorios para autos','Lubricentro / cambio de aceite',
     'Taller mecánico','Gomería','Chapería y pintura','Lavadero de autos',
     'Instalación de alarmas y audio',
@@ -15686,7 +15716,7 @@ function tarjetaEncantarHTML(p){
 
   // Precio anterior manual (nuevo campo) — tiene prioridad sobre el calculado
   var precioAntLineHTML = '';
-  if(p.precioAnterior && Number(p.precioAnterior) > precioFinal){
+  if(!productoSinPrecio(p) && p.precioAnterior && Number(p.precioAnterior) > precioFinal){
     var pct = Math.round((1 - precioFinal/Number(p.precioAnterior))*100);
     precioAntLineHTML = '<div class="prod-precio-ant"><span class="prod-precio-tachado">$'+Number(p.precioAnterior).toLocaleString('es-AR')+'</span><span class="prod-desc-badge">'+pct+'% OFF</span></div>';
   } else if(tieneDescuento){
@@ -15697,7 +15727,7 @@ function tarjetaEncantarHTML(p){
 
   // Cuotas
   var cuotasLineHTML = '';
-  if(p.cuotas && Number(p.cuotas) >= 2 && precioFinal > 0){
+  if(!productoSinPrecio(p) && p.cuotas && Number(p.cuotas) >= 2 && precioFinal > 0){
     var valCuota = Math.ceil(precioBaseCuotas(p, precioFinal) / Number(p.cuotas));
     var intLabel = p.cuotasInteres === 'con' ? 'con interés' : 'sin interés';
     cuotasLineHTML = '<div class="prod-cuotas">'+p.cuotas+' cuotas '+intLabel+' de $'+valCuota.toLocaleString('es-AR')+'</div>';
@@ -15719,6 +15749,9 @@ function tarjetaEncantarHTML(p){
     +'</div></div>';
 }
 
+// Rubros de PRODUCTOS que entran en "Te va a encantar" del home general. El resto (comida, vehículos,
+// inmuebles, servicios, instituciones, etc.) tiene su propia sección o no son productos de góndola.
+var ENCANTAR_CATEGORIAS = ['hogar','indumentaria','salud','tecnologia','libreria','regalos','agro-mascotas','caza-pesca-camping','belleza','imprenta','artesanias','deportes','automotor'];
 function renderFeedEncantar(){
   var grid = document.getElementById('feedGridEncantar');
   if(!grid) return;
@@ -15768,7 +15801,10 @@ function renderFeedEncantar(){
   if(!_feedCategoriaActual || _feedCategoriaActual === 'todos'){
     prods = prods.filter(function(p){
       var cat = categoriaDeProducto(p);
-      return cat !== 'gastronomia' && cat !== 'almacen';
+      if(!ENCANTAR_CATEGORIAS.includes(cat)) return false;
+      // Automotor: repuestos y accesorios sí; vehículos y maquinaria van a su propia fila
+      if(p._comercioTipo && VEHICULOS_TIPOS.includes(p._comercioTipo)) return false;
+      return true;
     });
   }
 
@@ -16690,7 +16726,7 @@ function abrirOferta(prodId){
   // Precio estilo ML: precio anterior tachado + % OFF + precio actual + cuotas
   const _precioFinal = Number(p.precio||0);
   let _precioAntHTML = '';
-  if(p.precioAnterior && Number(p.precioAnterior) > _precioFinal){
+  if(!esProductoDeVehiculos(p) && p.precioAnterior && Number(p.precioAnterior) > _precioFinal){
     const _pct = Math.round((1 - _precioFinal/Number(p.precioAnterior))*100);
     _precioAntHTML = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap;"><span style="font-size:11px;color:var(--muted);font-weight:500;">Precio de lista:</span><span style="font-size:13px;color:var(--muted);text-decoration:line-through;">$${Number(p.precioAnterior).toLocaleString('es-AR')}</span><span style="font-size:12px;font-weight:700;color:#00a650;background:#e8f7ef;border-radius:4px;padding:2px 6px;">${_pct}% OFF</span></div>`;
   } else if(p.descuento && Number(p.descuento) > 0){
@@ -16698,7 +16734,7 @@ function abrirOferta(prodId){
     _precioAntHTML = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap;"><span style="font-size:11px;color:var(--muted);font-weight:500;">Precio de lista:</span><span style="font-size:13px;color:var(--muted);text-decoration:line-through;">$${_precAnt.toLocaleString('es-AR')}</span><span style="font-size:12px;font-weight:700;color:#00a650;background:#e8f7ef;border-radius:4px;padding:2px 6px;">${Number(p.descuento)}% OFF</span></div>`;
   }
   let _cuotasHTML = '';
-  if(p.cuotas && Number(p.cuotas) >= 2 && _precioFinal > 0){
+  if(!esProductoDeVehiculos(p) && p.cuotas && Number(p.cuotas) >= 2 && _precioFinal > 0){
     const _valCuota = Math.ceil(precioBaseCuotas(p, _precioFinal)/Number(p.cuotas));
     const _intLabel = p.cuotasInteres === 'con' ? 'con interés' : 'sin interés';
     _cuotasHTML = `<div style="font-size:13px;color:#00a650;font-weight:600;margin-top:4px;">${p.cuotas} cuotas ${_intLabel} de $${_valCuota.toLocaleString('es-AR')}</div>`;
