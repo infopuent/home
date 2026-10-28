@@ -1813,6 +1813,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;"><h1 class="page-title" id="ofNombre" style="margin:0;flex:1;min-width:0;">Producto</h1><button type="button" aria-label="Compartir" onclick="compartirProductoCliente(ofertaAbierta)" style="background:none;border:none;padding:4px;cursor:pointer;color:#111;flex-shrink:0;line-height:0;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button></div>
       <div class="prod-price" style="font-size:22px; margin-bottom:8px;" id="ofPrecio">$0</div>
       <div id="ofStockInfo" style="margin-bottom:8px;"></div>
+      <button type="button" id="ofVerEnML" onclick="verProductoEnML(ofertaAbierta)" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);border-radius:100px;padding:7px 14px;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;margin-bottom:12px;font-family:inherit;">🔎 Comparar precio en Mercado Libre</button>
       <div id="ofRestricciones" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
 
       <!-- Descripción libre del producto -->
@@ -10734,6 +10735,14 @@ async function _imgProductoParaCompartir(blob, p, c, precio, link){
   g.font = '600 34px system-ui,Arial,sans-serif'; g.fillStyle = '#fff';
   g.fillText('👉 ' + link.replace(/^https?:\/\//,''), 40, H+195);
   return await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.88));
+}
+// Abre la búsqueda de Mercado Libre con el nombre del producto, para que el cliente compare precios.
+function verProductoEnML(prodId){
+  const p = (state.productos||[]).find(x=>x.id===prodId);
+  if(!p || !p.nombre) return;
+  const slug = String(p.nombre).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').trim().replace(/\s+/g,'-');
+  if(!slug) return;
+  window.open('https://listado.mercadolibre.com.ar/' + encodeURIComponent(slug), '_blank', 'noopener');
 }
 var _compartiendoProd = false;
 async function compartirProductoCliente(prodId){
