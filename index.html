@@ -900,9 +900,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .feed-solapas.hay-mas{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent); mask-image:linear-gradient(to right,#000 88%,transparent);}
 
 /* ---- GRILLA "Te va a encantar" (Ofertas del día) ---- */
-/* Ficha de comercio en el admin: una columna en celular, dos en desktop */
-.adm-det-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 22px;align-items:start;}
-@media(min-width:900px){ .adm-det-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);} }
 .feed-grid-encantar{
   display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:18px;
 }
@@ -911,8 +908,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
    público (Te va a encantar, Rubros, Oferta infinita), no en catálogos
    internos de comercio/admin que reusan la misma clase .prod-photo */
 .feed-grid-encantar .prod-photo, .feed-cat-grid .prod-photo, #feedGridInfinito .prod-photo{aspect-ratio:1/1;}
-#comidaHomeRow .prod-photo, #vehiculosHomeRow .prod-photo{aspect-ratio:1/1;}
-#comidaHomeRow .prod-body, #vehiculosHomeRow .prod-body{padding:5px 8px 6px;}
+#comidaHomeRow .prod-photo, #almacenHomeRow .prod-photo, #vehiculosHomeRow .prod-photo{aspect-ratio:1/1;}
+#comidaHomeRow .prod-body, #almacenHomeRow .prod-body, #vehiculosHomeRow .prod-body{padding:5px 8px 6px;}
 .prod-logo-badge{
   position:absolute; bottom:6px; left:6px; width:26px; height:26px; border-radius:50%;
   background:white; display:flex; align-items:center; justify-content:center;
@@ -1183,7 +1180,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <div style="font-size:26px;">🏬</div>
           <div>
             <div style="font-size:15px;font-weight:800;color:#1A1A1A;line-height:1.25;margin-bottom:3px;">Sumar mi negocio</div>
-            <div style="font-size:11.5px;font-weight:500;color:#888;line-height:1.35;">30 días gratis para probarlo</div>
+            <div style="font-size:11.5px;font-weight:500;color:#888;line-height:1.35;">Profesión u oficio / servicios</div>
           </div>
         </button>
 
@@ -1279,6 +1276,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <span class="ver-todo" id="comidaHomeVerTodos" onclick="toggleComidaHomeTodos()">Ver todos →</span>
         </div>
         <div id="comidaHomeRow" class="vit-row"></div>
+      </div>
+      <!-- Almacén y Alimentos: productos de almacenes, kioscos, minimercados, carnicerías, etc. -->
+      <div id="almacenHomeSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">🛒 Almacén y Alimentos</div>
+          <span class="ver-todo" id="almacenHomeVerTodos" onclick="toggleAlmacenHomeTodos()">Ver todos →</span>
+        </div>
+        <div id="almacenHomeRow" class="vit-row"></div>
       </div>
       <!-- Vehículos y maquinaria: autos, motos, lanchas, tractores. Siempre "Consultar precio" -->
       <div id="vehiculosHomeSection" style="display:none;padding:14px 0 0;">
@@ -2960,10 +2965,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       </div>
     </div>
 
-    <!-- Compartir PuenT (enlace / QR) para invitar a otros comercios -->
-    <button type="button" class="share-cta" onclick="abrirCompartirPuenT('comercio')" style="margin-bottom:12px;">
-      <span class="share-cta-ic"><i class="ti ti-share"></i></span>
-      <span class="share-cta-tx"><b>Invitá a otros comercios a PuenT</b><small>Compartí el enlace o el QR por WhatsApp</small></span>
+    <!-- Novedades de PuenT (las carga el admin) -->
+    <button type="button" class="share-cta" onclick="abrirNovedades()" style="margin-bottom:12px;">
+      <span class="share-cta-ic"><i class="ti ti-bell"></i></span>
+      <span class="share-cta-tx"><b>Novedades de PuenT</b><small>Lo nuevo de la app y las funciones que vamos sumando</small></span>
+      <span id="novedadesBadge" style="display:none;min-width:20px;height:20px;padding:0 6px;border-radius:100px;background:#FC1820;color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center;margin-right:6px;">0</span>
       <span class="share-cta-ar">›</span>
     </button>
 
@@ -3044,6 +3050,11 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <button class="p-card" style="background:#E0F7FA;color:#00697A;" onclick="compartirCatalogoComercio()">
         <i class="ti ti-share p-card-ic"></i>
         <div class="p-card-title">Compartir catálogo</div>
+      </button>
+
+      <button class="p-card" style="background:#E8EAF6;color:#283593;" onclick="abrirCartelQR()">
+        <i class="ti ti-printer p-card-ic"></i>
+        <div class="p-card-title">Mi cartel con QR</div>
       </button>
 
       <button class="p-card" style="background:#F3E8FF;color:#6A1B9A;position:relative;" onclick="renderCSuscripcionBox();showScreen('c-suscripcion')">
@@ -3808,6 +3819,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-nuevo-comercio');setTimeout(()=>crearMapaPick('adMapaPickMobile', adminNuevoComLatLng?.lat, adminNuevoComLatLng?.lng, (lat,lng)=>{adminNuevoComLatLng={lat,lng};const est=document.getElementById('adUbicacionEstadoMobile');if(est)est.textContent='✅ Ubicación marcada correctamente.';}),50)"><i class="ti ti-plus ic"></i>Nuevo comercio</button>
         <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="adminCargarRubrosHome();showScreen('admin-rubros-home')"><i class="ti ti-photo ic"></i>🖼️ Imágenes del home</button>
         <button class="btn-tile btn-tile-sage" style="grid-column:1/-1;" onclick="adminAbrirCiudadHoy();showScreen('admin-ciudad-hoy')"><i class="ti ti-building-community ic"></i>🏙️ La Ciudad Hoy</button>
+        <button class="btn-tile btn-tile-rose" style="grid-column:1/-1;" onclick="showScreen('admin-novedades');adminAbrirNovedades()"><i class="ti ti-bell ic"></i>🆕 Novedades para comercios</button>
         <button class="btn-tile btn-tile-sage" style="grid-column:1/-1;" onclick="adminPublicarCatalogo()"><i class="ti ti-cloud-upload ic"></i>☁️ Publicar catálogo ahora</button>
         <button class="btn-tile btn-tile-neutral" onclick="showScreen('admin-papelera');admCargarPapelera()"><i class="ti ti-trash ic"></i>🗑️ Papelera</button>
         <button class="btn-tile btn-tile-gold" onclick="adminCargarPlanes();showScreen('admin-planes')"><i class="ti ti-credit-card ic"></i>💳 Planes y pagos</button>
@@ -3828,6 +3840,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div style="padding:10px 0;flex:1;">
           <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#CCC;padding:12px 18px 4px;">General</div>
           <button class="adm-nav active" id="admNav-dashboard" onclick="adminDesktopTab('dashboard')"><i class="ti ti-layout-dashboard" style="font-size:16px;"></i>Dashboard</button>
+          <button class="adm-nav" id="admNav-estadisticas" onclick="adminDesktopTab('estadisticas')"><i class="ti ti-chart-bar" style="font-size:16px;"></i>📊 Estadísticas</button>
           <button class="adm-nav" id="admNav-comercios" onclick="adminDesktopTab('comercios')"><i class="ti ti-building-store" style="font-size:16px;"></i>Comercios</button>
           <button class="adm-nav" id="admNav-productos" onclick="adminDesktopTab('productos')"><i class="ti ti-package" style="font-size:16px;"></i>Productos</button>
           <button class="adm-nav" id="admNav-vendedores" onclick="adminDesktopTab('vendedores')"><i class="ti ti-users" style="font-size:16px;"></i>ConectorT</button>
@@ -3842,6 +3855,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <button class="adm-nav" id="admNav-mensajes" onclick="adminDesktopTab('mensajes')"><i class="ti ti-message-2" style="font-size:16px;"></i>Mensajes</button>
           <button class="adm-nav" id="admNav-rubroshome" onclick="adminDesktopTab('rubroshome')"><i class="ti ti-photo" style="font-size:16px;"></i>🖼️ Imágenes del home</button>
           <button class="adm-nav" id="admNav-ciudadhoy" onclick="adminDesktopTab('ciudadhoy')"><i class="ti ti-building-community" style="font-size:16px;"></i>🏙️ La Ciudad Hoy</button>
+          <button class="adm-nav" id="admNav-novedades" onclick="adminDesktopTab('novedades')"><i class="ti ti-bell" style="font-size:16px;"></i>🆕 Novedades</button>
           <button class="adm-nav" id="admNav-nuevo" onclick="adminDesktopTab('nuevo')"><i class="ti ti-plus" style="font-size:16px;"></i>Nuevo comercio</button>
           <button class="adm-nav" id="admNav-papelera" onclick="adminDesktopTab('papelera')"><i class="ti ti-trash" style="font-size:16px;"></i>🗑️ Papelera</button>
 
@@ -3936,6 +3950,15 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <h1 class="page-title">🏙️ La Ciudad Hoy</h1>
     <p class="page-sub">Texto libre que se muestra en la pestaña "Ciudad Hoy" de todos los usuarios. Dejá un campo vacío si no hay novedades en esa tarjeta.</p>
     <div id="admCiudadHoyBox"></div>
+  </div>
+
+  <!-- ============ SCREEN: ADMIN — NOVEDADES PARA COMERCIOS ============ -->
+  <div class="screen hidden" id="screen-admin-novedades">
+    <div class="link-back" onclick="showScreen('admin-panel')">← Panel admin</div>
+    <div class="kicker">Admin</div>
+    <h1 class="page-title">🆕 Novedades</h1>
+    <p class="page-sub">Lo que cargues acá lo ven solo los comercios, con un aviso al entrar a su panel (una vez por novedad nueva) y en el botón "Novedades".</p>
+    <div id="admNovedadesBox"></div>
   </div>
 
   <!-- ============ SCREEN: GASTRONOMÍA (por categoría) ============ -->
@@ -7048,6 +7071,18 @@ function crearCuentaDesdeGoogle(rol, user){
 }
 
 // Toma los datos (ya sea recién creados o recuperados de Firestore) y arma la sesión activa.
+// Guarda cuándo entró por última vez un comercio (para ordenarlos en el admin). Máx. 1 escritura por hora.
+function registrarIngresoComercio(c){
+  if(!c || !firebaseListo || !db) return;
+  const docId = c._docId || c.uid;
+  if(!docId) return;
+  const ahora = Date.now();
+  const ult = c.ultimoIngreso ? new Date(c.ultimoIngreso).getTime() : 0;
+  if(ult && ahora - ult < 3600000) return;
+  const iso = new Date(ahora).toISOString();
+  c.ultimoIngreso = iso;
+  db.collection('comercios').doc(docId).set({ ultimoIngreso: iso }, { merge:true }).catch(function(){});
+}
 function entrarConDatosGuardados(rol, data){
   if(data.estado==='suspendido'){
     toast('🚫 Tu cuenta fue suspendida. Contactá al soporte de PuenT para más info.');
@@ -7062,6 +7097,7 @@ function entrarConDatosGuardados(rol, data){
     return;
   }
   state.currentUser = data; state.role = rol;
+  if(rol==='comercio') try{ registrarIngresoComercio(data); }catch(e){}
 
   if(window._ventaPendienteDeGuardar){
     if(rol==='cliente'){
@@ -8838,6 +8874,7 @@ function _detectarContenido(src, w, h){
     let ok = 0;
     for(let k = 0; k < R.length; k++){ if(Math.abs(R[k]-br) + Math.abs(G[k]-bg) + Math.abs(B[k]-bb) <= T) ok++; }
     if(ok / R.length < 0.9) return completo; // sin fondo parejo: no tocamos nada
+    completo.fondo = [br, bg, bb];            // fondo parejo (blanco, gris, de color): se usa para rellenar los costados
     // Filas y columnas que tienen contenido (ignorando motas sueltas)
     const filas = new Array(ch).fill(0), cols = new Array(cw).fill(0);
     for(let y = 0; y < ch; y++){
@@ -8852,6 +8889,7 @@ function _detectarContenido(src, w, h){
     while(x0 < cw && cols[x0] < minC) x0++;
     while(x1 > x0 && cols[x1] < minC) x1--;
     if(y0 >= y1 || x0 >= x1) return completo;
+    const fondoRGB = completo.fondo;
     // Pasar a píxeles del src original y sumar un poco de aire
     let bx = x0 / e, by = y0 / e, bw = (x1 - x0 + 1) / e, bh = (y1 - y0 + 1) / e;
     const pad = 0.03 * Math.max(bw, bh);
@@ -8859,7 +8897,7 @@ function _detectarContenido(src, w, h){
     bw = Math.min(w - bx, bw + 2*pad); bh = Math.min(h - by, bh + 2*pad);
     const area = (bw * bh) / (w * h);
     if(area > 0.92 || area < 0.03) return completo;  // nada que recortar, o detección dudosa
-    return { x:bx, y:by, w:bw, h:bh, recortado:true };
+    return { x:bx, y:by, w:bw, h:bh, recortado:true, fondo:fondoRGB };
   }catch(err){
     return completo;
   }finally{
@@ -8879,9 +8917,50 @@ function _ajusteAuto(cfg, caja, Fw, Fh){
   return { k:k, tx: Fw/2 - (caja.x + caja.w/2) * k, ty: Fh/2 - (caja.y + caja.h/2) * k };
 }
 
+// Relleno de los costados: si la foto tiene un fondo parejo, ese mismo color (blanco en las de catálogo);
+// si no, la misma foto agrandada y desenfocada (se arma a muy baja resolución, anda en todos los celulares).
+const _fondoInfo = new WeakMap();   // src -> color de fondo detectado [r,g,b] o null
+const _fondoBlur = new WeakMap();   // src -> { ratio, cv } miniatura desenfocada
+function _miniaturaFondo(src, W, H, Fw, Fh){
+  const prev = _fondoBlur.get(src);
+  if(prev && prev.ratio === Fw / Fh) return prev.cv;
+  const tw = 28, th = Math.max(8, Math.round(tw * Fh / Fw));
+  // paso intermedio para que la reducción sea suave y no queden dientes
+  const mw = tw * 4, mh = th * 4;
+  const m = document.createElement('canvas'); m.width = mw; m.height = mh;
+  const gm = m.getContext('2d'); gm.fillStyle = '#fff'; gm.fillRect(0, 0, mw, mh);
+  gm.imageSmoothingEnabled = true; gm.imageSmoothingQuality = 'high';
+  const k1 = Math.max(mw / W, mh / H);
+  gm.drawImage(src, (mw - W * k1) / 2, (mh - H * k1) / 2, W * k1, H * k1);
+  const t = document.createElement('canvas'); t.width = tw; t.height = th;
+  const gt = t.getContext('2d'); gt.imageSmoothingEnabled = true; gt.imageSmoothingQuality = 'high';
+  gt.drawImage(m, 0, 0, tw, th);
+  m.width = m.height = 0;
+  _fondoBlur.set(src, { ratio: Fw / Fh, cv: t });
+  return t;
+}
+function _pintarFondo(ctx, src, st, W, H, cw, ch, Fw, Fh){
+  const rgb = _fondoInfo.get(src);
+  // ¿la foto llena todo el cuadro? entonces no hace falta fondo
+  const iw = W * st.k, ih = H * st.k;
+  const llena = st.tx <= 1 && st.ty <= 1 && st.tx + iw >= Fw - 1 && st.ty + ih >= Fh - 1;
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch);
+  if(llena) return;
+  if(rgb){
+    const claro = rgb[0] > 235 && rgb[1] > 235 && rgb[2] > 235;
+    if(!claro){ ctx.fillStyle = 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'; ctx.fillRect(0, 0, cw, ch); }
+    return;
+  }
+  try{
+    const mini = _miniaturaFondo(src, W, H, Fw, Fh);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(mini, 0, 0, cw, ch);
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(0, 0, cw, ch);   // apenas más suave, para que la foto resalte
+  }catch(e){}
+}
+
 function _dibujarAjuste(ctx, src, st, W, H, f, Fw, Fh){
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, Math.ceil(Fw * f), Math.ceil(Fh * f));
+  _pintarFondo(ctx, src, st, W, H, Math.ceil(Fw * f), Math.ceil(Fh * f), Fw, Fh);
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(src, st.tx * f, st.ty * f, W * st.k * f, H * st.k * f);
 }
@@ -8915,6 +8994,7 @@ function comprimirFotoAjustada(file, maxBytes, modo){
     try{
       const Fh = 1000, Fw = 1000 * cfg.ratio;
       const caja = _detectarContenido(base.src, base.w, base.h);
+      _fondoInfo.set(base.src, caja.fondo || null);
       const st = _ajusteAuto(cfg, caja, Fw, Fh);
       return _exportarAjuste(base.src, st, base.w, base.h, Fw, Fh, cfg, maxBytes);
     } finally { base.cerrar(); }
@@ -8950,6 +9030,7 @@ function abrirEditorFoto(file, modo, maxBytes, opts){
       const W = base.w, H = base.h;
       const Fh = 1000, Fw = 1000 * cfg.ratio;
       const caja = _detectarContenido(base.src, W, H);
+      _fondoInfo.set(base.src, caja.fondo || null);
       const auto = _ajusteAuto(cfg, caja, Fw, Fh);
       const kContain = Math.min(Fw / W, Fh / H);
       // opts.talCual: foto ya guardada -> se abre como quedó (entera, centrada) en vez de re-recortarla
@@ -8963,7 +9044,7 @@ function abrirEditorFoto(file, modo, maxBytes, opts){
       ov.innerHTML =
         '<div style="background:#fff;border-radius:18px;width:min(460px,100%);padding:16px;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto;">'
         + '<div style="font-weight:800;font-size:15px;color:#1a2340;">✂️ Ajustar foto</div>'
-        + '<div style="font-size:12px;color:#777;line-height:1.4;">Arrastrá para mover. Pellizcá o usá el control para acercar o alejar. Lo que ves es lo que se guarda, con fondo blanco.</div>'
+        + '<div style="font-size:12px;color:#777;line-height:1.4;">Arrastrá para mover. Pellizcá o usá el control para acercar o alejar. Lo que ves es lo que se guarda. Si la foto no llena el cuadro, los costados se rellenan con el color de la misma foto.</div>'
         + '<div style="display:flex;justify-content:center;"><canvas id="fotoEdCv" style="touch-action:none;border-radius:12px;border:1px solid #ddd;cursor:grab;max-width:100%;"></canvas></div>'
         + '<input id="fotoEdZoom" type="range" min="0" max="100" step="0.5" style="width:100%;">'
         + (modo === 'producto'
@@ -10710,6 +10791,120 @@ async function compartirCatalogoComercio(){
   window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
 }
 
+
+/* ============================================================
+   CARTEL CON QR DEL COMERCIO (15 x 15 cm)
+   Toma la plantilla (subida a R2) y le pega el QR de la ficha del comercio.
+   Se puede descargar, imprimir al tamaño exacto o compartir.
+   ============================================================ */
+var CARTEL_QR_PLANTILLA = 'https://img.puent.com.ar/Plantillas/cartel-comercio.webp';
+var CARTEL_QR_POS = { cx:0.7534, cy:0.4894, lado:0.31 }; // posición/tamaño del QR, como fracción del ancho del cartel
+var _cartelQrBlob = null, _cartelQrUrl = null;
+
+async function _cartelQrGenerar(c){
+  const link = linkCatalogoComercio(c);
+  const rTpl = await fetch(CARTEL_QR_PLANTILLA, { mode:'cors' });
+  if(!rTpl.ok) throw new Error('plantilla');
+  const tpl = await createImageBitmap(await rTpl.blob());
+  const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&ecc=M&color=0b1b3a&bgcolor=ffffff&data=' + encodeURIComponent(link);
+  const rQr = await fetch(qrSrc);
+  if(!rQr.ok) throw new Error('qr');
+  const qr = await createImageBitmap(await rQr.blob());
+  const N = tpl.width;
+  const cv = document.createElement('canvas'); cv.width = N; cv.height = tpl.height;
+  const g = cv.getContext('2d');
+  g.drawImage(tpl, 0, 0);
+  const lado = Math.round(N * CARTEL_QR_POS.lado);
+  const x = Math.round(N * CARTEL_QR_POS.cx - lado/2), y = Math.round(cv.height * CARTEL_QR_POS.cy - lado/2);
+  const pad = Math.round(lado * 0.05);
+  g.fillStyle = '#fff'; g.fillRect(x - pad, y - pad, lado + pad*2, lado + pad*2); // zona blanca de silencio alrededor del QR
+  g.imageSmoothingEnabled = false;
+  g.drawImage(qr, x, y, lado, lado);
+  try{ tpl.close(); qr.close(); }catch(e){}
+  return await new Promise(function(res){ cv.toBlob(res, 'image/png'); });
+}
+
+async function abrirCartelQR(){
+  const c = state.currentUser;
+  if(!c){ return; }
+  toast('Armando tu cartel…');
+  try{
+    _cartelQrBlob = await _cartelQrGenerar(c);
+  }catch(e){
+    console.warn('Cartel QR:', e);
+    toast('No pudimos armar el cartel. Revisá tu conexión y probá de nuevo.');
+    return;
+  }
+  if(_cartelQrUrl){ try{ URL.revokeObjectURL(_cartelQrUrl); }catch(e){} }
+  _cartelQrUrl = URL.createObjectURL(_cartelQrBlob);
+  const ov = document.createElement('div');
+  ov.id = 'cartelQrOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(15,15,20,.8);display:flex;align-items:center;justify-content:center;padding:14px;';
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:18px;width:min(460px,100%);max-height:100%;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">'
+    + '<div style="font-weight:800;font-size:15px;color:#1a2340;">🖨️ Tu cartel con QR</div>'
+    + '<div style="font-size:12px;color:#777;line-height:1.4;">Imprimilo en 15 × 15 cm y pegalo en tu vidriera o mostrador. Quien escanee el QR entra directo a la ficha de tu comercio en PuenT.</div>'
+    + '<img src="' + _cartelQrUrl + '" alt="Cartel con QR" style="width:100%;border-radius:12px;border:1px solid #e3e3e3;">'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    +   '<button type="button" class="btn btn-primary" style="flex:1;min-width:130px;" onclick="imprimirCartelQR()">🖨️ Imprimir</button>'
+    +   '<button type="button" class="btn btn-ghost" style="flex:1;min-width:130px;" onclick="descargarCartelQR()">⬇️ Descargar</button>'
+    +   '<button type="button" class="btn btn-ghost" style="flex:1;min-width:130px;" onclick="compartirCartelQR()">📤 Compartir</button>'
+    + '</div>'
+    + '<button type="button" class="btn btn-ghost" onclick="cerrarCartelQR()">Cerrar</button>'
+    + '</div>';
+  ov.addEventListener('click', function(e){ if(e.target === ov) cerrarCartelQR(); });
+  document.body.appendChild(ov);
+}
+function cerrarCartelQR(){
+  const ov = document.getElementById('cartelQrOverlay'); if(ov) ov.remove();
+  if(_cartelQrUrl){ try{ URL.revokeObjectURL(_cartelQrUrl); }catch(e){} _cartelQrUrl = null; }
+}
+function _cartelQrNombreArchivo(){
+  const c = state.currentUser;
+  const base = String((c && c.nombre) || 'comercio').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,40);
+  return 'cartel-puent-' + (base || 'comercio') + '.png';
+}
+function descargarCartelQR(){
+  if(!_cartelQrBlob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(_cartelQrBlob); a.download = _cartelQrNombreArchivo();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+}
+async function compartirCartelQR(){
+  if(!_cartelQrBlob) return;
+  const c = state.currentUser;
+  const link = c ? linkCatalogoComercio(c) : PUENT_URL;
+  const texto = '🏬 ' + (c ? c.nombre : 'Nuestro comercio') + ' ya está en PuenT. Mirá nuestra ficha y productos: ' + link;
+  try{
+    const file = new File([_cartelQrBlob], _cartelQrNombreArchivo(), { type:'image/png' });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ title:'PuenT', text:texto, files:[file] });
+      return;
+    }
+  }catch(e){ if(e && e.name === 'AbortError') return; }
+  descargarCartelQR();
+  toast('Se descargó el cartel. Compartilo desde tus fotos.');
+}
+function imprimirCartelQR(){
+  if(!_cartelQrBlob) return;
+  const fr = new FileReader();
+  fr.onload = function(){
+    const f = document.createElement('iframe');
+    f.style.cssText = 'position:fixed;width:0;height:0;border:0;right:0;bottom:0;';
+    f.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><title>Cartel PuenT</title>'
+      + '<style>@page{size:150mm 150mm;margin:0}html,body{margin:0;padding:0}img{display:block;width:150mm;height:150mm}</style></head>'
+      + '<body><img src="' + fr.result + '"></body></html>';
+    f.onload = function(){
+      const im = f.contentDocument.querySelector('img');
+      const lanzar = function(){ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){ descargarCartelQR(); } setTimeout(function(){ f.remove(); }, 60000); };
+      if(im && !im.complete){ im.onload = lanzar; } else { lanzar(); }
+    };
+    document.body.appendChild(f);
+  };
+  fr.readAsDataURL(_cartelQrBlob);
+}
+
 // Entrada por link compartido (?local=ID): espera a que carguen los comercios y abre la ficha.
 (function(){
   try{
@@ -11592,6 +11787,7 @@ function renderVitrinaSecciones(){
     if(r) r.innerHTML = items.length ? items.map(tarjeta).join('') : (verVacia ? vacio : '');
   });
   try{ renderComidaHome(); }catch(e){ console.warn('renderComidaHome:', e); }
+  try{ renderAlmacenHome(); }catch(e){ console.warn('renderAlmacenHome:', e); }
   try{ renderVehiculosHome(); }catch(e){ console.warn('renderVehiculosHome:', e); }
 }
 
@@ -11652,6 +11848,51 @@ function renderComidaHome(){
     row.innerHTML = prods.slice(0, _comidaHomeVisibles).map(tarjetaEncantarHTML).join('')
       + (prods.length > _comidaHomeVisibles
         ? '<div style="grid-column:1/-1;text-align:center;padding:6px 0 2px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="verMasComidaHome()">Ver más productos (' + (prods.length - _comidaHomeVisibles) + ')</button></div>'
+        : '');
+  } else {
+    row.className = 'vit-row';
+    row.style.padding = '';
+    row.innerHTML = prods.slice(0, COMIDA_HOME_MAX).map(function(p){
+      return '<div style="flex:0 0 calc((100% - 12px)/2);min-width:0;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
+    }).join('');
+  }
+}
+
+// Fila del home "Almacén y Alimentos": igual que "Hoy se come…", pero con los productos de comercios del rubro Almacén.
+var _almacenHomeVerTodos = false;
+var _almacenHomeVisibles = COMIDA_HOME_TANDA;
+function toggleAlmacenHomeTodos(){
+  _almacenHomeVerTodos = !_almacenHomeVerTodos;
+  _almacenHomeVisibles = COMIDA_HOME_TANDA;
+  renderAlmacenHome();
+  if(!_almacenHomeVerTodos){ try{ document.getElementById('almacenHomeSection').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} }
+}
+function verMasAlmacenHome(){ _almacenHomeVisibles += COMIDA_HOME_TANDA; renderAlmacenHome(); }
+function renderAlmacenHome(){
+  const sec = document.getElementById('almacenHomeSection'), row = document.getElementById('almacenHomeRow');
+  if(!sec || !row) return;
+  let prods = [];
+  (state.comercios||[]).forEach(function(c){
+    if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return;
+    if(c.restricciones && c.restricciones.ocultarFeed) return;
+    if(categoriaDeRubro(c.rubro || '') !== 'almacen') return;
+    const cId = c.id || c._docId;
+    (state.productos||[]).filter(function(p){ return p.comercioId === cId && (p.origen === 'comercio' || !p.origen); })
+      .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng}); });
+  });
+  if(!prods.length){ sec.style.display = 'none'; row.innerHTML = ''; return; }
+  sec.style.display = '';
+  prods = intercalarPorComercio(prods);
+  const verLink = document.getElementById('almacenHomeVerTodos');
+  const hayMas = prods.length > COMIDA_HOME_MAX;
+  const todos = _almacenHomeVerTodos && hayMas;
+  if(verLink){ verLink.style.display = hayMas ? '' : 'none'; verLink.textContent = todos ? 'Ver menos' : 'Ver todos →'; }
+  if(todos){
+    row.className = 'feed-grid-encantar';
+    row.style.padding = '8px 16px 0';
+    row.innerHTML = prods.slice(0, _almacenHomeVisibles).map(tarjetaEncantarHTML).join('')
+      + (prods.length > _almacenHomeVisibles
+        ? '<div style="grid-column:1/-1;text-align:center;padding:6px 0 2px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="verMasAlmacenHome()">Ver más productos (' + (prods.length - _almacenHomeVisibles) + ')</button></div>'
         : '');
   } else {
     row.className = 'vit-row';
@@ -12226,7 +12467,7 @@ function renderCPagosBox(){
       </label>
       <div style="margin-top:10px;background:#f5f5f3;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start;">
         <span style="font-size:15px;flex-shrink:0;">💡</span>
-        <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">Transferí al alias <strong style="color:var(--ink);">puent.pagos</strong> e ingresá el comprobante. Una vez confirmado por PuenT, tu mes queda registrado.</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">Transferí al alias <strong style="color:var(--ink);">puente.pagos</strong> o al CBU <strong style="color:var(--ink);user-select:all;">0000003100017908308226</strong> e ingresá el comprobante. Una vez confirmado por PuenT, tu mes queda registrado.</div>
       </div>
     </div>`;
 }
@@ -12452,7 +12693,7 @@ function renderCSuscripcionBox(){
       </label>
       <div style="margin-top:10px;background:#f5f5f3;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start;">
         <span style="font-size:15px;flex-shrink:0;">💡</span>
-        <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">Transferí al alias <strong style="color:var(--ink);">puent.pagos</strong> e ingresá el comprobante. Una vez confirmado por PuenT, tu mes queda registrado.</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">Transferí al alias <strong style="color:var(--ink);">puente.pagos</strong> o al CBU <strong style="color:var(--ink);user-select:all;">0000003100017908308226</strong> e ingresá el comprobante. Una vez confirmado por PuenT, tu mes queda registrado.</div>
       </div>
     </div>`;
 }
@@ -12952,7 +13193,7 @@ async function cobranzaConfirmarPago(docId, clave, comercioId){
 
 function cobranzaEnviarRecordatorio(wa, nombre, planVence){
   if(!wa){ toast('Este comercio no tiene WhatsApp cargado'); return; }
-  const texto = `Hola ${decodeURIComponent(nombre)}, te contactamos desde PuenT 👋. Tu suscripción vence el ${planVence||'próximamente'}. Podés transferir al alias *puent.pagos* y subir el comprobante desde tu panel. ¡Gracias!`;
+  const texto = `Hola ${decodeURIComponent(nombre)}, te contactamos desde PuenT 👋. Tu suscripción vence el ${planVence||'próximamente'}. Podés transferir al alias *puente.pagos* (CBU 0000003100017908308226) y subir el comprobante desde tu panel. ¡Gracias!`;
   window.open(`https://wa.me/54${wa.replace(/\D/g,'')}?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
@@ -18629,7 +18870,7 @@ function adminDesktopTab(tab){
   document.querySelectorAll('.adm-nav').forEach(b=>b.classList.remove('active'));
   const navBtn = document.getElementById('admNav-'+tab);
   if(navBtn) navBtn.classList.add('active');
-  const titles = {dashboard:'Dashboard',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',cobranzas:'💰 Cobranzas',repartidores:'Repartidores',zonasenvio:'Zonas de envío',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home',ciudadhoy:'🏙️ La Ciudad Hoy',papelera:'🗑️ Papelera'};
+  const titles = {dashboard:'Dashboard',estadisticas:'📊 Estadísticas de la app',comercios:'Comercios',productos:'Productos publicados',vendedores:'ConectorT',clientes:'Clientes',ventas:'Ventas',planes:'Planes y pagos',cobranzas:'💰 Cobranzas',repartidores:'Repartidores',zonasenvio:'Zonas de envío',mensajes:'Mensajes',nuevo:'Nuevo comercio',rubroshome:'🖼️ Imágenes del home',ciudadhoy:'🏙️ La Ciudad Hoy',novedades:'🆕 Novedades para comercios',papelera:'🗑️ Papelera'};
   document.getElementById('admDesktopTitle').textContent = titles[tab]||tab;
   document.getElementById('admDesktopBadge').innerHTML = '';
   const cont = document.getElementById('admDesktopContent');
@@ -18648,7 +18889,9 @@ function adminDesktopTab(tab){
   else if(tab==='nuevo')        admRenderNuevoComercioDesktop();
   else if(tab==='rubroshome')   adminCargarRubrosHome(true);
   else if(tab==='ciudadhoy')    adminAbrirCiudadHoy(true);
+  else if(tab==='novedades')    adminAbrirNovedades(true);
   else if(tab==='cobranzas')    admRenderCobranzasDesktop();
+  else if(tab==='estadisticas') admRenderEstadisticasApp();
 }
 
 async function admRenderDashboard(){
@@ -18679,6 +18922,7 @@ async function admRenderDashboard(){
         <div class="adm-stat2"><div class="val" style="color:${porVencer>0?'#A32020':'inherit'}">${porVencer}</div><div class="lbl">Planes por vencer</div></div>
         <div class="adm-stat2"><div class="val" style="color:${sinLeer>0?'#B3121A':'inherit'}">${sinLeer}</div><div class="lbl">Mensajes sin leer</div></div>
       </div>
+      <div id="admDashVisitas" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="adm-btn" onclick="adminMigrarFotosR2()" style="margin-right:8px;">☁️ Migrar fotos a Cloudflare</button>
         <button class="adm-btn" onclick="adminReGeocodificarTodo()">📍 Re-geocodificar mapa</button>
@@ -18693,6 +18937,7 @@ async function admRenderDashboard(){
           return `<tr onclick="admAbrirComercioDetalle('${c._docId}')" style="cursor:pointer;"><td style="font-weight:700;">${c.nombre||'&mdash;'}${c.modo==='vitrina'?' <span class="adm-badge" style="background:#EAF2E6;color:#5C7355;">🏬 Solo vidriera</span>':''}${c.modo==='servicios'?' <span class="adm-badge" style="background:#FFF0F0;color:#B3121A;">🧰 Profesional</span>':''}</td><td style="color:#888;">${c.rubro||'&mdash;'}</td><td style="color:#888;">${c.tipo||'&mdash;'}</td><td style="color:#888;">${plan}</td><td>${badge}</td><td><button class="adm-btn" onclick="event.stopPropagation();admAbrirComercioDetalle('${c._docId}')">Ver &rarr;</button></td></tr>`;
         }).join('')}</tbody></table>
       </div>`;
+    try{ admEstVisitasMini(); }catch(e){}
   }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
 }
 
@@ -19004,7 +19249,7 @@ async function admRenderComerciosDesktop(){
         <button class="adm-filter-btn" onclick="admSetFiltroComercio('vidriera',this)">🏬 Solo vidriera</button>
         <button class="adm-filter-btn" onclick="admSetFiltroComercio('baja',this)" style="color:#7A1A1A;border-color:#d4a0a0;">🔴 Baja solicitada</button>
       </div>
-      <div class="adm-section"><table class="adm-table"><thead><tr><th>Comercio</th><th>Rubro</th><th>Tipo</th><th>Plan</th><th>ConectorT</th><th>Días restantes</th><th>Estado</th><th></th></tr></thead>
+      <div class="adm-section"><table class="adm-table"><thead><tr><th>Comercio</th><th>Rubro</th><th>Tipo</th><th>Plan</th><th>ConectorT</th><th>Días restantes</th><th>Estado</th><th id="admThUltIng" style="cursor:pointer;white-space:nowrap;" onclick="admOrdenarPorIngreso()" title="Ordenar por último ingreso">Último ingreso ⇅</th><th></th></tr></thead>
       <tbody id="admTbodyComercios">${admRowsComercios(_adminComercios)}</tbody></table></div>`;
   }catch(e){cont.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`;}
 }
@@ -19024,11 +19269,34 @@ function admFiltrarComerciosDesktop(q){
   if(window._admFiltroComercio==='baja')       lista=lista.filter(c=>c.estado==='baja_solicitada');
   if(window._admFiltroComercio==='vidriera')   lista=lista.filter(c=>c.modo==='vitrina');
   if(q) lista=lista.filter(c=>(c.nombre||'').toLowerCase().includes(q.toLowerCase()));
+  if(window._admOrdenIngreso){
+    const t=c=>c.ultimoIngreso?new Date(c.ultimoIngreso).getTime():0;
+    const dir=window._admOrdenIngreso==='asc'?1:-1;
+    lista.sort((a,b)=>{const ta=t(a),tb=t(b); if(!ta&&!tb) return 0; if(!ta) return 1; if(!tb) return -1; return (ta-tb)*dir;});
+  }
+  const th=document.getElementById('admThUltIng');
+  if(th) th.textContent='Último ingreso '+(window._admOrdenIngreso==='desc'?'▼':window._admOrdenIngreso==='asc'?'▲':'⇅');
   const el=document.getElementById('admTbodyComercios');
   if(el) el.innerHTML=admRowsComercios(lista);
 }
+window._admOrdenIngreso=null;
+function admOrdenarPorIngreso(){
+  window._admOrdenIngreso = window._admOrdenIngreso===null?'desc':(window._admOrdenIngreso==='desc'?'asc':null);
+  admFiltrarComerciosDesktop(document.getElementById('admSearchComercio')&&document.getElementById('admSearchComercio').value||'');
+}
+function admTextoIngreso(iso){
+  if(!iso) return '<span style="color:#BBB;">Sin registro</span>';
+  const d=new Date(iso); if(isNaN(d)) return '&mdash;';
+  const hoy=new Date(); hoy.setHours(0,0,0,0);
+  const dias=Math.round((hoy-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000);
+  const hora=d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  if(dias<=0) return 'Hoy '+hora;
+  if(dias===1) return 'Ayer '+hora;
+  if(dias<30) return 'Hace '+dias+' días';
+  return d.toLocaleDateString('es-AR');
+}
 function admRowsComercios(lista){
-  if(!lista||!lista.length) return '<tr><td colspan="8" style="color:#AAA;text-align:center;padding:24px;">Sin resultados</td></tr>';
+  if(!lista||!lista.length) return '<tr><td colspan="9" style="color:#AAA;text-align:center;padding:24px;">Sin resultados</td></tr>';
   return lista.map(c=>{
     const dias=planDiasRestantes(c);
     const esBaja=c.estado==='baja_solicitada';
@@ -19041,7 +19309,7 @@ function admRowsComercios(lista){
     const btnAprobarDesktop = !c.aprobado && !esBaja
       ? `<button class="adm-btn" style="color:#2F7A55;border-color:#A8D5B5;" onclick="event.stopPropagation();adminAprobarComercio('${id}')">✅ Aprobar</button>`
       : '';
-    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;${esBaja?'background:#fdf4f4;':''}"><td style="font-weight:700;">${c.nombre||'&mdash;'}${c.modo==='vitrina'?' <span class="adm-badge" style="background:#EAF2E6;color:#5C7355;">🏬 Solo vidriera</span>':''}${c.modo==='servicios'?' <span class="adm-badge" style="background:#FFF0F0;color:#B3121A;">🧰 Profesional</span>':''}</td><td style="color:#888;">${c.rubro||'&mdash;'}</td><td style="color:#888;">${c.tipo||'&mdash;'}</td><td style="color:#888;">${plan}</td><td>${conectorBadge}</td><td style="color:#888;">${diasTxt}</td><td>${badge}</td><td style="white-space:nowrap;">
+    return `<tr onclick="admAbrirComercioDetalle('${id}')" style="cursor:pointer;${esBaja?'background:#fdf4f4;':''}"><td style="font-weight:700;">${c.nombre||'&mdash;'}${c.modo==='vitrina'?' <span class="adm-badge" style="background:#EAF2E6;color:#5C7355;">🏬 Solo vidriera</span>':''}${c.modo==='servicios'?' <span class="adm-badge" style="background:#FFF0F0;color:#B3121A;">🧰 Profesional</span>':''}</td><td style="color:#888;">${c.rubro||'&mdash;'}</td><td style="color:#888;">${c.tipo||'&mdash;'}</td><td style="color:#888;">${plan}</td><td>${conectorBadge}</td><td style="color:#888;">${diasTxt}</td><td>${badge}</td><td style="color:#888;white-space:nowrap;font-size:12px;">${admTextoIngreso(c.ultimoIngreso)}</td><td style="white-space:nowrap;">
       <button class="adm-btn" onclick="event.stopPropagation();admAbrirComercioDetalle('${id}')">Ver &rarr;</button>
       <button class="adm-btn" onclick="event.stopPropagation();admEditarComercio('${id}')">✏️ Editar</button>
       ${btnAprobarDesktop}
@@ -19084,6 +19352,12 @@ function admDiagVisibilidadHTML(c){
 async function admAbrirComercioDetalle(id){
   const c=_adminComercios.find(x=>(x._docId||x.id)===id);
   if(!c) return;
+  // Desktop: se limpia el panel ANTES de armar la ficha, así no queda una copia vieja con los mismos ids
+  // (si hay dos, los getElementById de la ficha apuntan a la vieja y la nueva queda en blanco o "Cargando…").
+  if(window.innerWidth>=900){
+    const _cd=document.getElementById('admDesktopContent');
+    if(_cd) _cd.innerHTML='<p style="color:var(--muted);font-size:13px;">Cargando…</p>';
+  }
   await adminVerComercio(id);
   if(window.innerWidth>=900){
     const cont=document.getElementById('admDesktopContent');
@@ -19094,6 +19368,7 @@ async function admAbrirComercioDetalle(id){
       const bk=cl.querySelector('.link-back');if(bk)bk.remove();
       // El original (oculto) queda vacío: si no, los ids (formulario de producto, fotos, etc.) quedan repetidos
       // y los botones de la ficha desktop terminarían trabajando sobre la copia invisible.
+      const _wCl=cl.querySelector('#adminComercioDetalleContenido'); if(_wCl) _wCl.removeAttribute('id');
       const orig=document.getElementById('adminComercioDetalleContenido'); if(orig) orig.innerHTML='';
       cont.appendChild(cl);
     }
@@ -19130,9 +19405,9 @@ function admAbrirEditarDesktop(docId){
   const _mobVid = document.getElementById('admVidMobileBox'); if(_mobVid) _mobVid.innerHTML = ''; // evita ids repetidos
   cont.innerHTML = `
     <button class="adm-btn" style="margin-bottom:14px;" onclick="admAbrirComercioDetalle('${docId}')">← Volver al detalle</button>
-    <div style="max-width:980px;">
+    <div style="max-width:640px;">
       <input type="hidden" id="editAdComercioId" value="${esc(docId)}">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="field"><label>Nombre</label><input id="editAdNombre" type="text" value="${esc(c.nombre)}"></div>
         <div class="field"><label>Ciudad</label>
           <select id="editAdCiudad">${ciudades.map(cd=>`<option value="${cd}"${cd===c.ciudad?' selected':''}>${cd}</option>`).join('')}</select>
@@ -19148,7 +19423,7 @@ function admAbrirEditarDesktop(docId){
         <input id="editAdLat" type="hidden" value="${esc(c.lat)}">
         <input id="editAdLng" type="hidden" value="${esc(c.lng)}">
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="field"><label>Teléfono</label><input id="editAdTelefono" type="tel" value="${esc(c.telefono)}"></div>
         <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editAdWhatsapp" type="tel" inputmode="numeric" value="${esc(c.whatsapp)}"></div>
         <div class="field"><label>Email</label><input id="editAdEmail" type="email" value="${esc(c.email)}"></div>
@@ -20017,7 +20292,6 @@ async function adminVerComercio(docId){
       <button class="btn btn-ghost btn-sm" style="flex:1;color:#7A1A1A;border-color:#d4a0a0;background:#fdf4f4;" onclick="admEliminarDefinitivo('${docId}','${(c.nombre||'').replace(/'/g,"&#39;")}')">💀 Eliminar definitivamente</button>
     </div>
 
-    <div class="adm-det-grid"><div>
     <div class="card" style="padding:4px 16px;margin-bottom:16px;">
       ${fila('Razón social', c.razonSocial ? vitEsc(c.razonSocial) : '')}
       ${fila('CUIT', c.cuit ? vitEsc(c.cuit) : '')}
@@ -20048,6 +20322,7 @@ async function adminVerComercio(docId){
       ${fila('Atiende a domicilio', c.modo==='servicios' ? (c.atiendeDomicilio ? 'Sí' : 'No') : '')}
       ${fila('Galería', (c.galeria||[]).length ? c.galeria.length+' foto(s)' : null)}
       ${fila('Características', (c.caracVitrina||[]).length ? c.caracVitrina.length+' cargadas' : null)}
+      ${fila('Último ingreso', c.ultimoIngreso ? new Date(c.ultimoIngreso).toLocaleString('es-AR') : '')}
       ${fila('Alta', c.fechaAlta ? new Date(c.fechaAlta).toLocaleDateString('es-AR') : null)}
     </div>
 
@@ -20112,7 +20387,14 @@ async function adminVerComercio(docId){
       </div>
     </div>
 
-    </div><div>
+    <!-- ══ VENTAS ══ -->
+    <div class="section-title" style="margin-bottom:8px;">📦 Reservas / Ventas</div>
+    <div style="margin-bottom:18px;">${ventasHtml}</div>
+
+    <!-- ══ VALORACIONES ══ -->
+    <div class="section-title" style="margin-bottom:8px;">⭐ Valoraciones</div>
+    <div style="margin-bottom:18px;">${valoracionesHtml}</div>
+
     <!-- ══ PRODUCTOS ══ -->
     <div class="section-title" style="margin-bottom:8px;">🛍️ Productos</div>
     <div id="adminProductosComercioLista" style="margin-bottom:10px;"><p style="color:var(--muted);font-size:12px;">Cargando…</p></div>
@@ -20158,15 +20440,6 @@ async function adminVerComercio(docId){
         <button class="btn btn-ghost" onclick="adminCerrarFormProducto()">Cancelar</button>
       </div>
     </div>
-    <!-- ══ VENTAS ══ -->
-    <div class="section-title" style="margin-bottom:8px;">📦 Reservas / Ventas</div>
-    <div style="margin-bottom:18px;">${ventasHtml}</div>
-
-    <!-- ══ VALORACIONES ══ -->
-    <div class="section-title" style="margin-bottom:8px;">⭐ Valoraciones</div>
-    <div style="margin-bottom:18px;">${valoracionesHtml}</div>
-
-    </div></div>
     <div style="height:30px;"></div>`;
   // Cargar lista de productos de este comercio
   await adminRenderProductosComercio(c.id);
@@ -24084,6 +24357,15 @@ function cCancelarVentaPendiente(ventaId){
   (function(){
     var deferredPrompt = null;
     var KEY = 'puent_instalar_oculto_hasta';
+    // ── Cuántas veces sale el cartel solo ──
+    // INSTALAR_MAX_VECES: cuántas veces en total se muestra solo (0 = siempre que entre).
+    // INSTALAR_DIAS_ENTRE: días mínimos entre un cartel y el siguiente (0 = en cada visita).
+    // El botón "Instalar app" del menú sigue disponible siempre.
+    var INSTALAR_MAX_VECES = 3;
+    var INSTALAR_DIAS_ENTRE = 2;
+    var KEY_VECES = 'puent_instalar_veces';
+    function leerVeces(){ try{ return parseInt(localStorage.getItem(KEY_VECES)||'0',10)||0; }catch(e){ return 0; } }
+    function sumarVeces(){ try{ localStorage.setItem(KEY_VECES, String(leerVeces()+1)); }catch(e){} }
     var UA = navigator.userAgent || '';
     var esIOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     var enAppSocial = /FBAN|FBAV|Instagram|Line\/|WhatsApp|TikTok/i.test(UA);
@@ -24141,7 +24423,7 @@ function cCancelarVentaPendiente(ventaId){
     window.cerrarInstalarApp = function(recordar){
       var el = document.getElementById('instalarAppSheet');
       if(el) el.classList.remove('on');
-      if(recordar) guardarOculto(7);
+      // el próximo aviso lo marca INSTALAR_DIAS_ENTRE (se fija al mostrarlo), no hace falta guardar nada acá
     };
     window.instalarAppAhora = function(){
       if(!deferredPrompt){ cerrarInstalarApp(true); return; }
@@ -24150,7 +24432,6 @@ function cCancelarVentaPendiente(ventaId){
       dp.prompt();
       dp.userChoice.then(function(r){
         cerrarInstalarApp(false);
-        if(r && r.outcome !== 'accepted') guardarOculto(7);
         actualizarItemMenu();
       }).catch(function(){ cerrarInstalarApp(false); });
     };
@@ -24158,16 +24439,19 @@ function cCancelarVentaPendiente(ventaId){
       var it = document.getElementById('menuInstalarApp');
       if(it) it.style.display = yaInstalada() ? 'none' : '';
     }
-    // Popup automático: una sola vez por sesión, sólo en el feed, y si no lo cerraron en los últimos 7 días
+    // Popup automático: una sola vez por visita, sólo en el feed, hasta INSTALAR_MAX_VECES veces y separado por INSTALAR_DIAS_ENTRE días
     function pantallaVisibleEsFeed(){
       var v = document.querySelector('.screen:not(.hidden)');
       return !!v && v.id === 'screen-feed';
     }
     function intentarMostrarAuto(){
       if(yaInstalada() || Date.now() < leerOculto()) return;
+      if(INSTALAR_MAX_VECES > 0 && leerVeces() >= INSTALAR_MAX_VECES) return;
       if(!(deferredPrompt || esIOS)) return; // Android sin prompt disponible: queda el botón del menú
       if(!pantallaVisibleEsFeed()) return;
       if(document.querySelector('[id^="modal"]:not(.hidden)[style*="display:flex"], [id^="modal"]:not(.hidden)[style*="display: flex"]')) return;
+      sumarVeces();
+      guardarOculto(INSTALAR_DIAS_ENTRE);
       abrirInstalarApp();
       clearInterval(t);
     }
@@ -24179,6 +24463,171 @@ function cCancelarVentaPendiente(ventaId){
     }, 5000);
     document.addEventListener('DOMContentLoaded', actualizarItemMenu);
     window.addEventListener('load', actualizarItemMenu);
+  })();
+  </script>
+
+  <!-- ESTADÍSTICAS DE LA APP (admin): cuántos están en línea y cuántos entraron por día.
+       Anónimo: solo un ID al azar por celular, sin nombres ni IP. Se guarda en la colección "estadisticas"
+       (docs "app_AAAA-MM-DD" = totales del día y "pres_<id>" = latido de quien tiene la app abierta). -->
+  <script>
+  (function(){
+    var COL = 'estadisticas';
+    var VENTANA_ONLINE = 5 * 60 * 1000;   // "en línea" = avisó hace menos de 5 minutos
+    function fechaLocal(d){ d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+    var did = (function(){
+      try{ var x = localStorage.getItem('puent_did'); if(!x){ x = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('puent_did', x); } return x; }
+      catch(e){ return window.__pdid || (window.__pdid = Math.random().toString(36).slice(2) + Date.now().toString(36)); }
+    })();
+    var contado = false, ultPing = 0;
+    function listo(){ return typeof firebaseListo !== 'undefined' && firebaseListo && typeof db !== 'undefined' && db; }
+    function rolActual(){ try{ return (state && state.role) || 'visitante'; }catch(e){ return 'visitante'; } }
+
+    // ---------- registro (lado visitante) ----------
+    function ping(){
+      try{
+        if(!listo() || rolActual() === 'admin') return;
+        if(document.visibilityState === 'hidden') return;
+        var ahora = Date.now(); if(ahora - ultPing < 25000) return; ultPing = ahora;
+        db.collection(COL).doc('pres_' + did).set({ comercioId:'_pres', fecha: fechaLocal(), ts: ahora, rol: rolActual() }, { merge:true })
+          .catch(function(e){ console.warn('presencia:', e && e.code || e); });
+      }catch(e){}
+    }
+    function contarVisita(){
+      try{
+        if(contado || !listo() || rolActual() === 'admin') return;
+        contado = true;
+        var f = fechaLocal();
+        var sesionNueva = true; try{ sesionNueva = !sessionStorage.getItem('puent_vis_s'); sessionStorage.setItem('puent_vis_s','1'); }catch(e){}
+        var diaNuevo = true;    try{ diaNuevo = localStorage.getItem('puent_vis_d') !== f; if(diaNuevo) localStorage.setItem('puent_vis_d', f); }catch(e){}
+        if(!sesionNueva && !diaNuevo) return;
+        var inc = function(n){ return firebase.firestore.FieldValue.increment(n); };
+        var data = { comercioId:'_app', fecha: f };
+        if(sesionNueva) data.sesiones = inc(1);
+        if(diaNuevo){
+          data.unicos = inc(1);
+          var pwa = false; try{ pwa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }catch(e){}
+          if(pwa) data.pwa = inc(1);
+        }
+        db.collection(COL).doc('app_' + f).set(data, { merge:true }).catch(function(e){ console.warn('visitas:', e && e.code || e); });
+      }catch(e){ console.warn('contarVisita:', e); }
+    }
+    var intentos = 0;
+    var espera = setInterval(function(){
+      intentos++;
+      if(listo()){ clearInterval(espera); setTimeout(function(){ contarVisita(); ping(); }, 4000); }   // espera a saber el rol (así el admin no se cuenta)
+      else if(intentos > 40) clearInterval(espera);
+    }, 1500);
+    setInterval(ping, 120000);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ contarVisita(); ping(); } });
+
+    // ---------- lectura (lado admin) ----------
+    var NOMBRE_ROL = { cliente:'Clientes', comercio:'Comercios', vendedor:'ConectorT', visitante:'Visitantes' };
+    async function leerOnline(){
+      var snap = await _getSrv(db.collection(COL).where('ts', '>=', Date.now() - VENTANA_ONLINE));
+      var r = { total:0, porRol:{} };
+      snap.forEach(function(d){ var x = d.data(); if(x.comercioId !== '_pres') return; r.total++; var k = x.rol || 'visitante'; r.porRol[k] = (r.porRol[k]||0) + 1; });
+      return r;
+    }
+    async function leerDias(){
+      var snap = await _getSrv(db.collection(COL).where('comercioId', '==', '_app'));
+      var o = {}; snap.forEach(function(d){ var x = d.data(); if(x.fecha) o[x.fecha] = { unicos:Number(x.unicos)||0, sesiones:Number(x.sesiones)||0, pwa:Number(x.pwa)||0 }; });
+      return o;
+    }
+    function textoRoles(r){
+      var p = Object.keys(r.porRol).map(function(k){ return r.porRol[k] + ' ' + (NOMBRE_ROL[k] || k).toLowerCase(); });
+      return p.length ? p.join(' · ') : 'nadie en este momento';
+    }
+    function tarjeta(valor, titulo, sub, id, color){
+      return '<div class="adm-stat2"><div class="val" ' + (id ? 'id="' + id + '"' : '') + ' style="' + (color ? 'color:' + color + ';' : '') + '">' + valor + '</div><div class="lbl">' + titulo + '</div>' + (sub ? '<div style="font-size:11px;color:#999;margin-top:3px;">' + sub + '</div>' : '') + '</div>';
+    }
+    function hoyAyer(dias){
+      var h = fechaLocal(), a = fechaLocal(new Date(Date.now() - 864e5));
+      return { hoy: dias[h] || { unicos:0, sesiones:0, pwa:0 }, ayer: dias[a] || { unicos:0, sesiones:0, pwa:0 } };
+    }
+
+    // Tarjetas chicas para el Dashboard
+    window.admEstVisitasMini = async function(){
+      var box = document.getElementById('admDashVisitas'); if(!box) return;
+      try{
+        var res = await Promise.all([leerOnline(), leerDias()]);
+        var on = res[0], ha = hoyAyer(res[1]);
+        box.innerHTML = tarjeta(on.total, '🟢 En línea ahora', textoRoles(on)) + tarjeta(ha.hoy.unicos, '📱 Entraron hoy', 'celulares distintos') + tarjeta(ha.ayer.unicos, 'Ayer', 'celulares distintos') + tarjeta(ha.hoy.sesiones, 'Sesiones hoy', 'veces que abrieron la app');
+      }catch(e){ box.innerHTML = '<div style="grid-column:1/-1;font-size:12px;color:#999;">No se pudieron cargar las visitas (revisá las reglas de Firestore para la colección estadisticas).</div>'; console.warn('mini visitas:', e && e.code || e); }
+    };
+
+    // Pestaña completa
+    var periodoRank = 7, tokenEst = 0, timerOnline = null;
+    window.admEstSetPeriodo = function(d){ periodoRank = d; window.admRenderEstadisticasApp(); };
+    function rubroNombre(c){ return vitEsc(c.nombre || '—'); }
+    async function ranking(dias){
+      if(!_adminComercios || !_adminComercios.length){
+        var cs = await _getSrv(db.collection('comercios'));
+        _adminComercios = cs.docs.map(function(d){ return Object.assign({}, d.data(), { _docId: d.id }); }).filter(function(c){ return c.estado !== 'papelera'; }).map(_admMarcarVacio);
+      }
+      var desde = fechaLocal(new Date(Date.now() - (dias - 1) * 864e5));
+      var snap = await _getSrv(db.collection(COL).where('fecha', '>=', desde));
+      var idx = {}; _adminComercios.forEach(function(c){ [c.id, c._docId, c.uid].forEach(function(k){ if(k) idx[k] = c; }); });
+      var acum = new Map();
+      snap.forEach(function(d){
+        var x = d.data(); var cid = x.comercioId; if(!cid || String(cid).charAt(0) === '_') return;
+        var c = idx[cid]; if(!c) return;
+        var a = acum.get(c) || { c:c, ficha:0, prod:0, cons:0, como:0 };
+        a.ficha += Number(x.vistasFicha)||0; a.prod += Number(x.vistasProducto)||0; a.cons += Number(x.consultas)||0; a.como += Number(x.comoLlegar)||0;
+        acum.set(c, a);
+      });
+      var filas = Array.from(acum.values()).sort(function(a, b){ return (b.ficha + b.prod) - (a.ficha + a.prod); });
+      var sin = _adminComercios.filter(function(c){ return c.aprobado && c.estado !== 'suspendido' && !acum.has(c); });
+      return { filas: filas, sin: sin };
+    }
+
+    window.admRenderEstadisticasApp = async function(){
+      var cont = document.getElementById('admDesktopContent'); if(!cont) return;
+      var tok = ++tokenEst;
+      cont.innerHTML = '<p style="color:#AAA;font-size:13px;padding:20px 0;">Cargando…</p>';
+      try{
+        var res = await Promise.all([leerOnline(), leerDias(), ranking(periodoRank)]);
+        if(tok !== tokenEst || !document.getElementById('admDesktopContent')) return;
+        var on = res[0], dias = res[1], rk = res[2], ha = hoyAyer(dias);
+        var inst = ha.hoy.unicos ? Math.round(ha.hoy.pwa * 100 / ha.hoy.unicos) : 0;
+        // barras de los últimos 14 días
+        var arr = [], max = 1;
+        for(var i = 13; i >= 0; i--){ var f = fechaLocal(new Date(Date.now() - i * 864e5)); var v = dias[f] ? dias[f].unicos : 0; if(v > max) max = v; arr.push({ f:f, v:v }); }
+        var barras = arr.map(function(b){
+          var h = Math.max(2, Math.round(b.v * 100 / max));
+          var dd = b.f.slice(8) + '/' + b.f.slice(5, 7);
+          return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;"><div style="font-size:11px;font-weight:700;color:#444;">' + (b.v || '') + '</div><div style="width:100%;max-width:34px;height:' + h + 'px;background:' + (b.f === fechaLocal() ? '#FC1820' : '#C9CFDC') + ';border-radius:6px 6px 0 0;"></div><div style="font-size:10px;color:#999;">' + dd + '</div></div>';
+        }).join('');
+        var chips = [[7,'7 días'],[30,'30 días']].map(function(x){ var on2 = periodoRank === x[0]; return '<button class="adm-filter-btn' + (on2 ? ' active' : '') + '" onclick="admEstSetPeriodo(' + x[0] + ')">' + x[1] + '</button>'; }).join('');
+        var filasHtml = rk.filas.length ? rk.filas.map(function(a, n){
+          var id = a.c._docId || a.c.id;
+          return '<tr onclick="admAbrirComercioDetalle(\'' + id + '\')" style="cursor:pointer;"><td style="color:#999;">' + (n + 1) + '</td><td style="font-weight:700;">' + rubroNombre(a.c) + '</td><td style="color:#888;">' + vitEsc(a.c.rubro || '—') + '</td><td>' + a.ficha + '</td><td>' + a.prod + '</td><td>' + a.cons + '</td><td>' + a.como + '</td></tr>';
+        }).join('') : '<tr><td colspan="7" style="color:#AAA;text-align:center;padding:24px;">Todavía no hay visitas registradas en este período.</td></tr>';
+        cont.innerHTML =
+          '<div id="admEstApp" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">'
+          + tarjeta(on.total, '🟢 En línea ahora', '<span id="admEstOnlineRoles">' + textoRoles(on) + '</span>', 'admEstOnlineNum', '#2F7A55')
+          + tarjeta(ha.hoy.unicos, '📱 Entraron hoy', 'celulares distintos')
+          + tarjeta(ha.ayer.unicos, 'Ayer', 'celulares distintos')
+          + tarjeta(ha.hoy.sesiones, 'Sesiones hoy', ha.hoy.unicos ? inst + '% con la app instalada' : 'veces que abrieron la app')
+          + '</div>'
+          + '<div class="adm-section" style="padding:16px;margin-bottom:16px;"><div class="adm-section-hdr" style="padding:0 0 10px;">Celulares distintos por día (últimos 14 días)</div>'
+          + '<div style="display:flex;align-items:flex-end;gap:6px;height:150px;">' + barras + '</div>'
+          + '<div style="font-size:11px;color:#999;margin-top:10px;line-height:1.5;">Se cuenta cada celular una vez por día. No incluye tus propias visitas como admin. Los datos empiezan desde que se activó esta función.</div></div>'
+          + '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;"><div style="font-weight:800;font-size:15px;margin-right:8px;">Ranking de comercios</div>' + chips + '</div>'
+          + '<div class="adm-section"><table class="adm-table"><thead><tr><th>#</th><th>Comercio</th><th>Rubro</th><th>Visitas a la ficha</th><th>Productos vistos</th><th>Consultas WhatsApp</th><th>Cómo llegar</th></tr></thead><tbody>' + filasHtml + '</tbody></table></div>'
+          + (rk.sin.length ? '<details style="margin-top:14px;background:#F7F8FB;border-radius:12px;padding:10px 14px;font-size:12.5px;"><summary style="font-weight:800;cursor:pointer;">Sin ninguna visita en el período (' + rk.sin.length + ')</summary><div style="margin-top:8px;line-height:1.9;">' + rk.sin.map(function(c){ return '<span style="display:inline-block;background:#fff;border:1px solid var(--line);border-radius:100px;padding:2px 10px;margin:0 6px 6px 0;cursor:pointer;" onclick="admAbrirComercioDetalle(\'' + (c._docId || c.id) + '\')">' + rubroNombre(c) + '</span>'; }).join('') + '</div></details>' : '');
+        // el contador "en línea" se actualiza solo cada 30 s mientras la pestaña está abierta
+        if(timerOnline) clearInterval(timerOnline);
+        timerOnline = setInterval(async function(){
+          var num = document.getElementById('admEstOnlineNum');
+          if(!num || tok !== tokenEst){ clearInterval(timerOnline); timerOnline = null; return; }
+          try{ var o = await leerOnline(); num.textContent = o.total; var rr = document.getElementById('admEstOnlineRoles'); if(rr) rr.textContent = textoRoles(o); }catch(e){}
+        }, 30000);
+      }catch(e){
+        if(tok !== tokenEst) return;
+        cont.innerHTML = '<div style="background:#FFF8E1;border-radius:14px;padding:16px;font-size:13px;line-height:1.5;color:#7A5B00;">No se pudieron cargar las estadísticas. Si el error persiste, puede ser que las reglas de Firestore no dejen leer la colección <b>estadisticas</b> completa al admin.<br><span style="font-size:11px;">' + (e && (e.code || e.message) || '') + '</span></div>';
+        console.warn('estadísticas app:', e);
+      }
+    };
   })();
   </script>
 
@@ -24429,6 +24878,206 @@ function cCancelarVentaPendiente(ventaId){
     };
   })();
   </script>
+
+<script>
+/* ============================================================
+   NOVEDADES PARA COMERCIOS
+   El admin las carga en config/novedades ({items:[{id,titulo,texto,imagen,fecha,activa}]}).
+   El comercio las ve con el botón "Novedades" del panel y con un aviso (una sola vez por novedad nueva).
+   ============================================================ */
+(function(){
+  var items = [];
+  var avisadoSesion = false;
+  function esc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function comercio(){ return (typeof state !== 'undefined' && state.role === 'comercio') ? state.currentUser : null; }
+  function keyVistas(c){ return 'puent_nov_vistas_' + (c.uid || c.id || 'x'); }
+  function vistasDe(c){
+    var a = c.novedadesVistas || '', b = '';
+    try{ b = localStorage.getItem(keyVistas(c)) || ''; }catch(e){}
+    return a > b ? a : b;
+  }
+  function activas(){
+    return items.filter(function(i){ return i && i.titulo && i.activa !== false; })
+                .sort(function(x,y){ return String(y.fecha||'') < String(x.fecha||'') ? -1 : 1; });
+  }
+  function noVistas(c){ var v = vistasDe(c); return activas().filter(function(i){ return String(i.fecha||'') > v; }); }
+  function fechaTxt(f){ try{ return new Date(f).toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }); }catch(e){ return ''; } }
+
+  async function cargar(){
+    try{
+      if(typeof db === 'undefined' || !db || !firebaseListo) return;
+      var d = await db.collection('config').doc('novedades').get();
+      items = (d.exists && Array.isArray(d.data().items)) ? d.data().items : [];
+    }catch(e){ console.warn('No se pudieron cargar las novedades:', e); }
+  }
+  function marcarVistas(){
+    var c = comercio(); if(!c) return;
+    var a = activas(); if(!a.length) return;
+    var nueva = String(a[0].fecha || '');
+    if(!nueva || nueva <= vistasDe(c)) return;
+    c.novedadesVistas = nueva;
+    try{ localStorage.setItem(keyVistas(c), nueva); }catch(e){}
+    try{ db.collection('comercios').doc(c._docId || c.uid || c.id).set({ novedadesVistas: nueva }, { merge:true }).catch(function(){}); }catch(e){}
+    actualizarBadge();
+  }
+  function actualizarBadge(){
+    var c = comercio();
+    var n = c ? noVistas(c).length : 0;
+    var b = document.getElementById('novedadesBadge');
+    if(b){ b.style.display = n ? 'inline-flex' : 'none'; b.textContent = n > 9 ? '9+' : String(n); }
+  }
+  function cerrar(id){ var o = document.getElementById(id); if(o) o.remove(); }
+
+  function itemHTML(i, nuevo){
+    return '<div style="border:1px solid #eee;border-radius:14px;overflow:hidden;margin-bottom:12px;">'
+      + (i.imagen ? '<img src="' + esc(i.imagen) + '" alt="" style="width:100%;height:auto;display:block;background:#f6f6f6;">' : '')
+      + '<div style="padding:12px 14px;">'
+      +   '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+      +     (nuevo ? '<span style="background:#FC1820;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:100px;">NUEVO</span>' : '')
+      +     '<span style="font-size:11px;color:#999;">' + esc(fechaTxt(i.fecha)) + '</span>'
+      +   '</div>'
+      +   '<div style="font-weight:800;font-size:15px;color:#1a2340;margin-bottom:4px;">' + esc(i.titulo) + '</div>'
+      +   '<div style="font-size:13.5px;color:#444;line-height:1.5;white-space:pre-line;">' + esc(i.texto || '') + '</div>'
+      + '</div></div>';
+  }
+  function overlay(id, inner){
+    cerrar(id);
+    var ov = document.createElement('div');
+    ov.id = id;
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99990;background:rgba(15,15,20,.6);display:flex;align-items:center;justify-content:center;padding:14px;';
+    ov.innerHTML = '<div style="background:#fff;border-radius:18px;width:min(460px,100%);max-height:100%;overflow:auto;padding:16px;">' + inner + '</div>';
+    ov.addEventListener('click', function(e){ if(e.target === ov){ cerrar(id); marcarVistas(); } });
+    document.body.appendChild(ov);
+  }
+
+  // Lista completa (botón "Novedades" del panel)
+  window.abrirNovedades = async function(){
+    var c = comercio(); if(!c) return;
+    await cargar();
+    var a = activas(), v = vistasDe(c);
+    var cuerpo = a.length
+      ? a.map(function(i){ return itemHTML(i, String(i.fecha||'') > v); }).join('')
+      : '<p style="color:#888;font-size:13px;text-align:center;padding:18px 0;">Todavía no hay novedades. Cuando sumemos algo nuevo lo vas a ver acá.</p>';
+    overlay('novedadesOverlay',
+      '<div style="font-weight:800;font-size:16px;color:#1a2340;margin-bottom:10px;">🆕 Novedades de PuenT</div>' + cuerpo
+      + '<button type="button" class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="cerrarNovedades()">Cerrar</button>');
+    marcarVistas();
+  };
+  window.cerrarNovedades = function(){ cerrar('novedadesOverlay'); cerrar('novedadesAvisoOverlay'); marcarVistas(); };
+
+  // Aviso al entrar al panel: solo si hay algo que no vio, una vez por sesión
+  async function revisarAviso(){
+    var c = comercio(); if(!c) return;
+    await cargar();
+    actualizarBadge();
+    if(avisadoSesion) return;
+    var nv = noVistas(c);
+    if(!nv.length) return;
+    avisadoSesion = true;
+    overlay('novedadesAvisoOverlay',
+      '<div style="font-weight:800;font-size:16px;color:#1a2340;margin-bottom:10px;">🆕 Hay novedades en PuenT</div>'
+      + itemHTML(nv[0], true)
+      + (nv.length > 1 ? '<div style="font-size:12px;color:#888;margin:-4px 0 10px;">Y ' + (nv.length - 1) + (nv.length - 1 === 1 ? ' novedad más.' : ' novedades más.') + '</div>' : '')
+      + '<div style="display:flex;gap:8px;">'
+      +   (nv.length > 1 ? '<button type="button" class="btn btn-ghost" style="flex:1;" onclick="cerrarNovedades();abrirNovedades()">Ver todas</button>' : '')
+      +   '<button type="button" class="btn btn-primary" style="flex:1;" onclick="cerrarNovedades()">Entendido</button>'
+      + '</div>');
+  }
+  window.novedadesRevisar = revisarAviso;
+
+  // Al mostrar el panel del comercio
+  var _sc = window.showScreen;
+  if(typeof _sc === 'function'){
+    window.showScreen = function(id){
+      var r = _sc.apply(this, arguments);
+      if(id === 'c-panel') setTimeout(revisarAviso, 700);
+      return r;
+    };
+  }
+
+  /* ---------------- ADMIN: cargar novedades ---------------- */
+  var nv = { items: [], edit: null, img: null, desktop: false };
+  function admCont(){ return nv.desktop ? document.getElementById('admDesktopContent') : document.getElementById('admNovedadesBox'); }
+  function admRender(){
+    var cont = admCont(); if(!cont) return;
+    var e = nv.edit;
+    var lista = nv.items.slice().sort(function(x,y){ return String(y.fecha||'') < String(x.fecha||'') ? -1 : 1; }).map(function(i){
+      return '<div class="card" style="margin-top:0;margin-bottom:8px;padding:10px;display:flex;gap:10px;align-items:center;">'
+        + (i.imagen ? '<img src="' + esc(i.imagen) + '" style="width:54px;height:54px;object-fit:contain;background:#f6f6f6;border-radius:10px;flex-shrink:0;">' : '')
+        + '<div style="flex:1;min-width:0;"><div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(i.titulo) + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);">' + esc(fechaTxt(i.fecha)) + (i.activa === false ? ' · oculta' : '') + '</div></div>'
+        + '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'
+        +   '<button class="adm-btn" onclick="admNovEditar(\'' + i.id + '\')">✏️ Editar</button>'
+        +   '<button class="adm-btn" onclick="admNovAlternar(\'' + i.id + '\')">' + (i.activa === false ? '👁️ Mostrar' : '🙈 Ocultar') + '</button>'
+        +   '<button class="adm-btn" style="color:#C0392B;" onclick="admNovBorrar(\'' + i.id + '\')">🗑️</button>'
+        + '</div></div>';
+    }).join('') || '<p style="font-size:12px;color:var(--muted);">Todavía no hay novedades cargadas.</p>';
+    cont.innerHTML = '<div style="max-width:560px;">'
+      + '<div class="card" style="margin-top:0;">'
+      +   '<div style="font-weight:800;font-size:14px;margin-bottom:8px;">' + (e ? '✏️ Editar novedad' : '➕ Nueva novedad') + '</div>'
+      +   '<div class="field"><label>Título</label><input type="text" id="nvTitulo" maxlength="80" placeholder="Ej: Ya podés compartir tus productos" value="' + esc(e ? e.titulo : '') + '"></div>'
+      +   '<div class="field"><label>Texto</label><textarea id="nvTexto" rows="4" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;font-family:inherit;font-size:14px;" placeholder="Contales qué hay de nuevo y cómo usarlo">' + esc(e ? e.texto : '') + '</textarea></div>'
+      +   '<div class="field"><label>Imagen <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>'
+      +   '<div id="nvImgPrev" style="margin-bottom:6px;">' + (nv.img ? '<img src="' + esc(nv.img) + '" style="max-width:100%;max-height:140px;border-radius:10px;">' : '') + '</div>'
+      +   '<input type="file" id="nvImgInput" accept="image/*" style="display:none;" onchange="admNovFoto(this)">'
+      +   '<div style="display:flex;gap:8px;"><button class="adm-btn" onclick="document.getElementById(\'nvImgInput\').click()">🖼️ Elegir imagen</button>'
+      +   (nv.img ? '<button class="adm-btn" style="color:#C0392B;" onclick="admNovQuitarFoto()">Quitar</button>' : '') + '</div></div>'
+      +   '<button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="admNovGuardar()">' + (e ? 'Guardar cambios' : 'Publicar novedad') + '</button>'
+      +   (e ? '<button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="admNovCancelar()">Cancelar edición</button>' : '')
+      + '</div>'
+      + '<div style="font-weight:800;font-size:14px;margin:18px 0 8px;">Novedades publicadas</div>' + lista + '</div>';
+  }
+  async function admGuardarTodo(){
+    await db.collection('config').doc('novedades').set({ items: nv.items });
+    items = nv.items.slice();
+  }
+  window.adminAbrirNovedades = async function(desktop){
+    nv.desktop = !!desktop; nv.edit = null; nv.img = null;
+    try{ var d = await db.collection('config').doc('novedades').get(); nv.items = (d.exists && Array.isArray(d.data().items)) ? d.data().items : []; }
+    catch(e){ nv.items = []; toast('No se pudieron leer las novedades'); }
+    admRender();
+  };
+  window.admNovFoto = function(input){
+    var f = input.files && input.files[0]; if(!f) return;
+    input.value = '';
+    comprimirImagen(f, LIMITE_FOTO_BYTES).then(function(d){ return fotoAR2(d, 'otros'); }).then(function(u){
+      nv.img = u;
+      var prev = document.getElementById('nvImgPrev');
+      if(prev) prev.innerHTML = '<img src="' + esc(u) + '" style="max-width:100%;max-height:140px;border-radius:10px;">';
+    }).catch(function(){ toast('No pudimos procesar esa imagen.'); });
+  };
+  window.admNovQuitarFoto = function(){ nv.img = null; var prev = document.getElementById('nvImgPrev'); if(prev) prev.innerHTML = ''; };
+  window.admNovEditar = function(id){ var i = nv.items.find(function(x){ return x.id === id; }); if(!i) return; nv.edit = Object.assign({}, i); nv.img = i.imagen || null; admRender(); };
+  window.admNovCancelar = function(){ nv.edit = null; nv.img = null; admRender(); };
+  window.admNovAlternar = async function(id){
+    var i = nv.items.find(function(x){ return x.id === id; }); if(!i) return;
+    i.activa = (i.activa === false);
+    try{ await admGuardarTodo(); toast(i.activa === false ? 'Novedad oculta' : 'Novedad visible'); }catch(e){ toast('No se pudo guardar'); }
+    admRender();
+  };
+  window.admNovBorrar = async function(id){
+    if(!confirm('¿Borrar esta novedad?')) return;
+    nv.items = nv.items.filter(function(x){ return x.id !== id; });
+    try{ await admGuardarTodo(); toast('Novedad borrada'); }catch(e){ toast('No se pudo guardar'); }
+    admRender();
+  };
+  window.admNovGuardar = async function(){
+    var titulo = (document.getElementById('nvTitulo').value || '').trim();
+    var texto = (document.getElementById('nvTexto').value || '').trim();
+    if(!titulo){ toast('Poné un título'); return; }
+    if(nv.edit){
+      var i = nv.items.find(function(x){ return x.id === nv.edit.id; });
+      if(i){ i.titulo = titulo; i.texto = texto; i.imagen = nv.img || null; }
+    } else {
+      nv.items.push({ id: 'n-' + Date.now(), titulo: titulo, texto: texto, imagen: nv.img || null, fecha: new Date().toISOString(), activa: true });
+    }
+    try{ await admGuardarTodo(); toast('¡Novedad publicada! ✅'); }catch(e){ console.error(e); toast('No se pudo guardar — revisá tu conexión'); return; }
+    nv.edit = null; nv.img = null; admRender();
+  };
+
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) actualizarBadge(); });
+})();
+</script>
 
   <!-- PWA: registra el service worker para que la app sea instalable.
        sw.js tiene que estar subido en la MISMA carpeta que este index.html. -->
