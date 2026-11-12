@@ -542,7 +542,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   max-height:0; overflow:hidden; transition:max-height .35s ease;
   background:#FAFAF8;
 }
-.cat-banner-item.open .cat-banner-panel{ max-height:2400px; }
+/* Tope muy alto: con "Ver más" el rubro puede tener muchas filas y un tope chico (2400px) cortaba las últimas imágenes */
+.cat-banner-item.open .cat-banner-panel{ max-height:100000px; }
 .cat-banner-panel-inner{ padding:12px; }
 .cat-banner-empty{
   padding:18px 4px; text-align:center; font-size:12.5px; color:var(--muted);
@@ -1542,7 +1543,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
     <div class="link-back" onclick="showScreen('bienvenida')">← Volver</div>
     <div class="kicker">Sumar mi negocio</div>
     <h1 class="page-title">¿Cómo querés estar en PuenT?</h1>
-    <p class="page-sub">Elegí la opción que mejor te represente. Tenés 30 días gratis para probarlo.</p>
+    <p class="page-sub">Elegí la opción que mejor te represente. Tenés gratis hasta que empiece el mes siguiente.</p>
     <div style="display:flex;flex-direction:column;gap:12px;margin-top:6px;">
       <button type="button" class="modo-neg-card" onclick="elegirModoNegocio('tienda')">
         <div class="modo-neg-ic">🛍️</div>
@@ -2303,14 +2304,14 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="background:#F0F7F2;border:1.5px solid #A8D5B5;border-radius:13px;padding:13px 14px;display:flex;gap:10px;align-items:flex-start;margin-bottom:20px;">
         <span style="font-size:18px;flex-shrink:0;">🎁</span>
         <div style="font-size:12.5px;color:#2F5C3F;line-height:1.6;">
-          <strong>30 días gratis, sin compromiso.</strong> Una vez que el equipo de PuenT apruebe tu comercio, tenés un mes para probarlo con todo incluido.
+          <strong>Gratis hasta que empiece el mes siguiente, sin compromiso.</strong> Desde ahí comienza la suscripción, que se abona del 1 al 10 de cada mes.
         </div>
       </div>
 
       <!-- Términos y condiciones -->
       <div style="background:#F8F8F8;border:1.5px solid #EAEAEA;border-radius:13px;padding:13px 14px;margin-bottom:20px;max-height:130px;overflow-y:auto;font-size:12px;color:#666;line-height:1.7;">
         <strong style="color:#333;">Términos y Condiciones de PuenT</strong><br><br>
-        Al registrarte en PuenT como comercio, aceptás que: (1) los datos que cargás son verídicos y corresponden a un negocio real; (2) PuenT puede revisar y aprobar o rechazar el alta del comercio; (3) el período de gracia de 30 días comienza desde la fecha de aprobación; (4) la plataforma cobra una comisión por ventas según el plan elegido; (5) podés solicitar la baja en cualquier momento desde tu panel; (6) PuenT puede suspender cuentas que incumplan las políticas de uso.
+        Al registrarte en PuenT como comercio, aceptás que: (1) los datos que cargás son verídicos y corresponden a un negocio real; (2) PuenT puede revisar y aprobar o rechazar el alta del comercio; (3) lo que queda del mes en que te sumás es sin cargo; desde el mes siguiente la suscripción se abona por adelantado, del 1 al 10 de cada mes; (4) PuenT no cobra comisión sobre tus ventas; (5) podés solicitar la baja en cualquier momento desde tu panel: seguís activo hasta el fin del período abonado, no se cobra la renovación y no hay reintegros parciales; (6) PuenT puede suspender cuentas que incumplan las políticas de uso.
       </div>
 
       <label style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:28px;padding:14px;background:#fff;border:1.5px solid #EAEAEA;border-radius:14px;">
@@ -2937,8 +2938,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="display:flex;align-items:flex-start;gap:12px;">
         <div style="font-size:22px;flex-shrink:0;margin-top:2px;">🎁</div>
         <div>
-          <div style="font-weight:800;font-size:14px;color:#1A1A1A;margin-bottom:4px;">30 días gratis, sin compromiso</div>
-          <div style="font-size:13px;color:#555;line-height:1.6;">Una vez activado, tenés un mes completo para probar PuenT sin ningún costo. Sin tarjeta, sin contrato. Si no te convence, nos avisás y listo.</div>
+          <div style="font-weight:800;font-size:14px;color:#1A1A1A;margin-bottom:4px;">Gratis hasta que empiece el mes siguiente</div>
+          <div style="font-size:13px;color:#555;line-height:1.6;">Una vez activado, probás PuenT sin costo hasta fin de mes. Desde el mes siguiente empieza la suscripción: se abona del 1 al 10 de cada mes. Sin tarjeta, sin contrato. Si no te convence, nos avisás y listo.</div>
         </div>
       </div>
     </div>
@@ -2965,7 +2966,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <span style="font-size:18px;">⏳</span>
         <div>
           <div style="font-weight:800;font-size:13px;color:#B3121A;">Tu comercio está en revisión</div>
-          <div style="font-size:12px;color:#8A2A2E;margin-top:1px;">Te contactamos en 48hs para activarlo · 30 días gratis incluidos</div>
+          <div style="font-size:12px;color:#8A2A2E;margin-top:1px;">Te contactamos en 48hs para activarlo · sin cargo hasta fin de mes</div>
         </div>
       </div>
     </div>
@@ -5979,14 +5980,14 @@ async function registrarProfesional(){
     try{ await rpSubirPendientes(d); }catch(eUp){ console.warn('No se pudieron subir las fotos pendientes:', eUp); }
     let _logoPro = fotosCargadas['rpLogo'] || null;
     if(_logoPro && _logoPro.indexOf('data:') === 0){ try{ _logoPro = await fotoAR2(_logoPro, 'logos'); }catch(eL){} }
-    const _gracia = new Date(); _gracia.setDate(_gracia.getDate() + 30);
+    const _cobro = cobroDatosRegistro();
     const c = Object.assign({
       id: nextId('c'), uid: user.uid, email: email, modo: 'servicios', rubro: 'Servicios Profesionales', tipo: '',
       direccion: '', dias: [], metodosPago: [], adheridos: [],
       img: _logoPro, imgGaleria: null,
       publicidadActiva: true, publicidadVence: diasAtras(-30),
       plan: 'gracia', planMonto: null, planComPct: null,
-      planVence: _gracia.toISOString().slice(0,10), planActivo: true,
+      planVence: _cobro.planVence, grupoCobro: _cobro.grupoCobro, planActivo: true,
       bannerActivo: false, bannerVence: null, pagos: [],
       fechaAlta: new Date().toISOString(),
       aprobado: false, viaEmail: true, emailVerificado: false, perfilCompleto: true, registroCompletado: true
@@ -6387,7 +6388,7 @@ async function registrarComercioSimple(){
     const result = await firebaseAuth.createUserWithEmailAndPassword(email, pass);
     cuentaCreada = true;
     const user = result.user;
-    const _gracia = new Date(); _gracia.setDate(_gracia.getDate() + 30);
+    const _cobro = cobroDatosRegistro();
     const c = {
       id: nextId('c'), uid: user.uid, nombre, email, ciudad, provincia,
       rubro, tipo:'', descripcion:'', direccion:'', telefono: celular, whatsapp: celular,
@@ -6395,9 +6396,10 @@ async function registrarComercioSimple(){
       adheridos:[], img: null, imgGaleria: null,
       publicidadActiva:true, publicidadVence:diasAtras(-30),
       plan:'gracia', planMonto:null, planComPct:null,
-      planVence: _gracia.toISOString().slice(0,10), planActivo:true,
+      planVence: _cobro.planVence, grupoCobro: _cobro.grupoCobro, planActivo:true,
       bannerActivo:false, bannerVence:null, pagos:[],
-      aprobado:false, viaEmail:true, emailVerificado:false, perfilCompleto:false
+      aprobado:false, viaEmail:true, emailVerificado:false, perfilCompleto:false,
+      fechaAlta: new Date().toISOString()
     };
     if(_modoPreLeer() === 'vitrina') c.modo = 'vitrina';
     _modoPreGuardar(null);
@@ -6670,7 +6672,7 @@ const TYC_TEXTOS = {
     Al marcar la casilla y continuar declarás que leíste y aceptás estos Términos y Condiciones.`,
   comercio: `<strong style="color:#333;">Términos y Condiciones de PuenT — Comercios</strong><br><br><strong style="color:#444;">1. Qué es PuenT</strong><br>
     PuenT es una plataforma digital que muestra comercios locales y permite que los clientes los encuentren y los contacten. <strong>PuenT no vende productos, no es parte de ninguna compra o acuerdo y no maneja el dinero de las ventas.</strong> Toda operación se realiza directamente entre el comercio y el cliente.<br><br><strong style="color:#444;">2. Sin comisión por ventas</strong><br>
-    <strong>PuenT no cobra comisión sobre tus ventas.</strong> Lo que cobres a tus clientes es 100% tuyo. PuenT puede ofrecer planes de suscripción para mostrar tu comercio; sus condiciones y precios se informan en la app y pueden cambiar con aviso previo.<br><br><strong style="color:#444;">3. Sos responsable de lo que publicás</strong><br>
+    <strong>PuenT no cobra comisión sobre tus ventas.</strong> Lo que cobres a tus clientes es 100% tuyo. PuenT puede ofrecer planes de suscripción para mostrar tu comercio; sus condiciones y precios se informan en la app y pueden cambiar con aviso previo. <strong>Período sin cargo y cobro:</strong> lo que queda del mes en que te sumás es sin cargo. Desde el mes siguiente la suscripción es mensual y se abona por adelantado, del 1 al 10 de cada mes. Si no se renueva, tras unos días de tolerancia el comercio pasa a modo Free (se oculta el catálogo). Si pedís la baja, seguís activo hasta el fin del período ya abonado, no se cobra la renovación y no se reintegran períodos parciales.<br><br><strong style="color:#444;">3. Sos responsable de lo que publicás</strong><br>
     Sos el único responsable de todo lo que publicás: descripción, fotos, precios, stock, promociones, calidad, garantía, facturación, entrega y atención al cliente. <strong>PuenT no controla ni garantiza la información publicada y no responde por ella.</strong><br><br><strong style="color:#444;">4. Cumplimiento de la ley</strong><br>
     Declarás que tu actividad es legal y que contás con las habilitaciones, inscripciones e impuestos que correspondan. Te comprometés a cumplir la normativa vigente, incluidos los derechos del consumidor (información clara, precio final, garantías y derecho de arrepentimiento en ventas a distancia cuando corresponda), y las normas sanitarias y de rotulado de tus productos.<br><br><strong style="color:#444;">5. Reclamos y responsabilidad frente a clientes</strong><br>
     Cualquier reclamo, daño, devolución o conflicto con un cliente es un asunto entre vos y el cliente, y lo resolvés vos. Si un cliente o un tercero reclama a PuenT por algo vinculado a tu comercio o a lo que publicaste, te hacés cargo de ese reclamo y de los costos que genere, y mantenés indemne a PuenT.<br><br><strong style="color:#444;">6. Contenido permitido</strong><br>
@@ -7067,12 +7069,12 @@ function crearCuentaDesdeGoogle(rol, user){
       fechaAlta: new Date().toISOString(), ultimaVenta:null, diasExtra:0};
     data.qrPersonal = 'VQR-' + data.id.split('-')[1].padStart(4,'0');
   } else if(rol==='comercio'){
-    const _graciaGoogle = new Date(); _graciaGoogle.setDate(_graciaGoogle.getDate() + 30);
+    const _cobroG = cobroDatosRegistro();
     data = {id: nextId('c'), uid:user.uid, nombre, email, ciudad:'La Paz',
             rubro:'', tipo:'', descripcion:'',
             viaGoogle:true, adheridos:[], img: null,
             publicidadActiva:true, publicidadVence:diasAtras(-30),
-            aprobado: false, planVence: _graciaGoogle.toISOString().slice(0,10), planActivo: true,
+            aprobado: false, planVence: _cobroG.planVence, grupoCobro: _cobroG.grupoCobro, planActivo: true,
             plan:'gracia', perfilCompleto:false, fechaAlta: new Date().toISOString()};
     const _mPre = _modoPreLeer();
     if(_mPre === 'servicios'){ data.modo = 'servicios'; data.rubro = 'Servicios Profesionales'; data.oficios = []; data.fechaAlta = new Date().toISOString(); }
@@ -8389,9 +8391,6 @@ async function submitRegister(){
     const planTipo = 'gracia';
     const planMonto = null;
     const planComPct = null;
-    // Fecha de vencimiento del período de gracia (20 días)
-    const gracia = new Date(); gracia.setDate(gracia.getDate() + 20);
-    const planVence = gracia.toISOString().slice(0,10);
 
     if(!razonSocial || !direccion || !whatsapp || !email){
       toast('Completá todos los datos obligatorios, incluyendo el WhatsApp'); return;
@@ -8448,9 +8447,9 @@ async function submitRegister(){
       }catch(e){ console.error('Error en auto-claim manual de comercio:', e); }
     }
 
-    const _graciaManual = new Date(); _graciaManual.setDate(_graciaManual.getDate() + 30);
-    const c = {id: nextId('c'), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, tipo, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, sinPedidos,
-      plan: planTipo, planMonto, planComPct, planVence: _graciaManual.toISOString().slice(0,10), planActivo: true,
+    const _cobroM = cobroDatosRegistro();
+    const c = {id: nextId('c'), fechaAlta: new Date().toISOString(), nombre, razonSocial, cuit, descripcion, direccion, ciudad, rubro, tipo, telefono, whatsapp, email, instagram, facebook, horario, turnos, dias, metodosPago, sinPedidos,
+      plan: planTipo, planMonto, planComPct, planVence: _cobroM.planVence, grupoCobro: _cobroM.grupoCobro, planActivo: true,
       bannerActivo: false, bannerVence: null, pagos: [],
       adheridos:[], lat: registroLatLng?.lat, lng: registroLatLng?.lng,
       img: fotosCargadas['rLogo'] || null,
@@ -8668,7 +8667,7 @@ const fotosCargadas = {}; // prefix -> dataURL comprimida, lista para publicar
 
 function onFotoSeleccionada(input, prefix){
   try{ localStorage.removeItem('puente_camPendiente'); }catch(e){}
-  const file = input.files[0];
+  let file = input.files[0];
   input.value = ''; // permite volver a elegir la MISMA foto (si no, el navegador no avisa el cambio)
   if(!file) return;
   const estado = document.getElementById(prefix+'FotoEstado');
@@ -8677,7 +8676,11 @@ function onFotoSeleccionada(input, prefix){
   estado.textContent = 'Comprimiendo imagen…';
 
   const modo = _fotoModoDe(prefix); // logo / producto / portada: recorte de márgenes + fondo blanco
-  const proceso = modo ? comprimirFotoAjustada(file, LIMITE_FOTO_BYTES, modo) : comprimirImagen(file, LIMITE_FOTO_BYTES);
+  const fileOriginal = file;
+  const proceso = _copiaEnMemoria(file).catch(function(){ return file; }).then(function(copia){
+    file = copia; // desde acá se trabaja con la copia en memoria (también para "Ajustar" más tarde)
+    return modo ? comprimirFotoAjustada(copia, LIMITE_FOTO_BYTES, modo) : comprimirImagen(copia, LIMITE_FOTO_BYTES);
+  });
   proceso.then(dataUrlLocal=>fotoAR2(dataUrlLocal, modo ? FOTO_CARPETAS[modo] : 'otros').then(dataUrl=>({dataUrl, dataUrlLocal}))).then(({dataUrl, dataUrlLocal})=>{
     fotosCargadas[prefix] = dataUrl;
     subirFotoAFirebase(prefix, dataUrlLocal); // placeholder — hoy no hace nada real
@@ -8690,12 +8693,7 @@ function onFotoSeleccionada(input, prefix){
     if(modo === 'producto') setTimeout(function(){ ajustarFotoManual(prefix, true); }, 200);
   }).catch((err)=>{
     console.error('Error procesando imagen:', err);
-    const _nm = (err && (err.name || '')) + ' ' + (err && err.message || '');
-    if(/Quota|NotReadable|NotAllowed|storage|memory/i.test(_nm)){
-      estado.textContent = '⚠️ Al celular le falta espacio o memoria libre. Cerrá otras apps, liberá espacio (fotos o descargas) y probá de nuevo.';
-    } else {
-      estado.textContent = '⚠️ No pudimos procesar esa foto. Probá desde Galería o elegí una imagen más pequeña.';
-    }
+    estado.textContent = _mensajeErrorFoto(err, fileOriginal);
   });
 }
 
@@ -8721,12 +8719,47 @@ function _difMiniatura(a, b){
   c.width = c.height = 0;
   return t / k;
 }
+// Copia la foto a la memoria apenas se elige. En Android/Samsung el archivo de la galería puede
+// dejar de estar disponible un rato después (el editor decía "no encuentra la foto");
+// la copia en memoria no depende de la galería.
+async function _copiaEnMemoria(file){
+  const buf = await file.arrayBuffer();
+  try{ return new File([buf], file.name || 'foto.jpg', { type: file.type || 'image/jpeg', lastModified: file.lastModified }); }
+  catch(e){ const b = new Blob([buf], { type: file.type || 'image/jpeg' }); b.name = file.name || 'foto.jpg'; return b; }
+}
+// Mensaje claro según por qué falló la foto
+function _mensajeErrorFoto(err, file){
+  const nm = (err && (err.name || '')) + ' ' + (err && err.message || '');
+  const tipo = String((file && file.type) || '') + ' ' + String((file && file.name) || '');
+  if(/heic|heif/i.test(tipo))
+    return '⚠️ Esa foto está en formato HEIC/HEIF y el navegador no puede leerla. En la cámara desactivá "Fotos de alta eficiencia" (HEIF) o sacala en JPG, y probá de nuevo.';
+  if(/NotFound|NotReadable|permission/i.test(nm) && !/Quota|memory/i.test(nm))
+    return '⚠️ El celular no nos deja leer esa foto de la galería. Probá sacar la foto de nuevo con el botón de cámara, o elegila otra vez.';
+  if(/Quota|storage|memory/i.test(nm))
+    return '⚠️ Al celular le falta espacio o memoria libre. Cerrá otras apps, liberá espacio (fotos o descargas) y probá de nuevo.';
+  return '⚠️ No pudimos leer esa foto. Probá sacarla de nuevo con la cámara o elegí otra. Si usás Samsung, desactivá HDR/HEIF en la configuración de la cámara.';
+}
+
 function _imgLiviana(file, maxLado){
   return new Promise((resolve, reject)=>{
     const url = URL.createObjectURL(file);
     const img = new Image();
     const limpiar = ()=>{ img.onload = img.onerror = null; img.src = ''; URL.revokeObjectURL(url); };
-    img.onerror = ()=>{ limpiar(); reject(new Error('No se pudo leer la imagen')); };
+    img.onerror = async ()=>{
+      limpiar();
+      // Algunos formatos de Samsung/Android no los abre <img> pero sí createImageBitmap: último intento
+      try{
+        if(typeof createImageBitmap !== 'function') throw new Error('sin soporte');
+        const bmp = await createImageBitmap(file, { imageOrientation:'from-image' });
+        const esc2 = Math.min(1, maxLado / Math.max(bmp.width, bmp.height));
+        const w2 = Math.max(1, Math.round(bmp.width * esc2)), h2 = Math.max(1, Math.round(bmp.height * esc2));
+        const c2 = document.createElement('canvas'); c2.width = w2; c2.height = h2;
+        c2.getContext('2d').drawImage(bmp, 0, 0, w2, h2);
+        const W2 = bmp.width, H2 = bmp.height;
+        try{ bmp.close(); }catch(e){}
+        resolve({ src:c2, w:w2, h:h2, esc:esc2, W:W2, H:H2, cerrar:()=>{ c2.width = c2.height = 0; } });
+      }catch(e2){ reject(new Error('No se pudo leer la imagen')); }
+    };
     img.onload = async ()=>{
       const W = img.naturalWidth, H = img.naturalHeight;
       if(!W || !H){ limpiar(); reject(new Error('No se pudo leer la imagen')); return; }
@@ -12360,6 +12393,46 @@ function guardarPerfilEnFirestore(coleccion, data, optsExtra){
     .catch(e=>console.error('No se pudo actualizar el perfil en Firestore:', e));
 }
 
+// ── COBRO: UNA SOLA VENTANA DEL 1 AL 10 ─────────────────────────────────────
+// Todos los comercios pagan del 1 al 10 de cada mes, por adelantado (el mes en curso).
+// Lo que queda del mes en que se suman es sin cargo: su primer pago es del 1 al 10 del mes siguiente.
+// planVence = día 10 (fin de la ventana). Tolerancia de 5 días (hasta el 15) antes de Modo Free.
+const COBRO_TOLERANCIA_DIAS = 5;
+function _cobroISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _cobroParse(iso){ const p = String(iso).slice(0,10).split('-'); return new Date(+p[0], +p[1]-1, +p[2], 12, 0, 0); }
+// Primer día "dia" del mes que cae en o después de "desde" (estricto=true → estrictamente después)
+function _cobroDiaDesde(dia, desde, estricto){
+  const d = new Date(desde.getFullYear(), desde.getMonth(), dia, 12, 0, 0);
+  while(estricto ? d <= desde : d < new Date(desde.getFullYear(), desde.getMonth(), desde.getDate(), 0, 0, 0)){
+    d.setMonth(d.getMonth()+1, dia);
+  }
+  return d;
+}
+// Alta en cualquier día del mes M → sin cargo hasta fin de M; primer pago del 1 al 10 de M+1 (vence el 10 de M+1)
+function cobroInfoAlta(fechaAlta){
+  const f = fechaAlta ? new Date(fechaAlta) : new Date();
+  const v = new Date(f.getFullYear(), f.getMonth()+1, 10, 12, 0, 0);
+  return { planVence: _cobroISO(v), grupoCobro: 'A' };
+}
+function cobroDatosRegistro(){ return cobroInfoAlta(); }
+function cobroGrupo(c){ return 'A'; }
+function cobroVentanaTexto(c){ return 'del 1 al 10'; }
+// Fecha de vencimiento que corresponde al registrar un pago
+function cobroSugerirVence(c){
+  const hoy = new Date(); hoy.setHours(12,0,0,0);
+  let base = null;
+  if(c && c.planVence){
+    const pv = _cobroParse(c.planVence);
+    const limite = new Date(pv.getTime()); limite.setDate(limite.getDate() + COBRO_TOLERANCIA_DIAS);
+    // Se encadena con el vencimiento anterior solo si cayó justo en el 10
+    if(hoy <= limite && pv.getDate() === 10) base = pv;
+  }
+  if(base) return _cobroISO(_cobroDiaDesde(10, base, true));
+  // Sin vencimiento anterior para encadenar (reactivado o fecha armada a mano): cubre al menos ~20 días
+  const m = new Date(hoy.getTime()); m.setDate(m.getDate() + 20);
+  return _cobroISO(_cobroDiaDesde(10, m, false));
+}
+
 function planDiasRestantes(c){
   if(!c.planVence) return null;
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -12367,16 +12440,18 @@ function planDiasRestantes(c){
   return Math.ceil((vence - hoy) / 86400000);
 }
 
-// Un comercio queda en "modo Free" automáticamente cuando se le venció la
-// gracia de 20 días y todavía no pagó ningún plan. En ese estado puede seguir
+// Un comercio queda en "modo Free" automáticamente cuando se le venció el plan
+// (o la gracia) y pasaron los días de tolerancia (COBRO_TOLERANCIA_DIAS). En ese estado puede seguir
 // armando su perfil/catálogo puertas adentro, pero no se muestra al público
 // (ni en el feed, ni en Locales con datos completos, ni con geolocalización)
 // hasta que pase a Fijo o Comisión.
 function esComercioFree(c){
   if(!c || !c.plan) return false;
-  if(c.pagos && c.pagos.length) return false;
   const dias = planDiasRestantes(c);
-  return dias !== null && dias < 0;
+  if(dias === null) return false;
+  // Con baja programada, el comercio queda activo hasta el fin del período pagado (sin tolerancia).
+  const tol = c.estado === 'baja_solicitada' ? 0 : COBRO_TOLERANCIA_DIAS;
+  return dias < -tol;
 }
 
 // Bloquea una función exclusiva de comercios con plan pago (Fijo/Comisión) si
@@ -12402,20 +12477,38 @@ function renderCPlanBox(){
 
   let colorBg, colorBorde, badge, diasTexto, subtexto;
 
-  if(!activo || dias < 0){
+  const _fmtF = function(iso){ const p = String(iso).slice(0,10).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
+  const _venceTxt = c.planVence ? _fmtF(c.planVence) : '';
+  const _enBaja = c.estado === 'baja_solicitada';
+  const _ventana = cobroVentanaTexto(c);
+  if(!activo || esComercioFree(c)){
     colorBg = '#fff5f5'; colorBorde = '#e05a5a';
     badge = '🆓 Modo Free';
-    diasTexto = 'Se venció tu gracia sin elegir plan pago: tu perfil y catálogo siguen guardados, pero solo se muestra tu logo y dirección — sin productos ni ubicación en el mapa hasta que pases a un plan pago.';
-    subtexto = 'Contactá a PuenT para pasar a Fijo o Comisión.';
-  } else if(dias !== null && dias <= 5){
+    diasTexto = _enBaja
+      ? 'Tu baja ya está efectiva: tu perfil y catálogo siguen guardados, pero solo se muestra tu logo y dirección. Si querés volver, contactá a PuenT.'
+      : 'Se venció tu plan: tu perfil y catálogo siguen guardados, pero solo se muestra tu logo y dirección — sin productos ni ubicación en el mapa hasta que renueves.';
+    subtexto = 'Contactá a PuenT para volver a un plan pago.';
+  } else if(_enBaja){
+    colorBg = '#fffbea'; colorBorde = '#C99A3E';
+    badge = '📅 Baja programada';
+    diasTexto = 'Seguís activo hasta el ' + _venceTxt + ' y no se te cobra la renovación.';
+    subtexto = 'Podés cancelar la baja antes de esa fecha desde el botón de abajo.';
+  } else if(dias !== null && dias < 0){
+    const _lim = _cobroParse(c.planVence); _lim.setDate(_lim.getDate() + COBRO_TOLERANCIA_DIAS);
+    colorBg = '#fff5f5'; colorBorde = '#e05a5a';
+    badge = '⚠️ Plan vencido';
+    diasTexto = 'Venció el ' + _venceTxt + '. Tenés hasta el ' + _fmtF(_cobroISO(_lim)) + ' para renovar; después pasa a Modo Free (se oculta tu catálogo).';
+    subtexto = 'Contactá a PuenT para renovar.';
+  } else if(dias !== null && dias <= 9){
     colorBg = '#fffbea'; colorBorde = '#C99A3E';
     badge = `⚠️ Vence en ${dias} día${dias===1?'':'s'}`;
-    diasTexto = 'Renová pronto para no perder visibilidad.';
+    diasTexto = 'Estás en tu ventana de pago (' + _ventana + ' de cada mes). Pagá antes del ' + _venceTxt + ' para no perder visibilidad.';
     subtexto = 'Contactá a PuenT para renovar.';
   } else if(esGracia){
     colorBg = '#f0f7ee'; colorBorde = 'var(--olive,#5C7355)';
-    badge = dias !== null ? `🎁 Período de gracia — ${dias} días restantes` : '🎁 Período de gracia';
-    diasTexto = 'Estás en prueba gratuita. ¡Aprovechá para cargar tus productos!';
+    badge = '🎁 Sin cargo por ahora';
+    const _pm = c.planVence ? parseInt(String(c.planVence).slice(5,7),10) : 0;
+    diasTexto = 'Tenés gratis hasta que empiece el mes siguiente. ¡Aprovechá para cargar tus productos! Tu primer pago es ' + _ventana + (_pm ? ' de ' + MESES_LARGOS[_pm-1] : '') + ', y después ' + _ventana + ' de cada mes (por adelantado).';
     subtexto = c.plan === 'fijo'
       ? `Tu plan elegido: Fijo $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
       : `Tu plan elegido: Comisión ${c.planComPct||5}% sobre ventas`;
@@ -12426,7 +12519,7 @@ function renderCPlanBox(){
       ? `Plan Fijo: $${(c.planMonto||20000).toLocaleString('es-AR')}/mes`
       : `Plan Comisión: ${c.planComPct||5}% sobre ventas`;
     const ultimo = c.pagos?.slice(-1)[0];
-    subtexto = ultimo ? `Último pago: ${ultimo.fecha} — $${parseInt(ultimo.monto).toLocaleString('es-AR')}` : '';
+    subtexto = (ultimo ? `Último pago: ${ultimo.fecha} — $${parseInt(ultimo.monto).toLocaleString('es-AR')} · ` : '') + `Próxima renovación: ${_ventana} (vence ${_venceTxt})`;
   }
 
   // Banner activo?
@@ -12626,12 +12719,12 @@ function renderCSuscripcionBox(){
     bg='#fff5f5'; borde='#e05a5a'; badge='🆓 Modo Free';
     texto='Se venció tu gracia sin elegir plan pago: tu perfil y catálogo siguen guardados, pero solo se muestra tu logo y dirección hasta que pases a un plan pago.';
     sub='Contactá a PuenT para activar tu plan.';
-  } else if(dias !== null && dias <= 5){
+  } else if(dias !== null && dias <= 9){
     bg='#fffbea'; borde='#C99A3E'; badge=`⚠️ Vence en ${dias} día${dias===1?'':'s'}`;
     texto='Renová pronto para no perder visibilidad.'; sub=`Tu plan: ${actual.label} · ${actual.detalle}`;
   } else if(esGracia){
     bg='#f0f7ee'; borde='var(--olive,#5C7355)';
-    badge = dias !== null ? `🎁 Período de gracia — ${dias} días restantes` : '🎁 Período de gracia';
+    badge = '🎁 Sin cargo por ahora';
     texto='Estás en prueba gratuita. ¡Aprovechá para cargar tus productos!';
     sub = actual.id==='gracia' ? 'Si no elegís plan, al terminar la gracia pasás al plan Base.' : `Tu plan elegido: ${actual.label} · ${actual.detalle}`;
   } else {
@@ -12808,6 +12901,7 @@ function admRenderCobranzasDesktop(){
         <button class="adm-filter-btn" onclick="cobranzasDeskFiltro('pendientes',this)">⚠️ Pendientes</button>
         <button class="adm-filter-btn" onclick="cobranzasDeskFiltro('vencidos',this)">🔴 Vencidos</button>
         <button class="adm-filter-btn" onclick="cobranzasDeskFiltro('gracia',this)">🎁 Gracia</button>
+        <button class="adm-filter-btn" onclick="cobroAsignarExistentes()" title="Calcula el vencimiento (día 10) de los comercios que todavía no lo tienen definido">📅 Asignar vencimientos</button>
       </div>
       <div style="display:flex;gap:16px;margin-left:auto;font-size:12px;font-weight:700;">
         <span style="color:#2F7A55;">✅ <span id="cobranzasStatPagados">0</span> pagados</span>
@@ -13232,6 +13326,39 @@ async function cobranzaConfirmarPago(docId, clave, comercioId){
     cobranzaRenderDetalle(cLocal||snap.data());
     cobranzasRender();
   }catch(e){ toast('Error: '+e.message); }
+}
+
+// Calcula grupo y vencimiento para los comercios que todavía no tienen grupo y no pagaron nunca.
+async function cobroAsignarExistentes(){
+  // Comercios sin vencimiento de la regla nueva (sin grupo o del viejo "Grupo B")
+  const lista = (state.comercios||[]).filter(c => c.aprobado !== false && c.estado !== 'papelera' && c.grupoCobro !== 'A');
+  if(!lista.length){ toast('Todos los comercios ya tienen su vencimiento asignado'); return; }
+  const hoy = new Date(); hoy.setHours(12,0,0,0);
+  let nAlta = 0, nViejos = 0, nHoy = 0, nPagaron = 0;
+  const plan = lista.map(c => {
+    if(c.pagos && c.pagos.length){ nPagaron++; return { c, campos:{ grupoCobro:'A' } }; }
+    // Los comercios cargados antes del lanzamiento empiezan su gracia el 1/11/2026;
+    // los que se sumaron después cuentan desde su propia fecha de alta.
+    const fa = c.fechaAlta || c.creadoEn || c.fechaAprobacion;
+    const inicio = new Date(2026, 10, 1, 12, 0, 0);
+    let fecha = inicio, propia = false;
+    if(fa){ const d = fa.toDate ? fa.toDate() : new Date(fa); if(!isNaN(d.getTime()) && d.getTime() <= Date.now() && d > inicio){ fecha = d; propia = true; } }
+    let info = cobroInfoAlta(fecha);
+    // Seguridad: si igual quedara vencido, se cuenta como alta de hoy
+    if(_cobroParse(info.planVence) <= hoy){ info = cobroInfoAlta(null); nHoy++; } else if(propia) nAlta++; else nViejos++;
+    return { c, campos:{ grupoCobro: 'A', planVence: info.planVence } };
+  });
+  if(!confirm('Se va a definir el vencimiento (día 10) de ' + lista.length + ' comercio(s):\n\n• ' + nViejos + ' sin pagos, anteriores al lanzamiento: sin cargo hasta fin de noviembre, primer pago del 1 al 10/12.\n• ' + nAlta + ' sin pagos que se sumaron después del 1/11: sin cargo lo que queda de su mes, primer pago del 1 al 10 del mes siguiente.\n• ' + nHoy + ' que igual quedarían vencidos: se cuentan como alta de hoy.\n• ' + nPagaron + ' con pagos: no se les toca el vencimiento.\n\n¿Continuar?')) return;
+  let ok = 0, fallos = 0;
+  for(const it of plan){
+    try{
+      await db.collection('comercios').doc(it.c._docId || it.c.id).update(it.campos);
+      Object.assign(it.c, it.campos); ok++;
+    }catch(e){ console.error(e); fallos++; }
+  }
+  toast('✅ Vencimientos asignados: ' + ok + (fallos ? ' · con error: ' + fallos : ''));
+  try{ cobranzasRender(); }catch(e){}
+  try{ if(document.getElementById('cobranzasTablaBody')) cobranzasDeskRender(); }catch(e){}
 }
 
 function cobranzaEnviarRecordatorio(wa, nombre, planVence){
@@ -17812,7 +17939,7 @@ function adminFiltrarPlanes(filtro){
 
 const PLANES_LABEL = {gracia:'🎁 Gracia', base:'🏪 Base', medio:'🚀 Medio', premium:'⭐ Premium', fijo:'Fijo', comision:'Comisión'};
 const PLANES_MONTO = {gracia:'Gratis', base:'$29.999/mes', medio:'$59.999/mes', premium:'$89.999/mes'};
-const PLANES_PRODS = {gracia:'30 días full · plan elegido', base:'15 productos', medio:'65 productos', premium:'150 productos'};
+const PLANES_PRODS = {gracia:'Sin cargo · plan elegido', base:'15 productos', medio:'65 productos', premium:'150 productos'};
 const PLANES_COLOR = {gracia:'#888', base:'#2563EB', medio:'#FC1820', premium:'#7C3AED', fijo:'#5C7355', comision:'#C99A3E'};
 
 /* ── Datos de los planes de tarifario (editables desde admin) ── */
@@ -18297,7 +18424,7 @@ function renderAdminPlanDetalle(c){
       <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Cambiar plan</div>
       <div class="field"><label>Plan</label>
         <select id="apPlanNuevo" style="padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;width:100%;">
-          <option value="gracia" ${planActual==='gracia'?'selected':''}>🎁 Gracia — Gratis (30 días full)</option>
+          <option value="gracia" ${planActual==='gracia'?'selected':''}>🎁 Gracia — Sin cargo</option>
           ${tarifarioState().planes.map(pl=>`<option value="${pl.id}" ${planActual===pl.id?'selected':''}>${pl.emoji} ${pl.nombre} — ${tfmt(pl.precio)}/mes (${pl.productos} productos)</option>`).join('')}
         </select>
       </div>
@@ -18321,7 +18448,7 @@ function renderAdminPlanDetalle(c){
             <option value="mercadopago">📲 MercadoPago</option>
           </select>
         </div>
-        <div class="field"><label>Nueva fecha venc.</label><input id="apVence" type="date"></div>
+        <div class="field"><label>Nueva fecha venc. (el día 10)</label><input id="apVence" type="date" value="${cobroSugerirVence(c)}"></div>
       </div>
       <div class="field"><label>Nota (opcional)</label><input id="apNota" placeholder="Ej: Mes de octubre"></div>
       <button class="btn btn-primary" onclick="adminRegistrarPago('${c.id}')">✅ Registrar pago</button>
@@ -18366,7 +18493,8 @@ function adminRegistrarPago(comercioId){
   c.pagos.push({ fecha: hoy, monto: parseInt(monto), tipo: metodo, nota, vence });
   c.planVence = vence;
   c.planActivo = true;
-  db.collection('comercios').doc(c._docId||c.id).update({ pagos: c.pagos, planVence: vence, planActivo: true })
+  if(!c.grupoCobro) c.grupoCobro = cobroGrupo({planVence: vence});
+  db.collection('comercios').doc(c._docId||c.id).update({ pagos: c.pagos, planVence: vence, planActivo: true, grupoCobro: c.grupoCobro })
     .then(()=> toast(`✅ Pago de $${parseInt(monto).toLocaleString('es-AR')} registrado. Plan renovado hasta ${vence}.`))
     .catch(e=> toast('Error al guardar pago: '+e.message));
   renderAdminPlanDetalle(c);
@@ -20659,11 +20787,14 @@ function adminEnlazarMenuDiaBox(c){
 async function admExtenderGracia(docId){
   const c = _adminComercios.find(x=>(x._docId||x.id)===docId);
   if(!c) return;
-  const dias = parseInt(prompt(`¿Cuántos días de gracia agregás a "${c.nombre||docId}"?\n(Se suman desde hoy si ya venció, o desde la fecha vigente si aún no venció)`, '30'));
+  const dias = parseInt(prompt(`¿Cuántos días de gracia agregás a "${c.nombre||docId}"?\n(Se suman desde hoy si ya venció, o desde la fecha vigente si aún no venció. El vencimiento se ajusta al próximo día 10.)`, '30'));
   if(!dias || isNaN(dias) || dias <= 0) return;
-  const base = c.planVence && new Date(c.planVence) > new Date() ? new Date(c.planVence) : new Date();
+  const hoyD = new Date(); hoyD.setHours(12,0,0,0);
+  const pvD = c.planVence ? _cobroParse(c.planVence) : null;
+  const base = (pvD && pvD > hoyD) ? pvD : hoyD;
   base.setDate(base.getDate() + dias);
-  const nuevaFecha = base.toISOString().slice(0,10);
+  // Se ajusta al próximo día 10 para que siga en la ventana única de cobro (1 al 10)
+  const nuevaFecha = _cobroISO(_cobroDiaDesde(10, base, false));
   try {
     await db.collection('comercios').doc(docId).update({ planVence: nuevaFecha, planActivo: true, plan: c.plan || 'gracia', emailVerificado: true });
     c.planVence = nuevaFecha; c.planActivo = true; c.emailVerificado = true; if(!c.plan) c.plan = 'gracia';
@@ -24454,8 +24585,9 @@ function cCancelarVentaPendiente(ventaId){
     if(c.estado === 'baja_solicitada'){
       el.innerHTML = `
         <div class="card" style="background:#F5E6E6;border:1.5px solid #d4a0a0;">
-          <div style="font-size:13px;font-weight:800;color:#7A1A1A;margin-bottom:4px;">🔴 Solicitud de baja enviada</div>
-          <div style="font-size:12px;color:#7A1A1A;line-height:1.5;">Tu solicitud fue recibida. El equipo de PuenT la va a procesar en los próximos días y te va a contactar para confirmar.</div>
+          <div style="font-size:13px;font-weight:800;color:#7A1A1A;margin-bottom:4px;">🔴 Baja solicitada</div>
+          <div style="font-size:12px;color:#7A1A1A;line-height:1.5;">Seguís activo hasta el fin del período que ya abonaste${c.planVence ? ' (' + String(c.planVence).slice(0,10).split('-').reverse().join('/') + ')' : ''} y no se te cobra la renovación. Podés cancelar la baja antes de esa fecha.</div>
+          <button onclick="cancelarBajaComercio()" style="margin-top:8px;background:none;border:1.5px solid #7A1A1A;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:#7A1A1A;cursor:pointer;width:100%;">↩️ Cancelar la baja</button>
         </div>`;
     } else {
       el.innerHTML = `
@@ -24468,7 +24600,8 @@ function cCancelarVentaPendiente(ventaId){
   async function solicitarBajaComercio(){
     const c = state.currentUser;
     if(!c) return;
-    if(!confirm('¿Querés solicitar la baja de tu comercio en PuenT?\n\nEl equipo va a revisar tu solicitud y te va a contactar para confirmar. Tus datos no se borran de inmediato.')) return;
+    const _vf = c.planVence ? String(c.planVence).slice(0,10).split('-').reverse().join('/') : 'el fin de tu período';
+    if(!confirm('¿Querés solicitar la baja de tu comercio en PuenT?\n\nSeguís activo hasta ' + _vf + ' (lo que ya abonaste) y no se te cobra la renovación. No hay reintegros parciales. Tus datos no se borran. Podés cancelar la baja antes de esa fecha.')) return;
     try{
       await db.collection('comercios').doc(c._docId || c.id).update({
         estado: 'baja_solicitada',
@@ -24476,8 +24609,25 @@ function cCancelarVentaPendiente(ventaId){
       });
       state.currentUser.estado = 'baja_solicitada';
       renderCBajaSolicitadaBox();
-      toast('✅ Solicitud de baja enviada. Te vamos a contactar pronto.');
+      try{ renderCPlanBox(); }catch(e2){}
+      toast('✅ Baja solicitada. Seguís activo hasta el fin de tu período.');
     }catch(e){ console.error(e); toast('Error al enviar la solicitud.'); }
+  }
+
+  async function cancelarBajaComercio(){
+    const c = state.currentUser;
+    if(!c) return;
+    if(!confirm('¿Cancelar la baja y seguir en PuenT?')) return;
+    try{
+      await db.collection('comercios').doc(c._docId || c.id).update({
+        estado: firebase.firestore.FieldValue.delete(),
+        fechaBajaSolicitada: firebase.firestore.FieldValue.delete()
+      });
+      delete state.currentUser.estado; delete state.currentUser.fechaBajaSolicitada;
+      renderCBajaSolicitadaBox();
+      try{ renderCPlanBox(); }catch(e2){}
+      toast('✅ Baja cancelada. ¡Seguís con nosotros!');
+    }catch(e){ console.error(e); toast('No se pudo cancelar la baja.'); }
   }
 
   function srTMinimizar(ev){
