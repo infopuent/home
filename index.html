@@ -249,7 +249,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .rp-chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #E0E0E0;border-radius:100px;padding:7px 12px;font-size:13px;font-weight:600;color:#444;cursor:pointer;background:#fff;}
 .rp-chip input{width:auto;accent-color:#FC1820;margin:0;}
 .rp-chip.sel{border-color:#FC1820;background:#FFF0F0;color:#B3121A;}
-.rl-hero{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FFF3F3 0%,#F1F6FC 100%);border:1.5px solid #F1E6E6;border-radius:22px;padding:18px 16px;margin-bottom:12px;overflow:hidden;}
+.rl-hero{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FFF6CC 0%,#FFEDA8 100%);border:1.5px solid #F5DE86;border-radius:22px;padding:18px 16px;margin-bottom:12px;overflow:hidden;}
 .rl-hero-txt{flex:1;min-width:0;}
 .rl-kicker{font-size:12px;font-weight:800;color:#FC1820;letter-spacing:.04em;margin-bottom:4px;}
 .rl-h{font-family:'Bai Jamjuree',sans-serif;font-size:22px;line-height:1.15;font-weight:800;color:#1F2A44;margin:0 0 6px;}
@@ -585,6 +585,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .feed-prod-card{background:white; border:none; border-radius:18px; overflow:hidden; cursor:pointer; flex:0 0 140px; width:140px; box-shadow:0 2px 10px rgba(0,0,0,0.08);}
 .feed-prod-card .prod-photo{height:170px;}
 #lpGrid .feed-prod-card{flex:none; width:100%;}
+#lpGrid .prod-card .prod-photo{aspect-ratio:1/1;}
+#lpGrid .prod-card .prod-body{padding:5px 8px 6px;}
 #lpGrid .feed-prod-card .prod-photo{height:auto; aspect-ratio:1/1;}
 .feed-vendor{display:flex; align-items:center; gap:6px; font-size:10.5px; color:var(--navy-2); font-weight:700; margin-top:6px;}
 .feed-vendor .dot{width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0;}
@@ -919,8 +921,8 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
    público (Te va a encantar, Rubros, Oferta infinita), no en catálogos
    internos de comercio/admin que reusan la misma clase .prod-photo */
 .feed-grid-encantar .prod-photo, .feed-cat-grid .prod-photo, #feedGridInfinito .prod-photo{aspect-ratio:1/1;}
-#comidaHomeRow .prod-photo, #almacenHomeRow .prod-photo, #vehiculosHomeRow .prod-photo{aspect-ratio:1/1;}
-#comidaHomeRow .prod-body, #almacenHomeRow .prod-body, #vehiculosHomeRow .prod-body{padding:5px 8px 6px;}
+#comidaHomeRow .prod-photo, #almacenHomeRow .prod-photo, #vehiculosHomeRow .prod-photo, #inmobHomeRow .prod-photo{aspect-ratio:1/1;}
+#comidaHomeRow .prod-body, #almacenHomeRow .prod-body, #vehiculosHomeRow .prod-body, #inmobHomeRow .prod-body{padding:5px 8px 6px;}
 .prod-logo-badge{
   position:absolute; bottom:6px; left:6px; width:26px; height:26px; border-radius:50%;
   background:white; display:flex; align-items:center; justify-content:center;
@@ -1011,6 +1013,57 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .share-act.sec{background:#F2F2F2;color:#333;}
 .share-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .share-row2 .share-act{font-size:13px;padding:12px 8px;}
+
+/* ================= MODO ESCRITORIO (pantallas anchas) =================
+   Solo se activa a partir de 1100px de ancho. El celular y la tablet no cambian. */
+@media (min-width:1100px){
+  body{background:#F6F6F4;}
+  #app{max-width:1240px; padding-bottom:48px; background:transparent;}
+
+  /* Barra superior en una sola fila: logo · ciudad · buscador · (menú a la derecha) */
+  .topbar{flex-direction:row; align-items:center; gap:18px; padding:10px 24px; padding-right:440px; border-radius:0 0 18px 18px;}
+  body:has(#bottomnav.hidden) .topbar{padding-right:24px;}
+  #topbarUserStrip{width:auto !important; flex:0 0 auto; align-items:center !important; gap:14px;}
+  #topbarRolCol{flex:none !important; max-width:none !important;}
+  #topbarCiudadCol{flex:none !important; padding-top:0 !important; gap:8px; justify-content:flex-start !important; align-items:center !important;}
+  #geoChip{top:0 !important;}
+  #ciudadDd{width:auto !important; flex:none !important;}
+  #topbarCiudadCol .topbar-city-btn{font-size:13px !important; padding:10px 16px !important;}
+  .topbar > div:nth-child(2){flex:1 1 auto; margin-top:0 !important; width:auto !important;}
+  #buscadorFeedBox{padding:12px 18px !important;}
+
+  /* Menú (antes barra de abajo) arriba a la derecha, alineado con la barra superior */
+  .bottomnav{
+    top:10px; bottom:auto; left:auto; right:max(24px, calc((100vw - 1240px)/2 + 24px));
+    transform:none; width:auto; max-width:none; background:transparent; border-top:0;
+    padding:0; gap:4px; z-index:31;
+  }
+  .navbtn{flex:none; flex-direction:row; gap:8px; padding:10px 14px; border-radius:12px;}
+  .navbtn:hover{background:#FFF1F1;}
+  .navbtn .ic{font-size:20px;}
+  .navbtn .nav-label{font-size:13px; font-weight:700;}
+  .navbtn-cart{margin:0 0 0 6px; width:46px; height:46px; border-width:2px;}
+
+  /* Solapas como píldoras */
+  .feed-solapas{background:transparent; border-bottom:0; box-shadow:none; padding:14px 24px 6px; gap:8px; flex-wrap:wrap; overflow:visible; -webkit-mask-image:none !important; mask-image:none !important; position:static !important;}
+  .feed-solapa{flex:none; padding:8px 16px; border:1.5px solid #E8E8E4; border-radius:999px; background:#fff; margin:0; font-size:13px;}
+  .feed-solapa:hover{border-color:#FC1820;}
+  .feed-solapa.active{background:#FFF1F1; color:#D9121A; border-color:#F6B5B8;}
+
+  /* Pantalla principal más ancha, con más aire */
+  #screen-feed{padding-left:8px; padding-right:8px;}
+  #screen-feed .feed-grid-encantar{grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px;}
+  #screen-feed .feed-cat-grid{grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; padding:12px 16px 16px;}
+  #screen-feed .vit-row{gap:16px; padding:8px 16px 6px;}
+  #screen-feed .vit-row > div[style*="flex:0 0 calc"]{flex:0 0 calc((100% - 96px)/5) !important;}
+  #screen-feed .vit-row{scroll-padding-left:16px;}
+  #screen-feed .section-title{font-size:20px;}
+  #screen-feed .ver-todo:hover{text-decoration:underline; cursor:pointer;}
+
+  /* Las demás pantallas (formularios, fichas, listas) quedan centradas y legibles */
+  .screen:not(#screen-feed){max-width:880px; margin-left:auto; margin-right:auto;}
+  .screen:not(#screen-feed) .feed-grid-encantar{grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;}
+}
 </style>
 <style>
 /* Google Fonts no disponible en este entorno — se carga en producción desde Cloudflare */
@@ -1297,8 +1350,17 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div id="vehiculosHomeSection" style="display:none;padding:14px 0 0;">
         <div class="section-title-row" style="padding:0 16px;">
           <div class="section-title">🚗 Vehículos y maquinaria</div>
+          <span class="ver-todo" id="vehiculosHomeVerTodos" onclick="toggleVehiculosHomeTodos()" style="display:none;">Ver todos →</span>
         </div>
         <div id="vehiculosHomeRow" class="vit-row"></div>
+      </div>
+      <!-- Inmobiliarias: propiedades en venta / alquiler. Siempre "Consultar precio", separadas de los productos -->
+      <div id="inmobHomeSection" style="display:none;padding:14px 0 0;">
+        <div class="section-title-row" style="padding:0 16px;">
+          <div class="section-title">🏡 Inmobiliarias</div>
+          <span class="ver-todo" id="inmobHomeVerTodos" onclick="toggleInmobHomeTodos()" style="display:none;">Ver todos →</span>
+        </div>
+        <div id="inmobHomeRow" class="vit-row"></div>
       </div>
 
       <!-- Rubros del home: banners full-width apilados, tipo acordeón — generados
@@ -1671,7 +1733,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <input id="rpInstagram" class="rp-input" type="text" maxlength="100" placeholder="@tuusuario" autocapitalize="none"></div>
         <div><label class="rp-label">Facebook <span style="font-weight:500;color:#888;">(opcional)</span></label>
           <input id="rpFacebook" class="rp-input" type="text" maxlength="120" placeholder="Tu página o link de Facebook" autocapitalize="none"></div>
-        <div><label class="rp-label">Sitio web <span style="font-weight:500;color:#888;">(opcional)</span></label>
+        <div><label class="rp-label">Página web / menú online <span style="font-weight:500;color:#888;">(opcional)</span></label>
           <input id="rpWeb" class="rp-input" type="text" maxlength="150" placeholder="www.tusitio.com.ar" autocapitalize="none"></div>
       </div>
       <button type="button" class="rp-btn" id="rpBtnPaso2" onclick="rpAvanzarPaso2()">Continuar</button>
@@ -1995,7 +2057,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <!-- Botones de acción -->
       <div style="display:flex; gap:8px; margin-top:14px;">
         <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="comoLlegar(window._lpComercioId)">📍 Cómo llegar</button>
-        <button class="btn btn-ghost btn-sm" style="flex:1;" id="lpBtnWsp" style="display:none;" onclick="abrirWhatsappLocal()">💬 WhatsApp</button>
+        <button class="btn btn-sm" style="flex:1;background:#25D366;border:1.5px solid #25D366;color:#fff;font-weight:700;display:none;" id="lpBtnWsp" onclick="abrirWhatsappLocal()">💬 WhatsApp</button>
       </div>
 
       <!-- Vitrina: galería al final -->
@@ -2201,7 +2263,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div>
           <label style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">Rubro:</label>
           <div style="position:relative;">
-            <select id="rcRubro"
+            <select id="rcRubro" onchange="rcToggleHabilitacionSalud()"
               style="width:100%;padding:14px;border:1.5px solid #EAEAEA;border-radius:14px;font-size:15px;font-family:inherit;box-sizing:border-box;background:#F8F8F8;color:#1A1A1A;appearance:none;-webkit-appearance:none;">
               <option value="">Elegí el rubro</option>
               <option>Gastronomía</option>
@@ -2236,6 +2298,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
             </select>
             <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#AAA;font-size:12px;">▼</span>
           </div>
+        <div id="rcHabSaludBox" style="display:none;margin-top:12px;background:#FFF8E6;border:1.5px solid #F2C94C;border-radius:14px;padding:12px 14px;">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="rcHabSalud" style="width:20px;height:20px;accent-color:#FC1820;flex-shrink:0;margin-top:1px;">
+            <span style="font-size:12.5px;color:#4a3b00;line-height:1.5;">Declaro contar con la <strong>habilitación sanitaria y las inscripciones</strong> que exige la ley para mi actividad (farmacia, óptica, ortopedia u otra relacionada con la salud), y me hago responsable de lo que publico.</span>
+          </label>
+        </div>
         </div>
         <div>
           <label style="font-size:13px;font-weight:700;color:#FC1820;display:block;margin-bottom:6px;">Teléfono / WhatsApp:</label>
@@ -3295,12 +3363,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <input id="cnpDescuento" type="number" min="1" max="90" placeholder="Ej: 20">
       </div>
       <div class="field">
-        <label>Rubro / filtro con el que aparece</label>
+        <label>¿En qué rubro querés que aparezca este producto?</label>
         <select id="cnpRubro" onchange="renderAtributosRubro();autoCategoria()"></select>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Por defecto es el rubro de tu comercio. Cambialo si este producto es de otro rubro (por ejemplo si vendés cosas de varios rubros).</div>
       </div>
-      <div class="field">
-        <label>Categoría en el home</label>
-        <select id="cnpCategoria">
+      <div class="field" style="display:none;" aria-hidden="true">
+        <select id="cnpCategoria" tabindex="-1">
           <option value="gastronomia">🍽️ Gastronomía</option>
           <option value="belleza">💅 Belleza y Estética</option>
           <option value="hogar">🏠 Hogar y Construcción</option>
@@ -3463,7 +3531,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="two-col">
         <div class="field"><label>Ciudad</label><input id="editCCiudad" placeholder="Ej: La Paz"></div>
         <div class="field"><label>Rubro</label>
-          <select id="editCRubro" onchange="onRubroChange('editCRubro','editCTipo','editCTipoField')"></select>
+          <select id="editCRubro" onchange="onRubroChange('editCRubro','editCTipo','editCTipoField'); editToggleHabilitacionSalud();"></select>
         </div>
       </div>
       <div id="editCTipoHint" style="font-size:12px;color:var(--muted);margin:-4px 0 6px;padding:0 2px;">
@@ -3473,6 +3541,12 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <label>Tipo / categoría del negocio</label>
         <select id="editCTipo"></select>
         <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Elegí la categoría que mejor describe tu comercio.</div>
+      </div>
+      <div id="editCHabSaludBox" style="display:none;margin:4px 0 12px;background:#FFF8E6;border:1.5px solid #F2C94C;border-radius:14px;padding:12px 14px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="editCHabSalud" style="width:20px;height:20px;accent-color:#FC1820;flex-shrink:0;margin-top:1px;">
+          <span style="font-size:12.5px;color:#4a3b00;line-height:1.5;">Declaro contar con la <strong>habilitación sanitaria y las inscripciones</strong> que exige la ley para mi actividad (farmacia, óptica, ortopedia u otra relacionada con la salud), y me hago responsable de lo que publico.</span>
+        </label>
       </div>
       <div class="two-col">
         <div class="field"><label>Teléfono del local</label><input id="editCTelefono" type="tel" placeholder="Fijo o WhatsApp"></div>
@@ -3527,7 +3601,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
         <div class="field"><label>Instagram (opcional)</label><input id="editCInstagram" placeholder="@tunegocio"></div>
         <div class="field"><label>Facebook (opcional)</label><input id="editCFacebook" placeholder="facebook.com/tunegocio"></div>
       </div>
-      <div class="field"><label>Sitio web (opcional)</label><input id="editCWeb" placeholder="www.tunegocio.com"></div>
+      <div class="field"><label>Página web / menú online / plataforma web (opcional)</label><input id="editCWeb" inputmode="url" autocapitalize="none" placeholder="www.tunegocio.com o el link de tu menú"></div>
     </div>
 
     <div class="card" style="margin-top:0;">
@@ -4430,7 +4504,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:8px;">📲 Obligatorio — los clientes envían pedidos al WhatsApp del comercio.</div>
       <div class="field"><label>Email</label><input id="editAdEmail" type="email"></div>
       <div class="field"><label>Instagram</label><input id="editAdInstagram" type="text"></div>
-      <div class="field"><label>Sitio web</label><input id="editAdWeb" type="text"></div>
+      <div class="field"><label>Página web / menú online</label><input id="editAdWeb" type="text"></div>
       <div class="field"><label>Descripción</label><textarea id="editAdDescripcion" rows="2" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;"></textarea></div>
       <div class="field"><label>Horario</label><input id="editAdHorario" type="text" placeholder="Ej: Lun a Vie 9 a 13 y 16 a 20hs"></div>
       <div class="field" style="background:var(--cream);border-radius:10px;padding:12px;">
@@ -4537,7 +4611,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
       <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
       <div class="field"><label>Instagram</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
       <div class="field"><label>Facebook</label><input type="text" id="adFacebook" placeholder="facebook.com/comercio"></div>
-      <div class="field"><label>Sitio web</label><input type="text" id="adWeb" placeholder="www.comercio.com.ar"></div>
+      <div class="field"><label>Página web / menú online</label><input type="text" id="adWeb" placeholder="www.comercio.com.ar o link del menú"></div>
       <div class="field"><label>Descripción breve</label><textarea id="adDescripcion" rows="2" placeholder="Qué ofrece el comercio, especialidad…" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;"></textarea></div>
       <!-- HORARIOS -->
       <div class="field">
@@ -6347,6 +6421,7 @@ function rcAvanzarPaso2(){
   if(!rubro){ toast('Elegí el rubro de tu comercio.'); return; }
   if(!celular){ toast('Ingresá tu celular o WhatsApp.'); return; }
   if(!ciudad){ toast('Elegí la ciudad de tu comercio.'); return; }
+  if(esRubroSalud(rubro) && !document.getElementById('rcHabSalud')?.checked){ toast('Para rubros de salud tenés que declarar que contás con la habilitación.'); return; }
   rcMostrarPaso(3);
 }
 
@@ -6368,6 +6443,17 @@ function rcActualizarCiudades(){
     ciudades.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('');
 }
 
+// Rubros de salud (farmacia, óptica, ortopedia…): el comercio declara contar con la habilitación sanitaria.
+function esRubroSalud(r){ return /^salud/i.test(String(r||'').trim()); }
+function rcToggleHabilitacionSalud(){
+  var box = document.getElementById('rcHabSaludBox'); if(!box) return;
+  box.style.display = esRubroSalud(document.getElementById('rcRubro')?.value) ? 'block' : 'none';
+}
+function editToggleHabilitacionSalud(){
+  var box = document.getElementById('editCHabSaludBox'); if(!box) return;
+  box.style.display = esRubroSalud(document.getElementById('editCRubro')?.value) ? 'block' : 'none';
+}
+
 async function registrarComercioSimple(){
   const nombre    = document.getElementById('rcNombre')?.value.trim();
   const rubro     = document.getElementById('rcRubro')?.value.trim();
@@ -6381,6 +6467,8 @@ async function registrarComercioSimple(){
   if(!terminos){ toast('Tenés que aceptar los términos y condiciones.'); return; }
   if(!nombre){ toast('Ingresá el nombre de tu comercio.'); return; }
   if(!rubro){ toast('Elegí el rubro de tu comercio.'); return; }
+  const _habSalud = esRubroSalud(rubro) && !!document.getElementById('rcHabSalud')?.checked;
+  if(esRubroSalud(rubro) && !_habSalud){ toast('Para rubros de salud tenés que declarar que contás con la habilitación.'); return; }
   if(!email){ toast('Ingresá tu correo.'); return; }
   if(!celular){ toast('Ingresá tu celular para que podamos contactarte.'); return; }
   if(!ciudad){ toast('Elegí la ciudad de tu comercio.'); return; }
@@ -6405,6 +6493,7 @@ async function registrarComercioSimple(){
       aprobado:false, viaEmail:true, emailVerificado:false, perfilCompleto:false,
       fechaAlta: new Date().toISOString()
     };
+    if(_habSalud){ c.declaraHabilitacionSalud = true; c.declaraHabilitacionFecha = new Date().toISOString(); }
     if(_modoPreLeer() === 'vitrina') c.modo = 'vitrina';
     _modoPreGuardar(null);
     c.qrPersonal = 'CQR-' + c.id.split('-')[1].padStart(4,'0');
@@ -6676,19 +6765,19 @@ const TYC_TEXTOS = {
     Para registrarte en PuenT tenés que ser <strong>mayor de 18 años</strong>. Al registrarte y marcar la casilla declarás que cumplís ese requisito. PuenT puede suspender o dar de baja las cuentas de quienes no lo cumplan.<br><br><strong style="color:#444;">11. Aceptación</strong><br>
     Al marcar la casilla y continuar declarás que leíste y aceptás estos Términos y Condiciones.`,
   comercio: `<strong style="color:#333;">Términos y Condiciones de PuenT — Comercios</strong><br><br><strong style="color:#444;">1. Qué es PuenT</strong><br>
-    PuenT es una plataforma digital que muestra comercios locales y permite que los clientes los encuentren y los contacten. <strong>PuenT no vende productos, no es parte de ninguna compra o acuerdo y no maneja el dinero de las ventas.</strong> Toda operación se realiza directamente entre el comercio y el cliente.<br><br><strong style="color:#444;">2. Sin comisión por ventas</strong><br>
+    PuenT es una plataforma digital que muestra comercios locales y permite que los clientes los encuentren y los contacten. <strong>PuenT es solo un intermediario tecnológico que conecta: no vende productos, no es parte de ninguna compra o acuerdo y no maneja el dinero de las ventas.</strong> Toda operación se realiza directamente entre el comercio y el cliente.<br><br><strong style="color:#444;">2. Sin comisión por ventas</strong><br>
     <strong>PuenT no cobra comisión sobre tus ventas.</strong> Lo que cobres a tus clientes es 100% tuyo. PuenT puede ofrecer planes de suscripción para mostrar tu comercio; sus condiciones y precios se informan en la app y pueden cambiar con aviso previo. <strong>Período sin cargo y cobro:</strong> lo que queda del mes en que te sumás es sin cargo. Desde el mes siguiente la suscripción es mensual y se abona por adelantado, del 1 al 10 de cada mes. Si no se renueva, tras unos días de tolerancia el comercio pasa a modo Free (se oculta el catálogo). Si pedís la baja, seguís activo hasta el fin del período ya abonado, no se cobra la renovación y no se reintegran períodos parciales.<br><br><strong style="color:#444;">3. Sos responsable de lo que publicás</strong><br>
     Sos el único responsable de todo lo que publicás: descripción, fotos, precios, stock, promociones, calidad, garantía, facturación, entrega y atención al cliente. <strong>PuenT no controla ni garantiza la información publicada y no responde por ella.</strong><br><br><strong style="color:#444;">4. Cumplimiento de la ley</strong><br>
     Declarás que tu actividad es legal y que contás con las habilitaciones, inscripciones e impuestos que correspondan. Te comprometés a cumplir la normativa vigente, incluidos los derechos del consumidor (información clara, precio final, garantías y derecho de arrepentimiento en ventas a distancia cuando corresponda), y las normas sanitarias y de rotulado de tus productos.<br><br><strong style="color:#444;">5. Reclamos y responsabilidad frente a clientes</strong><br>
-    Cualquier reclamo, daño, devolución o conflicto con un cliente es un asunto entre vos y el cliente, y lo resolvés vos. Si un cliente o un tercero reclama a PuenT por algo vinculado a tu comercio o a lo que publicaste, te hacés cargo de ese reclamo y de los costos que genere, y mantenés indemne a PuenT.<br><br><strong style="color:#444;">6. Contenido permitido</strong><br>
-    Solo podés publicar productos y servicios legales. <strong>Queda prohibido publicar:</strong> sustancias ilegales; medicamentos bajo receta sin indicarlo; armas o explosivos; contenido sexual, violento o discriminatorio; productos falsificados; <strong>la venta, oferta o comercialización de animales vivos (perros, gatos, aves, peces, ganado u otros), incluidas sus fotos y avisos</strong>; y cualquier contenido que viole la legislación argentina. PuenT puede quitar sin aviso estas publicaciones y suspender o dar de baja el comercio que las haga.<br><br><strong style="color:#444;">7. Fotos y propiedad intelectual</strong><br>
+    Cualquier reclamo, daño, devolución o conflicto con un cliente es un asunto entre vos y el cliente, y lo resolvés vos. Si un cliente o un tercero reclama a PuenT por algo vinculado a tu comercio o a lo que publicaste, te hacés cargo de ese reclamo y de los costos que genere (incluidos honorarios legales, multas o sanciones), y mantenés indemne a PuenT, tanto frente a clientes como frente a terceros y autoridades.<br><br><strong style="color:#444;">6. Contenido permitido</strong><br>
+    Solo podés publicar productos y servicios legales. <strong>Queda prohibido publicar:</strong> sustancias ilegales; medicamentos bajo receta sin indicarlo; armas o explosivos; contenido sexual, violento o discriminatorio; productos falsificados; <strong>la venta, oferta o comercialización de animales vivos (perros, gatos, aves, peces, ganado u otros), incluidas sus fotos y avisos</strong>; y cualquier contenido que viole la legislación argentina. PuenT puede quitar sin aviso estas publicaciones y suspender o dar de baja el comercio que las haga.<br><br><strong>Productos y servicios que requieren habilitación o registro:</strong> los productos cuya venta exige una habilitación específica o un registro sanitario (por ejemplo medicamentos, lentes y anteojos con o sin graduación —que solo pueden ofrecer las casas de óptica habilitadas—, productos médicos y ortopédicos, suplementos dietarios, cosméticos y alimentos con registro, tabaco, vapeadores y bebidas alcohólicas) solo pueden publicarse si tu comercio cuenta con esa habilitación y el producto con su registro. Si PuenT te lo pide, tenés que acreditarlo. No podés atribuir propiedades curativas o terapéuticas a productos que no las tengan autorizadas. Si tu rubro es de salud (farmacia, óptica, ortopedia u otro), declarás contar con la habilitación sanitaria que exige la ley para tu actividad. PuenT puede quitar estas publicaciones sin aviso.<br><br><strong style="color:#444;">7. Fotos y propiedad intelectual</strong><br>
     Declarás que tenés derecho a usar las fotos, textos, logos y marcas que subís, y que no violan derechos de terceros. Nos autorizás a mostrarlos dentro de PuenT mientras tu comercio esté activo. Si alguien reclama por ese contenido, la responsabilidad es tuya.<br><br><strong style="color:#444;">8. Precios, stock y veracidad</strong><br>
     Los datos del comercio deben ser verídicos y corresponder a un negocio real. Te comprometés a mantener actualizados precios, stock, horarios y datos de contacto, y a no publicar ofertas engañosas. PuenT puede verificar y rechazar altas que no cumplan este requisito.<br><br><strong style="color:#444;">9. Pedidos, pagos y entregas</strong><br>
     Los pedidos, cobros, envíos y devoluciones se acuerdan y se gestionan directamente entre vos y el cliente. PuenT no garantiza ventas, cobros ni la conducta de los clientes.<br><br><strong style="color:#444;">10. Datos de los clientes</strong><br>
     Si un cliente te contacta, podés usar sus datos solo para atender esa consulta o pedido. No podés cederlos, venderlos ni usarlos para otros fines, y debés cumplir la Ley de Protección de Datos Personales (Ley 25.326).<br><br><strong style="color:#444;">11. Calificaciones y comentarios</strong><br>
     Los clientes pueden calificar tu comercio. PuenT no modifica las opiniones, pero puede quitar las que sean ofensivas, falsas o ilegales.<br><br><strong style="color:#444;">12. Disponibilidad del servicio</strong><br>
     PuenT se ofrece tal como está. No garantizamos que funcione sin interrupciones ni errores, ni un resultado comercial determinado, y no respondemos por pérdidas de ventas derivadas de fallas o interrupciones del servicio.<br><br><strong style="color:#444;">13. Suspensión y baja</strong><br>
-    PuenT puede suspender o dar de baja una cuenta o quitar contenido que incumpla estos términos, que sea denunciado o que pueda perjudicar a otros usuarios, sin que eso genere derecho a indemnización. Vos podés darte de baja cuando quieras.<br><br><strong style="color:#444;">14. Cambios y ley aplicable</strong><br>
+    PuenT puede suspender o dar de baja una cuenta o quitar contenido que incumpla estos términos, que sea denunciado o que pueda perjudicar a otros usuarios, sin que eso genere derecho a indemnización. PuenT no tiene obligación de revisar todo lo que se publica: que no retire una publicación no implica que la apruebe ni lo hace responsable de ella. Vos podés darte de baja cuando quieras.<br><br><strong style="color:#444;">14. Cambios y ley aplicable</strong><br>
     PuenT puede actualizar estos términos y te avisará en la app; si seguís usando la plataforma, se entiende que los aceptás. Se rigen por las leyes de la República Argentina.<br><br><strong style="color:#444;">15. Edad mínima</strong><br>
     Para registrarte en PuenT tenés que ser <strong>mayor de 18 años</strong>. Al registrarte y marcar la casilla declarás que cumplís ese requisito. PuenT puede suspender o dar de baja las cuentas de quienes no lo cumplan.<br><br><strong style="color:#444;">16. Aceptación</strong><br>
     Al marcar la casilla y continuar declarás que leíste y aceptás estos Términos y Condiciones.`,
@@ -7487,6 +7576,16 @@ async function _cacheInvalidar(){
     db0.transaction('kv', 'readwrite').objectStore('kv').clear();
   }catch(e){}
 }
+// Una sola vez por celular: borra lo guardado por versiones anteriores, que pudo quedar incompleto
+// (solo los datos propios del comercio) y se seguía usando aunque se cerrara y abriera la app.
+(function(){
+  try{
+    if(localStorage.getItem('puent_cache_ver') !== '2'){
+      localStorage.setItem('puent_cache_ver', '2');
+      _cacheAbrir().then(function(d){ try{ if(d) d.transaction('kv', 'readwrite').objectStore('kv').clear(); }catch(e){} });
+    }
+  }catch(e){}
+})();
 function _cacheCodificar(x){
   if(x == null || typeof x !== 'object') return x;
   if(Array.isArray(x)) return x.map(_cacheCodificar);
@@ -7729,9 +7828,11 @@ function _fsGetColeccion(nombre){
   return _fsConCache('col:' + nombre,
     function(){ return _fsConRespaldo(function(){
         // Sin conexión, el SDK a veces responde "vacío" desde su caché interna: eso no es un dato válido.
-        return db.collection(nombre).get().then(function(s){ if(s.empty && s.metadata && s.metadata.fromCache) throw new Error('vacío desde caché offline'); return s; });
+        // Una lectura que salió de la caché interna del SDK (aunque no esté vacía) puede ser PARCIAL: en un comercio
+        // la caché solo tiene sus propios documentos. No es un dato válido: se descarta y se pide por REST.
+        return db.collection(nombre).get().then(function(s){ if(s.metadata && s.metadata.fromCache) throw new Error('lectura parcial desde caché offline'); return s; });
       }, function(){ return _fsColeccionREST(nombre); }, 8000); },
-    function(snap){ var l = []; snap.forEach(function(d){ l.push({ id: d.id, d: _cacheCodificar(d.data()) }); }); return l.length ? l : null; },
+    function(snap){ if(snap && snap.metadata && snap.metadata.fromCache) return null; var l = []; snap.forEach(function(d){ l.push({ id: d.id, d: _cacheCodificar(d.data()) }); }); return l.length ? l : null; },
     _cacheSnapshotColeccion);
 }
 function _fsGetDoc(col, id){
@@ -9561,10 +9662,13 @@ function precioBaseCuotas(p, precioNormal){
 // Comercios cuyo catálogo son vehículos / maquinaria: van a su propia fila del home y se muestran siempre con "Consultar".
 var VEHICULOS_TIPOS = ['Agencia de autos','Agencia de motos','Náutica y lanchas','Maquinaria agrícola','Bicicletas eléctricas'];
 function esComercioVehiculos(c){ return !!c && VEHICULOS_TIPOS.includes(c.tipo); }
+// Inmobiliarias: sus propiedades van a su propia fila del home, separadas de los productos, y se muestran con "Consultar precio".
+var INMOBILIARIA_TIPOS = ['Inmobiliaria','Administración de propiedades'];
+function esComercioInmobiliaria(c){ return !!c && INMOBILIARIA_TIPOS.includes(c.tipo); }
 function esProductoDeVehiculos(p){
   if(!p || !p.comercioId) return false;
   const c = (state.comercios||[]).find(x => x.id === p.comercioId || x._docId === p.comercioId);
-  return esComercioVehiculos(c);
+  return esComercioVehiculos(c) || esComercioInmobiliaria(c);
 }
 function productoSinPrecio(p){ return !!p && (p.sinPrecio === true || !Number(p.precio) || esProductoDeVehiculos(p)); }
 function precioTexto(p){ return productoSinPrecio(p) ? 'Consultar precio' : '$' + Number(p.precio).toLocaleString('es-AR'); }
@@ -10095,7 +10199,7 @@ const ATRIBUTOS_POR_RUBRO = {
 /* Renderiza los campos extra en el formulario de carga de producto */
 function renderAtributosRubro(){
   const rubro  = document.getElementById('cnpRubro')?.value || '';
-  const categoria = document.getElementById('cnpCategoria')?.value || categoriaDeRubro(rubro);
+  const categoria = (categoriaDeRubro(rubro) !== 'otros' ? categoriaDeRubro(rubro) : (document.getElementById('cnpCategoria')?.value || 'otros'));
   const cont   = document.getElementById('cnpAtributosRubro');
   if(!cont) return;
 
@@ -10244,7 +10348,7 @@ function crearProductoComercio(){
   const precio = sinPrecio ? 0 : parseFloat(document.getElementById('cnpPrecio').value);
   const comisionInput = document.getElementById('cnpComision').value;
   const rubro = document.getElementById('cnpRubro').value;
-  const categoria = document.getElementById('cnpCategoria')?.value || categoriaDeRubro(rubro);
+  const categoria = (categoriaDeRubro(rubro) !== 'otros' ? categoriaDeRubro(rubro) : (document.getElementById('cnpCategoria')?.value || 'otros'));
   const tipoOferta = document.getElementById('cnpTipoOferta').value;
   const descuento = parseFloat(document.getElementById('cnpDescuento').value) || null;
   const foto = fotosCargadas['cnp'];
@@ -11976,6 +12080,7 @@ function renderVitrinaSecciones(){
   try{ renderComidaHome(); }catch(e){ console.warn('renderComidaHome:', e); }
   try{ renderAlmacenHome(); }catch(e){ console.warn('renderAlmacenHome:', e); }
   try{ renderVehiculosHome(); }catch(e){ console.warn('renderVehiculosHome:', e); }
+  try{ renderInmobiliariasHome(); }catch(e){ console.warn('renderInmobiliariasHome:', e); }
 }
 
 // Fila del home "Gastronomía y Almacén": solo los PRODUCTOS que suben esos comercios, con la misma
@@ -12092,6 +12197,41 @@ function renderAlmacenHome(){
 
 // Fila del home "Vehículos y maquinaria": autos, motos, lanchas y maquinaria. Siempre con "Consultar precio".
 const VEHICULOS_HOME_MAX = 12;
+// Fila del home con botón "Ver todos": al tocarlo se despliega en grilla de 2 columnas (por tandas), igual que "Hoy se come…"
+var _vehiculosHomeVerTodos = false, _vehiculosHomeVisibles = COMIDA_HOME_TANDA;
+var _inmobHomeVerTodos = false, _inmobHomeVisibles = COMIDA_HOME_TANDA;
+function toggleVehiculosHomeTodos(){
+  _vehiculosHomeVerTodos = !_vehiculosHomeVerTodos; _vehiculosHomeVisibles = COMIDA_HOME_TANDA;
+  renderVehiculosHome();
+  if(!_vehiculosHomeVerTodos){ try{ document.getElementById('vehiculosHomeSection').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} }
+}
+function verMasVehiculosHome(){ _vehiculosHomeVisibles += COMIDA_HOME_TANDA; renderVehiculosHome(); }
+function toggleInmobHomeTodos(){
+  _inmobHomeVerTodos = !_inmobHomeVerTodos; _inmobHomeVisibles = COMIDA_HOME_TANDA;
+  renderInmobiliariasHome();
+  if(!_inmobHomeVerTodos){ try{ document.getElementById('inmobHomeSection').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} }
+}
+function verMasInmobHome(){ _inmobHomeVisibles += COMIDA_HOME_TANDA; renderInmobiliariasHome(); }
+function _homeFilaConVerTodos(o){
+  const prods = o.prods, row = o.rowEl, verLink = document.getElementById(o.linkId);
+  const hayMas = prods.length > VEHICULOS_HOME_MAX;
+  const todos = o.todos && hayMas;
+  if(verLink){ verLink.style.display = hayMas ? '' : 'none'; verLink.textContent = todos ? 'Ver menos' : 'Ver todos →'; }
+  if(todos){
+    row.className = 'feed-grid-encantar';
+    row.style.padding = '8px 16px 0';
+    row.innerHTML = prods.slice(0, o.visibles).map(tarjetaEncantarHTML).join('')
+      + (prods.length > o.visibles
+        ? '<div style="grid-column:1/-1;text-align:center;padding:6px 0 2px;"><button class="btn btn-ghost" style="width:auto;padding:10px 26px;border-radius:100px;font-weight:800;" onclick="' + o.verMas + '">Ver más</button></div>'
+        : '');
+  } else {
+    row.className = 'vit-row';
+    row.style.padding = '';
+    row.innerHTML = prods.slice(0, VEHICULOS_HOME_MAX).map(function(p){
+      return '<div style="flex:0 0 calc((100% - 12px)/2);min-width:0;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
+    }).join('');
+  }
+}
 function renderVehiculosHome(){
   const sec = document.getElementById('vehiculosHomeSection'), row = document.getElementById('vehiculosHomeRow');
   if(!sec || !row) return;
@@ -12107,11 +12247,35 @@ function renderVehiculosHome(){
   if(!prods.length){ sec.style.display = 'none'; row.innerHTML = ''; return; }
   sec.style.display = '';
   prods = intercalarPorComercio(prods);
-  row.innerHTML = prods.slice(0, VEHICULOS_HOME_MAX).map(function(p){
-    return '<div style="flex:0 0 calc((100% - 12px)/2);min-width:0;scroll-snap-align:start;">' + tarjetaEncantarHTML(p) + '</div>';
-  }).join('');
+  _homeFilaConVerTodos({prods:prods, rowEl:row, linkId:'vehiculosHomeVerTodos', todos:_vehiculosHomeVerTodos, visibles:_vehiculosHomeVisibles, verMas:'verMasVehiculosHome()'});
 }
 
+// Fila del home "Inmobiliarias": propiedades publicadas por las inmobiliarias. Siempre con "Consultar precio".
+function renderInmobiliariasHome(){
+  const sec = document.getElementById('inmobHomeSection'), row = document.getElementById('inmobHomeRow');
+  if(!sec || !row) return;
+  let prods = [];
+  (state.comercios||[]).forEach(function(c){
+    if(!esComercioInmobiliaria(c)) return;
+    if(ciudadSeleccionada && !mismaCiudad(c.ciudad, ciudadSeleccionada)) return;
+    if(c.restricciones && c.restricciones.ocultarFeed) return;
+    const cId = c.id || c._docId;
+    (state.productos||[]).filter(function(p){ return p.comercioId === cId && (p.origen === 'comercio' || !p.origen); })
+      .forEach(function(p){ prods.push({...p, _comercioNombre:c.nombre, _comercioId:cId, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng}); });
+  });
+  if(!prods.length){ sec.style.display = 'none'; row.innerHTML = ''; return; }
+  sec.style.display = '';
+  prods = intercalarPorComercio(prods);
+  _homeFilaConVerTodos({prods:prods, rowEl:row, linkId:'inmobHomeVerTodos', todos:_inmobHomeVerTodos, visibles:_inmobHomeVisibles, verMas:'verMasInmobHome()'});
+}
+
+// Texto corto para mostrar un link largo (menú online, plataforma web…): sin https:// ni www., cortado con "…".
+// El link real (para tocar) sigue siendo el completo.
+function webCorto(u, max){
+  max = max || 34;
+  var t = String(u||'').trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'').replace(/\/+$/,'');
+  return t.length <= max ? t : t.slice(0, max-1) + '…';
+}
 function vitUrl(u){ u = String(u||'').trim(); if(!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://'+u.replace(/^\/+/, ''); }
 
 function renderVitrinaFicha(c){
@@ -12130,7 +12294,7 @@ function renderVitrinaFicha(c){
   if(c.email) filas.push(['✉️','Correo',`<a href="mailto:${vitEsc(c.email)}" style="color:var(--navy);">${vitEsc(c.email)}</a>`]);
   if(c.telefonoAlt) filas.push(['📞','Teléfono alternativo',vitEsc(c.telefonoAlt)]);
   if(c.facebook) filas.push(['👍','Facebook',`<a href="${vitEsc(vitUrl(c.facebook))}" target="_blank" rel="noopener" style="color:var(--navy);">${vitEsc(c.facebook)}</a>`]);
-  if(c.web) filas.push(['🌐','Sitio web',`<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" style="color:var(--navy);">${vitEsc(c.web)}</a>`]);
+  if(c.web) filas.push(['🌐','Página web / menú online',`<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" title="${vitEsc(c.web)}" style="color:var(--navy);overflow-wrap:anywhere;">${vitEsc(webCorto(c.web))}</a>`]);
   if((c.dias||[]).length) filas.push(['📅','Días de atención',vitEsc(c.dias.join(', '))]);
   if((c.metodosPago||[]).length) filas.push(['💳','Medios de pago',vitEsc(c.metodosPago.join(', '))]);
   if(datos) datos.innerHTML = filas.map(([ic,l,v])=>`<div style="padding:8px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;"><span style="font-size:15px;">${ic}</span><div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;">${l}</div><div style="font-size:13.5px;font-weight:600;color:var(--navy);">${v}</div></div></div>`).join('');
@@ -12169,6 +12333,7 @@ function abrirEditarComercio(){
   document.getElementById('editCDireccion').value = c.direccion || '';
   document.getElementById('editCCiudad').value = c.ciudad || 'La Paz';
   fillRubroSelect('editCRubro', c.rubro || '');
+  { const _hs = document.getElementById('editCHabSalud'); if(_hs) _hs.checked = !!c.declaraHabilitacionSalud; editToggleHabilitacionSalud(); }
   // Cargar subcategoría guardada
   if(c.rubro && TIPOS_POR_RUBRO[c.rubro]){
     const tipoField = document.getElementById('editCTipoField');
@@ -12292,6 +12457,11 @@ function borrarMenuDia(){
 
 function guardarEdicionComercio(){
   const c = state.currentUser;
+  // Rubros de salud: hay que declarar la habilitación antes de guardar
+  const _rubroNuevo = document.getElementById('editCRubro').value;
+  const _habChk = !!document.getElementById('editCHabSalud')?.checked;
+  if(esRubroSalud(_rubroNuevo) && !_habChk){ toast('Para rubros de salud tenés que declarar que contás con la habilitación.'); return; }
+  if(esRubroSalud(_rubroNuevo)){ if(!c.declaraHabilitacionSalud){ c.declaraHabilitacionSalud = true; c.declaraHabilitacionFecha = new Date().toISOString(); } }
   c.nombre = document.getElementById('editCNombre').value.trim() || c.nombre;
   c.direccion = document.getElementById('editCDireccion').value.trim();
   c.ciudad = document.getElementById('editCCiudad').value.trim() || 'La Paz';
@@ -15493,11 +15663,13 @@ async function propagarCambioRubroComercio(comercio, rubroViejo, rubroNuevo){
   }catch(e){ console.warn('propagarCambioRubroComercio:', e); }
 }
 
-// Categoría con la que un producto aparece en el home. Manda el rubro ACTUAL del
-// comercio (así, si el comercio cambia de rubro, sus productos se mueven solos);
-// la categoria guardada en el producto queda solo como respaldo.
+// Categoría con la que un producto aparece en el home. Si el producto tiene un rubro propio distinto
+// al del comercio, manda ese; si no, el rubro ACTUAL del comercio (al cambiar de rubro, los productos
+// se actualizan con propagarCambioRubroComercio). La categoria guardada queda solo como respaldo.
 function categoriaDeProducto(p){
   const cr = p._comercioRubro;
+  // Si el comercio cargó el producto en OTRO rubro a propósito (rubro propio distinto al del comercio), manda ese.
+  if(p.rubro && p.rubro !== cr && RUBRO_A_CATEGORIA[p.rubro]) return RUBRO_A_CATEGORIA[p.rubro];
   if(cr && RUBRO_A_CATEGORIA[cr]) return RUBRO_A_CATEGORIA[cr];
   return p.categoria || categoriaDeRubro(p.rubro || '');
 }
@@ -16022,7 +16194,7 @@ function renderSeccionesCategorias(){
   (state.comercios||[]).forEach(function(c){
     if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
       (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio'||!p.origen); })
-        .forEach(function(p){ todosProd.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro, _comercioImg:c.img}); });
+        .forEach(function(p){ todosProd.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng}); });
     }
   });
 
@@ -16036,6 +16208,9 @@ function renderSeccionesCategorias(){
       var pCat = categoriaDeProducto(p);
       return pCat === c;
     });
+    // Se mezclan entre comercios (uno de cada comercio por vuelta) y el orden cambia en cada refresh,
+    // igual que "En tu ciudad": así no salen todos los productos de un mismo comercio juntos.
+    prods = intercalarPorComercio(prods);
     if(!prods.length){
       grid.innerHTML = '<div class="cat-banner-empty" style="grid-column:1/-1;">Todavía no hay ofertas cargadas en este rubro.</div>';
       return;
@@ -16536,6 +16711,8 @@ function renderFeedEncantar(){
       if(!ENCANTAR_CATEGORIAS.includes(cat)) return false;
       // Automotor: repuestos y accesorios sí; vehículos y maquinaria van a su propia fila
       if(p._comercioTipo && VEHICULOS_TIPOS.includes(p._comercioTipo)) return false;
+      // Inmobiliarias: las propiedades van a su propia fila
+      if(p._comercioTipo && INMOBILIARIA_TIPOS.includes(p._comercioTipo)) return false;
       return true;
     });
   }
@@ -16575,7 +16752,7 @@ function renderFeedInfinito(reset){
     (state.comercios||[]).forEach(function(c){
       if(!ciudadSeleccionada || mismaCiudad(c.ciudad, ciudadSeleccionada)){
         (state.productos||[]).filter(function(p){ return p.comercioId===c.id && (p.origen==='comercio' || !p.origen); })
-          .forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro, _comercioImg:c.img}); });
+          .forEach(function(p){ _feedInfinitoTodos.push({...p, _comercioNombre:c.nombre, _comercioId:c.id, _comercioRubro:c.rubro, _comercioTipo:c.tipo, _comercioImg:c.img, _comercioLat:c.lat, _comercioLng:c.lng}); });
       }
     });
     // Filtrar por categoría seleccionada
@@ -17383,7 +17560,7 @@ function ofertaLocalFilasHtml(c, esFree){
   if(c.email) h += fila('Correo', lnk('mailto:'+c.email, c.email));
   if(c.instagram && instagramUrl(c.instagram)) h += fila('Instagram', lnk(instagramUrl(c.instagram), '@'+String(c.instagram).replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/^@/,'').replace(/\/+$/,'')));
   if(c.facebook) h += fila('Facebook', lnk(vitUrl(c.facebook), c.facebook));
-  if(c.web) h += fila('Sitio web', lnk(vitUrl(c.web), c.web));
+  if(c.web) h += fila('Página web / menú online', lnk(vitUrl(c.web), webCorto(c.web)));
   if((c.metodosPago||[]).length) h += fila('Medios de pago', E(c.metodosPago.join(', ')));
   return h;
 }
@@ -18032,10 +18209,12 @@ function verProductosDeLocal(comercioId){
   if(prods.length===0){
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="ic">📦</div><div class="t">Este local todavía no cargó productos</div></div>`;
   } else {
+    const cCom = state.comercios.find(x=>x.id===comercioId) || {};
     grid.innerHTML = prods.map(p=>{
-      const foto = p.img ? `<img src="${p.img}" alt="${p.nombre}">` : (p.foto||'📦');
-      const badge = etiquetaOferta(p);
-      const comisionBadge = (state.role==='vendedor' && p.comision>0 && comercioConector) ? `<div class="feed-comision">💰 ${p.comision}% de comisión</div>` : '';
+      // Misma tarjeta que el home ("En tu ciudad"): nombre, precio, oferta, cuotas, distancia, compartir y favorito.
+      // Sin el logo sobre la foto: ya estamos dentro de la ficha del propio comercio.
+      const pc = {...p, _comercioNombre:cCom.nombre, _comercioId:comercioId, _comercioRubro:cCom.rubro, _comercioTipo:cCom.tipo, _comercioImg:'', _comercioLat:cCom.lat, _comercioLng:cCom.lng};
+      const comisionBadge = (state.role==='vendedor' && p.comision>0 && comercioConector) ? `<div class="feed-comision" style="margin:4px 2px 0;">💰 ${p.comision}% de comisión</div>` : '';
       let botonVendedor = '';
       if(state.role==='vendedor' && p.comision>0 && comercioConector){
         const yaEnCatalogo = state.catalogoVendedor.some(s=>s.vendedorId===(state.currentUser?.uid||state.currentUser?.id) && s.productoId===p.id);
@@ -18043,14 +18222,7 @@ function verProductosDeLocal(comercioId){
           ? `<button class="share-btn" disabled style="opacity:.55; cursor:default;" onclick="event.stopPropagation()">✅ En tu catálogo</button>`
           : `<button class="share-btn" onclick="event.stopPropagation(); agregarProductoAMiCatalogo('${p.id}')">➕ Sumar a mi catálogo</button>`;
       }
-      return `
-        <div class="feed-prod-card" onclick="abrirOferta('${p.id}')">
-          <div class="prod-photo">${foto}${badge ? `<span class="oferta-badge">${badge}</span>` : ''}</div>
-          <div class="prod-body">
-            <div class="prod-price">${precioTexto(p)}</div>
-            <span class="prod-acts"><button class="prod-share" aria-label="Compartir" onclick="event.stopPropagation(); compartirProductoCliente('${p.id}')">📤</button><button class="prod-like${esFavorito(p.id)?' liked':''}" onclick="event.stopPropagation(); toggleFavorito('${p.id}', this)">${esFavorito(p.id)?'❤️':'🤍'}</button></span>
-          </div>
-        </div>`;
+      return '<div style="min-width:0;">' + tarjetaEncantarHTML(pc) + comisionBadge + botonVendedor + '</div>';
     }).join('');
   }
   showScreen('local-productos');
@@ -19922,7 +20094,7 @@ function admAbrirEditarDesktop(docId){
         <div class="field"><label>WhatsApp <span style="color:#e05a5a;">*</span></label><input id="editAdWhatsapp" type="tel" inputmode="numeric" value="${esc(c.whatsapp)}"></div>
         <div class="field"><label>Email</label><input id="editAdEmail" type="email" value="${esc(c.email)}"></div>
         <div class="field"><label>Instagram</label><input id="editAdInstagram" type="text" value="${esc(c.instagram)}"></div>
-        <div class="field"><label>Sitio web</label><input id="editAdWeb" type="text" value="${esc(c.web)}"></div>
+        <div class="field"><label>Página web / menú online</label><input id="editAdWeb" type="text" value="${esc(c.web)}"></div>
         <div class="field"><label>Publicidad activa hasta</label><input id="editAdPublicidadVence" type="date" value="${c.publicidadVence?esc(c.publicidadVence.slice(0,10)):''}"></div>
       </div>
       <div class="field"><label>Descripción</label><textarea id="editAdDescripcion" rows="2" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;">${esc(c.descripcion)}</textarea></div>
@@ -20487,7 +20659,7 @@ function admRenderNuevoComercioDesktop(){
         <div class="field"><label>Email</label><input type="email" id="adEmail" placeholder="comercio@email.com"></div>
         <div class="field"><label>Instagram</label><input type="text" id="adInstagram" placeholder="@comercio"></div>
         <div class="field"><label>Facebook</label><input type="text" id="adFacebook" placeholder="facebook.com/comercio"></div>
-        <div class="field"><label>Sitio web</label><input type="text" id="adWeb" placeholder="www.comercio.com.ar"></div>
+        <div class="field"><label>Página web / menú online</label><input type="text" id="adWeb" placeholder="www.comercio.com.ar o link del menú"></div>
       </div>
       <div class="field"><label>Descripción breve</label><textarea id="adDescripcion" rows="2" placeholder="Qué ofrece el comercio…" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;font-size:14px;"></textarea></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -20806,7 +20978,7 @@ async function adminVerComercio(docId){
       ${fila('Registro completo', c.registroCompletado||c.perfilCompleto ? 'Sí' : '')}
       ${fila('Instagram', c.instagram && instagramUrl(c.instagram) ? `<a href="${vitEsc(instagramUrl(c.instagram))}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;">${vitEsc(c.instagram)}</a>` : c.instagram)}
       ${fila('Facebook', c.facebook ? `<a href="${vitEsc(vitUrl(c.facebook))}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;">${vitEsc(c.facebook)}</a>` : '')}
-      ${fila('Web', c.web ? `<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:700;">${vitEsc(c.web)}</a>` : '')}
+      ${fila('Web / menú', c.web ? `<a href="${vitEsc(vitUrl(c.web))}" target="_blank" rel="noopener" title="${vitEsc(c.web)}" style="color:var(--navy);font-weight:700;overflow-wrap:anywhere;">${vitEsc(webCorto(c.web, 40))}</a>` : '')}
       ${fila('Horario', c.horario)}
       ${fila('Modo', c.modo==='vitrina' ? '🏬 Solo vidriera' : (c.modo==='servicios' ? '🧰 Profesional / oficio' : '🛍️ Tienda'))}
       ${fila('Categorías Red Local', (c.oficios&&c.oficios.length) ? vitEsc(proOficiosNorm(c).join(', ')) : '')}
@@ -25700,6 +25872,42 @@ function cCancelarVentaPendiente(ventaId){
         if(typeof renderLocales === 'function') renderLocales();
       }
     });
+
+    // ── Perro guardián de datos públicos ────────────────────────────────
+    // Al desbloquear el celular (o cuando vuelve la red) la carga puede fallar "a medias":
+    // queda cargado solo lo propio del comercio (sus publicaciones) y nada del resto, y la
+    // app lo da por bueno. Acá se revisa que la lista pública esté completa y, si no,
+    // se vuelve a pedir sola, sin que haga falta refrescar la página.
+    var _wdIntentos = 0, _wdEnCurso = false;
+    function _datosPublicosIncompletos(){
+      var n = (state.comercios || []).length;
+      var propios = (state.role === 'comercio') ? 1 : 0;
+      return n <= propios;
+    }
+    async function _asegurarDatosPublicos(){
+      if(_wdEnCurso || document.visibilityState === 'hidden') return;
+      if(typeof state === 'undefined' || typeof cargarDatosConReintento !== 'function') return;
+      if(!_datosPublicosIncompletos()){ _wdIntentos = 0; return; }
+      if(_wdIntentos >= 6) return;
+      _wdIntentos++; _wdEnCurso = true;
+      try{
+        if(_wdIntentos >= 2 && typeof reconectarFirestore === 'function') await reconectarFirestore();
+        await cargarDatosConReintento();
+      }catch(e){ console.warn('Reintento de datos públicos falló:', e && e.message); }
+      try{
+        if(typeof renderFeed === 'function') renderFeed();
+        if(typeof renderLocales === 'function') renderLocales();
+        if(typeof renderFeedVendedores === 'function') renderFeedVendedores();
+        if(typeof renderHomeTab === 'function') renderHomeTab();
+      }catch(e){}
+      _wdEnCurso = false;
+    }
+    function _wdReiniciar(){ _wdIntentos = 0; setTimeout(_asegurarDatosPublicos, 1500); }
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') _wdReiniciar(); });
+    window.addEventListener('online', _wdReiniciar);
+    window.addEventListener('pageshow', _wdReiniciar);
+    setTimeout(_asegurarDatosPublicos, 8000);
+    setInterval(_asegurarDatosPublicos, 20000);
   })();
   </script>
 
