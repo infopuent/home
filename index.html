@@ -1063,6 +1063,27 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
   /* Las demás pantallas (formularios, fichas, listas) quedan centradas y legibles */
   .screen:not(#screen-feed){max-width:880px; margin-left:auto; margin-right:auto;}
   .screen:not(#screen-feed) .feed-grid-encantar{grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;}
+
+  /* Arriba del home: banner de bienvenida (izquierda) y Tornado de Ofertas (derecha) en la misma fila */
+  #feedHomeView{display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); column-gap:8px; align-items:stretch;}
+  #feedHomeView > *{grid-column:1 / -1;}
+  #feedHomeView > #bannerPublicidadHome{grid-column:1; grid-row:1;}
+  #feedHomeView > #bannerTornadoOfertas{grid-column:2; grid-row:1;}
+  #feedHomeView:has(#bannerPublicidadHome:empty) > #bannerTornadoOfertas{grid-column:1 / -1;}
+  #feedHomeView:has(#bannerTornadoOfertas:empty) > #bannerPublicidadHome{grid-column:1 / -1;}
+  #bannerPublicidadHome, #bannerTornadoOfertas{display:flex;}
+  #bannerPublicidadHome .banner-publicidad-home{width:auto; flex:1; margin:10px 0 10px 16px;}
+  #bannerTornadoOfertas .banner-tornado-ofertas{width:auto; flex:1; margin:10px 16px 10px 0;}
+  #bannerTornadoOfertas > div[style*="padding"]{flex:1; display:flex; padding:10px 16px 10px 0 !important;}
+  #bannerTornadoOfertas .tornado-ofertas-btn{height:100%;}
+  #bannerPublicidadHome .banner-publicidad-home img,
+  #bannerTornadoOfertas .banner-tornado-ofertas img{width:100%; height:100%; object-fit:cover;}
+
+  /* Rubros de la ciudad en 3 columnas (el rubro abierto ocupa todo el ancho para mostrar sus productos) */
+  #catBannerList{display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px !important; align-items:start;}
+  #catBannerList > div:not(.cat-banner-item){grid-column:1 / -1;}
+  #catBannerList > .cat-banner-item.open{grid-column:1 / -1;}
+  #catBannerList > .cat-banner-item.open .cat-banner{aspect-ratio:auto !important; height:130px;}
 }
 </style>
 <style>
