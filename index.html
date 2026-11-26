@@ -1013,78 +1013,6 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 .share-act.sec{background:#F2F2F2;color:#333;}
 .share-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .share-row2 .share-act{font-size:13px;padding:12px 8px;}
-
-/* ================= MODO ESCRITORIO (pantallas anchas) =================
-   Solo se activa a partir de 1100px de ancho. El celular y la tablet no cambian. */
-@media (min-width:1100px){
-  body{background:#F6F6F4;}
-  #app{max-width:1240px; padding-bottom:48px; background:transparent;}
-
-  /* Barra superior en una sola fila: logo · ciudad · buscador · (menú a la derecha) */
-  .topbar{flex-direction:row; align-items:center; gap:18px; padding:10px 24px; padding-right:440px; border-radius:0 0 18px 18px;}
-  body:has(#bottomnav.hidden) .topbar{padding-right:24px;}
-  #topbarUserStrip{width:auto !important; flex:0 0 auto; align-items:center !important; gap:14px;}
-  #topbarRolCol{flex:none !important; max-width:none !important;}
-  #topbarCiudadCol{flex:none !important; padding-top:0 !important; gap:8px; justify-content:flex-start !important; align-items:center !important;}
-  #geoChip{top:0 !important;}
-  #ciudadDd{width:auto !important; flex:none !important;}
-  #topbarCiudadCol .topbar-city-btn{font-size:13px !important; padding:10px 16px !important;}
-  .topbar > div:nth-child(2){flex:1 1 auto; margin-top:0 !important; width:auto !important;}
-  #buscadorFeedBox{padding:12px 18px !important;}
-
-  /* Menú (antes barra de abajo) arriba a la derecha, alineado con la barra superior */
-  .bottomnav{
-    top:10px; bottom:auto; left:auto; right:max(24px, calc((100vw - 1240px)/2 + 24px));
-    transform:none; width:auto; max-width:none; background:transparent; border-top:0;
-    padding:0; gap:4px; z-index:31;
-  }
-  .navbtn{flex:none; flex-direction:row; gap:8px; padding:10px 14px; border-radius:12px;}
-  .navbtn:hover{background:#FFF1F1;}
-  .navbtn .ic{font-size:20px;}
-  .navbtn .nav-label{font-size:13px; font-weight:700;}
-  .navbtn-cart{margin:0 0 0 6px; width:46px; height:46px; border-width:2px;}
-
-  /* Solapas como píldoras */
-  .feed-solapas{background:transparent; border-bottom:0; box-shadow:none; padding:14px 24px 6px; gap:8px; flex-wrap:wrap; overflow:visible; -webkit-mask-image:none !important; mask-image:none !important; position:static !important;}
-  .feed-solapa{flex:none; padding:8px 16px; border:1.5px solid #E8E8E4; border-radius:999px; background:#fff; margin:0; font-size:13px;}
-  .feed-solapa:hover{border-color:#FC1820;}
-  .feed-solapa.active{background:#FFF1F1; color:#D9121A; border-color:#F6B5B8;}
-
-  /* Pantalla principal más ancha, con más aire */
-  #screen-feed{padding-left:8px; padding-right:8px;}
-  #screen-feed .feed-grid-encantar{grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px;}
-  #screen-feed .feed-cat-grid{grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; padding:12px 16px 16px;}
-  #screen-feed .vit-row{gap:16px; padding:8px 16px 6px;}
-  #screen-feed .vit-row > div[style*="flex:0 0 calc"]{flex:0 0 calc((100% - 96px)/5) !important;}
-  #screen-feed .vit-row{scroll-padding-left:16px;}
-  #screen-feed .section-title{font-size:20px;}
-  #screen-feed .ver-todo:hover{text-decoration:underline; cursor:pointer;}
-
-  /* Las demás pantallas (formularios, fichas, listas) quedan centradas y legibles */
-  .screen:not(#screen-feed){max-width:880px; margin-left:auto; margin-right:auto;}
-  .screen:not(#screen-feed) .feed-grid-encantar{grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;}
-
-  /* Arriba del home: banner de bienvenida (izquierda) y Tornado de Ofertas (derecha) en la misma fila */
-  #feedHomeView{display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); column-gap:8px; align-items:stretch;}
-  #feedHomeView > *{grid-column:1 / -1;}
-  #feedHomeView > #bannerPublicidadHome{grid-column:1; grid-row:1;}
-  #feedHomeView > #bannerTornadoOfertas{grid-column:2; grid-row:1;}
-  #feedHomeView:has(#bannerPublicidadHome:empty) > #bannerTornadoOfertas{grid-column:1 / -1;}
-  #feedHomeView:has(#bannerTornadoOfertas:empty) > #bannerPublicidadHome{grid-column:1 / -1;}
-  #bannerPublicidadHome, #bannerTornadoOfertas{display:flex;}
-  #bannerPublicidadHome .banner-publicidad-home{width:auto; flex:1; margin:10px 0 10px 16px;}
-  #bannerTornadoOfertas .banner-tornado-ofertas{width:auto; flex:1; margin:10px 16px 10px 0;}
-  #bannerTornadoOfertas > div[style*="padding"]{flex:1; display:flex; padding:10px 16px 10px 0 !important;}
-  #bannerTornadoOfertas .tornado-ofertas-btn{height:100%;}
-  #bannerPublicidadHome .banner-publicidad-home img,
-  #bannerTornadoOfertas .banner-tornado-ofertas img{width:100%; height:100%; object-fit:cover;}
-
-  /* Rubros de la ciudad en 3 columnas (el rubro abierto ocupa todo el ancho para mostrar sus productos) */
-  #catBannerList{display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px !important; align-items:start;}
-  #catBannerList > div:not(.cat-banner-item){grid-column:1 / -1;}
-  #catBannerList > .cat-banner-item.open{grid-column:1 / -1;}
-  #catBannerList > .cat-banner-item.open .cat-banner{aspect-ratio:auto !important; height:130px;}
-}
 </style>
 <style>
 /* Google Fonts no disponible en este entorno — se carga en producción desde Cloudflare */
@@ -1317,6 +1245,9 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
 
       <!-- Banner de publicidad — admin lo carga desde "Imágenes del home" -->
       <div id="bannerPublicidadHome"></div>
+
+      <!-- Recién publicado: franja de novedades de las últimas 24 h (se muestra solo si hay productos nuevos) -->
+      <div id="novFranja" style="display:none;"></div>
 
       <!-- Comercios adheridos (logos) -->
       <div style="padding:14px 16px 0;">
@@ -2297,6 +2228,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
               <option>Agro y Mascotas</option>
               <option>Tecnología</option>
               <option>Librería y Juguetería</option>
+              <option>Bebés y Maternidad</option>
               <option>Educación y Cursos</option>
               <option>Deportes y Recreación</option>
               <option>Inmobiliarias y Turismo</option>
@@ -3400,6 +3332,7 @@ input,select,textarea{font-family:inherit; font-size:14.5px;}
           <option value="agro-mascotas">🐾 Agro y Mascotas</option>
           <option value="tecnologia">💻 Tecnología</option>
           <option value="libreria">📚 Librería y Juguetería</option>
+          <option value="bebes">🍼 Bebés y Maternidad</option>
           <option value="educacion">🎓 Educación y Cursos</option>
           <option value="deportes">⚽ Deportes y Recreación</option>
           <option value="inmobiliarias">🏡 Inmobiliarias y Turismo</option>
@@ -10439,7 +10372,7 @@ function crearProductoComercio(){
   }
 
   const _comercioId = c.id || c._docId || c.uid;
-  const p = {id: nextId('p'), comercioId:_comercioId, nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, caracteristicas, enMenuDia, mayores18, receta, precioAnterior, cuotas, cuotasInteres};
+  const p = {id: nextId('p'), comercioId:_comercioId, nombre, descripcion, precio, sinPrecio, comision, conector, rubro, img:foto, origen:'comercio', tipoOferta, descuento, stock, stockInicial: stock, horaInicio: horaInicio || null, horaHasta: horaHasta || null, fechaInicio: fechaInicio || null, envio, envioPolitica, caja, atributos, caracteristicas, enMenuDia, mayores18, receta, precioAnterior, cuotas, cuotasInteres, creadoEn: new Date().toISOString()};
   state.productos.push(p);
   guardarProductoEnFirestore(p, c.uid);
   toast('Producto publicado en tu ficha y en el feed de La Paz ✅');
@@ -14907,6 +14840,7 @@ const RUBROS_LIST = [
   ['Agro y Mascotas',           '1f69c_3d.png'],
   ['Tecnología',                '1f4f1_3d.png'],
   ['Librería y Juguetería',     '1f4da_3d.png'],
+  ['Bebés y Maternidad',        '1f37c_3d.png'],
   ['Educación y Cursos',        '1f393_3d.png'],
   ['Deportes y Recreación',     '26bd_3d.png'],
   ['Inmobiliarias y Turismo',   '1f3e1_3d.png'],
@@ -14993,7 +14927,7 @@ const TIPOS_POR_RUBRO = {
     'Ropa femenina','Ropa masculina','Ropa unisex','Ropa infantil',
     'Ropa deportiva','Lencería y pijamas','Uniformes y ropa de trabajo',
     'Zapatería','Calzado deportivo','Calzado infantil',
-    'Joyería y bijouterie','Carteras y marroquinería','Sombreros y gorros','Anteojos de sol',
+    'Joyería y bijouterie','Carteras y marroquinería','Sombreros y gorros',
     // Más opciones
     'Ropa de novia y fiesta','Ropa de segunda mano','Mercería y telas',
   ],
@@ -15031,6 +14965,15 @@ const TIPOS_POR_RUBRO = {
     'Librería y papelería','Juguetería',
     // Más opciones
     'Artículos escolares','Útiles y mochilas','Libros y revistas','Arte y manualidades',
+  ],
+  'Bebés y Maternidad': [
+    // Productos
+    'Pañalera','Ropa de bebé y recién nacido','Ropa de niños y niñas','Calzado infantil',
+    'Cochecitos, cunas y muebles de bebé','Juguetes y didácticos','Lactancia, mamaderas y accesorios',
+    'Ropa y accesorios de maternidad','Regalos para bebés y baby shower','Artículos de puericultura',
+    // Servicios
+    'Fotografía de bebés y embarazo','Jardín maternal / guardería','Niñeras y cuidado infantil',
+    'Fiestas y cumpleaños infantiles','Cursos de preparación para el parto',
   ],
   'Educación y Cursos': [
     'Clases particulares','Inglés y otros idiomas','Música e instrumentos',
@@ -15582,6 +15525,7 @@ const RUBROS_HOME_DEFAULT = [
   {id:'agro-mascotas',      nombre:'Agro y Mascotas',          icono:'🐾', orden:8,  imagen:''},
   {id:'tecnologia',         nombre:'Tecnología',               icono:'💻', orden:9,  imagen:''},
   {id:'libreria',           nombre:'Librería y Juguetería',    icono:'📚', orden:10, imagen:''},
+  {id:'bebes',              nombre:'Bebés y Maternidad',       icono:'🍼', orden:10.2, imagen:''},
   {id:'educacion',          nombre:'Educación y Cursos',       icono:'🎓', orden:10.5, imagen:''},
   {id:'deportes',           nombre:'Deportes y Recreación',    icono:'⚽', orden:11, imagen:''},
   {id:'inmobiliarias',      nombre:'Inmobiliarias y Turismo',  icono:'🏡', orden:12, imagen:''},
@@ -15619,6 +15563,7 @@ const RUBRO_A_CATEGORIA = {
   'Agro y Mascotas':'agro-mascotas',
   'Tecnología':'tecnologia',
   'Librería y Juguetería':'libreria',
+  'Bebés y Maternidad':'bebes',
   'Educación y Cursos':'educacion',
   'Educación y Librerías':'educacion', // nombre viejo: comercios ya cargados con este rubro siguen apareciendo (revisar y pasar las librerías a "Librería y Juguetería")
   'Deportes y Recreación':'deportes',
@@ -16103,7 +16048,7 @@ function colorDeRubro(r, idx){
 // las ofertas de ese rubro, sin salir del home.
 // Agrupación visual de rubros en el home
 const GRUPOS_RUBROS = [
-  { label:'🛍️ Productos y comercios', ids:['gastronomia','almacen','indumentaria','hogar','tecnologia','libreria','salud','belleza','deportes','agro-mascotas','regalos','imprenta','caza-pesca-camping','artesanias','automotor','turismo','entretenimiento','eventos'] },
+  { label:'🛍️ Productos y comercios', ids:['gastronomia','almacen','indumentaria','hogar','tecnologia','libreria','bebes','salud','belleza','deportes','agro-mascotas','regalos','imprenta','caza-pesca-camping','artesanias','automotor','turismo','entretenimiento','eventos'] },
   { label:'🔧 Servicios e instituciones', ids:['servicios-varios','servicios-prof','transporte','inmobiliarias','alquiler','combustibles-energia','cuidado-personas','funerarios','educacion','instituciones','finanzas'] },
 ];
 function _grupoDeRubro(id){
@@ -16619,6 +16564,7 @@ function renderHomeTab(){
   actualizarBadgeTornado();
   renderCatChipsYSecciones();
   renderSeccionesCategorias();
+  try{ if(typeof novRenderFranja==='function') novRenderFranja(); }catch(e){}
 }
 
 var _encantarCache = { key:null, ids:[] };
@@ -16679,7 +16625,7 @@ function tarjetaEncantarHTML(p){
 // Rubros de PRODUCTOS que entran en "Te va a encantar" del home general. El resto (comida, vehículos,
 // inmuebles, servicios, instituciones, etc.) tiene su propia sección o no son productos de góndola.
 var ENCANTAR_CANTIDAD = 16; // tarjetas que se muestran en "En tu ciudad" (home general)
-var ENCANTAR_CATEGORIAS = ['hogar','indumentaria','salud','tecnologia','libreria','regalos','agro-mascotas','caza-pesca-camping','belleza','imprenta','artesanias','deportes','automotor'];
+var ENCANTAR_CATEGORIAS = ['hogar','indumentaria','salud','tecnologia','libreria','bebes','regalos','agro-mascotas','caza-pesca-camping','belleza','imprenta','artesanias','deportes','automotor'];
 function renderFeedEncantar(){
   var grid = document.getElementById('feedGridEncantar');
   if(!grid) return;
@@ -21757,7 +21703,7 @@ async function adminGuardarProductoEnComercio(docId){
     } else {
       // Nuevo
       const prodId = 'p-' + Date.now();
-      const prodCompleto = {...prod, id:prodId, comercioId:c.id, stockInicial: stock, creadoPorAdmin:true, fechaAlta:new Date().toISOString()};
+      const prodCompleto = {...prod, id:prodId, comercioId:c.id, stockInicial: stock, creadoPorAdmin:true, fechaAlta:new Date().toISOString(), creadoEn:new Date().toISOString()};
       await db.collection('productos').doc(prodId).set(prodCompleto);
       if(!state.productos.some(x=>x.id===prodId)) state.productos.push(prodCompleto);
       toast('Producto creado ✅');
@@ -26720,4 +26666,225 @@ document.addEventListener('DOMContentLoaded', function(){
   };
 })();
 
+
+/* ============ AVISOS DE NOVEDADES (cartelito sobre el menú de abajo) ============
+   Cada ~45 s consulta solo lo NUEVO (productos con creadoEn, comercios/profesionales con
+   fechaAprobacion posteriores a la última revisión). Un solo aviso por vuelta; si hay varias, se agrupan. */
+(function(){
+  var KEY = 'puent_nov_desde';
+  var INTERVALO = 45000, PRIMERA = 25000, VISIBLE_MS = 7000, MAX_RECIENTES = 30;
+  var desde = null, timer = null, hideT = null, vistos = {}, recientes = [], _items = [];
+  function ls(a,k,v){ try{ if(a==='g') return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+  function esc(t){ return (typeof vitEsc==='function') ? vitEsc(t) : String(t==null?'':t).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];}); }
+  function iniciarDesde(){
+    var g = ls('g', KEY), ahora = Date.now();
+    var t = g ? Date.parse(g) : NaN;
+    desde = (!isNaN(t) && ahora - t < 24*3600*1000) ? g : new Date(ahora).toISOString();
+  }
+  function guardarDesde(iso){ desde = iso; ls('s', KEY, iso); }
+
+  // estilos + elementos
+  var st = document.createElement('style');
+  st.textContent =
+   '#novToast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));width:calc(100% - 20px);max-width:460px;transform:translate(-50%,140%);opacity:0;z-index:45;'+
+   'border-radius:18px;padding:10px 12px;display:flex;gap:11px;align-items:center;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.08);'+
+   'box-shadow:0 8px 22px rgba(0,0,0,.4);transition:transform .38s cubic-bezier(.2,.9,.3,1),opacity .3s;pointer-events:none;overflow:hidden;-webkit-tap-highlight-color:transparent;}'+
+   '#novToast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}'+
+   '#novToast .nvt{width:46px;height:46px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;font-size:23px;overflow:hidden;background:rgba(255,255,255,.14);}'+
+   '#novToast .nvt img{width:100%;height:100%;object-fit:cover;}'+
+   '#novToast .nvx{flex:1;min-width:0;}'+
+   '#novToast small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;opacity:.7;}'+
+   '#novToast strong{display:block;font-size:14px;line-height:1.25;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+   '#novToast .nvs{display:block;font-size:12px;opacity:.8;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+   '#novToast .nvg{font-size:20px;opacity:.6;flex:none;}'+
+   '#novToast .nvc{position:absolute;top:4px;right:6px;width:22px;height:22px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;opacity:.55;}'+
+   '#novToast .nvb{position:absolute;left:12px;right:12px;bottom:0;height:3px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden;}'+
+   '#novToast .nvb b{display:block;height:100%;width:100%;background:rgba(255,255,255,.7);transform-origin:left;}'+
+   '#novToast.show .nvb b{animation:novBar '+VISIBLE_MS+'ms linear forwards;}'+
+   '@keyframes novBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}'+
+   '#srTFloatWrap{transition:bottom .35s cubic-bezier(.2,.9,.3,1);}'+
+   '#novLista{position:fixed;inset:0;z-index:700;background:rgba(15,20,35,.45);display:none;align-items:flex-end;justify-content:center;}'+
+   '#novLista.show{display:flex;}'+
+   '#novLista .nvp{background:#fff;width:100%;max-width:480px;max-height:75vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 14px calc(18px + env(safe-area-inset-bottom));}'+
+   '#novLista h3{margin:0 0 10px;font-size:17px;}'+
+   '#novLista .nvr{display:flex;gap:11px;align-items:center;padding:10px 4px;border-bottom:.5px solid #e6e6ea;cursor:pointer;}'+
+   '#novLista .nvr .nvt{width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-size:21px;overflow:hidden;}'+
+   '#novLista .nvr .nvt img{width:100%;height:100%;object-fit:cover;}'+
+   '#novLista .nvr div{min-width:0;} #novLista .nvr b{display:block;font-size:14px;} #novLista .nvr span{font-size:12px;color:#6b7385;}';
+  document.head.appendChild(st);
+  var el = document.createElement('div'); el.id = 'novToast';
+  el.setAttribute('role','status');
+  el.addEventListener('click', function(e){ if(e.target.closest('.nvc')){ ocultar(); return; } tocar(); });
+  var y0=null;
+  el.addEventListener('touchstart', function(e){ y0 = e.touches[0].clientY; }, {passive:true});
+  el.addEventListener('touchend', function(e){ if(y0!=null && e.changedTouches[0].clientY - y0 > 28){ ocultar(); e.preventDefault(); } y0=null; });
+  var lista = document.createElement('div'); lista.id = 'novLista';
+  lista.addEventListener('click', function(e){ if(e.target===lista) lista.classList.remove('show'); });
+  function montar(){ if(!document.body) return setTimeout(montar,200); document.body.appendChild(el); document.body.appendChild(lista); }
+  montar();
+
+  function srT(arriba){ var w = document.getElementById('srTFloatWrap'); if(w) w.style.bottom = arriba ? 'calc(168px + env(safe-area-inset-bottom))' : ''; }
+  function ocultar(){ clearTimeout(hideT); el.classList.remove('show'); srT(false); }
+
+  var PAST = {producto:'#1a1d26', comercio:'#1a1d26', pro:'#1a1d26', grupo:'#1a1d26'};
+  var THB = {producto:'#3a2f22', comercio:'#1f3a2b', pro:'#2c2a4a', grupo:'#4a3f1c'};
+  function foto(it){ var u = it.img; if(u && /^(https?:|data:image)/.test(u)) return '<img src="'+esc(u)+'" alt="" loading="lazy">'; return it.emoji; }
+  function mostrar(tipo, rotulo, titulo, sub, thumbHtml, esIt){
+    el.style.background = PAST[tipo];
+    el.innerHTML = '<div class="nvc">✕</div><div class="nvt" style="background:'+THB[tipo]+'">'+thumbHtml+'</div><div class="nvx"><small>'+esc(rotulo)+'</small><strong>'+esc(titulo)+'</strong><span class="nvs">'+esc(sub)+'</span></div><div class="nvg">›</div><div class="nvb"><b></b></div>';
+    el._tipo = tipo;
+    void el.offsetWidth;
+    el.classList.add('show'); srT(true);
+    clearTimeout(hideT); hideT = setTimeout(ocultar, VISIBLE_MS);
+  }
+  function precioTxt(p){ if(p.sinPrecio || p.precio==null || p.precio==='') return ''; var n = Number(p.precio); return isNaN(n) ? '' : '$ ' + n.toLocaleString('es-AR'); }
+  function nombreComercio(id){ var c = (state.comercios||[]).find(function(x){ return x.id===id || x._docId===id; }); return c ? c.nombre : ''; }
+
+  function abrirItem(it){
+    ocultar(); lista.classList.remove('show');
+    try{
+      if(it.tipo==='producto'){ if(typeof abrirProducto==='function') abrirProducto(it.id); }
+      else if(it.tipo==='comercio'){ if(typeof verProductosDeLocal==='function') verProductosDeLocal(it.id); }
+      else if(it.tipo==='pro'){ if(typeof rlAbrirFicha==='function') rlAbrirFicha(it.id); }
+    }catch(e){ console.warn('novedades:', e); }
+  }
+  function tocar(){
+    if(el._tipo==='grupo'){ ocultar(); abrirLista(); return; }
+    if(_items.length) abrirItem(_items[0]);
+  }
+  window.novAbrirIdx = function(i){ if(recientes[i]) abrirItem(recientes[i]); };
+  function abrirLista(){
+    var h = '<div class="nvp"><h3>✨ Novedades de hoy</h3>';
+    recientes.forEach(function(it,i){
+      h += '<div class="nvr" onclick="novAbrirIdx('+i+')"><div class="nvt" style="background:'+THB[it.tipo]+'">'+foto(it)+'</div><div><b>'+esc(it.titulo)+'</b><span>'+esc(it.rotulo+(it.sub?' · '+it.sub:''))+'</span></div></div>';
+    });
+    lista.innerHTML = h + '</div>'; lista.classList.add('show');
+  }
+
+
+  // ---- Franja "Recién publicado" en el Home ----
+  // Solo se muestra si hay al menos 1 PRODUCTO publicado en las últimas 24 h (los viejos no tienen fecha).
+  // Con eso activa, suma también comercios y profesionales aprobados en las últimas 24 h.
+  var VENTANA = 24*3600*1000, MAX_FRANJA = 10;
+  function enVentana(v){ var t = v ? Date.parse(v) : NaN; return !isNaN(t) && (Date.now() - t) < VENTANA && t <= Date.now() + 3600000; }
+  function itemsFranja(){
+    var prods = (state.productos||[]).filter(function(p){ return p && p.nombre && p.estado!=='papelera' && enVentana(p.creadoEn); })
+      .sort(function(a,b){ return Date.parse(b.creadoEn) - Date.parse(a.creadoEn); });
+    if(!prods.length) return [];
+    var its = prods.map(function(p){ return {t:Date.parse(p.creadoEn), tipo:'producto', id:p.id, rotulo:'Nuevo producto', titulo:p.nombre, sub:nombreComercio(p.comercioId)||precioTxt(p), img:p.img, emoji:'🛍️'}; });
+    (state.comercios||[]).forEach(function(c){ if(c && c.nombre && c.estado!=='papelera' && c.aprobado!==false && enVentana(c.fechaAprobacion))
+      its.push({t:Date.parse(c.fechaAprobacion), tipo:'comercio', id:c.id, rotulo:'Se sumó hoy', titulo:c.nombre, sub:c.rubro||'Comercio nuevo', img:c.img||c.logo, emoji:'🏪'}); });
+    (state.profesionales||[]).forEach(function(c){ if(c && c.nombre && c.estado!=='papelera' && c.aprobado!==false && enVentana(c.fechaAprobacion))
+      its.push({t:Date.parse(c.fechaAprobacion), tipo:'pro', id:(typeof rlIdDe==='function'?rlIdDe(c):c._docId||c.id), rotulo:'Nuevo en Red Local', titulo:c.nombre, sub:(typeof proEspecialidad==='function'?proEspecialidad(c):'')||'Oficios', img:c.img, emoji:'🧰'}); });
+    its.sort(function(a,b){ return b.t - a.t; });
+    return its.slice(0, MAX_FRANJA);
+  }
+  var _stF = document.createElement('style');
+  _stF.textContent =
+   '#novFranja .nvf-t{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 0;}'+
+   '#novFranja .nvf-t b{font-size:16px;font-weight:800;}'+
+   '#novFranja .nvf-t span{font-size:12px;font-weight:700;color:#fff;background:#fc1820;border-radius:14px;padding:5px 11px;cursor:pointer;}'+
+   '#novFranja .nvf-s{display:flex;gap:10px;overflow-x:auto;padding:10px 16px 2px;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;}'+
+   '#novFranja .nvf-s::-webkit-scrollbar{display:none;}'+
+   '#novFranja .nvf-c{flex:none;width:112px;scroll-snap-align:start;cursor:pointer;}'+
+   '#novFranja .nvf-i{height:84px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;position:relative;}'+
+   '#novFranja .nvf-i img{width:100%;height:100%;object-fit:cover;}'+
+   '#novFranja .nvf-n{position:absolute;top:6px;left:6px;background:#fc1820;color:#fff;font-size:9px;font-weight:800;border-radius:8px;padding:2px 7px;}'+
+   '#novFranja .nvf-c b{display:block;font-size:12px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+   '#novFranja .nvf-c em{display:block;font-style:normal;font-size:11px;color:#6b7385;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}';
+  document.head.appendChild(_stF);
+  var _franjaIts = [];
+  window.novRenderFranja = function(){
+    var box = document.getElementById('novFranja'); if(!box) return;
+    _franjaIts = itemsFranja();
+    if(!_franjaIts.length){ box.style.display = 'none'; box.innerHTML = ''; return; }
+    var h = '<div class="nvf-t"><b>✨ Recién publicado</b><span onclick="novVerTodo()">Ver todo</span></div><div class="nvf-s">';
+    _franjaIts.forEach(function(it,i){
+      var im = (it.img && /^(https?:|data:image)/.test(it.img)) ? '<img src="'+esc(it.img)+'" alt="" loading="lazy">' : it.emoji;
+      h += '<div class="nvf-c" onclick="novFranjaAbrir('+i+')"><div class="nvf-i" style="background:'+({producto:'#f3d9b8',comercio:'#cfe9d9',pro:'#d9d6f5'}[it.tipo])+'">'+im+(i<3?'<div class="nvf-n">NUEVO</div>':'')+'</div><b>'+esc(it.titulo)+'</b><em>'+esc(it.sub||it.rotulo)+'</em></div>';
+    });
+    box.innerHTML = h + '</div>'; box.style.display = '';
+  };
+  window.novFranjaAbrir = function(i){ if(_franjaIts[i]) abrirItem(_franjaIts[i]); };
+  window.novVerTodo = function(){ recientes = _franjaIts.slice(); abrirLista(); };
+
+  function esMio(tipo, d){
+    if(window._novIgnorarMio) return false;
+    var u = state.currentUser; if(!u) return false;
+    var uid = u.uid; if(!uid) return false;
+    if(tipo==='producto') return d.ownerUid===uid || d.comercioId===u.id || d.comercioId===u._docId || d.comercioId===uid;
+    return d.uid===uid || d._docId===uid || d.id===u.id;
+  }
+
+  async function revisar(){
+    try{
+      if(document.hidden || typeof firebaseListo==='undefined' || !firebaseListo || !db){ console.info('[novedades] omitida (app oculta o Firebase no listo)'); return; }
+      var w = document.getElementById('srTFloatWrap'); if(w && w.style.display==='none') return; // splash / admin
+      if(el.classList.contains('show') || lista.classList.contains('show')) return;
+      var ini = new Date().toISOString();
+      var base = new Date(Date.parse(desde) - 5000).toISOString();
+      var rs = await Promise.allSettled([
+        db.collection('productos').where('creadoEn','>',base).limit(25).get(),
+        db.collection('comercios').where('fechaAprobacion','>',base).limit(25).get()
+      ]);
+      var nuevos = [], agregado = false;
+      if(rs[1].status==='fulfilled') rs[1].value.forEach(function(doc){
+        var d = doc.data(); var k = 'c'+doc.id;
+        if(vistos[k]) return; vistos[k]=1;
+        if(d.estado==='papelera' || !d.nombre || d.aprobado===false) return;
+        if(d.viaEmail && d.emailVerificado===false && d.aprobado!==true) return;
+        var c = Object.assign({}, d, {id:d.id||doc.id, _docId:doc.id});
+        if(esMio('comercio', c)) return;
+        var esPro = (typeof esProfesional==='function') && esProfesional(c);
+        var lst = esPro ? (state.profesionales = state.profesionales||[]) : state.comercios;
+        if(!lst.some(function(x){ return x._docId===c._docId || x.id===c.id; })){ lst.push(c); agregado = true; }
+        if(esPro){
+          var of = (c.oficios && c.oficios[0] && (c.oficios[0].nombre||c.oficios[0])) || (typeof proEspecialidad==='function' ? proEspecialidad(c) : '') || 'Oficios';
+          nuevos.push({tipo:'pro', id:(typeof rlIdDe==='function'?rlIdDe(c):c._docId), rotulo:'Nuevo en Red Local', titulo:c.nombre, sub:String(of||'Oficios')+(c.ciudad?' · '+c.ciudad:''), img:c.img, emoji:'🧰'});
+        } else {
+          nuevos.push({tipo:'comercio', id:c.id, rotulo:'Se sumó hoy', titulo:c.nombre, sub:[c.rubro, c.ciudad].filter(Boolean).join(' · '), img:c.img||c.logo, emoji:'🏪'});
+        }
+      });
+      if(rs[0].status==='fulfilled') rs[0].value.forEach(function(doc){
+        var d = doc.data(); var k = 'p'+doc.id;
+        if(vistos[k]) return; vistos[k]=1;
+        if(d.estado==='papelera' || !d.nombre) return;
+        var p = Object.assign({}, d, {id:d.id||doc.id});
+        if(esMio('producto', p)) return;
+        if(!state.productos.some(function(x){ return x.id===p.id; })){ state.productos.push(p); agregado = true; }
+        var pr = precioTxt(p), cn = nombreComercio(p.comercioId);
+        nuevos.push({tipo:'producto', id:p.id, rotulo:'Nuevo producto', titulo:p.nombre, sub:[cn, pr].filter(Boolean).join(' · '), img:p.img, emoji:'🛍️'});
+      });
+      console.info('[novedades] revisión: productos '+(rs[0].status==='fulfilled'?rs[0].value.size:'ERROR '+(rs[0].reason&&rs[0].reason.message))+', comercios '+(rs[1].status==='fulfilled'?rs[1].value.size:'ERROR '+(rs[1].reason&&rs[1].reason.message))+', avisos '+nuevos.length+', desde '+base);
+      guardarDesde(ini);
+      if(agregado){ try{ renderFeed(); }catch(e){} }
+      try{ novRenderFranja(); }catch(e){}
+      if(!nuevos.length) return;
+      recientes = nuevos.concat(recientes).slice(0, MAX_RECIENTES);
+      _items = nuevos;
+      if(nuevos.length===1){
+        var it = nuevos[0]; mostrar(it.tipo, it.rotulo, it.titulo, it.sub, foto(it));
+      } else {
+        var np = nuevos.filter(function(x){return x.tipo==='producto';}).length;
+        var nc = nuevos.filter(function(x){return x.tipo==='comercio';}).length;
+        var nr = nuevos.filter(function(x){return x.tipo==='pro';}).length;
+        var partes = [];
+        if(np) partes.push(np+(np===1?' producto':' productos'));
+        if(nc) partes.push(nc+(nc===1?' comercio':' comercios'));
+        if(nr) partes.push(nr+(nr===1?' profesional':' profesionales'));
+        var tit = partes.join(', ').replace(/, ([^,]*)$/, ' y $1') + (nuevos.length>1 ? ' nuevos' : ' nuevo');
+        mostrar('grupo', 'Hoy en PuenT', tit, 'Tocá para ver las novedades', '✨');
+      }
+    }catch(e){ console.warn('[novedades] error', e); }
+  }
+
+  function arrancar(){
+    iniciarDesde();
+    setTimeout(function(){ revisar(); timer = setInterval(revisar, INTERVALO); }, PRIMERA);
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) setTimeout(revisar, 1500); });
+  }
+  arrancar();
+  // Prueba manual desde la consola: novDebug(48) mira las últimas 48 h e incluye lo propio
+  window.novDebug = function(horas){ window._novIgnorarMio = true; vistos = {}; desde = new Date(Date.now() - (horas||24)*3600*1000).toISOString(); ocultar(); lista.classList.remove('show'); return revisar(); };
+})();
 </script>
